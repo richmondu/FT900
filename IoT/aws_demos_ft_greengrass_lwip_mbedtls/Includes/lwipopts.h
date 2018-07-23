@@ -429,11 +429,13 @@
 #define TCP_QUEUE_OOSEQ         0
 
 /* TCP Maximum segment size. */
-#define TCP_MSS                 1460
+// If RAM is really constrained then use smaller segments:
+// All peers will understand this and only send small packets.
+#define TCP_MSS                 800 // 1460
 
 /* TCP receive window. */
 #define TCP_WND                 (2 * TCP_MSS)
-#define TCP_SND_BUF             (4 * TCP_MSS)
+#define TCP_SND_BUF             (2 * TCP_MSS)//(4 * TCP_MSS)
 
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              12
