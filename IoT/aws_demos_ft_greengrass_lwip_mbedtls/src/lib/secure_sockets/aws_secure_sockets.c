@@ -72,8 +72,10 @@
 /*-----------------------------------------------------------*/
 
 #ifdef DEBUG
-#define DEBUG_CONNECT(...) 			do {tfp_printf(__VA_ARGS__);} while (0)
-#define DEBUG_CONNECT_VERBOSE(...) 	//do {tfp_printf(__VA_ARGS__);} while (0)
+#define DEBUG_CONNECT(...)
+#define DEBUG_CONNECT_VERBOSE(...)
+//#define DEBUG_CONNECT				DEBUG_MINIMAL
+//#define DEBUG_CONNECT_VERBOSE 	DEBUG_PRINTF
 #define DEBUG_SEND(...)
 #define DEBUG_RECV(...)
 #else
@@ -107,7 +109,7 @@ typedef struct ESPSecureSocket
 {
     uint8_t ucInUse;                    /**< Tracks whether the socket is in use or not. */
     char * pcDestination;               /**< Destination URL. Set using SOCKETS_SO_SERVER_NAME_INDICATION option in SOCKETS_SetSockOpt function. */
-    sslclient_context sslCtx;
+    sslclient_context* sslCtx;
 
 } ESPSecureSocket_t;
 
@@ -123,7 +125,7 @@ static ESPSecureSocket_t xSockets[ 1 ] = {0};
 
 static int _TLS_send(void *ctx, const unsigned char *ptr, size_t size)
 {
-	sslclient_context *ssl_client = &xSockets[0].sslCtx;
+	sslclient_context *ssl_client = xSockets[0].sslCtx;
 
 	int ret = lwip_send(ssl_client->socket, ptr, size, 0);
 	if (ret != size) {
@@ -135,7 +137,7 @@ static int _TLS_send(void *ctx, const unsigned char *ptr, size_t size)
 
 static int _TLS_recv(void *ctx, unsigned char *ptr, size_t size)
 {
-	sslclient_context *ssl_client = &xSockets[0].sslCtx;
+	sslclient_context *ssl_client = xSockets[0].sslCtx;
 
 	int ret = lwip_recv(ssl_client->socket, ptr, size, 0);
 	if (ret <= 0) {
@@ -148,9 +150,10 @@ static int _TLS_recv(void *ctx, unsigned char *ptr, size_t size)
 	return ret;
 }
 
+#if 0
 static int _TLS_recv_timeout(void *ctx, const unsigned char *ptr, size_t size, uint32_t timeoutMs)
 {
-	sslclient_context *ssl_client = &xSockets[0].sslCtx;
+	sslclient_context *ssl_client = xSockets[0].sslCtx;
 
 	if (timeoutMs) {
 		struct timeval timeout = {0};
@@ -169,6 +172,7 @@ static int _TLS_recv_timeout(void *ctx, const unsigned char *ptr, size_t size, u
 
 	return ret;
 }
+#endif
 
 static void generate_random(char *output, size_t len)
 {
@@ -203,7 +207,8 @@ Socket_t SOCKETS_Socket( int32_t lDomain,
 
     xSockets[ ulSocketNumber ].ucInUse = 1;
 	xSockets[ ulSocketNumber ].pcDestination = NULL;
-	memset(&xSockets[ ulSocketNumber ].sslCtx, 0, sizeof(xSockets[ ulSocketNumber ].sslCtx));
+	xSockets[ ulSocketNumber ].sslCtx = pvPortMalloc(sizeof(sslclient_context));
+	memset(xSockets[ ulSocketNumber ].sslCtx, 0, sizeof(sslclient_context));
 
     /* If we fail to get a free socket, we return SOCKETS_INVALID_SOCKET. */
     return ( Socket_t ) ulSocketNumber; /*lint !e923 cast required for portability. */
@@ -238,7 +243,7 @@ static inline int32_t socketConnect(const char* pcHostName, uint16_t uwPort)
 		}
 		if (server->h_addr_list[0] != 0) {
 			addr.s_addr = *(u_long *)server->h_addr_list[0];
-			tfp_printf("DNS %s: %s\r\n", pcHostName, inet_ntoa(addr));
+			DEBUG_MINIMAL("DNS %s: %s\r\n", pcHostName, inet_ntoa(addr));
 		}
 	}
 #else // LWIP_DNS
@@ -263,13 +268,13 @@ static inline int32_t socketConnect(const char* pcHostName, uint16_t uwPort)
         return SOCKETS_SOCKET_ERROR;
     }
 
-    timeout = 30000;
+    timeout = 10000;
     lwip_setsockopt(lSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     lwip_setsockopt(lSocket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
     lwip_setsockopt(lSocket, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
     lwip_setsockopt(lSocket, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
 
-	tfp_printf("Connected to %s:%d\r\n", inet_ntoa(addr), uwPort);
+    DEBUG_MINIMAL("Connected to %s:%d\r\n", inet_ntoa(addr), uwPort);
     return lSocket;
 }
 
@@ -279,7 +284,6 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
                          SocketsSockaddr_t * pxAddress,
                          Socklen_t xAddressLength )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
     int32_t lRetVal = SOCKETS_SOCKET_ERROR;
     ESPSecureSocket_t * pxSecureSocket;
     int ret = 0;
@@ -294,10 +298,10 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 #endif // USE_TLS
 
 
-    if( xSockets[ ulSocketNumber ].ucInUse ) {
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+    if( xSockets[ ( uint32_t ) xSocket ].ucInUse ) {
+        pxSecureSocket = &( xSockets[ ( uint32_t ) xSocket ] );
 
-    	sslclient_context *ssl_client = &pxSecureSocket->sslCtx;
+    	sslclient_context *ssl_client = pxSecureSocket->sslCtx;
 
         ssl_client->socket = socketConnect(pxSecureSocket->pcDestination, pxAddress->usPort);
         if (ssl_client->socket < 0) {
@@ -325,6 +329,7 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
         }
 
         DEBUG_CONNECT_VERBOSE("Setting up the SSL/TLS structure...\r\n");
+
         if ((ret = mbedtls_ssl_config_defaults(&ssl_client->ssl_conf,
                                                MBEDTLS_SSL_IS_CLIENT,
                                                MBEDTLS_SSL_TRANSPORT_STREAM,
@@ -365,23 +370,28 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             mbedtls_pk_init(&ssl_client->client_key);
 
             DEBUG_CONNECT_VERBOSE("Loading CRT cert %d\r\n", strlen(cli_cert));
+
             ret = mbedtls_x509_crt_parse(&ssl_client->client_cert, (const unsigned char *)cli_cert, strlen(cli_cert) + 1);
             if (ret < 0) {
             	DEBUG_PRINTF("mbedtls_x509_crt_parse failed! %d\r\n", ret);
-                return SOCKETS_SOCKET_ERROR;
+            	lRetVal = SOCKETS_SOCKET_ERROR;
+            	goto cleanup;
             }
 
             DEBUG_CONNECT_VERBOSE("Loading private key %d\r\n", strlen(cli_key));
+
             ret = mbedtls_pk_parse_key(&ssl_client->client_key, (const unsigned char *)cli_key, strlen(cli_key) + 1, NULL, 0);
             if (ret != 0) {
             	DEBUG_PRINTF("mbedtls_pk_parse_key failed! %d\r\n", ret);
-                return SOCKETS_SOCKET_ERROR;
+            	lRetVal = SOCKETS_SOCKET_ERROR;
+            	goto cleanup;
             }
 
             ret = mbedtls_ssl_conf_own_cert(&ssl_client->ssl_conf, &ssl_client->client_cert, &ssl_client->client_key);
             if (ret != 0) {
             	DEBUG_PRINTF("mbedtls_ssl_conf_own_cert failed! %d\r\n", ret);
-                return SOCKETS_SOCKET_ERROR;
+            	lRetVal = SOCKETS_SOCKET_ERROR;
+            	goto cleanup;
             }
         }
 
@@ -397,23 +407,19 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
         mbedtls_ssl_conf_rng(&ssl_client->ssl_conf, mbedtls_ctr_drbg_random, &ssl_client->drbg_ctx);
         if ((ret = mbedtls_ssl_setup(&ssl_client->ssl_ctx, &ssl_client->ssl_conf)) != 0) {
         	DEBUG_PRINTF("mbedtls_ssl_setup failed! %d\r\n", ret);
-            return SOCKETS_SOCKET_ERROR;
+        	lRetVal = SOCKETS_SOCKET_ERROR;
+        	goto cleanup;
         }
 
-        mbedtls_ssl_set_bio(&ssl_client->ssl_ctx, &ssl_client->socket, _TLS_send, _TLS_recv, _TLS_recv_timeout );
-
+        mbedtls_ssl_set_bio(&ssl_client->ssl_ctx, &ssl_client->socket, _TLS_send, _TLS_recv, NULL);//_TLS_recv_timeout );
 
         DEBUG_CONNECT_VERBOSE("SSL/TLS handshake\r\n");
 
         while ((ret = mbedtls_ssl_handshake(&ssl_client->ssl_ctx)) != 0) {
         	DEBUG_PRINTF("mbedtls_ssl_handshake failed! %d 0x%x\r\n", ret, -1*ret);
-
             if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
-    			mbedtls_x509_crt_free(&ssl_client->ca_cert);
-    			mbedtls_x509_crt_free(&ssl_client->client_cert);
-    			mbedtls_pk_free(&ssl_client->client_key);
-    			SOCKETS_Close( xSocket );
-                return SOCKETS_SOCKET_ERROR;
+            	lRetVal = SOCKETS_SOCKET_ERROR;
+            	goto cleanup;
             }
             vTaskDelay(100);
         }
@@ -422,25 +428,22 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 
         if (cli_cert != NULL && cli_key != NULL) {
         	DEBUG_CONNECT_VERBOSE("Protocol is %s Ciphersuite is %s\r\n", mbedtls_ssl_get_version(&ssl_client->ssl_ctx), mbedtls_ssl_get_ciphersuite(&ssl_client->ssl_ctx));
-            if ((ret = mbedtls_ssl_get_record_expansion(&ssl_client->ssl_ctx)) < 0) {
-            	DEBUG_PRINTF("Record expansion unknown\r\n");
-            }
         }
 
         DEBUG_CONNECT_VERBOSE("Verifying peer X.509 certificate...\r\n");
 
         if ((flags = mbedtls_ssl_get_verify_result(&ssl_client->ssl_ctx)) != 0) {
-    		char buf[512];
-            bzero(buf, sizeof(buf));
-            mbedtls_x509_crt_verify_info(buf, sizeof(buf), "  ! ", flags);
-
-            DEBUG_PRINTF("Failed to verify peer certificate! verification info: %s\r\n", buf);
-
-            SOCKETS_Close( xSocket );
-            return SOCKETS_SOCKET_ERROR;
+            DEBUG_PRINTF("Failed to verify peer certificate!\r\n");
+        	lRetVal = SOCKETS_SOCKET_ERROR;
+        	goto cleanup;
         }
+
 		DEBUG_CONNECT_VERBOSE("Certificate verified.\r\n");
 
+		lRetVal = SOCKETS_ERROR_NONE;
+
+
+cleanup:
         /* Free some unused resource */
 		if (ca_cert) {
 			mbedtls_x509_crt_free(&ssl_client->ca_cert);
@@ -451,11 +454,14 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 		if (cli_key) {
 			mbedtls_pk_free(&ssl_client->client_key);
 		}
-
-		DEBUG_CONNECT("Secure channel created.\r\n");
+		if (lRetVal != SOCKETS_ERROR_NONE) {
+			SOCKETS_Close( xSocket );
+		}
+		else {
+			DEBUG_MINIMAL("Secure channel created.\r\n\r\n");
+		}
 #endif // USE_TLS
 
-		lRetVal = SOCKETS_ERROR_NONE;
     }
 
     return lRetVal;
@@ -469,15 +475,12 @@ int32_t SOCKETS_Recv( Socket_t xSocket,
                       uint32_t ulFlags )
 {
     int32_t lReceivedBytes = SOCKETS_SOCKET_ERROR;
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    //ESPSecureSocket_t * pxSecureSocket;
 
-    if( xSockets[ ulSocketNumber ].ucInUse )
+    if( xSockets[ ( uint32_t ) xSocket ].ucInUse )
     {
-
     	DEBUG_RECV("Receiving data\r\n");
 
-        sslclient_context *ssl_client = &xSockets[ulSocketNumber].sslCtx;
+        sslclient_context *ssl_client = xSockets[( uint32_t ) xSocket].sslCtx;
     	struct timeval timeout = {0};
     	timeout.tv_sec = 1;
     	lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
@@ -494,7 +497,7 @@ int32_t SOCKETS_Recv( Socket_t xSocket,
         }
         else { //if (lReceivedBytes < 0) {
         	if (errno == EBADF) {
-        		tfp_printf("Failed to recv data [ret=%d] [errno=%d]\r\n", (int)lReceivedBytes, errno);
+        		DEBUG_MINIMAL("Failed recv [ret=%d][errno=%d]\r\n", (int)lReceivedBytes, errno);
         		lReceivedBytes = SOCKETS_SOCKET_ERROR;
         		SOCKETS_Close( xSocket );
         	}
@@ -515,14 +518,13 @@ int32_t SOCKETS_Send( Socket_t xSocket,
                       size_t xDataLength,
                       uint32_t ulFlags )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
     int32_t lSentBytes = SOCKETS_SOCKET_ERROR;
 
-    if( xSockets[ ulSocketNumber ].ucInUse )
+    if ( xSockets[ ( uint32_t ) xSocket ].ucInUse )
     {
     	DEBUG_SEND("Sending data %d\r\n", xDataLength);
 
-        sslclient_context *ssl_client = &xSockets[ulSocketNumber].sslCtx;
+        sslclient_context *ssl_client = xSockets[( uint32_t ) xSocket].sslCtx;
 
 #if USE_TLS
         while ((lSentBytes = mbedtls_ssl_write(&ssl_client->ssl_ctx, pvBuffer, xDataLength)) <= 0)
@@ -544,31 +546,30 @@ int32_t SOCKETS_Send( Socket_t xSocket,
 		}
 		else
 		{
-			tfp_printf("Failed to send data [ret: %d] [errno=%d]\r\n", (int)lSentBytes, errno);
+			DEBUG_MINIMAL("Failed send [ret=%d][errno=%d]\r\n", (int)lSentBytes, errno);
 			lSentBytes = SOCKETS_SOCKET_ERROR;
 			SOCKETS_Close( xSocket );
 		}
     }
+
     return lSentBytes;
 }
 /*-----------------------------------------------------------*/
 
 int32_t SOCKETS_Close( Socket_t xSocket )
 {
-    int32_t lRetVal = SOCKETS_ERROR_NONE;
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    if( xSockets[ ulSocketNumber ].ucInUse )
+    if ( xSockets[ ( uint32_t ) xSocket ].ucInUse )
     {
-    	xSockets[ ulSocketNumber ].ucInUse = 0;
-    	if (xSockets[ ulSocketNumber ].pcDestination)
+    	xSockets[ ( uint32_t ) xSocket ].ucInUse = 0;
+    	if (xSockets[ ( uint32_t ) xSocket ].pcDestination)
     	{
-    		vPortFree(xSockets[ ulSocketNumber ].pcDestination);
-    		xSockets[ ulSocketNumber ].pcDestination = NULL;
+    		vPortFree(xSockets[ ( uint32_t ) xSocket ].pcDestination);
+    		xSockets[ ( uint32_t ) xSocket ].pcDestination = NULL;
     	}
 
         DEBUG_PRINTF("\r\nCleaning SSL connection.\r\n");
 
-        sslclient_context *ssl_client = &xSockets[ulSocketNumber].sslCtx;
+        sslclient_context *ssl_client = xSockets[( uint32_t ) xSocket].sslCtx;
 
 #if 0
         do
@@ -591,10 +592,15 @@ int32_t SOCKETS_Close( Socket_t xSocket )
 		mbedtls_entropy_free(&ssl_client->entropy_ctx);
 #endif // USE_TLS
 
+		vPortFree(xSockets[( uint32_t ) xSocket].sslCtx);
+		xSockets[( uint32_t ) xSocket].sslCtx = NULL;
+
+		DEBUG_PRINTF("Cleaning SSL connection done.\r\n");
     }
 
-    return lRetVal;
+    return SOCKETS_ERROR_NONE;
 }
+
 /*-----------------------------------------------------------*/
 
 int32_t SOCKETS_SetSockOpt( Socket_t xSocket,
@@ -604,15 +610,13 @@ int32_t SOCKETS_SetSockOpt( Socket_t xSocket,
                             size_t xOptionLength )
 {
     int32_t lRetVal = SOCKETS_ERROR_NONE;
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
     ESPSecureSocket_t * pxSecureSocket;
-    //uint32_t lTimeout;
 
     /* Ensure that a valid socket was passed. */
-    if( xSockets[ ulSocketNumber ].ucInUse )
+    if ( xSockets[ ( uint32_t ) xSocket ].ucInUse )
     {
         /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+        pxSecureSocket = &( xSockets[ ( uint32_t ) xSocket ] );
 
         switch( lOptionName )
         {
@@ -621,17 +625,14 @@ int32_t SOCKETS_SetSockOpt( Socket_t xSocket,
                 /* Non-NULL destination string indicates that SNI extension should
                  * be used during TLS negotiation. */
                 pxSecureSocket->pcDestination = ( char * ) pvPortMalloc( 1U + xOptionLength );
-
-                if( pxSecureSocket->pcDestination == NULL )
+                if ( pxSecureSocket->pcDestination == NULL )
                 {
                     lRetVal = SOCKETS_ENOMEM;
-                }
-                else
-                {
-                    memcpy( pxSecureSocket->pcDestination, pvOptionValue, xOptionLength );
-                    pxSecureSocket->pcDestination[ xOptionLength ] = '\0';
+                    break;
                 }
 
+				memcpy( pxSecureSocket->pcDestination, pvOptionValue, xOptionLength );
+				pxSecureSocket->pcDestination[ xOptionLength ] = '\0';
                 break;
 
             default:
