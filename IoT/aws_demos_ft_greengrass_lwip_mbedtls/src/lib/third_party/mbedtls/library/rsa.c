@@ -752,8 +752,8 @@ static int rsa_prepare_blinding( mbedtls_rsa_context *ctx,
 
     /* Blinding value: Vi =  Vf^(-e) mod N */
     MBEDTLS_MPI_CHK( mbedtls_mpi_inv_mod( &ctx->Vi, &ctx->Vf, &ctx->N ) );
-	//tfp_printf("= rsa_prepare_blinding4 %d\r\n", ret);
     MBEDTLS_MPI_CHK( mbedtls_mpi_exp_mod( &ctx->Vi, &ctx->Vi, &ctx->E, &ctx->N, &ctx->RN ) );
+
 
 cleanup:
     return( ret );
@@ -820,8 +820,6 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
     mbedtls_mpi *D = &ctx->D;
 #endif /* MBEDTLS_RSA_NO_CRT */
 
-    //tfp_printf("= mbedtls_rsa_private\r\n");
-
     /* Temporaries holding the initial input and the double
      * checked result; should be the same in the end. */
     mbedtls_mpi I, C;
@@ -863,7 +861,6 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
 
     /* End of MPI initialization */
 
-    //tfp_printf("= mbedtls_mpi_read_binary\r\n");
     MBEDTLS_MPI_CHK( mbedtls_mpi_read_binary( &T, input, ctx->len ) );
     if( mbedtls_mpi_cmp_mpi( &T, &ctx->N ) >= 0 )
     {
@@ -871,7 +868,6 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
         goto cleanup;
     }
 
-    //tfp_printf("= mbedtls_mpi_copy\r\n");
     MBEDTLS_MPI_CHK( mbedtls_mpi_copy( &I, &T ) );
 
     if( f_rng != NULL )
@@ -880,9 +876,7 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
          * Blinding
          * T = T * Vi mod N
          */
-        //tfp_printf("= rsa_prepare_blinding\r\n");
         MBEDTLS_MPI_CHK( rsa_prepare_blinding( ctx, f_rng, p_rng ) );
-        //tfp_printf("= rsa_prepare_blinding end\r\n");
         MBEDTLS_MPI_CHK( mbedtls_mpi_mul_mpi( &T, &T, &ctx->Vi ) );
         MBEDTLS_MPI_CHK( mbedtls_mpi_mod_mpi( &T, &T, &ctx->N ) );
 

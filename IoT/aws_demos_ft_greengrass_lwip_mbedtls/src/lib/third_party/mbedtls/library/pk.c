@@ -257,8 +257,6 @@ int mbedtls_pk_sign( mbedtls_pk_context *ctx, mbedtls_md_type_t md_alg,
              unsigned char *sig, size_t *sig_len,
              int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
 {
-	//tfp_printf("= mbedtls_pk_sign\r\n");
-
     if( ctx == NULL || ctx->pk_info == NULL ||
         pk_hashlen_helper( md_alg, &hash_len ) != 0 )
         return( MBEDTLS_ERR_PK_BAD_INPUT_DATA );

@@ -488,7 +488,7 @@ const mbedtls_md_info_t mbedtls_sha256_info = {
 
 #endif /* MBEDTLS_SHA256_C */
 
-#if 0//defined(MBEDTLS_SHA512_C)
+#if defined(MBEDTLS_SHA512_C)
 
 static int sha384_starts_wrap( void *ctx )
 {

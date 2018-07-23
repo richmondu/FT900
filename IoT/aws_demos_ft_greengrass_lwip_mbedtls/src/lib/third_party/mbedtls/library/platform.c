@@ -58,28 +58,17 @@ static void (*mbedtls_free_func)( void * ) = mbedtls_free;
 
 void * mbedtls_calloc( size_t nmemb, size_t size )
 {
-#if 1
 	int len = nmemb * size;
-
-	//tfp_printf("mbedtls_calloc! %d %d\r\n", nmemb, size);
-    char* temp = pvPortMalloc( len ); //(*mbedtls_calloc_func)( nmemb, size );
-    if (!temp) {
-    	tfp_printf("mbedtls_calloc failed! %d %d\r\n", nmemb, size);
-    }
-    else {
+    char* temp = pvPortMalloc( len );
+    if (temp) {
     	memset(temp, 0, len);
     }
-
     return temp;
-#else
-    return pvPortMalloc( nmemb * size );
-#endif
 }
 
 void mbedtls_free( void * ptr )
 {
-	//tfp_printf("mbedtls_free\r\n");
-	vPortFree( ptr ); //(*mbedtls_free_func)( ptr );
+	vPortFree( ptr );
 }
 
 int mbedtls_platform_set_calloc_free( void * (*calloc_func)( size_t, size_t ),

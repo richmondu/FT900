@@ -1,7 +1,7 @@
 
 # Also see "include/mbedtls/config.h"
 
-CFLAGS	?= -Og
+CFLAGS	?= -Os
 WARNING_CFLAGS ?=  -Wall -W -Wdeclaration-after-statement
 LDFLAGS ?=
 
@@ -9,7 +9,7 @@ LOCAL_CFLAGS = $(WARNING_CFLAGS) -I../include -D_FILE_OFFSET_BITS=64
 LOCAL_LDFLAGS =
 
 ifdef DEBUG
-LOCAL_CFLAGS += -g
+LOCAL_CFLAGS += -g0
 endif
 
 # MicroBlaze specific options:

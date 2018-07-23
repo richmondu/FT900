@@ -165,7 +165,7 @@ const mbedtls_md_info_t *mbedtls_md_info_from_type( mbedtls_md_type_t md_type )
         case MBEDTLS_MD_SHA256:
             return( &mbedtls_sha256_info );
 #endif
-#if 0//defined(MBEDTLS_SHA512_C)
+#if defined(MBEDTLS_SHA512_C)
         case MBEDTLS_MD_SHA384:
             return( &mbedtls_sha384_info );
         case MBEDTLS_MD_SHA512:

@@ -29,7 +29,7 @@
 #include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
 #endif
 
-#if 1//defined(MBEDTLS_SSL_TLS_C)
+#if defined(MBEDTLS_SSL_TLS_C)
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"

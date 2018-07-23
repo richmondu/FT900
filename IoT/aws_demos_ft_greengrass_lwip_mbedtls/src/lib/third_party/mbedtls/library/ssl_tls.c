@@ -2471,7 +2471,6 @@ int mbedtls_ssl_flush_output( mbedtls_ssl_context *ssl )
     unsigned char *buf, i;
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> flush output" ) );
-    //tfp_printf("==> mbedtls_ssl_flush_output\r\n");
 
     if( ssl->f_send == NULL )
     {
@@ -2494,10 +2493,7 @@ int mbedtls_ssl_flush_output( mbedtls_ssl_context *ssl )
 
         buf = ssl->out_hdr + mbedtls_ssl_hdr_len( ssl ) +
               ssl->out_msglen - ssl->out_left;
-
-        //tfp_printf("==> f_send %s %d\r\n", buf, ssl->out_left);
         ret = ssl->f_send( ssl->p_bio, buf, ssl->out_left );
-        //tfp_printf("<== f_send\r\n");
 
         MBEDTLS_SSL_DEBUG_RET( 2, "ssl->f_send", ret );
 
@@ -2768,7 +2764,6 @@ int mbedtls_ssl_write_record( mbedtls_ssl_context *ssl )
     size_t len = ssl->out_msglen;
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> write record" ) );
-    //tfp_printf("=> mbedtls_ssl_write_record\r\n");
 
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
     if( ssl->conf->transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM &&
@@ -2925,7 +2920,6 @@ int mbedtls_ssl_write_record( mbedtls_ssl_context *ssl )
         MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ssl_flush_output", ret );
         return( ret );
     }
-    //tfp_printf("<= mbedtls_ssl_flush_output\r\n");
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "<= write record" ) );
 
@@ -3567,19 +3561,13 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
                         "version = [%d:%d], msglen = %d",
                         ssl->in_msgtype,
                         major_ver, minor_ver, ssl->in_msglen ) );
-#if 0
-    tfp_printf( "input record: msgtype = %d, "
-                        "version = [%d:%d], msglen = %d\r\n",
-                        ssl->in_msgtype,
-                        major_ver, minor_ver, ssl->in_msglen );
-#endif
+
     /* Check record type */
     if( ssl->in_msgtype != MBEDTLS_SSL_MSG_HANDSHAKE &&
         ssl->in_msgtype != MBEDTLS_SSL_MSG_ALERT &&
         ssl->in_msgtype != MBEDTLS_SSL_MSG_CHANGE_CIPHER_SPEC &&
         ssl->in_msgtype != MBEDTLS_SSL_MSG_APPLICATION_DATA )
     {
-    	//tfp_printf("ssl->in_msgtype=%d\r\n", ssl->in_msgtype);
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "unknown record type" ) );
 
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
@@ -3596,14 +3584,12 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
     /* Check version */
     if( major_ver != ssl->major_ver )
     {
-    	//tfp_printf("err major_ver != ssl->major_ver\r\n");
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "major version mismatch" ) );
         return( MBEDTLS_ERR_SSL_INVALID_RECORD );
     }
 
     if( minor_ver > ssl->conf->max_minor_ver )
     {
-    	//tfp_printf("err minor_ver != ssl->max_minor_ver\r\n");
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "minor version mismatch" ) );
         return( MBEDTLS_ERR_SSL_INVALID_RECORD );
     }
@@ -3612,8 +3598,6 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
     if( ssl->in_msglen > MBEDTLS_SSL_BUFFER_LEN
                          - (size_t)( ssl->in_msg - ssl->in_buf ) )
     {
-    	//tfp_printf("bad message length %d %d\r\n", ssl->in_msglen, MBEDTLS_SSL_BUFFER_LEN
-        //        - (size_t)( ssl->in_msg - ssl->in_buf ));
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad message length" ) );
         return( MBEDTLS_ERR_SSL_INVALID_RECORD );
     }
@@ -3707,7 +3691,6 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
         if( ssl->in_msglen < 1 ||
             ssl->in_msglen > MBEDTLS_SSL_MAX_CONTENT_LEN )
         {
-        	//tfp_printf("bad message length 2 %d %d\r\n", ssl->in_msglen, MBEDTLS_SSL_MAX_CONTENT_LEN);
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad message length" ) );
             return( MBEDTLS_ERR_SSL_INVALID_RECORD );
         }
@@ -3716,7 +3699,6 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
     {
         if( ssl->in_msglen < ssl->transform_in->minlen )
         {
-        	//tfp_printf("bad message length 3 %d %d\r\n", ssl->in_msglen, ssl->transform_in->minlen);
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad message length" ) );
             return( MBEDTLS_ERR_SSL_INVALID_RECORD );
         }
@@ -3738,8 +3720,6 @@ static int ssl_parse_record_header( mbedtls_ssl_context *ssl )
             ssl->in_msglen > ssl->transform_in->minlen +
                              MBEDTLS_SSL_MAX_CONTENT_LEN + 256 )
         {
-        	//tfp_printf("bad message length 4 %d\r\n", ssl->in_msglen, ssl->transform_in->minlen +
-            //        MBEDTLS_SSL_MAX_CONTENT_LEN + 256);
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad message length" ) );
             return( MBEDTLS_ERR_SSL_INVALID_RECORD );
         }
@@ -3839,7 +3819,6 @@ int mbedtls_ssl_read_record( mbedtls_ssl_context *ssl )
 
             if( ret != 0 )
             {
-            	//tfp_printf("mbedtls_ssl_read_record_layer %d\r\n", ret);
                 MBEDTLS_SSL_DEBUG_RET( 1, ( "mbedtls_ssl_read_record_layer" ), ret );
                 return( ret );
             }
@@ -3851,7 +3830,6 @@ int mbedtls_ssl_read_record( mbedtls_ssl_context *ssl )
 
         if( 0 != ret )
         {
-        	//tfp_printf("mbedtls_ssl_handle_message_type %d\r\n", ret);
             MBEDTLS_SSL_DEBUG_RET( 1, ( "mbedtls_ssl_handle_message_type" ), ret );
             return( ret );
         }
@@ -3977,14 +3955,12 @@ int mbedtls_ssl_read_record_layer( mbedtls_ssl_context *ssl )
 
     if( ( ret = mbedtls_ssl_fetch_input( ssl, mbedtls_ssl_hdr_len( ssl ) ) ) != 0 )
     {
-    	//tfp_printf("mbedtls_ssl_fetch_input %d\r\n", ret);
         MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ssl_fetch_input", ret );
         return( ret );
     }
 
     if( ( ret = ssl_parse_record_header( ssl ) ) != 0 )
     {
-    	//tfp_printf("ssl_parse_record_header %d\r\n", ret);
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
         if( ssl->conf->transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM &&
             ret != MBEDTLS_ERR_SSL_CLIENT_RECONNECT )
@@ -4021,7 +3997,6 @@ int mbedtls_ssl_read_record_layer( mbedtls_ssl_context *ssl )
     if( ( ret = mbedtls_ssl_fetch_input( ssl,
                                  mbedtls_ssl_hdr_len( ssl ) + ssl->in_msglen ) ) != 0 )
     {
-    	//tfp_printf("mbedtls_ssl_fetch_input 2 %d\r\n", ret);
         MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ssl_fetch_input", ret );
         return( ret );
     }
@@ -4042,7 +4017,6 @@ int mbedtls_ssl_read_record_layer( mbedtls_ssl_context *ssl )
 
     if( ( ret = ssl_prepare_record_content( ssl ) ) != 0 )
     {
-    	//tfp_printf("ssl_prepare_record_content %d\r\n", ret);
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
         if( ssl->conf->transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM )
         {
@@ -4437,10 +4411,8 @@ int mbedtls_ssl_parse_certificate( mbedtls_ssl_context *ssl )
     }
 #endif
 
-    //tfp_printf("mbedtls_ssl_read_record\r\n");
     if( ( ret = mbedtls_ssl_read_record( ssl ) ) != 0 )
     {
-        //tfp_printf("mbedtls_ssl_read_record failed! ret=%d\r\n", ret);
         /* mbedtls_ssl_read_record may have sent an alert already. We
            let it decide whether to alert. */
         MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ssl_read_record", ret );
@@ -6782,17 +6754,15 @@ int mbedtls_ssl_handshake( mbedtls_ssl_context *ssl )
         return( MBEDTLS_ERR_SSL_BAD_INPUT_DATA );
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> handshake" ) );
-    //tfp_printf("> handshake\r\n");
+
     while( ssl->state != MBEDTLS_SSL_HANDSHAKE_OVER )
     {
         ret = mbedtls_ssl_handshake_step( ssl );
-        //tfp_printf("= handshake %d\r\n", ret);
 
         if( ret != 0 )
             break;
     }
 
-    //tfp_printf("< handshake\r\n");
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "<= handshake" ) );
 
     return( ret );
