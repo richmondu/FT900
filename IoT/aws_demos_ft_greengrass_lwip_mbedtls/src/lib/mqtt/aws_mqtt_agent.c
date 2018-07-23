@@ -488,10 +488,8 @@ static void prvProcessReceivedTimeout( MQTTBrokerConnection_t * const pxConnecti
  * @param[in] pxConnection The MQTTBrokerConnection_t corresponding to the connection on which Disconnect event is received.
  * @param[in] pxParams The parameters received in the callback form the MQTT Core library containing relevant data.
  */
-#if !mqttconfigDISABLE_DISCONNECT
 static void prvProcessReceivedDisconnect( MQTTBrokerConnection_t * const pxConnection,
                                           const MQTTEventCallbackParams_t * const pxParams );
-#endif
 
 /**
  * @brief Notifies the task by encoding the packet identifier, notification code and status in the notification value.
@@ -542,9 +540,7 @@ static void prvInitiateMQTTConnect( MQTTEventData_t * const pxEventData );
  *
  * @param[in] pxEventData The event data as posted by application task to the command queue.
  */
-#if !mqttconfigDISABLE_DISCONNECT
 static void prvInitiateMQTTDisconnect( MQTTEventData_t * const pxEventData );
-#endif
 
 /**
  * @brief Initiates the MQTT Subscribe operation.
@@ -735,11 +731,9 @@ static MQTTBool_t prvMQTTEventCallback( void * pvCallbackContext,
             prvProcessReceivedTimeout( pxConnection, pxParams );
             break;
 
-#if !mqttconfigDISABLE_DISCONNECT
         case eMQTTClientDisconnected:
             prvProcessReceivedDisconnect( pxConnection, pxParams );
             break;
-#endif
 
         case eMQTTPacketDropped:
             configPRINTF( ( "[WARN] MQTT Agent dropped a packet. No buffer available.\r\n" ) );
@@ -867,7 +861,7 @@ static MQTTNotificationData_t * prvRetrieveNotificationData( MQTTBrokerConnectio
 }
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData )
+static inline BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData )
 {
     SocketsSockaddr_t xMQTTServerAddress = { 0 };
     BaseType_t xStatus = pdPASS;
@@ -942,7 +936,6 @@ static BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData 
                 }
             }
 
-
 #if 1
             if( xStatus != pdPASS )
             {
@@ -977,7 +970,7 @@ static BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData 
 }
 /*-----------------------------------------------------------*/
 
-static void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConnection )
+static inline void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConnection )
 {
     const TickType_t xShortDelay = pdMS_TO_TICKS( 10 );
     TickType_t xTicksToWait = xShortDelay * ( TickType_t ) 100;
@@ -1182,7 +1175,6 @@ static inline void prvProcessReceivedTimeout( MQTTBrokerConnection_t * const pxC
 }
 /*-----------------------------------------------------------*/
 
-#if !mqttconfigDISABLE_DISCONNECT
 static inline void prvProcessReceivedDisconnect( MQTTBrokerConnection_t * const pxConnection,
                                           const MQTTEventCallbackParams_t * const pxParams )
 {
@@ -1201,7 +1193,7 @@ static inline void prvProcessReceivedDisconnect( MQTTBrokerConnection_t * const 
             xCallbackParams.xMQTTEvent = eMQTTAgentDisconnect;
             ( void ) pxConnection->pxCallback( pxConnection->pvUserData, &( xCallbackParams ) );
         }
-        tfp_printf("%s ", __FUNCTION__);
+        //tfp_printf("%s ", __FUNCTION__);
         /* Close the connection. */
         prvGracefulSocketClose( pxConnection );
     }
@@ -1224,7 +1216,6 @@ static inline void prvProcessReceivedDisconnect( MQTTBrokerConnection_t * const 
         }
     }
 }
-#endif
 
 /*-----------------------------------------------------------*/
 
@@ -1281,6 +1272,7 @@ static inline TickType_t prvManageConnections( void )
                 /* If data was read, pass it to the MQTT Core library. */
                 if( lBytesReceived > 0 )
                 {
+                	//tfp_printf("SOCKETS_Recv %d\r\n", lBytesReceived);
                     ( void ) MQTT_ParseReceivedData( &( pxConnection->xMQTTContext ), pxConnection->ucRxBuffer, ( size_t ) lBytesReceived );
                 }
                 else if( lBytesReceived == 0 )
@@ -1290,7 +1282,6 @@ static inline TickType_t prvManageConnections( void )
                 }
                 else
                 {
-#if !mqttconfigDISABLE_DISCONNECT
                     /* A negative return value from SOCKETS_Recv indicates error.
                      * Since the socket is marked non-blocking, read can potentially
                      * return SOCKETS_EWOULDBLOCK in which case we will re-try to
@@ -1305,7 +1296,6 @@ static inline TickType_t prvManageConnections( void )
                     }
 
                     break;
-#endif
                 }
             }
 
@@ -1391,7 +1381,6 @@ static inline void prvInitiateMQTTConnect( MQTTEventData_t * const pxEventData )
 }
 /*-----------------------------------------------------------*/
 
-#if !mqttconfigDISABLE_DISCONNECT
 static inline void prvInitiateMQTTDisconnect( MQTTEventData_t * const pxEventData )
 {
     MQTTBrokerConnection_t * pxConnection = &( xMQTTConnections[ pxEventData->uxBrokerNumber ] );
@@ -1411,7 +1400,6 @@ static inline void prvInitiateMQTTDisconnect( MQTTEventData_t * const pxEventDat
         prvNotifyRequestingTask( &( pxEventData->xNotificationData ), eMQTTDISCONNCouldNotBeSent, pdFAIL );
     }
 }
-#endif
 
 /*-----------------------------------------------------------*/
 
@@ -1592,7 +1580,7 @@ static inline void prvInitiateMQTTPublish( MQTTEventData_t * const pxEventData )
 }
 /*-----------------------------------------------------------*/
 
-static MQTTAgentReturnCode_t prvSendCommandToMQTTTask( MQTTEventData_t * pxEventData )
+static inline MQTTAgentReturnCode_t prvSendCommandToMQTTTask( MQTTEventData_t * pxEventData )
 {
     BaseType_t xReturn;
     MQTTAgentReturnCode_t xReturnCode = eMQTTAgentFailure;
@@ -1755,12 +1743,10 @@ static void prvMQTTTask( void * pvParameters )
                         prvInitiateMQTTConnect( &( xMQTTCommand ) );
                         break;
 
-#if !mqttconfigDISABLE_DISCONNECT
                     case eMQTTDisconnectRequest:
                         //tfp_printf("eMQTTDisconnectRequest \r\n");
                         prvInitiateMQTTDisconnect( &( xMQTTCommand ) );
                         break;
-#endif
 
 #if !mqttconfigDISABLE_SUBSCRIBE
                     case eMQTTSubscribeRequest:
@@ -1864,13 +1850,10 @@ BaseType_t MQTT_AGENT_Init( void )
 
         /* Don't create the MQTT task until the command queue has been created,
          * as the task itself assumes the queue is valid. */
-        //xCommandQueue = xQueueCreateStatic( mqttCOMMAND_QUEUE_LENGTH, sizeof( MQTTEventData_t ), ucQueueStorageArea, &xStaticQueue );
         xCommandQueue = xQueueCreate(mqttCOMMAND_QUEUE_LENGTH, sizeof( MQTTEventData_t ));
         configASSERT( xCommandQueue );
 
-        //xMQTTTaskHandle = xTaskCreateStatic( prvMQTTTask, "MQTT", mqttconfigMQTT_TASK_STACK_DEPTH, NULL, mqttconfigMQTT_TASK_PRIORITY, xStack, &xStaticTask );
-        //xTaskCreate(prvMQTTTask, "MQTT", configMINIMAL_STACK_SIZE*2+128, NULL, mqttconfigMQTT_TASK_PRIORITY, &xMQTTTaskHandle);
-        xTaskCreate(prvMQTTTask, "MQTT", configMINIMAL_STACK_SIZE*4, NULL, mqttconfigMQTT_TASK_PRIORITY, &xMQTTTaskHandle);
+        xTaskCreate(prvMQTTTask, "MQTT", mqttconfigMQTT_TASK_STACK_DEPTH, NULL, mqttconfigMQTT_TASK_PRIORITY, &xMQTTTaskHandle);
         configASSERT( xMQTTTaskHandle );
     }
 
@@ -1946,7 +1929,6 @@ MQTTAgentReturnCode_t MQTT_AGENT_Connect( MQTTAgentHandle_t xMQTTHandle,
 }
 /*-----------------------------------------------------------*/
 
-#if !mqttconfigDISABLE_DISCONNECT
 MQTTAgentReturnCode_t MQTT_AGENT_Disconnect( MQTTAgentHandle_t xMQTTHandle,
                                              TickType_t xTimeoutTicks )
 {
@@ -1965,7 +1947,6 @@ MQTTAgentReturnCode_t MQTT_AGENT_Disconnect( MQTTAgentHandle_t xMQTTHandle,
     /* Return the code to the user. */
     return xReturnCode;
 }
-#endif
 
 /*-----------------------------------------------------------*/
 

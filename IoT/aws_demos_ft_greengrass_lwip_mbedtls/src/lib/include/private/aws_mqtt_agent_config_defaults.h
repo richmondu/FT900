@@ -39,6 +39,7 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "aws_mqtt_agent_config_defaults.h"
 
 /**
  * @brief Controls whether or not to report usage metrics to the
@@ -59,6 +60,7 @@
  * in the "username" field of MQTT connect messages.
  */
 /** @{ */
+#if mqttconfigENABLE_METRICS
 #ifndef mqttconfigMETRIC_SDK
     #define mqttconfigMETRIC_SDK    "SDK=AmazonFreeRTOS"                    /**< The SDK used by this device. */
 #endif
@@ -69,6 +71,7 @@
 
 #ifndef mqttconfigMETRIC_PLATFORM
     #define mqttconfigMETRIC_PLATFORM    "Platform=Unknown"              /**< The platform that this SDK is running on. */
+#endif
 #endif
 /** @} */
 
@@ -156,7 +159,11 @@
  * @brief Length of the buffer used to receive data.
  */
 #ifndef mqttconfigRX_BUFFER_SIZE
+#if !mqttconfigDISABLE_SUBSCRIBE
     #define mqttconfigRX_BUFFER_SIZE    ( 1024 )
+#else
+    #define mqttconfigRX_BUFFER_SIZE    ( 16 )
+#endif
 #endif
 
 /**

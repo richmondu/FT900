@@ -35,6 +35,7 @@
 
 #ifndef _AWS_MQTT_CONFIG_DEFAULTS_H_
 #define _AWS_MQTT_CONFIG_DEFAULTS_H_
+#include "aws_mqtt_agent_config.h"
 
 /**
  * @brief Enable subscription management.
@@ -42,8 +43,10 @@
  * Subscription management allows the user to register per subscription
  * callback.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 #ifndef mqttconfigENABLE_SUBSCRIPTION_MANAGEMENT
     #define mqttconfigENABLE_SUBSCRIPTION_MANAGEMENT
+#endif
 #endif
 
 /**
@@ -56,8 +59,10 @@
  * The subscribe operation will fail if the user tries to subscribe to a topic
  * of length more than the maximum specified here.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 #ifndef mqttconfigSUBSCRIPTION_MANAGER_MAX_TOPIC_LENGTH
     #define mqttconfigSUBSCRIPTION_MANAGER_MAX_TOPIC_LENGTH    ( 128 )
+#endif
 #endif
 
 /**
@@ -70,8 +75,10 @@
  * simultaneously. The subscribe operation will fail is the user tries to
  * subscribe to more topics than the maximum specified here.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 #ifndef mqttconfigSUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS
     #define mqttconfigSUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS    ( 8 )
+#endif
 #endif
 
 /**

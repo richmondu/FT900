@@ -532,6 +532,7 @@ typedef struct MQTTConnectParams
  *
  * Parameters passed to the MQTT_Subscribe API.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 typedef struct MQTTSubscribeParams
 {
     const uint8_t * pucTopic;                    /**< The topic to subscribe to. This can be a topic filter containing wild cards as permitted by the MQTT protocol. */
@@ -547,12 +548,14 @@ typedef struct MQTTSubscribeParams
                                                   *   in which case the generic callback ( if registered during initialization ) is invoked. */
     #endif /* mqttconfigENABLE_SUBSCRIPTION_MANAGEMENT */
 } MQTTSubscribeParams_t;
+#endif
 
 /**
  * @brief MQTT Unsubscribe Parameters.
  *
  * Parameters passed to the MQTT_Unsubscribe API.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 typedef struct MQTTUnsubscribeParams
 {
     const uint8_t * pucTopic;    /**< The topic to unsubscribe from. */
@@ -560,6 +563,7 @@ typedef struct MQTTUnsubscribeParams
     uint16_t usPacketIdentifier; /**< The same identifier is returned in the callback when corresponding UNSUBACK is received or the operation times out. */
     uint32_t ulTimeoutTicks;     /**< The time interval in ticks after which the operation should fail. */
 } MQTTUnsubscribeParams_t;
+#endif
 
 /**
  * @brief MQTT Publish Parameters.
@@ -652,8 +656,10 @@ MQTTReturnCode_t MQTT_Disconnect( MQTTContext_t * pxMQTTContext );
  *
  * @return eMQTTSuccess if everything succeeds, otherwise an error code explaining the reason of failure.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 MQTTReturnCode_t MQTT_Subscribe( MQTTContext_t * pxMQTTContext,
                                  const MQTTSubscribeParams_t * const pxSubscribeParams );
+#endif
 
 /**
  * @brief Initiates the Unsubscribe operation.
@@ -667,8 +673,10 @@ MQTTReturnCode_t MQTT_Subscribe( MQTTContext_t * pxMQTTContext,
  *
  * @return eMQTTSuccess if everything succeeds, otherwise an error code explaining the reason of failure.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 MQTTReturnCode_t MQTT_Unsubscribe( MQTTContext_t * pxMQTTContext,
                                    const MQTTUnsubscribeParams_t * const pxUnsubscribeParams );
+#endif
 
 /**
  * @brief Initiates the Publish operation.

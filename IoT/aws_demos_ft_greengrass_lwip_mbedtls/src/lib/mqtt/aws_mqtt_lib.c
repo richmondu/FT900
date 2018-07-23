@@ -394,10 +394,12 @@ static MQTTBufferHandle_t prvPacketTypeFlagsGetTxBuffer( MQTTContext_t * pxMQTTC
  *
  * @return The handle to the buffer if it finds one, NULL otherwise.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 static MQTTBufferHandle_t prvPacketTypeFlagsIdentifierGetTxBuffer( MQTTContext_t * pxMQTTContext,
                                                                    uint8_t ucPacketType,
                                                                    uint8_t ucFlags,
                                                                    uint16_t usPacketIdentifier );
+#endif
 
 /**
  * @brief Finds a Tx buffer containing the MQTT message matching the given packet
@@ -542,7 +544,9 @@ static void prvProcessReceivedCONNACK( MQTTContext_t * pxMQTTContext );
  *
  * @param[in] pxMQTTContext The MQTT context for which the message was received.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 static void prvProcessReceivedSUBACK( MQTTContext_t * pxMQTTContext );
+#endif
 
 /**
  * @brief Decodes and processes the received UNSUBACK message.
@@ -553,7 +557,9 @@ static void prvProcessReceivedSUBACK( MQTTContext_t * pxMQTTContext );
  *
  * @param[in] pxMQTTContext The MQTT context for which the message was received.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 static void prvProcessReceivedUNSUBACK( MQTTContext_t * pxMQTTContext );
+#endif
 
 /**
  * @brief Decodes and processes the received PUBACK message.
@@ -922,6 +928,7 @@ static inline MQTTBufferHandle_t prvPacketTypeFlagsGetTxBuffer( MQTTContext_t * 
 }
 /*-----------------------------------------------------------*/
 
+#if !mqttconfigDISABLE_SUBSCRIBE
 static MQTTBufferHandle_t prvPacketTypeFlagsIdentifierGetTxBuffer( MQTTContext_t * pxMQTTContext,
                                                                    uint8_t ucPacketType,
                                                                    uint8_t ucFlags,
@@ -955,6 +962,8 @@ static MQTTBufferHandle_t prvPacketTypeFlagsIdentifierGetTxBuffer( MQTTContext_t
 
     return xBuffer;
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 static inline MQTTBufferHandle_t prvPacketTypeIdentifierGetTxBuffer( MQTTContext_t * pxMQTTContext,
@@ -1164,6 +1173,7 @@ static inline void prvProcessReceivedMQTTPacket( MQTTContext_t * pxMQTTContext )
     {
         prvProcessReceivedPUBACK( pxMQTTContext );
     }
+#if !mqttconfigDISABLE_SUBSCRIBE
     /* Is this a SUBACK? */
     else if( mqttbufferGET_DATA( pxMQTTContext->xRxBuffer )[ mqttFIXED_HEADER_CONTROL_BYTE_OFFSET ] == ( uint8_t ) ( mqttCONTROL_SUBACK | mqttFLAGS_SUBACK ) )
     {
@@ -1174,6 +1184,7 @@ static inline void prvProcessReceivedMQTTPacket( MQTTContext_t * pxMQTTContext )
     {
         prvProcessReceivedUNSUBACK( pxMQTTContext );
     }
+#endif
     /* Any other packet is considered malformed. */
     else
     {
@@ -1345,6 +1356,7 @@ static inline void prvProcessReceivedCONNACK( MQTTContext_t * pxMQTTContext )
 }
 /*-----------------------------------------------------------*/
 
+#if !mqttconfigDISABLE_SUBSCRIBE
 static inline void prvProcessReceivedSUBACK( MQTTContext_t * pxMQTTContext )
 {
     MQTTBufferHandle_t xSubscribeTxBuffer;
@@ -1447,8 +1459,11 @@ static inline void prvProcessReceivedSUBACK( MQTTContext_t * pxMQTTContext )
     /* Return the RxBuffer to the free buffer pool. */
     prvReturnBuffer( pxMQTTContext, pxMQTTContext->xRxBuffer );
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
+#if !mqttconfigDISABLE_SUBSCRIBE
 static inline void prvProcessReceivedUNSUBACK( MQTTContext_t * pxMQTTContext )
 {
     MQTTBufferHandle_t xUnsubscribeTxBuffer;
@@ -1535,6 +1550,8 @@ static inline void prvProcessReceivedUNSUBACK( MQTTContext_t * pxMQTTContext )
     /* Return the RxBuffer to the free buffer pool. */
     prvReturnBuffer( pxMQTTContext, pxMQTTContext->xRxBuffer );
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 static inline void prvProcessReceivedPUBACK( MQTTContext_t * pxMQTTContext )
@@ -2679,8 +2696,10 @@ MQTTReturnCode_t MQTT_Disconnect( MQTTContext_t * pxMQTTContext )
 
     return xReturnCode;
 }
+
 /*-----------------------------------------------------------*/
 
+#if !mqttconfigDISABLE_SUBSCRIBE
 MQTTReturnCode_t MQTT_Subscribe( MQTTContext_t * pxMQTTContext,
                                  const MQTTSubscribeParams_t * const pxSubscribeParams )
 {
@@ -2837,8 +2856,11 @@ MQTTReturnCode_t MQTT_Subscribe( MQTTContext_t * pxMQTTContext,
 
     return xReturnCode;
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
+#if !mqttconfigDISABLE_SUBSCRIBE
 MQTTReturnCode_t MQTT_Unsubscribe( MQTTContext_t * pxMQTTContext,
                                    const MQTTUnsubscribeParams_t * const pxUnsubscribeParams )
 {
@@ -2959,6 +2981,8 @@ MQTTReturnCode_t MQTT_Unsubscribe( MQTTContext_t * pxMQTTContext,
 
     return xReturnCode;
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 MQTTReturnCode_t MQTT_Publish( MQTTContext_t * pxMQTTContext,
