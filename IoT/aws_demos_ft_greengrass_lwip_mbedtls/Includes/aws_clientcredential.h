@@ -36,6 +36,7 @@
  */
 #define USE_TLS        	1
 
+
 /*
  * Switch for MQTT message broker to be used
  */
@@ -46,12 +47,14 @@
 //#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_IOT
 //#define USE_MQTT_BROKER 	MQTT_BROKER_MOSQUITTO
 
+
 /*
  * Switch between verifying Root CA certificate
  * If 0, root CA will not be verified. This is prone to man-in-the-middle attacks.
  * However, note that the client certificate and private key are still verified.
  */
 #define USE_ROOTCA     	0 // Do not modify for now
+
 
 /*
  * Switch to handle or not handle Ethernet unplug/plug scenario
@@ -67,9 +70,11 @@
 /*
  * Setup the IP address, gateway and subnet mask of this FT900 device
  */
-#define FT9XX_IP_ADDRESS "192.168.254.200"
-#define FT9XX_IP_GATEWAY "192.168.254.254"
-#define FT9XX_IP_SUBNET  "255.255.255.0"
+#include "aws_secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
+#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 254, 200)
+#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 254, 254)
+#define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)
+
 
 /*
  * MQTT Broker endpoint.
@@ -86,6 +91,7 @@
 	static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.254.102"; // local mosquitto server
 #endif // USE_TLS
 
+
 /*
  * Port number the MQTT broker is using.
  */
@@ -95,10 +101,12 @@
 #define clientcredentialMQTT_BROKER_PORT 1883
 #endif // USE_TLS
 
+
 /*
  * When using Greengrass, this must be the thing name associated with the certificates
  */
 #define clientcredentialMQTT_CLIENT_ID "HelloWorld_Publisher"
+
 
 /*
  * Root CA certificate for the client certificate and private key to be used
@@ -189,6 +197,7 @@ static const char clientcredentialROOTCA_CERTIFICATE_PEM[] =
 #endif // USE_ROOTCA
 #endif // USE_TLS
 
+
 #if USE_TLS
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS || USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
 /*
@@ -215,6 +224,7 @@ static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "jz+E7WiTbRqNyrpJjNbt2w4Foo3qeqsHzOaesMfOrsKu1dCa1jfrFne+T/Z+l6LH\n"
 "ITSGE9QuiJjYR9sDHY/dquYkp6MMGX1BK8DuMqsoCfLEMQZhCZs6Ppba06QWYw==\n"
 "-----END CERTIFICATE-----\n";
+
 
 /*
  * Private key associated with the client certificate
@@ -283,6 +293,7 @@ static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "paQvyFq1DF0Y1VtRJYkG4e1jH2yHR7ild9YqQzWSqdW+RUFS0UXXcijSZEE=\n"
 "-----END CERTIFICATE-----\n";
 
+
 /*
  * Private key associated with the client certificate
  */
@@ -316,6 +327,7 @@ static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] =
 "-----END RSA PRIVATE KEY-----\n";
 #endif
 #endif // USE_TLS
+
 
 #endif // __AWS_CLIENTCREDENTIAL__H__
 

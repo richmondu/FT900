@@ -87,46 +87,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1079580602" name="deprecated_definitions.h" rcbsApplicability="disable" resourcePath="src/lib/include/private/deprecated_definitions.h" toolsToInvoke="">
-						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1281809924" name="Resource Custom Build Step">
-							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1161936330" name="Resource Custom Build Step Input Type">
-								<additionalInput kind="additionalinputdependency" paths=""/>
-							</inputType>
-							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1462205155" name="Resource Custom Build Step Output Type"/>
-						</tool>
-					</fileInfo>
-					<fileInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1486959326" name="aws_doubly_linked_list.h" rcbsApplicability="disable" resourcePath="src/lib/include/private/aws_doubly_linked_list.h" toolsToInvoke="">
-						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.267384204" name="Resource Custom Build Step">
-							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1899351026" name="Resource Custom Build Step Input Type">
-								<additionalInput kind="additionalinputdependency" paths=""/>
-							</inputType>
-							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1259622331" name="Resource Custom Build Step Output Type"/>
-						</tool>
-					</fileInfo>
-					<fileInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.121458234" name="mpu_wrappers.h" rcbsApplicability="disable" resourcePath="src/lib/include/private/mpu_wrappers.h" toolsToInvoke="">
-						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.822443525" name="Resource Custom Build Step">
-							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.250704103" name="Resource Custom Build Step Input Type">
-								<additionalInput kind="additionalinputdependency" paths=""/>
-							</inputType>
-							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.391822060" name="Resource Custom Build Step Output Type"/>
-						</tool>
-					</fileInfo>
-					<fileInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1003874601" name="aws_default_root_certificates.h" rcbsApplicability="disable" resourcePath="src/lib/include/private/aws_default_root_certificates.h" toolsToInvoke="">
-						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.868949093" name="Resource Custom Build Step">
-							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1103988227" name="Resource Custom Build Step Input Type">
-								<additionalInput kind="additionalinputdependency" paths=""/>
-							</inputType>
-							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1526511034" name="Resource Custom Build Step Output Type"/>
-						</tool>
-					</fileInfo>
-					<fileInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1914049387" name="aws_secure_sockets_config_defaults.h" rcbsApplicability="disable" resourcePath="src/lib/include/private/aws_secure_sockets_config_defaults.h" toolsToInvoke="">
-						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1556215259" name="Resource Custom Build Step">
-							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.238236123" name="Resource Custom Build Step Input Type">
-								<additionalInput kind="additionalinputdependency" paths=""/>
-							</inputType>
-							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.609236644" name="Resource Custom Build Step Output Type"/>
-						</tool>
-					</fileInfo>
 					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.194323168" name="/" resourcePath="src/lib/third_party/lwip/netif">
 						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.28841924" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007.1981917494" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007"/>
