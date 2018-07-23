@@ -31,6 +31,7 @@
 
 #ifndef _AWS_MQTT_CONFIG_H_
 #define _AWS_MQTT_CONFIG_H_
+#include "aws_mqtt_agent_config.h"
 
 /**
  * @brief Enable subscription management.
@@ -43,13 +44,17 @@
  * @brief Maximum length of the topic which can be stored in subscription
  * manager.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 #define mqttconfigSUBSCRIPTION_MANAGER_MAX_TOPIC_LENGTH     ( 32 )
+#endif
 
 /**
  * @brief Maximum number of subscriptions which can be stored in subscription
  * manager.
  */
+#if !mqttconfigDISABLE_SUBSCRIBE
 #define mqttconfigSUBSCRIPTION_MANAGER_MAX_SUBSCRIPTIONS    ( 2 )
+#endif
 
 /*
  * Uncomment the following two lines to enable asserts.
@@ -60,6 +65,6 @@
 /**
  * @brief Set this macro to 1 for enabling debug logs.
  */
-#define mqttconfigENABLE_DEBUG_LOGS    1
+//#define mqttconfigENABLE_DEBUG_LOGS    1
 
 #endif /* _AWS_MQTT_CONFIG_H_ */

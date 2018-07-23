@@ -34,6 +34,6 @@
 
 /* Timeout used when performing MQTT operations that do not need extra time
  * to perform a TLS negotiation. */
-#define democonfigMQTT_TIMEOUT                               pdMS_TO_TICKS( 2500 )
+#define democonfigMQTT_TIMEOUT                          pdMS_TO_TICKS( 2500 )
 
 #endif /* _AWS_DEMO_CONFIG_H_ */

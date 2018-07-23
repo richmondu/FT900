@@ -53,9 +53,11 @@
  * in the "username" field of MQTT connect messages.
  */
 /** @{ */
+#if mqttconfigENABLE_METRICS
 #define mqttconfigMETRIC_SDK         "SDK=AmazonFreeRTOS"               /**< The SDK used by this device. */
 #define mqttconfigMETRIC_VERSION     "Version="tskKERNEL_VERSION_NUMBER /**< The version number of this SDK. */
 #define mqttconfigMETRIC_PLATFORM    "Platform=STM32L475"               /**< The platform that this SDK is running on. */
+#endif
 /** @} */
 
 /**
@@ -98,7 +100,7 @@
  * @defgroup MQTTTask MQTT task configuration parameters.
  */
 /** @{ */
-#define mqttconfigMQTT_TASK_STACK_DEPTH    ( 256 )
+#define mqttconfigMQTT_TASK_STACK_DEPTH    ( 512 + 64 )
 #define mqttconfigMQTT_TASK_PRIORITY       ( configMAX_PRIORITIES - 3 )
 /** @} */
 
@@ -110,7 +112,7 @@
 /**
  * @brief Maximum number of parallel operations per client.
  */
-#define mqttconfigMAX_PARALLEL_OPS       ( 5 )
+#define mqttconfigMAX_PARALLEL_OPS       ( 2 )
 
 /**
  * @brief Time in milliseconds after which the TCP send operation should timeout.

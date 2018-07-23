@@ -39,7 +39,19 @@
 
 /**
  * @brief The size of each buffer in the static buffer pool.
+ * Increase this buffer as necessary
+ * Note that this buffer is for sending MQTT packets only
+ * This buffer size has been reduced for memory footprint purposes
  */
-#define bufferpoolconfigBUFFER_SIZE    ( 256 + 128 )
+#if 1
+#define bufferpoolconfigBUFFER_DATA_SIZE    ( 112 )
+#else
+#define bufferpoolconfigBUFFER_DATA_SIZE    ( 256 )
+#endif
+
+/**
+ * @brief The size of each buffer in the static buffer pool.
+ */
+#define bufferpoolconfigBUFFER_SIZE    ( bufferpoolconfigBUFFER_DATA_SIZE + 64 )
 
 #endif /* _AWS_BUFFER_POOL_CONFIG_H_ */
