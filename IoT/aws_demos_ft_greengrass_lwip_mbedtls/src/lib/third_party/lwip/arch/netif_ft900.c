@@ -43,10 +43,29 @@
 
 #include "netif_arch.h"
 
+// Use TCP_MSS instead of hardcoded 1500
+// Note that TCP_MSS can be lowered for RAM purposes
+// All peers will understand this and only send small packets
+#define USE_TCP_MSS_VALUE 1
+
+// rlen < FT900_MAX_PACKET will always be true on 2nd try
+// so the loopstart is useless
+#define FIX_USELESS_LOOP 1
+
+// Use task notification instead of polling
+#define FIX_POLLING_BEHAVIOR 1
+
+
+
 #define MIN(a,b) ((a<b)?a:b)
 #define ARCH_HW_HLEN ETH_PAD_SIZE
 
+#if USE_TCP_MSS_VALUE
+#include "lwipopts.h"
+#define FT900_MAX_PACKET ((TCP_MSS+40) + ETHERNET_WRITE_HEADER + ARCH_HW_HLEN + sizeof(uint32_t))
+#else // USE_TCP_MSS_VALUE
 #define FT900_MAX_PACKET (1500 + ETHERNET_WRITE_HEADER + ARCH_HW_HLEN + sizeof(uint32_t))
+#endif // USE_TCP_MSS_VALUE
 
 struct ifstats {
 	u32_t rx_cnt;
@@ -60,9 +79,9 @@ extern u32_t millis(void);
 
 static struct ifstats  arch_ft900_stats = {0};
 
-/* Reserve space to receive up to 2 packets at a time from the Ethernet interface.
+/* Reserve space to receive up to 1 packet at a time from the Ethernet interface.
  */
-static uint8_t netif_rx_data[1 * FT900_MAX_PACKET] = {0};
+static uint8_t netif_rx_data[1 * FT900_MAX_PACKET] = {0xFF};
 
 static void arch_ft900_ethernet_ISR(void);
 
@@ -111,7 +130,11 @@ err_t arch_ft900_init(struct netif *netif)
 	// Setup lwIP arch interface.
 	netif->output = etharp_output;
 	netif->linkoutput = arch_ft900_link_output;
+#if USE_TCP_MSS_VALUE
+	netif->mtu = TCP_MSS + 40;
+#else // USE_TCP_MSS_VALUE
 	netif->mtu = 1500;
+#endif // USE_TCP_MSS_VALUE
 	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_ETHERNET | NETIF_FLAG_IGMP;
 	netif->input = ethernet_input;
 #if LWIP_IGMP
@@ -410,6 +433,8 @@ static void arch_ft900_ethernet_ISR(void)
 
 		/* Collect any packets in Rx FIFO into RAM. */
 
+#if FIX_USELESS_LOOP
+#else // FIX_USELESS_LOOP
 		/* This utilises labels and gotos to improve speed. */
 		loopstart:
 
@@ -420,11 +445,14 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		if (rlen < FT900_MAX_PACKET)
 		{
+			//tfp_printf("rlen(%d) < FT900_MAX_PACKET(%d)\r\n", rlen, FT900_MAX_PACKET);
+
 			/* No room left for a full packet.
 			 * It will get read in the next time.
 			 */
 			goto loopstop;
 		}
+#endif // FIX_USELESS_LOOP
 
 		/* How many packets have been received and are
 		 * waiting in the Rx FIFO.
@@ -457,10 +485,18 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		dst = (uint32_t *)(((uint8_t *)dst) + w0);
 
+		//tfp_printf("w0=%d\r\n", w0);
+
 		/* Reduce available space for new packets. */
 		rlen -= w0;
 		/* Read any more packets available. */
+
+#if FIX_USELESS_LOOP
+		// Note loopstartif condition will always fail on the 2nd try (rlen < FT900_MAX_PACKET)
+		// Just exit the loop my goodness gracious
+#else // FIX_USELESS_LOOP
 		goto loopstart;
+#endif // FIX_USELESS_LOOP
 
 		loopstop:
 
@@ -471,6 +507,10 @@ static void arch_ft900_ethernet_ISR(void)
 		 * when the packets are processed.
 		 */
 		arch_ft900_recv_off();
+
+#if FIX_POLLING_BEHAVIOR
+		net_packet_available();
+#endif //FIX_POLLING_BEHAVIOR
 	}
 
 	if (isr & MASK_ETH_IACK_TX_EMPTY)

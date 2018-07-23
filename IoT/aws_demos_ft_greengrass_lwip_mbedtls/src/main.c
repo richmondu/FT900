@@ -54,10 +54,11 @@
 #define TASK_NOTIFY_NETIF_UP    	(0x01)
 #define TASK_NOTIFY_LINK_UP     	(0x02)
 #define TASK_NOTIFY_LINK_DOWN   	(0x04)
+#define TASK_NOTIFY_PACKET   		(0x08)
 
 // Do not modify unless you know what you are doing
 // These are currently the most optimal stack size for this application
-#define TASK_SYSTEM_STACK_SIZE      (144)
+#define TASK_SYSTEM_STACK_SIZE      176//(144)
 #define TASK_SYSTEM_PRIORITY        (configMAX_PRIORITIES-1)
 #define TASK_MQTTAPP_STACK_SIZE     (192)
 #define TASK_MQTTAPP_PRIORITY       (tskIDLE_PRIORITY + 1)
@@ -73,8 +74,15 @@ TaskHandle_t g_hMQTTAppTask = NULL;
 
 /*-----------------------------------------------------------*/
 
-static void app_ethif_status_cb(int netif_up, int link_up)
+static void connectionCB(int netif_up, int link_up, int packet_available)
 {
+	if (packet_available) {
+		if (g_hSystemTask) {
+			xTaskNotify(g_hSystemTask, TASK_NOTIFY_PACKET, eSetBits);
+			return;
+		}
+	}
+
 	if (netif_up) {
 		if (g_hSystemTask) {
 			xTaskNotify(g_hSystemTask,TASK_NOTIFY_NETIF_UP,eSetBits);
@@ -100,6 +108,7 @@ static inline void initializeApplication()
 	extern void vMQTTAppTask( void * pvParameters );
     BaseType_t xResult = pdPASS;
 
+
     xResult = MQTT_AGENT_Init();
     if ( xResult == pdPASS ) {
         xResult = BUFFERPOOL_Init();
@@ -112,64 +121,57 @@ static inline void initializeApplication()
 
 static void vTaskSystem(void* params)
 {
+
 	// Initialize Ethernet
 	{
-		uint32_t ulNotifiedValue;
 		ip_addr_t ipaddr, gateway, mask;
-		ip4addr_aton(FT9XX_IP_ADDRESS, &ipaddr);
-		ip4addr_aton(FT9XX_IP_GATEWAY, &gateway);
-		ip4addr_aton(FT9XX_IP_SUBNET, &mask);
+		ipaddr.addr = FT9XX_IP_ADDRESS;
+		gateway.addr = FT9XX_IP_GATEWAY;
+		mask.addr = FT9XX_IP_SUBNET;
 
 
-		net_init(ipaddr, gateway, mask, 1, "FT90x_lwIP_Example", app_ethif_status_cb);
+		net_init(ipaddr, gateway, mask, 1, NULL, connectionCB);
 
-		while (xTaskNotifyWait(pdFALSE, TASK_NOTIFY_NETIF_UP,
-			&ulNotifiedValue, portMAX_DELAY ) == false);
+		while (xTaskNotifyWait(pdFALSE, TASK_NOTIFY_NETIF_UP, NULL, portMAX_DELAY ) == false);
 
 		while (1) {
 			if (!netif_is_link_up(net_get_netif())) {
 				if (ethernet_is_link_up()) {
 					netif_set_link_up(net_get_netif());
-					tfp_printf("Ethernet connected.\r\n\r\n");
+					DEBUG_MINIMAL("Ethernet connected.\r\n\r\n");
 					break;
 				}
 			}
 		}
 
-		while (xTaskNotifyWait(pdTRUE, TASK_NOTIFY_LINK_UP,
-			&ulNotifiedValue, portMAX_DELAY ) == false);
+		while (xTaskNotifyWait(pdTRUE, TASK_NOTIFY_LINK_UP, NULL, portMAX_DELAY ) == false);
 	}
 
 	// Initialize application
 	initializeApplication();
 
 	// Monitor connection and disconnection
+	uint32_t ulTimeout = 500 * portTICK_PERIOD_MS;
 	while (1) {
 		if (netif_is_link_up(net_get_netif())) {
 			if (!ethernet_is_link_up()) {
 				netif_set_link_down(net_get_netif());
-				tfp_printf("Ethernet disconnected.\r\n\r\n");
-				if (g_hMQTTAppTask) {
-					xTaskNotify(g_hMQTTAppTask, TASK_NOTIFY_LINK_DOWN, eSetBits);
-				}
+				DEBUG_MINIMAL("Ethernet disconnected.\r\n\r\n");
 			}
 		}
 		else {
 			if (ethernet_is_link_up()) {
 				netif_set_link_up(net_get_netif());
-				tfp_printf("Ethernet connected.\r\n\r\n");
-				if (g_hMQTTAppTask) {
-					xTaskNotify(g_hMQTTAppTask, TASK_NOTIFY_LINK_UP, eSetBits);
-				}
+				DEBUG_MINIMAL("Ethernet connected.\r\n\r\n");
 			}
 		}
-		for (int i = 0; i < 10; i++) {
+
+		// While data is received, keep on reading
+		while (xTaskNotifyWait(0, TASK_NOTIFY_PACKET, NULL, ulTimeout) == pdTRUE) {
 			arch_ft900_tick(net_get_netif());
-			vTaskDelay(1 * portTICK_PERIOD_MS);
 		}
 	}
 }
-
 
 /*-----------------------------------------------------------*/
 

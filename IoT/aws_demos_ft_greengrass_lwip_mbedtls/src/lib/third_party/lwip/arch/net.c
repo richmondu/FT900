@@ -57,9 +57,9 @@
 
 #define NET_DEBUG
 #ifdef NET_DEBUG
-#define NET_DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+#define NET_DEBUG_PRINTF	DEBUG_MINIMAL
 #else
-#define NET_DEBUG_PRINTF(...)
+#define NET_DEBUG_PRINTF
 #endif
 
 /* CONSTANTS ***********************************************************************/
@@ -69,7 +69,7 @@
 /**
  @brief Callback function for network available/unavailable signal.
 */
-static fn_status_cb gfn_status;
+static fn_status_cb gfn_status = NULL;
 
 /* LOCAL VARIABLES *****************************************************************/
 
@@ -237,9 +237,16 @@ void net_status_cb(struct netif *netif)
 #endif // NET_USE_EEPROM
 
 	if (gfn_status) {
-		gfn_status(1, netif_is_link_up(netif));
+		gfn_status(1, netif_is_link_up(netif), 0);
 	}
 	/*mdns_resp_netif_settings_changed();*/
+}
+
+void net_packet_available()
+{
+	if (gfn_status) {
+		gfn_status(0, 0, 1);
+	}
 }
 
 /** @brief Gets the DHCP status of the interface.

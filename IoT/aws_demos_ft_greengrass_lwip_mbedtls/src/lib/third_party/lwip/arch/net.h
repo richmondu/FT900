@@ -114,9 +114,9 @@ struct eeprom_net_config {
 #endif
 
 /**
- @brief Callback function for network available/unavailable signal.
+ @brief Callback function for network available/unavailable signal and packet available.
 */
-typedef void (*fn_status_cb)(int netif_up, int link_up);
+typedef void (*fn_status_cb)(int netif_up, int link_up, int packet_available);
 
 err_t net_init(ip_addr_t ip,
 		ip_addr_t gw, ip_addr_t mask,
@@ -141,6 +141,7 @@ ip_addr_t net_get_gateway();
 ip_addr_t net_get_netmask();
 #else
 struct netif* net_get_netif();
+void net_packet_available();
 #endif
 
 
