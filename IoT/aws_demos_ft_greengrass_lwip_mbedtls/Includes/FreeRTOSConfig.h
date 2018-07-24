@@ -104,7 +104,7 @@
 			#define configTOTAL_HEAP_SIZE               ((size_t)(28 * 1024 + 512))
 		#endif // USE_ROOTCA
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-		#define configTOTAL_HEAP_SIZE               ((size_t)(33 * 1024))
+		#define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024))
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
 		#define configTOTAL_HEAP_SIZE               ((size_t)(33 * 1024))
 	#endif // USE_GREENGRASS
