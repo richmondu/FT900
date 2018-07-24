@@ -96,3 +96,36 @@ Troubleshooting utilities
    for publishing and subscribing MQTT messages to/from MQTT topics
    Refer to https://mosquitto.org/
 
+
+Optimization efforts
+
+1. The available memory footprint for sensor data has been tripled from 25kB to 76kB.
+   a. code for AWS Greengrass/IoT demo: 180 kB (70% of 256 kB)
+   b. code for sensor data: 76 kB (30% of 256 kB)
+
+2. The optimizations performed include the following:
+   a. Use small send and recv buffer size of MQTT
+      Whats the use of big buffers if our MQTT packets are small.
+      Set these buffers small but big enough to fit our expected send and recv packets.
+   b. Make MQTT packet small by making Greengrass append geolocation and timestamp
+      Previously, FT900 is adding geolocatin and timestamp information to all MQTT packets.
+      Now, we make the Greengrass append this information to make MQTT packets small.
+   c. Use small TCP MSS buffer size for LWIP. 
+      Broadcasting small MSS buffer size makes peer send small packets.
+   d. Make ethernet buffer size based on lwIP configured TCP MSS buffer 
+      so that buffer size is not wasted.
+   e. Disable MQTT subscriptions. Can be re-enabled by a macro.
+      Our demo application does not use MQTT subscriptions.
+      Previously, we had MQTT subscriptions for querying the time from Greengrass/SNTP.
+   f. Use dynamic allocations on TLS connection and application logic. 
+      After TLS connection, a lot of allocated dynamic memory is available for reuse.
+   g. Make IP address initialization use SOCKETS_inet_addr_quick
+      Saves a few bytes but more efficient.
+   h. Use tfp_snprintf consistently instead of mixing snprintf and tfp_snprintf.
+      Having two separate snprintf versions linked is efficient in terms of memory used.
+      Use only one so only 1 is linked.
+   i. Limit debug logs
+      Provided centralized debugging macro for minimal and verbose debug logs.
+   j. Removed 1 unnecessary macro in mbedTLS configuration.
+      Also used mbedTLS configurables intended for memory footprint optimization.
+
