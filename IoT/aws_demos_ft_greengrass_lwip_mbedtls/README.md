@@ -81,6 +81,9 @@ This application has been tested to work successfully with the following test se
    b. AWS Greengrass (installed on a Raspberry PI 3B)
       Refer here on how to setup an RPI as an AWS Greengrass CORE 
       https://docs.aws.amazon.com/greengrass/latest/developerguide/module1.html
+	  Once setuped, it can be started using the following command:
+	    cd /greengrass/ggc/core
+		sudo ./greengrassd start
    c. Mosquitto (configured w/TLS)
 
 2. MQTT w/o TLS
@@ -101,6 +104,10 @@ Optimization efforts
 
 1. The available memory footprint for sensor data has been tripled from 25kB to 76kB.
    a. code for AWS Greengrass/IoT demo: 180 kB (70% of 256 kB)
+      text: 130856 (128 kB)
+      data: 23332 (22 kB)
+      bss:  30292 (30 kB)
+      total: 180 kB flash memory (70% of 256 kB)
    b. code for sensor data: 76 kB (30% of 256 kB)
 
 2. The optimizations performed include the following:

@@ -31,6 +31,7 @@
  */
 
 /* MQTT agent includes. */
+#include <secure_sockets.h>
 #include "aws_mqtt_agent.h"
 #include "aws_mqtt_agent_config.h"
 #include "aws_mqtt_agent_config_defaults.h"
@@ -45,9 +46,6 @@
 #include "semphr.h"
 
 /* Secure sockets include. */
-#include "aws_secure_sockets.h"
-
-/* Standard includes. */
 #include <string.h>
 
 /**

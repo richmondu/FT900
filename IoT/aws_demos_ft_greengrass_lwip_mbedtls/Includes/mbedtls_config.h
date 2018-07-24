@@ -23,7 +23,7 @@
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA
 
 // RSA-related configurations
-#define MBEDTLS_KEY_EXCHANGE_RSA_ENABLED	// required by our chosen ciphersuites
+#define MBEDTLS_KEY_EXCHANGE_RSA_ENABLED // required by our chosen ciphersuites
 #define MBEDTLS_RSA_C				// required by our chosen ciphersuites
 #define MBEDTLS_OID_C 				// required by MBEDTLS_RSA_C
 #define MBEDTLS_PKCS1_V15 			// required by MBEDTLS_RSA_C
@@ -55,10 +55,10 @@
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 3072
 #define MBEDTLS_SHA512_C			// required by my self-generated X509 certificates
 #endif
-#define MBEDTLS_AES_ROM_TABLES
-#define MBEDTLS_MPI_WINDOW_SIZE 1
-#define MBEDTLS_MPI_MAX_SIZE 256
-#define MBEDTLS_SHA256_SMALLER
+#define MBEDTLS_AES_ROM_TABLES		// decreases code size by 896 bytes
+#define MBEDTLS_MPI_WINDOW_SIZE 1	// decreases code size by 808 bytes
+#define MBEDTLS_MPI_MAX_SIZE 256	// decreases code size by 64 bytes
+#define MBEDTLS_SHA256_SMALLER		// decreases code size by 2944 bytes
 #define MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_KEY_EXCHANGE
 
 // Platform related configuration

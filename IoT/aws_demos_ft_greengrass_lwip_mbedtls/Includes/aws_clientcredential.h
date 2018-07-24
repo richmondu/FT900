@@ -70,7 +70,7 @@
 /*
  * Setup the IP address, gateway and subnet mask of this FT900 device
  */
-#include "aws_secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
+#include "secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
 #define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 254, 200)
 #define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 254, 254)
 #define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)

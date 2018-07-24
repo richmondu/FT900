@@ -1,58 +1,11 @@
-/*
- * Amazon FreeRTOS
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software. If you wish to use our Amazon
- * FreeRTOS name, please do so in a fair use way that does not cause confusion.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * http://aws.amazon.com/freertos
- * http://www.FreeRTOS.org
- */
+#ifndef _SECURE_SOCKETS_H_
+#define _SECURE_SOCKETS_H_
 
-/**
- * @file aws_secure_sockets.h
- * @brief Secure Sockets Interface.
- *
- * Secure sockets is a portable layer for establishing a TCP/IP
- * connection, with the option of using TLS.
- *
- * Secure sockets is based on the Berkeley sockets API.
- * A few difference general differences between Berkeley and SOCKETS are:
- * - SOCKETS has additional socket options to enable TLS, server name
- * indication, and per-socket root of trust server certificates.  See
- * SOCKETS_SetSockOpt() for more information.
- * - SOCKETS API return an error code, rather than returning -1 and setting
- * a global errno value.
- *
- */
 
-#ifndef _AWS_SECURE_SOCKETS_H_
-#define _AWS_SECURE_SOCKETS_H_
-
-/*
- #ifdef __cplusplus
- *  extern "C" {
- #endif
- */
 #include <stdint.h>
 #include <stddef.h>
-#include "aws_secure_sockets_config.h"
-#include "aws_secure_sockets_config_defaults.h"
+
+#define socketsconfigBYTE_ORDER              pdLITTLE_ENDIAN
 
 /**
  * @brief The socket type.
@@ -460,10 +413,5 @@ uint32_t SOCKETS_GetHostByName( const char * pcHostName, char* pAddress );
 
 #endif /* socketsconfigBYTE_ORDER. */
 
-/*
- #ifdef __cplusplus
- *  }
- #endif
- */
 
-#endif /* _AWS_SECURE_SOCKETS_H_ */
+#endif /* _SECURE_SOCKETS_H_ */
