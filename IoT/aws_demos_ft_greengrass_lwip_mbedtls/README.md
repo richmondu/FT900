@@ -77,17 +77,32 @@ such as Amazon AWS Greengrass and AWS IoT cloud, as well as local Mosquitto brok
 This application has been tested to work successfully with the following test setup:
 
 1. MQTT w/TLS
-   1. AWS IoT
-   2. AWS Greengrass (installed on a Raspberry PI 3B)
-      - Refer here on how to setup an RPI as an AWS Greengrass CORE 
-      - https://docs.aws.amazon.com/greengrass/latest/developerguide/module1.html
-      - Once setuped, it can be started using the following command:
-      - cd /greengrass/ggc/core
-      - sudo ./greengrassd start
-   3. Mosquitto (configured w/TLS)
+   1. AWS IoT, debug and release modes
+   2. AWS Greengrass (installed on a Raspberry PI 3B), debug and release modes
+   3. Mosquitto (configured w/TLS), debug and release modes
 
 2. MQTT w/o TLS
-   1. Mosquitto (configured w/o TLS)
+   1. Mosquitto (configured w/o TLS), debug and release modes
+
+
+### Test instructions
+
+1. MQTT w/TLS
+   1. AWS IoT
+      - default configuration
+      - set IP address, subnet mask and gateway of FT900 device
+      - compile and run
+      - then goto http://iotgs-iotgss3bucket-2uxeg22cmka4.s3-website-ap-southeast-1.amazonaws.com/
+   2. AWS Greengrass (installed on a Raspberry PI 3B)
+      - set USE_MQTT_BROKER to MQTT_BROKER_AWS_GREENGRASS in aws_clientcredential.h
+      - set IP address, subnet mask and gateway of FT900 device
+      - compile and run
+      - then goto http://iotgs-iotgss3bucket-2uxeg22cmka4.s3-website-ap-southeast-1.amazonaws.com/
+   3. Mosquitto (configured w/TLS)
+      - set USE_MQTT_BROKER to MQTT_BROKER_MOSQUITTO in aws_clientcredential.h
+      - set IP address, subnet mask and gateway of FT900 device
+      - compile and run
+      - then subscribe to mosquitto broker using mosquitto_sub.exe to verify packets sent
 
 
 ### Troubleshooting utilities
@@ -102,13 +117,20 @@ This application has been tested to work successfully with the following test se
 
 ### Optimization efforts
 
-1. The available memory footprint for sensor data has been tripled from 25kB to 76kB.
-   1. code for AWS Greengrass/IoT demo: 180 kB (70% of 256 kB)
+1. The available memory footprint for sensor data has been tripled from 25kB to 75kB.
+   1. code size for AWS Greengrass demo: 181 kB (70% of 256 kB)
       - text: 130856 (128 kB)
       - data: 23332 (22 kB)
       - bss:  30292 (30 kB)
-      - total: 180 kB flash memory (70% of 256 kB)
-   2. code for sensor data: 76 kB (30% of 256 kB)
+      - total: 181 kB flash memory (70% of 256 kB)
+      - available memory for sensor data: 75 kB (30% of 256 kB)
+   2. code size for different test combinations:
+      - AWS_GREENGRASS, release mode: 184892 (181 kB)
+      - AWS_GREENGRASS, debug mode: 216012 (211 kB)
+      - AWS_IOT, release mode: 198848 (194 kB)
+      - AWS_IOT, debug mode: 233200 (228 kB)
+      - MOSQUITTO, release mode: 198416 (194 kB)
+      - MOSQUITTO, debug mode: 230824 (225 kB)
 
 2. The optimizations performed include the following:
    1. Use small send and recv buffer size of MQTT
