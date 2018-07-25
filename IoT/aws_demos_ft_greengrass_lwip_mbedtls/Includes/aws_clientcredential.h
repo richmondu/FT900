@@ -30,6 +30,16 @@
 
 
 /*
+ * DO NOT FORGET TO UPDATE THESE VALUES FOR FT900
+ * Setup the IP address, gateway and subnet mask of this FT900 device
+ */
+#include "secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
+#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 254, 200)
+#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 254, 254)
+#define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)
+
+
+/*
  * Switch between secure MQTT and non-secure MQTT
  * Note that non-secure MQTT can be tested using Mosquitto local broker only
  * AWS does not support non-secure MQTT
@@ -43,9 +53,13 @@
 #define MQTT_BROKER_MOSQUITTO       0	// local Mosquitto broker
 #define MQTT_BROKER_AWS_GREENGRASS  1	// local AWS Greengrass broker
 #define MQTT_BROKER_AWS_IOT			2	// AWS IoT cloud
-#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_GREENGRASS
-//#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_IOT
+#if USE_TLS
+//#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_GREENGRASS
+#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_IOT
 //#define USE_MQTT_BROKER 	MQTT_BROKER_MOSQUITTO
+#else // USE_TLS
+#define USE_MQTT_BROKER 	MQTT_BROKER_MOSQUITTO
+#endif // USE_TLS
 
 
 /*
@@ -65,15 +79,6 @@
 #else
 #define HANDLE_RECONNECTION 0
 #endif
-
-
-/*
- * Setup the IP address, gateway and subnet mask of this FT900 device
- */
-#include "secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
-#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 254, 200)
-#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 254, 254)
-#define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)
 
 
 /*
