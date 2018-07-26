@@ -158,3 +158,16 @@ This application has been tested to work successfully with the following test se
    10. Removed 1 unnecessary macro in mbedTLS configuration.
       Also used mbedTLS configurables intended for memory footprint optimization.
 
+
+### Scalability
+
+1. USE_DHCP
+   - To support multiple device scenario in a network environment, support for DHCP has been added. 
+   - It can be enabled by setting the macro USE_DHCP.
+   - Advantage: you don't have to set the IP address and gateway address manually
+   - Disadvantage: enabling this adds 10k memory footprint (for RELEASE mode) or 14kb (for DEBUG mode).
+   
+2. Device certificate and private key
+   - Each FT900 device should have its own certificate and private key.
+   - AWS or any other server will not allow 2 different devices to use the same certificate and private key simultaneously.
+   - You must generate a certificate and private key for each FT900 device.
