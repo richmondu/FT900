@@ -184,6 +184,7 @@ This application has been tested to work successfully with the following test se
    - Advantage: prevent man-in-the-middle attacks
    - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
    - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   - For production release, server certificate verification is a must.
    
 2. ECC Ciphersuite support
    - TODO. Not yet currently tested and supported.
