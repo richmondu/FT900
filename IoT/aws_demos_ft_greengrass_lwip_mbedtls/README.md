@@ -115,7 +115,7 @@ This application has been tested to work successfully with the following test se
    Refer to https://mosquitto.org/
 
 
-### Optimization efforts
+### Memory footprint
 
 1. The available memory footprint for sensor data has been tripled from 25kB to 75kB.
    1. code size for AWS Greengrass demo: 181 kB (70% of 256 kB)
