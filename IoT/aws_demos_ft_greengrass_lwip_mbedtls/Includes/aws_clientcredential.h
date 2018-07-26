@@ -37,7 +37,7 @@
  * 10kb for Release mode, 14kb for Debug mode
  * Set this to 0 if you need more memory for sensor code
  */
-#define USE_DHCP 1 // this is useful for multiple device scenario
+#define USE_DHCP 0 // this is useful for multiple device scenario
 
 
 /*
@@ -60,7 +60,7 @@
  * Note that non-secure MQTT can be tested using Mosquitto local broker only
  * AWS does not support non-secure MQTT
  */
-#define USE_TLS        	1
+#define USE_TLS 1
 
 
 /*
@@ -80,10 +80,13 @@
 
 /*
  * Switch between verifying Root CA certificate
- * If 0, root CA will not be verified. This is prone to man-in-the-middle attacks.
+ * If 0, root CA server certificate will not be verified.
+ * This is prone to man-in-the-middle attacks.
  * However, note that the client certificate and private key are still verified.
+ * For production release, this must be enabled.
+ * This has been tested with AWS Greengrass scenario only.
  */
-#define USE_ROOTCA 0 // Do not modify for now
+#define USE_ROOTCA 0
 
 
 /*

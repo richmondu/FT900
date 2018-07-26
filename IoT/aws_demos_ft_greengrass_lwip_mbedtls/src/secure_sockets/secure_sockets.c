@@ -327,12 +327,7 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
         if (ca_cert != NULL) {
             DEBUG_CONNECT_VERBOSE("Loading CA cert %d\r\n", strlen(rootCABuff));
             mbedtls_x509_crt_init(&ssl_client->ca_cert);
-
-#if 1
-            mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_NONE);
-#else
             mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED);
-#endif
 
             ret = mbedtls_x509_crt_parse(&ssl_client->ca_cert, (const unsigned char *)ca_cert, strlen(ca_cert) + 1);
             mbedtls_ssl_conf_ca_chain(&ssl_client->ssl_conf, &ssl_client->ca_cert, NULL);
@@ -346,9 +341,9 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_NONE);
             //DEBUG_PRINTF("WARNING: Verify server certificate to prevent man-in-the-middle attacks!\r\n");
         }
-#else
+#else // USE_ROOTCA
         mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_NONE);
-#endif
+#endif // USE_ROOTCA
 
         if (cli_cert != NULL && cli_key != NULL) {
             mbedtls_x509_crt_init(&ssl_client->client_cert);
@@ -379,15 +374,6 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
                 goto cleanup;
             }
         }
-
-#if 0
-        //DEBUG_PRINTF("Setting hostname for TLS session...\r\n");
-        // Hostname set here should match CN in server certificate
-        if ((ret = mbedtls_ssl_set_hostname(&ssl_client->ssl_ctx, host)) != 0) {
-            DEBUG_PRINTF("mbedtls_ssl_set_hostname failed! %d\r\n", ret);
-            return SOCKETS_SOCKET_ERROR;
-        }
-#endif
 
         mbedtls_ssl_conf_rng(&ssl_client->ssl_conf, mbedtls_ctr_drbg_random, &ssl_client->drbg_ctx);
         if ((ret = mbedtls_ssl_setup(&ssl_client->ssl_ctx, &ssl_client->ssl_conf)) != 0) {
