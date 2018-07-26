@@ -168,9 +168,23 @@ This application has been tested to work successfully with the following test se
      NET_USE_EEPROM enables reading of MAC ADDRESS stored in EEPROM.
      Note that if each ft900 device have the same MAC ADDRESS, it will cause conflict with the DHCP server.
    - Advantage: you don't have to set the IP address and gateway address manually
-   - Disadvantage: enabling this adds 10k memory footprint (for RELEASE mode) or 14kb (for DEBUG mode).
+   - Disadvantage: enabling this adds 10kb memory footprint (for RELEASE mode) or 14kb (for DEBUG mode).
    
 2. Device certificate and private key
    - Each FT900 device should have its own certificate and private key.
    - AWS or any other server will not allow 2 different devices to use the same certificate and private key simultaneously.
    - You must generate a certificate and private key for each FT900 device.
+   
+
+### Security
+
+1. TLS Server certificate verification
+   - Server certificate verification is currently disabled by default.
+   - It can be enabled by setting the macro USE_ROOTCA
+   - Advantage: prevent man-in-the-middle attacks
+   - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
+   - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   
+2. ECC Ciphersuite support
+   - TODO. Not yet currently tested and supported.
+
