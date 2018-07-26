@@ -164,6 +164,9 @@ This application has been tested to work successfully with the following test se
 1. USE_DHCP
    - To support multiple device scenario in a network environment, support for DHCP has been added. 
    - It can be enabled by setting the macro USE_DHCP.
+   - Enabling USE_DHCP will enable LWIP_DHCP and NET_USE_EEPROM
+     NET_USE_EEPROM enables reading of MAC ADDRESS stored in EEPROM.
+     Note that if each ft900 device have the same MAC ADDRESS, it will cause conflict with the DHCP server.
    - Advantage: you don't have to set the IP address and gateway address manually
    - Disadvantage: enabling this adds 10k memory footprint (for RELEASE mode) or 14kb (for DEBUG mode).
    
