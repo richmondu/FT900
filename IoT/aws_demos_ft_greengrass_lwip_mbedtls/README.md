@@ -115,7 +115,7 @@ This application has been tested to work successfully with the following test se
    Refer to https://mosquitto.org/
 
 
-### Optimization efforts
+### Memory footprint
 
 1. The available memory footprint for sensor data has been tripled from 25kB to 75kB.
    1. code size for AWS Greengrass demo: 181 kB (70% of 256 kB)
@@ -157,4 +157,35 @@ This application has been tested to work successfully with the following test se
       Provided centralized debugging macro for minimal and verbose debug logs.
    10. Removed 1 unnecessary macro in mbedTLS configuration.
       Also used mbedTLS configurables intended for memory footprint optimization.
+
+
+### Scalability
+
+1. USE_DHCP
+   - To support multiple device scenario in a network environment, support for DHCP has been added. 
+   - It can be enabled by setting the macro USE_DHCP.
+   - Enabling USE_DHCP will enable LWIP_DHCP and NET_USE_EEPROM
+     NET_USE_EEPROM enables reading of MAC ADDRESS stored in EEPROM.
+     Note that if each ft900 device have the same MAC ADDRESS, it will cause conflict with the DHCP server.
+   - Advantage: you don't have to set the IP address and gateway address manually
+   - Disadvantage: enabling this adds 10kb memory footprint (for RELEASE mode) or 14kb (for DEBUG mode).
+   
+2. Device certificate and private key
+   - Each FT900 device should have its own certificate and private key.
+   - AWS or any other server will not allow 2 different devices to use the same certificate and private key simultaneously.
+   - You must generate a certificate and private key for each FT900 device.
+   
+
+### Security
+
+1. TLS Server certificate verification
+   - Server certificate verification is currently disabled by default.
+   - It can be enabled by setting the macro USE_ROOTCA
+   - Advantage: prevent man-in-the-middle attacks
+   - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
+   - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   - For production release, server certificate verification is a must.
+   
+2. ECC Ciphersuite support
+   - TODO. Not yet currently tested and supported.
 
