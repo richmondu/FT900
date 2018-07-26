@@ -55,7 +55,7 @@
 #include "lwip/priv/tcp_priv.h"
 #include "lwip/autoip.h"
 #include "lwip/stats.h"
-#include "lwip/prot/dhcp.h"
+#include <lwip/prot/dhcp2.h>
 #include "lwip/prot/udp.h"
 
 #include <string.h>

@@ -140,7 +140,7 @@ static void vTaskSystem(void* params)
 		mask.addr = FT9XX_IP_SUBNET;
 
 
-		net_init(ipaddr, gateway, mask, 1, NULL, connectionCB);
+		net_init(ipaddr, gateway, mask, LWIP_DHCP, NULL, connectionCB);
 
 		while (xTaskNotifyWait(pdFALSE, TASK_NOTIFY_NETIF_UP, NULL, portMAX_DELAY ) == false);
 
@@ -205,7 +205,8 @@ static inline void setupEthernet()
 {
 	/* Set up Ethernet */
 	sys_enable(sys_device_ethernet);
-#if 0
+
+#ifdef NET_USE_EEPROM
 	/* Set up I2C */
 	sys_enable(sys_device_i2c_master);
 

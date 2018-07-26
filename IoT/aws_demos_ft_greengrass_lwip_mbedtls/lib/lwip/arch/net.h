@@ -47,35 +47,37 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <lwip/inet.h>
+#include <lwip/netif.h>
+#include <lwip/tcp.h>
+#include <lwip/tcpip.h>
+#include "netif_arch.h"
 
-#if 1
-#include <lwip/inet.h>
-#include <lwip/netif.h>
-#include <lwip/tcp.h>
-#include <lwip/tcpip.h>
-#else
-#include <lwip/inet.h>
-#include <lwip/udp.h>
-#include <lwip/tcp.h>
-#include <lwip/tcpip.h>
-#include <lwip/timeouts.h>
-#include <lwip/netif.h>
-#include <lwip/init.h>
-#include <lwip/sys.h>
-#include <lwip/igmp.h>
-#include <netif/etharp.h>
+#include <lwipopts.h> // for LWIP_DHCP
+#if LWIP_DHCP
 #include <lwip/dhcp.h>
-#include <lwip/ip_addr.h>
-#include <lwip/igmp.h>
 #endif
 
-#include "netif_arch.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#if 0
+/**
+ @brief Write the IP address configuration information to the EEPROM.
+ @details Define macro to make an address change event update the EEPROM.
+ */
+#if LWIP_DHCP
+// If DHCP is enabled, must use EEPROM so that MAC address is unique
+#define NET_USE_EEPROM
+#else // LWIP_DHCP
+//#define NET_USE_EEPROM
+#endif // LWIP_DHCP
+
+
+
+#ifdef NET_USE_EEPROM
 /**
  @brief Structure to hold IP address configuration in EEPROM.
  @details This is used to both keep settings stored persistently in EEPROM.
@@ -94,13 +96,6 @@ struct eeprom_net_config {
  unique number whenever the base structure changes.
  */
 #define EEPROM_VALID_KEY 0x5A45
-
-
-/**
- @brief Write the IP address configuration information to the EEPROM.
- @details Define macro to make an address change event update the EEPROM.
- */
-//#define NET_USE_EEPROM
 
 /**
  @brief Address of EEPROM on I2C bus.

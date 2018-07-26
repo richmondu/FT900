@@ -30,12 +30,28 @@
 
 
 /*
- * DO NOT FORGET TO UPDATE THESE VALUES FOR FT900
+ * Switch between DHCP or static IP address
+ * This is useful for multiple device scenario
+ * Set this to 1 so IP address is not set manually
+ * However, note that enabling this adds memory footprint of
+ * 10kb for Release mode, 14kb for Debug mode
+ * Set this to 0 if you need more memory for sensor code
+ */
+#define USE_DHCP 1 // this is useful for multiple device scenario
+
+
+/*
+ * DO NOT FORGET TO UPDATE THESE VALUES FOR FT900 if USE_DHCP is 0
  * Setup the IP address, gateway and subnet mask of this FT900 device
  */
 #include "secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
-#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 254, 200)
-#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 254, 254)
+#if USE_DHCP
+#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(0, 0, 0, 0) // no need to set since USE_DHCP is 1
+#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(0, 0, 0, 0) // no need to set since USE_DHCP is 1
+#else // USE_DHCP
+#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 22, 200)
+#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 22, 1)
+#endif // USE_DHCP
 #define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)
 
 
@@ -50,15 +66,15 @@
 /*
  * Switch for MQTT message broker to be used
  */
-#define MQTT_BROKER_MOSQUITTO       0	// local Mosquitto broker
-#define MQTT_BROKER_AWS_GREENGRASS  1	// local AWS Greengrass broker
-#define MQTT_BROKER_AWS_IOT			2	// AWS IoT cloud
+#define MQTT_BROKER_MOSQUITTO       0    // local Mosquitto broker
+#define MQTT_BROKER_AWS_GREENGRASS  1    // local AWS Greengrass broker
+#define MQTT_BROKER_AWS_IOT         2    // AWS IoT cloud
 #if USE_TLS
-//#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_GREENGRASS
-#define USE_MQTT_BROKER 	MQTT_BROKER_AWS_IOT
-//#define USE_MQTT_BROKER 	MQTT_BROKER_MOSQUITTO
+//#define USE_MQTT_BROKER   MQTT_BROKER_AWS_GREENGRASS
+#define USE_MQTT_BROKER   MQTT_BROKER_AWS_IOT
+//#define USE_MQTT_BROKER   MQTT_BROKER_MOSQUITTO
 #else // USE_TLS
-#define USE_MQTT_BROKER 	MQTT_BROKER_MOSQUITTO
+#define USE_MQTT_BROKER     MQTT_BROKER_MOSQUITTO
 #endif // USE_TLS
 
 
@@ -67,18 +83,14 @@
  * If 0, root CA will not be verified. This is prone to man-in-the-middle attacks.
  * However, note that the client certificate and private key are still verified.
  */
-#define USE_ROOTCA     	0 // Do not modify for now
+#define USE_ROOTCA 0 // Do not modify for now
 
 
 /*
  * Switch to handle or not handle Ethernet unplug/plug scenario
  * Disabling this helps when debugging issues
  */
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
 #define HANDLE_RECONNECTION 1
-#else
-#define HANDLE_RECONNECTION 0
-#endif
 
 
 /*
@@ -86,14 +98,14 @@
  */
 #if USE_TLS
 	#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-		static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.254.107"; // local Greengrass server
+		static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.22.16"; // local Greengrass server
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
 		static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "amasgua12bmkv.iot.us-east-1.amazonaws.com";
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
-		static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.254.102"; // local mosquitto server
+		static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.22.3"; // local mosquitto server
 	#endif
 #else // USE_TLS
-	static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.254.102"; // local mosquitto server
+	static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "192.168.22.3"; // local mosquitto server
 #endif // USE_TLS
 
 

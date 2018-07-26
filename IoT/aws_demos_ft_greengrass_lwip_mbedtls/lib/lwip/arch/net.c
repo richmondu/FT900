@@ -228,7 +228,7 @@ void net_status_cb(struct netif *netif)
 		netifCur.gw = netif->gw;
 		netifCur.mask = netif->netmask;
 #if LWIP_DHCP
-		netifCur.dhcp = net_get_dhcp();
+		netifCur.dhcp = my_dhcp;
 #endif
 		netifCur.key = EEPROM_VALID_KEY;
 
@@ -252,7 +252,7 @@ void net_packet_available()
 /** @brief Gets the DHCP status of the interface.
  *  @returns Returns a non-zero if DHCP is enabled.
  */
-#if LWIP_DHCP
+#if 0
 uint8_t net_get_dhcp()
 {
 	return my_dhcp;
@@ -264,13 +264,13 @@ void net_set_dhcp(uint8_t flag)
 {
 	if (flag)
 	{
-		NET_DEBUG_PRINTF("DHCP starting...");
+		NET_DEBUG_PRINTF("DHCP starting...\r\n");
 		dhcp_start(&my_netif);
 		my_dhcp = 1;
 	}
 	else
 	{
-		NET_DEBUG_PRINTF("DHCP stopping.");
+		NET_DEBUG_PRINTF("DHCP stopping.\r\n");
 		dhcp_stop(&my_netif);
 		my_dhcp = 0;
 	}
@@ -427,7 +427,6 @@ err_t net_init(ip_addr_t ip,
 
 	// Initialize LWIP
     tcpip_init(NULL, NULL);
-    //lwip_init();
 
 	// Add our netif to LWIP (netif_add calls our driver initialization function)
 	if (netif_add(&my_netif,

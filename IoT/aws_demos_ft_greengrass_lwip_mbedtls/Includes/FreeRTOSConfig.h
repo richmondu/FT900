@@ -98,15 +98,11 @@
 
 #if USE_TLS
 	#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-		#if USE_ROOTCA
-			#define configTOTAL_HEAP_SIZE               ((size_t)(30 * 1024 + 512))
-		#else // USE_ROOTCA
-			#define configTOTAL_HEAP_SIZE               ((size_t)(28 * 1024 + 512))
-		#endif // USE_ROOTCA
+		#define configTOTAL_HEAP_SIZE               ((size_t)(30 * 1024))
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-		#define configTOTAL_HEAP_SIZE               ((size_t)(35 * 1024))
+		#define configTOTAL_HEAP_SIZE               ((size_t)(36 * 1024))
 	#elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
-		#define configTOTAL_HEAP_SIZE               ((size_t)(33 * 1024))
+		#define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024))
 	#endif // USE_GREENGRASS
 #else // USE_TLS
 	#define configTOTAL_HEAP_SIZE                   ((size_t)(12 * 1024))

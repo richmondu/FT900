@@ -74,7 +74,7 @@
 #include "lwip/autoip.h"
 #include "lwip/dns.h"
 #include "lwip/etharp.h"
-#include "lwip/prot/dhcp.h"
+#include <lwip/prot/dhcp2.h>
 
 #include <string.h>
 
