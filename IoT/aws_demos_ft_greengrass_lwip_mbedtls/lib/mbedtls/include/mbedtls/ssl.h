@@ -46,6 +46,10 @@
 #include "mbedtls/dhm.h"
 #endif
 
+#if defined(MBEDTLS_ECP_C)
+#include "mbedtls/ecp.h"
+#endif
+
 #if defined(MBEDTLS_ECDH_C)
 #include "mbedtls/ecdh.h"
 #endif

@@ -53,6 +53,14 @@
 #include "mbedtls/platform_util.h"
 #endif
 
+#if defined(MBEDTLS_ECP_C)
+#include "mbedtls/ecp.h"
+#endif
+
+#if defined(MBEDTLS_ECDH_C)
+#include "mbedtls/ecdh.h"
+#endif
+
 #if defined(MBEDTLS_SSL_SERVER_NAME_INDICATION)
 static void ssl_write_hostname_ext( mbedtls_ssl_context *ssl,
                                     unsigned char *buf,

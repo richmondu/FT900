@@ -49,6 +49,10 @@
 #include "mbedtls/ecjpake.h"
 #endif
 
+#if defined(MBEDTLS_ECDH_C)
+#include "mbedtls/ecdh.h"
+#endif
+
 #if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
     !defined(inline) && !defined(__cplusplus)
 #define inline __inline

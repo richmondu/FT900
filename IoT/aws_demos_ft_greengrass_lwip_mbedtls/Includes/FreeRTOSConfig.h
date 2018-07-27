@@ -98,9 +98,9 @@
 
 #if USE_TLS
     #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-        #define configTOTAL_HEAP_SIZE               ((size_t)(30 * 1024 + (USE_ROOTCA * 2048)))
+        #define configTOTAL_HEAP_SIZE               ((size_t)(31 * 1024 + (USE_ROOTCA * 2048)))
     #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-        #define configTOTAL_HEAP_SIZE               ((size_t)(36 * 1024 + (USE_ROOTCA * 2048)))
+        #define configTOTAL_HEAP_SIZE               ((size_t)(37 * 1024 + 512 + (USE_ROOTCA * 2048)))
     #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
         #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024 + (USE_ROOTCA * 2048)))
     #endif // USE_MQTT_BROKER
