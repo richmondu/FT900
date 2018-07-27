@@ -60,7 +60,7 @@
  * Note that non-secure MQTT can be tested using Mosquitto local broker only
  * AWS does not support non-secure MQTT
  */
-#define USE_TLS 1
+#define USE_TLS 1 // do not modify; unsecure connection is for beginners
 
 
 /*
@@ -84,16 +84,8 @@
  * This is prone to man-in-the-middle attacks.
  * However, note that the client certificate and private key are still verified.
  * For production release, this must be enabled.
- * This has been tested with AWS Greengrass scenario only.
  */
 #define USE_ROOTCA 0
-
-
-/*
- * Switch to handle or not handle Ethernet unplug/plug scenario
- * Disabling this helps when debugging issues
- */
-#define HANDLE_RECONNECTION 1
 
 
 /*

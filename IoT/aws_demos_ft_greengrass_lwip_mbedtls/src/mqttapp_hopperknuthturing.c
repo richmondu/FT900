@@ -59,14 +59,16 @@
 
 /*-----------------------------------------------------------*/
 
-#define hktTOPIC_NAME_PRE     	 "device/"
-#define hktTOPIC_NAME_POST    	 "/devicePayload"
-#define hktTOPIC_NAME_LENGTH  	 28
-#define hktDEVICE_ID_LENGTH   	 8
-#define hktMAX_DATA_LENGTH    	 bufferpoolconfigBUFFER_DATA_SIZE
-#define hktDEVICE_HOPPER 		 "hopper"
-#define hktDEVICE_KNUTH  		 "knuth"
-#define hktDEVICE_TURING 		 "turing"
+#define HANDLE_RECONNECTION      0
+
+#define hktTOPIC_NAME_PRE        "device/"
+#define hktTOPIC_NAME_POST       "/devicePayload"
+#define hktTOPIC_NAME_LENGTH     28
+#define hktDEVICE_ID_LENGTH      8
+#define hktMAX_DATA_LENGTH       bufferpoolconfigBUFFER_DATA_SIZE
+#define hktDEVICE_HOPPER         "hopper"
+#define hktDEVICE_KNUTH          "knuth"
+#define hktDEVICE_TURING         "turing"
 #if HANDLE_RECONNECTION
 #define htkTERMINATE             { int x=1/0; } // force a crash
 #else

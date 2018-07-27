@@ -387,7 +387,7 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
         DEBUG_CONNECT_VERBOSE("SSL/TLS handshake\r\n");
 
         while ((ret = mbedtls_ssl_handshake(&ssl_client->ssl_ctx)) != 0) {
-            DEBUG_PRINTF("mbedtls_ssl_handshake failed! %d 0x%x\r\n", ret, -1*ret);
+            DEBUG_MINIMAL("TLS handshake failed! 0x%x\r\n", -1*ret);
             if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
                 lRetVal = SOCKETS_SOCKET_ERROR;
                 goto cleanup;

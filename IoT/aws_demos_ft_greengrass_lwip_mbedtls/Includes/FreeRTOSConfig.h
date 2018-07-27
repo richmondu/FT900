@@ -97,19 +97,13 @@
 #include "aws_clientcredential.h"
 
 #if USE_TLS
-    #if USE_ROOTCA
-        #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-            #define configTOTAL_HEAP_SIZE               ((size_t)(32 * 1024))
-        #endif // USE_MQTT_BROKER
-    #else // USE_ROOTCA
-        #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-            #define configTOTAL_HEAP_SIZE               ((size_t)(30 * 1024))
-        #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-            #define configTOTAL_HEAP_SIZE               ((size_t)(36 * 1024))
-        #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
-            #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024))
-        #endif // USE_MQTT_BROKER
-    #endif // USE_ROOTCA
+    #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+        #define configTOTAL_HEAP_SIZE               ((size_t)(30 * 1024 + (USE_ROOTCA * 2048)))
+    #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+        #define configTOTAL_HEAP_SIZE               ((size_t)(36 * 1024 + (USE_ROOTCA * 2048)))
+    #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
+        #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024 + (USE_ROOTCA * 2048)))
+    #endif // USE_MQTT_BROKER
 #else // USE_TLS
     #define configTOTAL_HEAP_SIZE                   ((size_t)(12 * 1024))
 #endif // USE_TLS
