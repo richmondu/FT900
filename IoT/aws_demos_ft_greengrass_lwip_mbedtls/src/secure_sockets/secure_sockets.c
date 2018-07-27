@@ -325,7 +325,7 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 
 #if USE_ROOTCA
         if (ca_cert != NULL) {
-            DEBUG_CONNECT_VERBOSE("Loading CA cert %d\r\n", strlen(rootCABuff));
+            DEBUG_CONNECT_VERBOSE("Loading CA cert %d\r\n", strlen(ca_cert));
             mbedtls_x509_crt_init(&ssl_client->ca_cert);
             mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED);
 

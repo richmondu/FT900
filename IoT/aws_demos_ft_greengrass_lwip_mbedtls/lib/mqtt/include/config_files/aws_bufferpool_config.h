@@ -44,7 +44,7 @@
  * This buffer size has been reduced for memory footprint purposes
  */
 #if 1
-#define bufferpoolconfigBUFFER_DATA_SIZE    ( 112 )
+#define bufferpoolconfigBUFFER_DATA_SIZE    ( 100 )
 #else
 #define bufferpoolconfigBUFFER_DATA_SIZE    ( 256 )
 #endif
