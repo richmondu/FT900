@@ -186,6 +186,17 @@ This application has been tested to work successfully with the following test se
    - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
    - For production release, server certificate verification is a must.
    
-2. ECC Ciphersuite support
-   - TODO. Not yet currently tested and supported.
-
+2. Elliptic Curve Cryptography (ECC) ciphersuite support and AES_GCM support
+   - Stronger ciphersuites are now supported and tested on FT900
+   - However, note that the heap size has been increased to support stronger security.
+   - Ciphersuite is now configurable by setting the macro USE_CIPHERSUITE
+   - CIPHERSUITE_OPTION_1: // AES_CBC
+      - MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA
+      - MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA
+   - CIPHERSUITE_OPTION_2: // AES_GCM is stronger than CBC
+      - MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256
+      - MBEDTLS_TLS_RSA_WITH_AES_256_GCM_SHA384
+   - CIPHERSUITE_OPTION_3: // ECDHE_RSA is strong than RSA
+      - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+      - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+   - By default, USE_CIPHERSUITE is set to CIPHERSUITE_OPTION_1 which is a good enough encryption.
