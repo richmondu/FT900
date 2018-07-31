@@ -36,8 +36,8 @@ function execute(action)
         for each(var device in devices) 
         {
             publish(device);
+            Thread.sleep(1000);
         }
-        Thread.sleep(1000);
     }
     
     action.setExitCode(0);
