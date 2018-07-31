@@ -2,8 +2,6 @@
 
 An end-to-end dashboard IoT solution has been created for FTDI-Bridgetek's FT900 microcontroller that securely connects to AWS cloud services via AmazonMQTT over mbedTLS and LWIP. The solution utilizes various Amazon cloud services such as IoT Core, Greengrass, Lambda, API Gateway, DynamoDB and SNS for data visualization of sensor connected to FT900.
 
-![alt text](https://s3-ap-southeast-1.amazonaws.com/iotgs-iotgss3bucket-2uxeg22cmka4/FT900+AWS+IoT+-+System+Architecture.jpeg)
-
 
 ### mbedTLS
 
