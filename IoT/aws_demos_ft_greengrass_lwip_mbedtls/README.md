@@ -105,6 +105,14 @@ This application has been tested to work successfully with the following test se
       - then subscribe to mosquitto broker using mosquitto_sub.exe to verify packets sent
 
 
+### Test simulators
+Simulators for FT900 device has been provided. This can be used for testing the backend cloud solution. Refer to the test folder.
+
+1. Javascript code for MQTT.FX
+2. Python code using AWS IoT SDK API for Python
+
+
+
 ### Troubleshooting utilities
 
 1. MQTT.FX is a helpful GUI-based MQTT client tool which can be used for troubleshooting MQTT connection
