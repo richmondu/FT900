@@ -1,9 +1,15 @@
+### FT900 AWS IoT Dashboard Demo
+
+An end-to-end dashboard IoT solution has been created for FTDI-Bridgetek's FT900 microcontroller that securely connects to AWS cloud services via AmazonMQTT over mbedTLS and LWIP. The solution utilizes various Amazon cloud services such as IoT Core, Greengrass, Lambda, API Gateway, DynamoDB and SNS for data visualization of sensor connected to FT900.
+
+
+### mbedTLS
+
 MbedTLS has been integrated to FT900 to enable secure IoT connectivity via MQTT protocol over LWIP running on Ethernet connection. 
 This enables FT900 to communicate with MQTT brokers that require secure TLS/SSL connection, 
 such as Amazon AWS Greengrass and AWS IoT cloud, as well as local Mosquitto broker (with TLS/SSL enabled).
 
-
-### mbedTLS configuration
+mbedTLS configuration
 
 1. The TLS client configuration for FT900 AWS IoT demo only enables the following ciphersuites due to memory constraints.
 
@@ -105,6 +111,14 @@ This application has been tested to work successfully with the following test se
       - then subscribe to mosquitto broker using mosquitto_sub.exe to verify packets sent
 
 
+### Test simulators
+Simulators for FT900 device has been provided. This can be used for testing the backend cloud solution. Refer to the test folder.
+
+1. Javascript code for MQTT.FX
+2. Python code using AWS IoT SDK API for Python
+
+
+
 ### Troubleshooting utilities
 
 1. MQTT.FX is a helpful GUI-based MQTT client tool which can be used for troubleshooting MQTT connection
@@ -183,7 +197,7 @@ This application has been tested to work successfully with the following test se
    - It can be enabled by setting the macro USE_ROOTCA
    - Advantage: prevent man-in-the-middle attacks
    - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
-   - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   - Note that this has been tested working on AWS Greengrass and AWS IoT brokers.
    - For production release, server certificate verification is a must.
    
 2. Elliptic Curve Cryptography (ECC) ciphersuite support and AES_GCM support
