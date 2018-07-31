@@ -191,7 +191,7 @@ Simulators for FT900 device has been provided. This can be used for testing the 
    - It can be enabled by setting the macro USE_ROOTCA
    - Advantage: prevent man-in-the-middle attacks
    - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
-   - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   - Note that this has been tested working on AWS Greengrass and AWS IoT brokers.
    - For production release, server certificate verification is a must.
    
 2. Elliptic Curve Cryptography (ECC) ciphersuite support and AES_GCM support
