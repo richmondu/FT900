@@ -216,3 +216,21 @@ Simulators for FT900 device has been provided. This can be used for testing the 
       - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
       - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
    - By default, USE_CIPHERSUITE is set to CIPHERSUITE_OPTION_1 which is a good enough encryption.
+   
+
+### AWS Cloud 
+
+#### Back-end
+   0. FT900
+   1. Greengrass
+   2. IoT
+   3. Lambda
+   4. DynamoDB
+   5. SNS
+   
+#### Front-end 
+   0. Browser
+   1. S3
+   2. API Gateway
+   3. Lambda
+   4. DynamoDB
