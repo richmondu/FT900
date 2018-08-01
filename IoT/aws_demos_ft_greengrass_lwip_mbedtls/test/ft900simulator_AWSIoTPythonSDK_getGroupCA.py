@@ -87,11 +87,11 @@ def main():
             print("The group CA certificate has been retrieved and saved to: %s\n" % groupCA)
             break
         except BaseException as e:
-            print("BaseException %s %s %d" % (str(type(e)), e.message, retryCount) )
+            print("BaseException %s %s %d/%d" % (str(type(e)), e.message, retryCount, MAX_DISCOVERY_RETRIES) )
             retryCount -= 1
 
     if not discovered:
-        print("Discovery failed after several retries. Exiting...\n")
+        print("Discovery failed after %d retries. Exiting...\n" % (MAX_DISCOVERY_RETRIES))
         sys.exit(-1)
 
         
