@@ -14,6 +14,7 @@ set GREENGRASS_DEVICE_KEY=certificates/publisher.private.key
 set GREENGRASS_DEVICE_CLIENTID=HelloWorld_Publisher
 
 :: MODES: demo, publish, subscribe, both (publish, subscribe)
+:: TOPIC and MESSAGE will not be used when MODE is demo
 set MODE=demo
 set TOPIC=""
 set MESSAGE=""

@@ -84,7 +84,7 @@ def main():
         try:
             groupCA = getGroupCA(discoveryInfoProvider, args.thingName, args.groupCAFilePath, args.groupCAFileName)
             discovered = True
-            print("The group CA certificate has been generated: %s\n" % groupCA)
+            print("The group CA certificate has been retrieved and saved to: %s\n" % groupCA)
             break
         except BaseException as e:
             print("BaseException %s %s %d/%d" % (str(type(e)), e.message, retryCount, MAX_DISCOVERY_RETRIES) )
