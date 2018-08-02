@@ -27,6 +27,8 @@ mbedTLS configuration
 
    Additional ciphersuites may be later added to support Microsoft Azure and Google Cloud.
 
+   Update: ECDHE_RSA and AES_GCM ciphersuites have been supported. 
+   These stronger ciphersuites can be enabled via a macro (See Security section below).
 
 2. To use these 2 ciphersuites, the following macros and its dependencies are enabled:
 
