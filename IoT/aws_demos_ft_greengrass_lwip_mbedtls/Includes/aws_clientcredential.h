@@ -27,40 +27,7 @@
 #ifndef __AWS_CLIENTCREDENTIAL__H__
 #define __AWS_CLIENTCREDENTIAL__H__
 
-
-
-/*
- * Switch between DHCP or static IP address
- * This is useful for multiple device scenario
- * Set this to 1 so IP address is not set manually
- * However, note that enabling this adds memory footprint of
- * 10kb for Release mode, 14kb for Debug mode
- * Set this to 0 if you need more memory for sensor code
- */
-#define USE_DHCP 0 // this is useful for multiple device scenario
-
-
-/*
- * DO NOT FORGET TO UPDATE THESE VALUES FOR FT900 if USE_DHCP is 0
- * Setup the IP address, gateway and subnet mask of this FT900 device
- */
-#include "secure_sockets.h" // SOCKETS_inet_addr_quick for lesser footprint
-#if USE_DHCP
-#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(0, 0, 0, 0) // no need to set since USE_DHCP is 1
-#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(0, 0, 0, 0) // no need to set since USE_DHCP is 1
-#else // USE_DHCP
-#define FT9XX_IP_ADDRESS SOCKETS_inet_addr_quick(192, 168, 22, 200)
-#define FT9XX_IP_GATEWAY SOCKETS_inet_addr_quick(192, 168, 22, 1)
-#endif // USE_DHCP
-#define FT9XX_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)
-
-
-/*
- * Switch between secure MQTT and non-secure MQTT
- * Note that non-secure MQTT can be tested using Mosquitto local broker only
- * AWS does not support non-secure MQTT
- */
-#define USE_TLS 1 // do not modify; unsecure connection is for beginners
+#include "user_settings.h"
 
 
 /*
@@ -70,22 +37,12 @@
 #define MQTT_BROKER_AWS_GREENGRASS  1    // local AWS Greengrass broker
 #define MQTT_BROKER_AWS_IOT         2    // AWS IoT cloud
 #if USE_TLS
-//#define USE_MQTT_BROKER   MQTT_BROKER_AWS_GREENGRASS
+//#define USE_MQTT_BROKER     MQTT_BROKER_AWS_GREENGRASS
 #define USE_MQTT_BROKER   MQTT_BROKER_AWS_IOT
 //#define USE_MQTT_BROKER   MQTT_BROKER_MOSQUITTO
 #else // USE_TLS
 #define USE_MQTT_BROKER     MQTT_BROKER_MOSQUITTO
 #endif // USE_TLS
-
-
-/*
- * Switch between verifying Root CA certificate
- * If 0, root CA server certificate will not be verified.
- * This is prone to man-in-the-middle attacks.
- * However, note that the client certificate and private key are still verified.
- * For production release, this must be enabled.
- */
-#define USE_ROOTCA 0
 
 
 /*
@@ -122,9 +79,14 @@
 
 /*
  * Root CA certificate for the client certificate and private key to be used
+ * Note that the Root CA certificate for AWS IoT and AWS Greengrass are different.
+ * The Root CA certification for AWS Greengrass is the Greegrass Group CA certificate
+ * which expires 7 days by default but configurable to 30 days maximum.
  */
 #if USE_TLS
 #if USE_ROOTCA
+#if USE_CERT_OPTIMIZATION
+#else // USE_CERT_OPTIMIZATION
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
 static const char clientcredentialROOTCA_CERTIFICATE_PEM[] =
 "-----BEGIN CERTIFICATE-----\n"
@@ -206,6 +168,7 @@ static const char clientcredentialROOTCA_CERTIFICATE_PEM[] =
 "GlZZyhIcJF23OsouFO9IV4MoRJrK9Z+rCjyL91oe\n"
 "-----END CERTIFICATE-----\n";
 #endif
+#endif // USE_CERT_OPTIMIZATION
 #endif // USE_ROOTCA
 #endif // USE_TLS
 
@@ -215,6 +178,8 @@ static const char clientcredentialROOTCA_CERTIFICATE_PEM[] =
 /*
  * Client certificate signed by the root CA certificate
  */
+#if USE_CERT_OPTIMIZATION
+#else // USE_CERT_OPTIMIZATION
 static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "-----BEGIN CERTIFICATE-----\n"
 "MIIDWjCCAkKgAwIBAgIVAMIQwgFqTHGTLGUe8r0RC36FxWAWMA0GCSqGSIb3DQEB\n"
@@ -236,11 +201,13 @@ static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "jz+E7WiTbRqNyrpJjNbt2w4Foo3qeqsHzOaesMfOrsKu1dCa1jfrFne+T/Z+l6LH\n"
 "ITSGE9QuiJjYR9sDHY/dquYkp6MMGX1BK8DuMqsoCfLEMQZhCZs6Ppba06QWYw==\n"
 "-----END CERTIFICATE-----\n";
-
+#endif // USE_CERT_OPTIMIZATION
 
 /*
  * Private key associated with the client certificate
  */
+#if USE_CERT_OPTIMIZATION
+#else // USE_CERT_OPTIMIZATION
 static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] =
 "-----BEGIN RSA PRIVATE KEY-----\n"
 "MIIEpAIBAAKCAQEAqtah0I99GP6i+XXSg91kvszJuP/G/4DScPF/n8HEpunRMSj1\n"
@@ -269,10 +236,13 @@ static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] =
 "Nf303wS0vmYK0WMukcCuWe/twTZXc3zErFo/0iCGihA8sesAudTXiKcb+sEqFvOx\n"
 "0E2yyBo7qFe2F+k7OcTHDSgAvVCSmBrE/9QbXjwdNBVWgezmLuLoIg==\n"
 "-----END RSA PRIVATE KEY-----\n";
+#endif  // USE_CERT_OPTIMIZATION
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
 /*
  * Client certificate signed by the root CA certificate
  */
+#if USE_CERT_OPTIMIZATION
+#else // USE_CERT_OPTIMIZATION
 static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "-----BEGIN CERTIFICATE-----\n"
 "MIIFODCCBCCgAwIBAgIJANUhUNn92KzIMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n"
@@ -304,11 +274,13 @@ static const char clientcredentialCLIENT_CERTIFICATE_PEM[] =
 "l0Km6MD622q1epn9I1EmI6U1YVY1lQADhC603w55BDe//xEEo2z9bV/+z3qvs5j+\n"
 "paQvyFq1DF0Y1VtRJYkG4e1jH2yHR7ild9YqQzWSqdW+RUFS0UXXcijSZEE=\n"
 "-----END CERTIFICATE-----\n";
-
+#endif // USE_CERT_OPTIMIZATION
 
 /*
  * Private key associated with the client certificate
  */
+#if USE_CERT_OPTIMIZATION
+#else // USE_CERT_OPTIMIZATION
 static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] =
 "-----BEGIN RSA PRIVATE KEY-----\n"
 "MIIEpQIBAAKCAQEAwFCBn8FL3a/PM/6k6JMy/7pWKfkK8Ll1YIqJ+Q+assew0xUi\n"
@@ -337,6 +309,7 @@ static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] =
 "yUSdP24srgz0IRI7BC6XFjs9YAqLhEDgbuQVmm1Pw28BBv7Rj37FfRwtpUokJZPt\n"
 "BT+tjCPdR5TKgfMj61MlXerse8QYlQ7Ht5UfynBEV4Qrx8ixXC2ojb4=\n"
 "-----END RSA PRIVATE KEY-----\n";
+#endif // USE_CERT_OPTIMIZATION
 #endif
 #endif // USE_TLS
 
