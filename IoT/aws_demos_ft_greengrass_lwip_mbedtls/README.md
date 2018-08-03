@@ -135,22 +135,26 @@ Simulators for FT900 device has been provided. This can be used for testing the 
 
 ### Memory footprint
 
-1. The available memory footprint for sensor data has been tripled from 25kB to 75kB.
-   1. code size for AWS Greengrass demo: 181 kB (70% of 256 kB)
+1. The available program memory for sensor data has been tripled from 25kB to 75kB.
+   1. Program memory for AWS Greengrass demo: 181 kB (70% of 256 kB)
       - text: 130856 (128 kB)
       - data: 23332 (22 kB)
       - bss:  30292 (30 kB)
       - total: 181 kB flash memory (70% of 256 kB)
       - available memory for sensor data: 75 kB (30% of 256 kB)
-   2. code size for different test combinations:
+   2. Program memory for different test combinations:
       - AWS_GREENGRASS, release mode: 184892 (181 kB)
       - AWS_GREENGRASS, debug mode: 216012 (211 kB)
       - AWS_IOT, release mode: 198848 (194 kB)
       - AWS_IOT, debug mode: 233200 (228 kB)
       - MOSQUITTO, release mode: 198416 (194 kB)
       - MOSQUITTO, debug mode: 230824 (225 kB)
+      
+2. The available data memory for sensor data has been increased by 3KB (or 4.5kb when ROOTCA is enabled),
+   1. Data memory for AWS Greengrass demo: 51kb (13kb available for sensor code)
+   2. Data memory for AWS IoT demo: 56kb (8kb available for sensor code)
 
-2. The optimizations performed include the following:
+3. The optimizations performed include the following:
    1. Use small send and recv buffer size of MQTT
       Whats the use of big buffers if our MQTT packets are small.
       Set these buffers small but big enough to fit our expected send and recv packets.
@@ -175,6 +179,12 @@ Simulators for FT900 device has been provided. This can be used for testing the 
       Provided centralized debugging macro for minimal and verbose debug logs.
    10. Removed 1 unnecessary macro in mbedTLS configuration.
       Also used mbedTLS configurables intended for memory footprint optimization.
+   11. Move certificates from data section to text section, 
+       that is from data memory to program memory using __flash__ and memcpy_pm2dat.
+       Then data is loaded to heap memory and immediately freed after calling mbedTLS function
+       since mbedTLS allocates heap memory and performs deep copy.
+       Since we already have a lots of program memory available, 
+       this helps provide a balanced memory headroom (data memory and program memory) for the sensor integration.
 
 
 ### Scalability
