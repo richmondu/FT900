@@ -30,8 +30,8 @@ def initParser():
     parser.add_argument("-c", "--cert", action="store", dest="certificatePath", help="Certificate file path")
     parser.add_argument("-k", "--key", action="store", dest="privateKeyPath", help="Private key file path")
     parser.add_argument("-n", "--thingName", action="store", dest="thingName", default="Bot", help="Targeted thing name")
-    parser.add_argument("-p", "--filePath", action="store", dest="groupCAFilePath", default="certificates/", help="Group CA file path")
-    parser.add_argument("-f", "--fileName", action="store", dest="groupCAFileName", default="group-ca-cert.pem", help="Group CA file name")
+    parser.add_argument("-p", "--filePath", action="store", dest="groupCAFilePath", default="../certificates/", help="Group CA file path")
+    parser.add_argument("-f", "--fileName", action="store", dest="groupCAFileName", default="ggca.crt", help="Group CA file name")
     
     return parser
     

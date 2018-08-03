@@ -118,7 +118,7 @@ def main():
                 message = generateMessage(deviceId)
                 if MQTTclient.publish(topic, message, 0) != True:
                     print("Cannot publish to host %s" % args.host)
-                    break
+                    sys.exit(-1)
                 print('Published topic %s:\n%s\n\n' % (topic, message))
                 time.sleep(1)
                 
