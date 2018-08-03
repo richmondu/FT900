@@ -886,6 +886,7 @@ static inline BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEve
 
         if( pxConnection->xSocket != SOCKETS_INVALID_SOCKET )
         {
+#if 0
             /* Set a callback function that will unblock the MQTT task when data
              * is received on a socket. */
             ( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
@@ -893,6 +894,7 @@ static inline BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEve
                                          SOCKETS_SO_WAKEUP_CALLBACK,
                                          ( void * ) prvMQTTClientSocketWakeupCallback, /*lint !e9087 !e9074 The cast is ok as we are setting the callback here. */
                                          sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
+#endif
 
             /* Set secure socket option if it is a secured connection. */
             if( ( pxConnection->uxFlags & mqttCONNECTION_SECURED ) == mqttCONNECTION_SECURED )

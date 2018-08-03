@@ -142,6 +142,12 @@
 
 /*-----------------------------------------------------------*/
 
+// Modifications were added in x509_crt.c to reduce some .txt memory
+// The modifications were enclosed in
+// MBEDTLS_X509_CRT_INFO and MBEDTLS_X509_CRT_VERIFY_INFO
+
+/*-----------------------------------------------------------*/
+
 
 #include "mbedtls/check_config.h"
 

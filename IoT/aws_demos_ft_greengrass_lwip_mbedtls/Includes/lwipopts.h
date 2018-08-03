@@ -501,7 +501,7 @@
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. */
-#include "aws_clientcredential.h" // for USE_DHCP
+#include "user_settings.h" // for USE_DHCP
 #if USE_DHCP
 #define LWIP_DHCP               1
 #else

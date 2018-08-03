@@ -52,6 +52,9 @@
 #include "secure_sockets.h"
 #include "aws_clientcredential.h"
 
+/* User settings includes. */
+#include "user_settings.h"
+
 /* LWIP includes. */
 #include "lwip/sockets.h"
 #include "lwip/ip4_addr.h"
@@ -71,7 +74,6 @@
 #include "mbedtls/platform.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/net_sockets.h"
-
 #endif // USE_TLS
 
 
@@ -263,23 +265,63 @@ static inline int32_t socketConnect(const char* pcHostName, uint16_t uwPort)
     return lSocket;
 }
 
+
 /*-----------------------------------------------------------*/
 
-int32_t SOCKETS_Connect( Socket_t xSocket,
-                         SocketsSockaddr_t * pxAddress,
-                         Socklen_t xAddressLength )
+int32_t SOCKETS_Connect(
+    Socket_t xSocket,
+    SocketsSockaddr_t * pxAddress,
+    Socklen_t xAddressLength )
 {
     int32_t lRetVal = SOCKETS_SOCKET_ERROR;
     ESPSecureSocket_t * pxSecureSocket;
     int ret = 0;
 #if USE_TLS
 #if USE_ROOTCA
+#if USE_CERT_OPTIMIZATION
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    extern __flash__ uint8_t clientcredentialROOTCA_CERTIFICATE_PEM[]      asm("_binary____Certificates_ggca_crt_start");
+    extern __flash__ uint8_t clientcredentialROOTCA_CERTIFICATE_PEM_END[]  asm("_binary____Certificates_ggca_crt_end");
+#else
+    extern __flash__ uint8_t clientcredentialROOTCA_CERTIFICATE_PEM[]      asm("_binary____Certificates_ca_crt_start");
+    extern __flash__ uint8_t clientcredentialROOTCA_CERTIFICATE_PEM_END[]  asm("_binary____Certificates_ca_crt_end");
+#endif
+
+    ret = clientcredentialROOTCA_CERTIFICATE_PEM_END - clientcredentialROOTCA_CERTIFICATE_PEM + 1;
+    char *ca_cert = pvPortMalloc(ret);
+    if (!ca_cert) {
+        return SOCKETS_SOCKET_ERROR;
+    }
+    memcpy_pm2dat(ca_cert, clientcredentialROOTCA_CERTIFICATE_PEM, ret);
+#else // USE_CERT_OPTIMIZATION
     const char *ca_cert = clientcredentialROOTCA_CERTIFICATE_PEM;
+#endif // USE_CERT_OPTIMIZATION
 #else // USE_ROOTCA
     const char *ca_cert = NULL;
 #endif // USE_ROOTCA
+#if USE_CERT_OPTIMIZATION
+    extern __flash__ uint8_t clientcredentialCLIENT_CERTIFICATE_PEM[]      asm("_binary____Certificates_cert_crt_start");
+    extern __flash__ uint8_t clientcredentialCLIENT_CERTIFICATE_PEM_END[]  asm("_binary____Certificates_cert_crt_end");
+    extern __flash__ uint8_t clientcredentialCLIENT_PRIVATE_KEY_PEM[]      asm("_binary____Certificates_cert_key_start");
+    extern __flash__ uint8_t clientcredentialCLIENT_PRIVATE_KEY_PEM_END[]  asm("_binary____Certificates_cert_key_end");
+
+    ret = clientcredentialCLIENT_CERTIFICATE_PEM_END - clientcredentialCLIENT_CERTIFICATE_PEM + 1;
+    char *cli_cert = pvPortMalloc(ret);
+    if (!cli_cert) {
+        return SOCKETS_SOCKET_ERROR;
+    }
+    memcpy_pm2dat(cli_cert, clientcredentialCLIENT_CERTIFICATE_PEM, ret);
+
+    ret = clientcredentialCLIENT_PRIVATE_KEY_PEM_END - clientcredentialCLIENT_PRIVATE_KEY_PEM + 1;
+    char *cli_key = pvPortMalloc(ret);
+    if (!cli_key) {
+        return SOCKETS_SOCKET_ERROR;
+    }
+    memcpy_pm2dat(cli_key, clientcredentialCLIENT_PRIVATE_KEY_PEM, ret);
+#else // USE_CERT_OPTIMIZATION
     const char *cli_cert = clientcredentialCLIENT_CERTIFICATE_PEM;
     const char *cli_key = clientcredentialCLIENT_PRIVATE_KEY_PEM;
+#endif // USE_CERT_OPTIMIZATION
 #endif // USE_TLS
 
 
@@ -330,6 +372,9 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED);
 
             ret = mbedtls_x509_crt_parse(&ssl_client->ca_cert, (const unsigned char *)ca_cert, strlen(ca_cert) + 1);
+#if USE_CERT_OPTIMIZATION
+            vPortFree(ca_cert);
+#endif // USE_CERT_OPTIMIZATION
             mbedtls_ssl_conf_ca_chain(&ssl_client->ssl_conf, &ssl_client->ca_cert, NULL);
             if (ret < 0) {
                 DEBUG_PRINTF("mbedtls_x509_crt_parse failed! %d\r\n", ret);
@@ -352,6 +397,9 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             DEBUG_CONNECT_VERBOSE("Loading CRT cert %d\r\n", strlen(cli_cert));
 
             ret = mbedtls_x509_crt_parse(&ssl_client->client_cert, (const unsigned char *)cli_cert, strlen(cli_cert) + 1);
+#if USE_CERT_OPTIMIZATION
+            vPortFree(cli_cert);
+#endif // USE_CERT_OPTIMIZATION
             if (ret < 0) {
                 DEBUG_PRINTF("mbedtls_x509_crt_parse failed! %d\r\n", ret);
                 lRetVal = SOCKETS_SOCKET_ERROR;
@@ -361,6 +409,9 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             DEBUG_CONNECT_VERBOSE("Loading private key %d\r\n", strlen(cli_key));
 
             ret = mbedtls_pk_parse_key(&ssl_client->client_key, (const unsigned char *)cli_key, strlen(cli_key) + 1, NULL, 0);
+#if USE_CERT_OPTIMIZATION
+            vPortFree(cli_key);
+#endif // USE_CERT_OPTIMIZATION
             if (ret != 0) {
                 DEBUG_PRINTF("mbedtls_pk_parse_key failed! %d\r\n", ret);
                 lRetVal = SOCKETS_SOCKET_ERROR;
@@ -440,10 +491,11 @@ cleanup:
 
 /*-----------------------------------------------------------*/
 
-int32_t SOCKETS_Recv( Socket_t xSocket,
-                      void * pvBuffer,
-                      size_t xBufferLength,
-                      uint32_t ulFlags )
+int32_t SOCKETS_Recv(
+    Socket_t xSocket,
+    void * pvBuffer,
+    size_t xBufferLength,
+    uint32_t ulFlags )
 {
     int32_t lReceivedBytes = SOCKETS_SOCKET_ERROR;
 
@@ -484,10 +536,11 @@ int32_t SOCKETS_Recv( Socket_t xSocket,
 
 /*-----------------------------------------------------------*/
 
-int32_t SOCKETS_Send( Socket_t xSocket,
-                      const void * pvBuffer,
-                      size_t xDataLength,
-                      uint32_t ulFlags )
+int32_t SOCKETS_Send(
+    Socket_t xSocket,
+    const void * pvBuffer,
+    size_t xDataLength,
+    uint32_t ulFlags )
 {
     int32_t lSentBytes = SOCKETS_SOCKET_ERROR;
 
@@ -574,11 +627,12 @@ int32_t SOCKETS_Close( Socket_t xSocket )
 
 /*-----------------------------------------------------------*/
 
-int32_t SOCKETS_SetSockOpt( Socket_t xSocket,
-                            int32_t lLevel,
-                            int32_t lOptionName,
-                            const void * pvOptionValue,
-                            size_t xOptionLength )
+int32_t SOCKETS_SetSockOpt(
+    Socket_t xSocket,
+    int32_t lLevel,
+    int32_t lOptionName,
+    const void * pvOptionValue,
+    size_t xOptionLength )
 {
     int32_t lRetVal = SOCKETS_ERROR_NONE;
     ESPSecureSocket_t * pxSecureSocket;

@@ -191,7 +191,7 @@ static inline BaseType_t prvPublish( const char* topic, const char* message )
     }
 
     vPortFree(pxPublishParameters);
-    DEBUG_MINIMAL( "MQTT app published to %s:\r\n%s\r\n\r\n", topic, message );
+    DEBUG_MINIMAL( "%s:\r\n%s\r\n\r\n", topic, message );
     return pdPASS;
 }
 

@@ -45,9 +45,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Credentials includes */
-#include "aws_clientcredential.h"
-
 /* LWIP includes. */
 #include "lwip/ip_addr.h"
 #include "net.h"
@@ -56,6 +53,9 @@
 #include "aws_bufferpool.h"
 #include "aws_mqtt_agent.h"
 #include "aws_demo_config.h"
+
+/* User setting includes */
+#include "user_settings.h"
 
 
 

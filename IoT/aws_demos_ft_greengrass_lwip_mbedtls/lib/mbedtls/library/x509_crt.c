@@ -1249,6 +1249,7 @@ cleanup:
 }
 #endif /* MBEDTLS_FS_IO */
 
+#if defined(MBEDTLS_X509_CRT_INFO)
 static int x509_info_subject_alt_name( char **buf, size_t *size,
                                        const mbedtls_x509_sequence *subject_alt_name )
 {
@@ -1514,7 +1515,9 @@ int mbedtls_x509_crt_info( char *buf, size_t size, const char *prefix,
 
     return( (int) ( size - n ) );
 }
+#endif
 
+#if defined(MBEDTLS_X509_CRT_VERIFY_INFO)
 struct x509_crt_verify_string {
     int code;
     const char *string;
@@ -1571,6 +1574,7 @@ int mbedtls_x509_crt_verify_info( char *buf, size_t size, const char *prefix,
 
     return( (int) ( size - n ) );
 }
+#endif
 
 #if defined(MBEDTLS_X509_CHECK_KEY_USAGE)
 int mbedtls_x509_crt_check_key_usage( const mbedtls_x509_crt *crt,
