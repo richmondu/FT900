@@ -179,10 +179,10 @@ Simulators for FT900 device has been provided. This can be used for testing the 
       Provided centralized debugging macro for minimal and verbose debug logs.
    10. Removed 1 unnecessary macro in mbedTLS configuration.
       Also used mbedTLS configurables intended for memory footprint optimization.
-   11. Move certificates from data section to text section, 
+   11. Move certificates (CA certificate, device certificate, device private key) from data section to text section, 
        that is from data memory to program memory using __flash__ and memcpy_pm2dat.
        Then data is loaded to heap memory and immediately freed after calling mbedTLS function
-       since mbedTLS allocates heap memory and performs deep copy.
+       since the mbedTLS function allocates heap memory and performs deep copy.
        Since we already have a lots of program memory available, 
        this helps provide a balanced memory headroom (data memory and program memory) for the sensor integration.
 
