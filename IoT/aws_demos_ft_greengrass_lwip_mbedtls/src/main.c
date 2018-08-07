@@ -55,6 +55,7 @@
 
 static inline int iot_app_generate_topic( char* pcTopic, int lTopicSize, const char* pcDeviceId )
 {
+    // Use tfp_snprintf consistently to reduce memory footprint
     int lTopicLen = tfp_snprintf( pcTopic, lTopicSize, "device/%s/devicePayload", pcDeviceId );
     pcTopic[lTopicLen] = '\0';
     return lTopicLen;
@@ -69,6 +70,9 @@ static inline int iot_app_generate_payload( char* pcPayload, int lPayloadSize, c
         3. tfp_snprintf has floating point issues.
     */
 
+    // Simulate sensor data and packaged it in JSON format
+	// In reality, these values should be queried from a real sensor
+	// For now, simply use random values
     int lPayloadLen = tfp_snprintf( pcPayload, lPayloadSize,
         "{\r\n"\
         " \"deviceId\":\"%s\",\r\n"\
@@ -81,8 +85,8 @@ static inline int iot_app_generate_payload( char* pcPayload, int lPayloadSize, c
         rand() % 30 - 10,        // batteryCharge -10-20
         rand() % 5 );            // batteryDischargeRate 0-5
 
-    // MQTT message must be less than bufferpoolconfigBUFFER_SIZE
-    // Increase bufferpoolconfigBUFFER_SIZE if necessary
+    // MQTT message must be less than iot_MAX_BUFFER_SIZE
+    // Increase iot_MAX_BUFFER_SIZE if necessary
     if ( lPayloadLen <= 0 || lPayloadLen > iot_MAX_BUFFER_SIZE ) {
         return 0;
     }
@@ -147,11 +151,15 @@ void iot_app_task( void * pvParameters )
         goto exit;
     }
 
-    /* Publish to iot broker */
+    /* Publish to iot broker continuously */
     do {
         for ( int i=0; i<lDeviceCount && xReturned==pdPASS; i++ ) {
+
+            /* Generate the topic and payload (payload is ideally in JSON format) */
             lTopicLen = iot_app_generate_topic( pcTopic, IOT_APP_TOPIC_LENGTH, pcDevices[i] );
             lPayloadLen = iot_app_generate_payload( pcPayload, IOT_APP_PAYLOAD_LENGTH, pcDevices[i] );
+
+            /* Publish the payload on the given topic */
             xReturned = iot_publish( pcTopic, lTopicLen, pcPayload, lPayloadLen );
         }
     }
