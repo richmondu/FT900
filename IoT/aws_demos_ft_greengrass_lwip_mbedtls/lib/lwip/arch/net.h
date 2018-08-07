@@ -52,11 +52,7 @@
 #include <lwip/tcp.h>
 #include <lwip/tcpip.h>
 #include "netif_arch.h"
-
-#include <lwipopts.h> // for LWIP_DHCP
-#if LWIP_DHCP
 #include <lwip/dhcp.h>
-#endif
 
 
 
@@ -68,13 +64,7 @@ extern "C" {
  @brief Write the IP address configuration information to the EEPROM.
  @details Define macro to make an address change event update the EEPROM.
  */
-#if LWIP_DHCP
-// If DHCP is enabled, must use EEPROM so that MAC address is unique
-#define NET_USE_EEPROM
-#else // LWIP_DHCP
-//#define NET_USE_EEPROM
-#endif // LWIP_DHCP
-
+#define NET_USE_EEPROM // lets make this enabled by default same as DHCP
 
 
 #ifdef NET_USE_EEPROM
