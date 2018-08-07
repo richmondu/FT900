@@ -34,231 +34,152 @@
  * ============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "ft900.h"
-#include "tinyprintf.h"
-
-/* FreeRTOS includes. */
-#include "FreeRTOS.h"
-#include "task.h"
-
-/* LWIP includes. */
-#include "lwip/ip_addr.h"
-#include "net.h"
-
-/* MQTT includes. */
-#include "aws_bufferpool.h"
-#include "aws_mqtt_agent.h"
-#include "aws_demo_config.h"
-
-/* User setting includes */
-#include "user_settings.h"
-
-
-
-/* Macro Definitions ---------------------------------------------------------*/
-
-#define TASK_NOTIFY_NETIF_UP    	(0x01)
-#define TASK_NOTIFY_LINK_UP     	(0x02)
-#define TASK_NOTIFY_LINK_DOWN   	(0x04)
-#define TASK_NOTIFY_PACKET   		(0x08)
-
-// Do not modify unless you know what you are doing
-// These are currently the most optimal stack size for this application
-#define TASK_SYSTEM_STACK_SIZE      176//(144)
-#define TASK_SYSTEM_PRIORITY        (configMAX_PRIORITIES-1)
-#define TASK_MQTTAPP_STACK_SIZE     (192)
-#define TASK_MQTTAPP_PRIORITY       (tskIDLE_PRIORITY + 1)
-
-/* Private variables ---------------------------------------------------------*/
-
-TaskHandle_t g_hSystemTask = NULL;
-TaskHandle_t g_hMQTTAppTask = NULL;
-
-/*-----------------------------------------------------------*/
+#include "ft900.h" // for sensor integration
+#include "FreeRTOSConfig.h" // for pvPortMalloc, vPortFree
+#include "tinyprintf.h" // for tfp_snprintf, tfp_printf
+#include "iot.h" // for iot interface
+#include "iot_config.h" // for optional iot configurables
+#include "iot_clientcredential.h" // for required iot configurables
 
 
 
 /*-----------------------------------------------------------*/
 
-static void connectionCB(int netif_up, int link_up, int packet_available)
+#define IOT_APP_TOPIC_LENGTH          28
+#define IOT_APP_PAYLOAD_LENGTH        iot_MAX_BUFFER_SIZE
+#define IOT_APP_DEVICE_HOPPER         "hopper"
+#define IOT_APP_DEVICE_KNUTH          "knuth"
+#define IOT_APP_DEVICE_TURING         "turing"
+#define IOT_APP_TERMINATE             { for (;;) ; }
+//#define IOT_APP_TERMINATE             { int x=1/0; } // force a crash
+
+static inline int iot_app_generate_topic( char* pcTopic, int lTopicSize, const char* pcDeviceId )
 {
-	if (packet_available) {
-		if (g_hSystemTask) {
-			xTaskNotify(g_hSystemTask, TASK_NOTIFY_PACKET, eSetBits);
-			return;
-		}
-	}
-
-	if (netif_up) {
-		if (g_hSystemTask) {
-			xTaskNotify(g_hSystemTask,TASK_NOTIFY_NETIF_UP,eSetBits);
-		}
-	}
-
-	if (link_up) {
-		if (g_hSystemTask) {
-			xTaskNotify(g_hSystemTask,TASK_NOTIFY_LINK_UP,eSetBits);
-		}
-	}
-	else {
-		if (g_hSystemTask) {
-			xTaskNotify(g_hSystemTask,TASK_NOTIFY_LINK_DOWN,eSetBits);
-		}
-	}
+    int lTopicLen = tfp_snprintf( pcTopic, lTopicSize, "device/%s/devicePayload", pcDeviceId );
+    pcTopic[lTopicLen] = '\0';
+    return lTopicLen;
 }
 
-/*-----------------------------------------------------------*/
-
-static inline void initializeApplication()
+static inline int iot_app_generate_payload( char* pcPayload, int lPayloadSize, const char* pcDeviceId )
 {
-	extern void vMQTTAppTask( void * pvParameters );
-    BaseType_t xResult = pdPASS;
+    /* Notes:
+        1. Let AWS Greengrass (or AWS IoT) set the timestamp and location
+           Previously, FT900 adds the timestamp and location
+        2. snprintf issue with int64/uint64; tfp_printf works.
+        3. tfp_snprintf has floating point issues.
+    */
 
+    int lPayloadLen = tfp_snprintf( pcPayload, lPayloadSize,
+        "{\r\n"\
+        " \"deviceId\":\"%s\",\r\n"\
+        " \"sensorReading\":%d,\r\n"\
+        " \"batteryCharge\":%d,\r\n"\
+        " \"batteryDischargeRate\":%d\r\n"\
+        "}",
+		pcDeviceId,
+        rand() % 10 + 30,        // sensorReading 30-40
+        rand() % 30 - 10,        // batteryCharge -10-20
+        rand() % 5 );            // batteryDischargeRate 0-5
 
-    xResult = MQTT_AGENT_Init();
-    if ( xResult == pdPASS ) {
-        xResult = BUFFERPOOL_Init();
+    // MQTT message must be less than bufferpoolconfigBUFFER_SIZE
+    // Increase bufferpoolconfigBUFFER_SIZE if necessary
+    if ( lPayloadLen <= 0 || lPayloadLen > iot_MAX_BUFFER_SIZE ) {
+        return 0;
     }
-    if ( xResult == pdPASS ) {
-		xTaskCreate(vMQTTAppTask, "MQTTAPP", TASK_MQTTAPP_STACK_SIZE,
-			NULL, TASK_MQTTAPP_PRIORITY, &g_hMQTTAppTask );
-    }
-}
+    pcPayload[lPayloadLen] = '\0';
 
-static void vTaskSystem(void* params)
-{
-
-	// Initialize Ethernet
-	{
-		ip_addr_t ipaddr, gateway, mask;
-		ipaddr.addr = FT9XX_IP_ADDRESS;
-		gateway.addr = FT9XX_IP_GATEWAY;
-		mask.addr = FT9XX_IP_SUBNET;
-
-
-		net_init(ipaddr, gateway, mask, LWIP_DHCP, NULL, connectionCB);
-
-		while (xTaskNotifyWait(pdFALSE, TASK_NOTIFY_NETIF_UP, NULL, portMAX_DELAY ) == false);
-
-		while (1) {
-			if (!netif_is_link_up(net_get_netif())) {
-				if (ethernet_is_link_up()) {
-					netif_set_link_up(net_get_netif());
-					DEBUG_MINIMAL("Ethernet connected.\r\n\r\n");
-					break;
-				}
-			}
-		}
-
-		while (xTaskNotifyWait(pdTRUE, TASK_NOTIFY_LINK_UP, NULL, portMAX_DELAY ) == false);
-	}
-
-	// Initialize application
-	initializeApplication();
-
-	// Monitor connection and disconnection
-	uint32_t ulTimeout = 500 * portTICK_PERIOD_MS;
-	while (1) {
-		if (netif_is_link_up(net_get_netif())) {
-			if (!ethernet_is_link_up()) {
-				netif_set_link_down(net_get_netif());
-				DEBUG_MINIMAL("Ethernet disconnected.\r\n\r\n");
-			}
-		}
-		else {
-			if (ethernet_is_link_up()) {
-				netif_set_link_up(net_get_netif());
-				DEBUG_MINIMAL("Ethernet connected.\r\n\r\n");
-			}
-		}
-
-		// While data is received, keep on reading
-		while (xTaskNotifyWait(0, TASK_NOTIFY_PACKET, NULL, ulTimeout) == pdTRUE) {
-			arch_ft900_tick(net_get_netif());
-		}
-	}
+    DEBUG_PRINTF( "len = %d\r\n", lPayloadLen );
+    return lPayloadLen;
 }
 
 /*-----------------------------------------------------------*/
 
-static void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
-static inline void setupUART()
-{
-	/* Set up UART */
-    sys_enable(sys_device_uart0);
-    gpio_function(48, pad_func_3);
-    gpio_function(49, pad_func_3);
-    uart_open(UART0, 1, UART_DIVIDER_115200_BAUD, 8, 0, 0);
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, myputc);
-}
-
-static inline void setupEthernet()
-{
-	/* Set up Ethernet */
-	sys_enable(sys_device_ethernet);
-
-#ifdef NET_USE_EEPROM
-	/* Set up I2C */
-	sys_enable(sys_device_i2c_master);
-
-	/* Setup I2C channel 0 pins */
-	/* Use sys_i2c_swop(0) to activate. */
-	gpio_function(44, pad_i2c0_scl); /* I2C0_SCL */
-	gpio_function(45, pad_i2c0_sda); /* I2C0_SDA */
-
-	/* Setup I2C channel 1 pins for EEPROM */
-	/* Use sys_i2c_swop(1) to activate. */
-	gpio_function(46, pad_i2c1_scl); /* I2C1_SCL */
-	gpio_function(47, pad_i2c1_sda); /* I2C1_SDA */
-#endif
-}
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief Application runtime entry point.
+/*
+ * User application code that will be triggered by the call to iot_setup()
+ * This user application code can securely connect to cloud using iot_connect()
+ * and then push data to cloud using iot_publish()
+ * Pre-requisites:
+ *   1. Certificates should be stored in the certificates folder
+ *      with the filenames: ca.crt, cert.crt and cert.key
+ *   2. Set the required parameters in iot_clientcredential.h
+ *   3. Configure the optional parameters in iot_config.h
  */
+void iot_app_task( void * pvParameters )
+{
+    ( void ) pvParameters;
+    BaseType_t xReturned;
+    char* pcDevices[3] = { IOT_APP_DEVICE_HOPPER, IOT_APP_DEVICE_KNUTH, IOT_APP_DEVICE_TURING };
+    int lDeviceCount = sizeof( pcDevices )/sizeof( pcDevices[0] );
+    char* pcPayload = NULL;
+    char* pcTopic = NULL;
+    int lTopicLen = 0;
+    int lPayloadLen = 0;
+
+
+    DEBUG_PRINTF( "IOT APP has started.\r\n" );
+
+
+    /* Connect to iot broker
+     * Certificates should be stored in the certificates folder
+     * with the filenames: ca.crt, cert.crt and cert.key
+     * These certificates are compiled using USE_CERTIFICATE_OPTIMIZATION.bat
+     *   which is called in the Pre-build step in the "Build Steps" tab in (Properties / C/C++ Build / Settings)
+     * These certificates are then linked to the binary by adding the object files in
+     *   FT9XX GCC Linker/Miscellaneous/Other objects of "Tool Settings" tab in (Properties / C/C++ Build / Settings)
+     * Alternatively, the certificates can be hardcoded in iot_clientcredential.h
+     *   by setting IOT_CONFIG_USE_CERT_OPTIMIZATION to 0 in iot_config.h
+     */
+    iot_connect_params_t xParams = {
+        IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT,
+        IOT_CLIENTCREDENTIAL_BROKER_PORT,
+        IOT_CLIENTCREDENTIAL_CLIENT_ID };
+    xReturned = iot_connect( &xParams );
+    if ( xReturned != pdPASS ) {
+        DEBUG_MINIMAL( "IOT APP connect fail!\r\n" );
+        goto exit;
+    }
+
+    /* Allocate memory for iot packet */
+    pcPayload = pvPortMalloc( IOT_APP_PAYLOAD_LENGTH );
+    pcTopic = pvPortMalloc( IOT_APP_TOPIC_LENGTH );
+    if ( !pcPayload || !pcTopic ) {
+        DEBUG_MINIMAL( "IOT APP alloc fail!\r\n" );
+        goto exit;
+    }
+
+    /* Publish to iot broker */
+    do {
+        for ( int i=0; i<lDeviceCount && xReturned==pdPASS; i++ ) {
+            lTopicLen = iot_app_generate_topic( pcTopic, IOT_APP_TOPIC_LENGTH, pcDevices[i] );
+            lPayloadLen = iot_app_generate_payload( pcPayload, IOT_APP_PAYLOAD_LENGTH, pcDevices[i] );
+            xReturned = iot_publish( pcTopic, lTopicLen, pcPayload, lPayloadLen );
+        }
+    }
+    while ( xReturned == pdPASS );
+
+    /* Release memory for iot packet */
+    vPortFree( pcPayload );
+    vPortFree( pcTopic );
+
+
+exit:
+    /* Disconnect from iot broker */
+    iot_disconnect();
+
+
+    DEBUG_MINIMAL( "IOT APP has ended.\r\n" );
+    IOT_APP_TERMINATE;
+}
+
 int main( void )
 {
-    sys_reset_all();
-
-	setupUART();
-
-#if 1
-    uart_puts(UART0, "\r\n"
-		"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-		"\x1B[H" /* ANSI/VT100 - Move Cursor to Home */ );
-#else
-    uart_puts(UART0,
-		"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-		"\x1B[H" /* ANSI/VT100 - Move Cursor to Home */
-		"Copyright (C) Bridgetek Pte Ltd \r\n"
-		"--------------------------------------------------------------------- \r\n"
-		"Welcome to FT900 AWS IoT Demo\r\n"
-		"--------------------------------------------------------------------- \r\n");
-#endif
-
-    setupEthernet();
-
-	interrupt_enable_globally();
-
-    srand((unsigned int)time(NULL));
-
-    xTaskCreate(vTaskSystem, "SYSTEM", TASK_SYSTEM_STACK_SIZE,
-    	NULL, TASK_SYSTEM_PRIORITY, &g_hSystemTask);
-
-    vTaskStartScheduler();
-    for(;;);
+    /* Initialize the iot framework and trigger the user-callback function
+     * This includes:
+     *   Third party libraries (FreeRTOS, LWIP TCP/IP stack, Amazon MQTT, mbedTLS SSL library)
+     *   FT900 peripheral libraries (Ethernet, I2C master, UART)
+     * and then launch a task for the provided function which will contain the user-application code
+     */
+    iot_setup( iot_app_task );
 
     return 0;
 }
-

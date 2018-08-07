@@ -31,7 +31,7 @@
  */
 
 /* MQTT agent includes. */
-#include <secure_sockets.h>
+#include <iot_secure_sockets.h>
 #include "aws_mqtt_agent.h"
 #include "aws_mqtt_agent_config.h"
 #include "aws_mqtt_agent_config_defaults.h"
@@ -396,7 +396,7 @@ static void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConnection 
  *
  * @param[in] pxSocket The socket on which the data is available for reading.
  */
-static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
+//static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 
 /**
  * @brief Notifies the application task about the received CONNACK message.
@@ -1013,6 +1013,7 @@ static inline void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConn
 }
 /*-----------------------------------------------------------*/
 
+#if 0
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 20 );
@@ -1040,6 +1041,8 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
         ( void ) xQueueSendToBack( xCommandQueue, &xEventData, xTicksToWait );
     }
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 static inline void prvProcessReceivedCONNACK( MQTTBrokerConnection_t * const pxConnection,

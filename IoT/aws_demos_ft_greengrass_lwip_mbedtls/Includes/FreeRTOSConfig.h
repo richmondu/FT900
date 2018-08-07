@@ -94,20 +94,20 @@
 /* These are used in porting code (Source\portable). */
 #define configTICK_RATE_HZ                          ((TickType_t)1000)
 #if defined(__FT900__)
-#include "aws_clientcredential.h"
+#include <iot_clientcredential.h>
 
-#if USE_TLS
+#if IOT_CONFIG_USE_TLS
     #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
         //#define configTOTAL_HEAP_SIZE               ((size_t)(28 * 1024)) // Default setting: No DHCP, No RootCA, No CertOptimization, CiphersuiteOption1
-        #define configTOTAL_HEAP_SIZE               ((size_t)(32 * 1024 + (USE_ROOTCA * 2048))) // With DHCP, RootCA, CertOptimization, CiphersuiteOption3
+        #define configTOTAL_HEAP_SIZE               ((size_t)(32 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048))) // With DHCP, RootCA, CertOptimization, CiphersuiteOption3
     #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-        #define configTOTAL_HEAP_SIZE               ((size_t)(37 * 1024 + (USE_ROOTCA * 2048)))
+        #define configTOTAL_HEAP_SIZE               ((size_t)(37 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048)))
     #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
-        #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024 + (USE_ROOTCA * 2048)))
+        #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048)))
     #endif // USE_MQTT_BROKER
-#else // USE_TLS
+#else // IOT_CONFIG_USE_TLS
     #define configTOTAL_HEAP_SIZE                   ((size_t)(12 * 1024))
-#endif // USE_TLS
+#endif // IOT_CONFIG_USE_TLS
 
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))

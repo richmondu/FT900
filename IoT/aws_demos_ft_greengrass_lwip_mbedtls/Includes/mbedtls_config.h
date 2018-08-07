@@ -2,32 +2,25 @@
 #define MBEDTLS_CONFIG_H
 
 #include "tinyprintf.h" // for tfp_snprintf and tfp_printf needed by platform.c
-#include "aws_clientcredential.h" // for USE_MQTT_BROKER switch
 #include "FreeRTOS.h" // for portable.h needed by platform.c
 #include <string.h> // for memset needed by platform.c
+#include <iot_config.h> // for IOT_CONFIG_USE_CIPHERSUITE switch
+#include <iot_clientcredential.h> // for USE_MQTT_BROKER switch
 
 
 
 /*-----------------------------------------------------------*/
 
-#define CIPHERSUITE_OPTION_1         1 // strong:    RSA_AES128_CBC_SHA, RSA_AES256_CBC_SHA
-#define CIPHERSUITE_OPTION_2         2 // stronger:  RSA_AES128_GCM_SHA256, RSA_AES256_GCM_SHA384
-#define CIPHERSUITE_OPTION_3         3 // strongest: ECDHE_RSA_AES128_CBC_SHA, ECDHE_RSA_AES256_CBC_SHA
-#define CIPHERSUITE_OPTION_DEFAULT   CIPHERSUITE_OPTION_1
-#define USE_CIPHERSUITE              CIPHERSUITE_OPTION_DEFAULT
-
-/*-----------------------------------------------------------*/
-
-#if (USE_CIPHERSUITE == CIPHERSUITE_OPTION_1)
+#if (IOT_CONFIG_USE_CIPHERSUITE == CIPHERSUITE_OPTION_1)
     #define USE_GCM_OVER_CBC         0
     #define USE_ECC_CIPHERSUITE      0
-#elif (USE_CIPHERSUITE == CIPHERSUITE_OPTION_2)
+#elif (IOT_CONFIG_USE_CIPHERSUITE == CIPHERSUITE_OPTION_2)
     #define USE_GCM_OVER_CBC         1
     #define USE_ECC_CIPHERSUITE      0
-#elif (USE_CIPHERSUITE == CIPHERSUITE_OPTION_3)
+#elif (IOT_CONFIG_USE_CIPHERSUITE == CIPHERSUITE_OPTION_3)
     #define USE_GCM_OVER_CBC         0
     #define USE_ECC_CIPHERSUITE      1
-#endif
+#endif // IOT_CONFIG_USE_CIPHERSUITE
 
 /*-----------------------------------------------------------*/
 

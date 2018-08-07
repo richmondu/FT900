@@ -124,7 +124,7 @@
 /* LWIP_DNS
  * Disable lwIP DNS module,
  */
-#include "aws_clientcredential.h"
+#include <iot_clientcredential.h>
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS || USE_MQTT_BROKER == MQTT_BROKER_AWS_MOSQUITTO)
 #define LWIP_DNS                   0
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
@@ -501,12 +501,7 @@
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. */
-#include "user_settings.h" // for USE_DHCP
-#if USE_DHCP
-#define LWIP_DHCP               1
-#else
-#define LWIP_DHCP               0
-#endif
+#define LWIP_DHCP               1 // lets turn this on by default
 
 /* 1 if you want to want DHCP to wait for link to be up
    before starting. */
