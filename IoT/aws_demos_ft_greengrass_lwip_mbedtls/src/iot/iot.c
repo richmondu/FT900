@@ -53,9 +53,9 @@ static MQTTAgentHandle_t xMQTTHandle = NULL;
 
 /*-----------------------------------------------------------*/
 
-inline iot_status iot_connect( iot_connect_params_t* params )
+inline iot_status iot_connect( const iot_connect_params_t* param )
 {
-    MQTTAgentConnectParams_t *pxConnectParameters = (MQTTAgentConnectParams_t *)params;
+    MQTTAgentConnectParams_t *pxConnectParameters = (MQTTAgentConnectParams_t *)param;
 
     if ( MQTT_AGENT_Create( &xMQTTHandle ) != eMQTTAgentSuccess ) {
         DEBUG_PRINTF("Failed to create MQTT Agent.\r\n");
@@ -91,33 +91,18 @@ inline iot_status iot_disconnect( void )
 
 /*-----------------------------------------------------------*/
 
-inline iot_status iot_publish( const char* topic, int topicLen, const char* message, int messageLen )
+inline iot_status iot_publish( const iot_publish_params_t* param )
 {
-    MQTTAgentPublishParams_t* pxPublishParameters = pvPortMalloc(sizeof(MQTTAgentPublishParams_t));
     MQTTAgentReturnCode_t xReturned;
 
 
-    if (!pxPublishParameters) {
-        DEBUG_PRINTF( "ERROR: Failed to malloc.\r\n");
-        return pdFAIL;
-    }
-
-    memset( pxPublishParameters, 0x00, sizeof( MQTTAgentPublishParams_t ) );
-    pxPublishParameters->pucTopic = (const uint8_t*) topic;
-    pxPublishParameters->pvData = message;
-    pxPublishParameters->usTopicLength = ( uint16_t ) topicLen;
-    pxPublishParameters->ulDataLength = ( uint32_t ) messageLen;
-    pxPublishParameters->xQoS = eMQTTQoS0;
-
-    xReturned = MQTT_AGENT_Publish( xMQTTHandle, pxPublishParameters, MQTT_TIMEOUT );
+    xReturned = MQTT_AGENT_Publish( xMQTTHandle, param, MQTT_TIMEOUT );
     if ( xReturned != eMQTTAgentSuccess ) {
-        vPortFree(pxPublishParameters);
         DEBUG_PRINTF( "ERROR: Failed to publish.\r\n");
         return pdFAIL;
     }
 
-    vPortFree(pxPublishParameters);
-    DEBUG_MINIMAL( "%s:\r\n%s\r\n\r\n", topic, message );
+    DEBUG_PRINTF( "MQTT app published.\r\n\r\n" );
     return pdPASS;
 }
 

@@ -85,9 +85,9 @@ static inline int iot_app_generate_payload( char* pcPayload, int lPayloadSize, c
         rand() % 30 - 10,        // batteryCharge -10-20
         rand() % 5 );            // batteryDischargeRate 0-5
 
-    // MQTT message must be less than iot_MAX_BUFFER_SIZE
-    // Increase iot_MAX_BUFFER_SIZE if necessary
-    if ( lPayloadLen <= 0 || lPayloadLen > iot_MAX_BUFFER_SIZE ) {
+    // MQTT message must be less than bufferpoolconfigBUFFER_DATA_SIZE
+    // Increase bufferpoolconfigBUFFER_DATA_SIZE if necessary
+    if ( lPayloadLen <= 0 || lPayloadLen > IOT_APP_PAYLOAD_LENGTH ) {
         return 0;
     }
     pcPayload[lPayloadLen] = '\0';
@@ -114,13 +114,6 @@ void iot_app_task( void * pvParameters )
     BaseType_t xReturned;
     char* pcDevices[3] = { IOT_APP_DEVICE_HOPPER, IOT_APP_DEVICE_KNUTH, IOT_APP_DEVICE_TURING };
     int lDeviceCount = sizeof( pcDevices )/sizeof( pcDevices[0] );
-    char* pcPayload = NULL;
-    char* pcTopic = NULL;
-    int lTopicLen = 0;
-    int lPayloadLen = 0;
-
-
-    DEBUG_PRINTF( "IOT APP has started.\r\n" );
 
 
     /* Connect to iot broker
@@ -133,41 +126,47 @@ void iot_app_task( void * pvParameters )
      * Alternatively, the certificates can be hardcoded in iot_clientcredential.h
      *   by setting IOT_CONFIG_USE_CERT_OPTIMIZATION to 0 in iot_config.h
      */
-    iot_connect_params_t xParams = {
+    iot_connect_params_t xConnectParam = {
         IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT,
         IOT_CLIENTCREDENTIAL_BROKER_PORT,
         IOT_CLIENTCREDENTIAL_CLIENT_ID };
-    xReturned = iot_connect( &xParams );
+    xReturned = iot_connect( &xConnectParam );
     if ( xReturned != pdPASS ) {
         DEBUG_MINIMAL( "IOT APP connect fail!\r\n" );
         goto exit;
     }
 
     /* Allocate memory for iot packet */
-    pcPayload = pvPortMalloc( IOT_APP_PAYLOAD_LENGTH );
-    pcTopic = pvPortMalloc( IOT_APP_TOPIC_LENGTH );
-    if ( !pcPayload || !pcTopic ) {
+    iot_publish_params_t xPublishParam = {
+        pvPortMalloc( IOT_APP_TOPIC_LENGTH ), 0, 0,
+        pvPortMalloc( IOT_APP_PAYLOAD_LENGTH ), 0 };
+    if ( !xPublishParam.pucTopic || !xPublishParam.pvData ) {
         DEBUG_MINIMAL( "IOT APP alloc fail!\r\n" );
         goto exit;
     }
 
     /* Publish to iot broker continuously */
     do {
-        for ( int i=0; i<lDeviceCount && xReturned==pdPASS; i++ ) {
+        for ( int i = 0; i < lDeviceCount && xReturned == pdPASS; i++ ) {
 
-            /* Generate the topic and payload (payload is ideally in JSON format) */
-            lTopicLen = iot_app_generate_topic( pcTopic, IOT_APP_TOPIC_LENGTH, pcDevices[i] );
-            lPayloadLen = iot_app_generate_payload( pcPayload, IOT_APP_PAYLOAD_LENGTH, pcDevices[i] );
+            /* Generate the topic and data payload (payload is ideally in JSON format) */
+            xPublishParam.usTopicLength = iot_app_generate_topic(
+                ( char* )xPublishParam.pucTopic, IOT_APP_TOPIC_LENGTH, pcDevices[i] );
+            xPublishParam.ulDataLength = iot_app_generate_payload(
+                ( char* )xPublishParam.pvData, IOT_APP_PAYLOAD_LENGTH, pcDevices[i] );
+
+            DEBUG_MINIMAL( "%s:\r\n%s\r\n\r\n",
+                ( char* )xPublishParam.pucTopic, ( char* )xPublishParam.pvData );
 
             /* Publish the payload on the given topic */
-            xReturned = iot_publish( pcTopic, lTopicLen, pcPayload, lPayloadLen );
+            xReturned = iot_publish( &xPublishParam );
         }
     }
     while ( xReturned == pdPASS );
 
     /* Release memory for iot packet */
-    vPortFree( pcPayload );
-    vPortFree( pcTopic );
+    vPortFree( ( char* )xPublishParam.pucTopic );
+    vPortFree( ( char* )xPublishParam.pvData );
 
 
 exit:
@@ -175,7 +174,7 @@ exit:
     iot_disconnect();
 
 
-    DEBUG_MINIMAL( "IOT APP has ended.\r\n" );
+    DEBUG_MINIMAL( "IOT APP ended.\r\n" );
     IOT_APP_TERMINATE;
 }
 

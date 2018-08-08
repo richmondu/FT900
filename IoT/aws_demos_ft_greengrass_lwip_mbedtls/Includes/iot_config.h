@@ -27,6 +27,9 @@
 
 /*
  * Switch for TLS cipher suite option (security level)
+ * Note that there is a security-memory tradeoff, that is,
+ * the stronger the security, the higher the memory footprint.
+ * So to save memory footprint, we use option 1 by default.
  */
 #define CIPHERSUITE_OPTION_1 1 // strong:    RSA_AES128_CBC_SHA, RSA_AES256_CBC_SHA
 #define CIPHERSUITE_OPTION_2 2 // stronger:  RSA_AES128_GCM_SHA256, RSA_AES256_GCM_SHA384

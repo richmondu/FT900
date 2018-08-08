@@ -98,10 +98,11 @@
 
 #if IOT_CONFIG_USE_TLS
     #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-        //#define configTOTAL_HEAP_SIZE               ((size_t)(28 * 1024)) // Default setting: No DHCP, No RootCA, No CertOptimization, CiphersuiteOption1
+        //#define configTOTAL_HEAP_SIZE               ((size_t)(28 * 1024)) // No DHCP, No NET_USE_EEPROM, No RootCA, No CertOptimization, CiphersuiteOption1
+        //#define configTOTAL_HEAP_SIZE               ((size_t)(29 * 1024)) // No RootCA, CiphersuiteOption1
         #define configTOTAL_HEAP_SIZE               ((size_t)(32 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048))) // With DHCP, RootCA, CertOptimization, CiphersuiteOption3
     #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-        #define configTOTAL_HEAP_SIZE               ((size_t)(37 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048)))
+        #define configTOTAL_HEAP_SIZE               ((size_t)(40 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048))) // With DNS, DHCP, RootCA, CertOptimization, CiphersuiteOption3
     #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
         #define configTOTAL_HEAP_SIZE               ((size_t)(34 * 1024 + (IOT_CONFIG_USE_ROOTCA * 2048)))
     #endif // USE_MQTT_BROKER
