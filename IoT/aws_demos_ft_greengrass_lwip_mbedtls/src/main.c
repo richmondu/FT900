@@ -45,8 +45,8 @@
 
 /*-----------------------------------------------------------*/
 
-#define IOT_APP_TOPIC_LENGTH          28
 #define IOT_APP_PAYLOAD_LENGTH        iot_MAX_BUFFER_SIZE
+#define IOT_APP_TOPIC_LENGTH          28
 #define IOT_APP_DEVICE_HOPPER         "hopper"
 #define IOT_APP_DEVICE_KNUTH          "knuth"
 #define IOT_APP_DEVICE_TURING         "turing"
@@ -86,7 +86,7 @@ static inline int iot_app_generate_payload( char* pcPayload, int lPayloadSize, c
         rand() % 5 );            // batteryDischargeRate 0-5
 
     // MQTT message must be less than bufferpoolconfigBUFFER_DATA_SIZE
-    // Increase bufferpoolconfigBUFFER_DATA_SIZE if necessary
+    // Increase bufferpoolconfigBUFFER_DATA_SIZE in aws_bufferpool_config.h if necessary
     if ( lPayloadLen <= 0 || lPayloadLen > IOT_APP_PAYLOAD_LENGTH ) {
         return 0;
     }
@@ -178,6 +178,15 @@ exit:
     IOT_APP_TERMINATE;
 }
 
+/*-----------------------------------------------------------*/
+
+/*
+ * Troubleshooting tips for common problems:
+ * 1. If pvPortMalloc fails, increase configTOTAL_HEAP_SIZE in FreeRTOSConfig.h.
+ * 2. If constructing large payloads, increase bufferpoolconfigBUFFER_DATA_SIZE in aws_bufferpool_config.h.
+ * 3. If crashes appears, increase TASK_MQTTAPP_STACK_SIZE in iot_setup.c.
+ *    Since stack is retrieved from the heap, configTOTAL_HEAP_SIZE should also be increased.
+ */
 int main( void )
 {
     /* Initialize the iot framework and trigger the user-callback function

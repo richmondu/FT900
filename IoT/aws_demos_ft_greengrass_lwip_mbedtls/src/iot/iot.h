@@ -75,11 +75,13 @@ typedef BaseType_t iot_status;
 typedef TaskFunction_t iot_task;
 typedef MQTTAgentConnectParams_t iot_connect_params_t;
 typedef MQTTAgentPublishParams_t iot_publish_params_t;
+typedef MQTTAgentSubscribeParams_t iot_subscribe_params_t;
 
 iot_status iot_setup( iot_task task );
 iot_status iot_connect( const iot_connect_params_t* param );
 iot_status iot_disconnect( void );
 iot_status iot_publish( const iot_publish_params_t* param );
+iot_status iot_subsribe( const iot_subscribe_params_t* param );
 
 
 

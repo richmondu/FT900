@@ -106,3 +106,25 @@ inline iot_status iot_publish( const iot_publish_params_t* param )
     return pdPASS;
 }
 
+/*-----------------------------------------------------------*/
+
+inline iot_status iot_subsribe( const iot_subscribe_params_t* param )
+{
+#if !mqttconfigDISABLE_SUBSCRIBE
+    MQTTAgentReturnCode_t xReturned;
+
+
+    xReturned = MQTT_AGENT_Subscribe( xMQTTHandle, param, MQTT_TIMEOUT );
+    if ( xReturned != eMQTTAgentSuccess ) {
+        DEBUG_PRINTF( "ERROR: Failed to subscribe.\r\n");
+        return pdFAIL;
+    }
+
+    DEBUG_PRINTF( "MQTT app subscribed.\r\n\r\n" );
+    return pdPASS;
+#else
+    return pdFAIL;
+#endif
+}
+
+
