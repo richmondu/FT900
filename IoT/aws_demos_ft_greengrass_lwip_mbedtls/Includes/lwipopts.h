@@ -44,7 +44,7 @@
 #ifndef LOCAL_LWIPOPTS_H_
 #define LOCAL_LWIPOPTS_H_
 
-#include "ft900opts.h"
+#include <ft900opts.h>
 
 /* NO_SYS
  * Do not use Operating System (RTOS) style primitives and implement stack
@@ -124,7 +124,7 @@
 /* LWIP_DNS
  * Disable lwIP DNS module,
  */
-#include <iot_clientcredential.h>
+#include "iot_clientcredential.h"
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS || USE_MQTT_BROKER == MQTT_BROKER_AWS_MOSQUITTO)
 #define LWIP_DNS                   0
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)

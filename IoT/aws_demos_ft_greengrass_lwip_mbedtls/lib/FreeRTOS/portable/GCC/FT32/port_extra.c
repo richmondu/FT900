@@ -203,18 +203,6 @@ typedef struct tskTaskControlBlock
         volatile eNotifyValue eNotifyState;
     #endif
 
-	/* See the comments above the definition of
-	tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE. */
-	#if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 ) /*lint !e731 Macro has been consolidated for readability reasons. */
-		uint8_t	ucStaticallyAllocated; 		/*< Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
-	#endif
-
-	#if( INCLUDE_xTaskAbortDelay == 1 )
-		uint8_t ucDelayAborted;
-	#endif
-
-	//int lHeapAllocations;
-
 #ifdef FT32_PORT
     StackType_t         *pxStackBase;       /*< Points to the base of the stack. */
 #endif
@@ -240,7 +228,6 @@ extern volatile TCB_t * volatile pxCurrentTCB;
 inline void vPortTaskCreate(void *pxNewTCB)
 {
     TCB_t *p = (TCB_t *)pxNewTCB;
-    //p->lHeapAllocations = 0;
     DPRINTF("C %s %x %x %x\r\n",
             p->pcTaskName,
             p->pxStackBase,
@@ -299,16 +286,3 @@ void vApplicationMallocFailedHook(size_t xWantedSize)
     DPRINTF("vApplicationMallocFailedHook(): malloc(%d) failed in task \"%s\"\r\n", xWantedSize, pxCurrentTCB->pcTaskName);
 }
 #endif //configUSE_MALLOC_FAILED_HOOK
-
-#if 0
-void vUpdateTaskAllocations(int allocate, int size)
-{
-	if (allocate) {
-		pxCurrentTCB->lHeapAllocations += size;
-	}
-	else {
-		pxCurrentTCB->lHeapAllocations -= size;
-	}
-    tfp_printf("vUpdate: %s %d (%d)\r\n", pxCurrentTCB->pcTaskName, pxCurrentTCB->lHeapAllocations, size);
-}
-#endif

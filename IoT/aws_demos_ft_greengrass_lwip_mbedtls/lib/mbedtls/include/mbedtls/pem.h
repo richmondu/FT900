@@ -28,11 +28,13 @@
 
 #include <stddef.h>
 
+#if defined(FT32_PORT)
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
+#endif // FT32_PORT
 
 /**
  * \name PEM Error codes

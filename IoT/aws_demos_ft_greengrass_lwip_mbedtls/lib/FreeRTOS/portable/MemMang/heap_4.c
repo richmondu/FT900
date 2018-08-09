@@ -149,7 +149,6 @@ void *pvReturn = NULL;
 			mtCOVERAGE_TEST_MARKER();
 		}
 
-		//tfp_printf("  pvPortMalloc want=%d free=%d\r\n", xWantedSize, xFreeBytesRemaining);
 		/* Check the requested block size is not so large that the top bit is
 		set.  The top bit of the block size member of the BlockLink_t structure
 		is used to determine who owns the block - the application or the
@@ -243,9 +242,6 @@ void *pvReturn = NULL;
 					by the application and has no "next" block. */
 					pxBlock->xBlockSize |= xBlockAllocatedBit;
 					pxBlock->pxNextFreeBlock = NULL;
-
-					//vUpdateTaskAllocations(1, xWantedSize);
-
 				}
 				else
 				{
@@ -315,14 +311,10 @@ BlockLink_t *pxLink;
 
 				vTaskSuspendAll();
 				{
-					//vUpdateTaskAllocations(0, pxLink->xBlockSize);
-
 					/* Add this block to the list of free blocks. */
 					xFreeBytesRemaining += pxLink->xBlockSize;
 					traceFREE( pv, pxLink->xBlockSize );
 					prvInsertBlockIntoFreeList( ( ( BlockLink_t * ) pxLink ) );
-
-					//tfp_printf("  pvPortFree size=%d free=%d\r\n", pxLink->xBlockSize, xFreeBytesRemaining);
 				}
 				( void ) xTaskResumeAll();
 			}

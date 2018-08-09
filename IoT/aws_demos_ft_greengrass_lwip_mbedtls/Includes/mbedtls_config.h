@@ -1,11 +1,11 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 
+#include <string.h> // for memset needed by platform.c
 #include "tinyprintf.h" // for tfp_snprintf and tfp_printf needed by platform.c
 #include "FreeRTOS.h" // for portable.h needed by platform.c
-#include <string.h> // for memset needed by platform.c
-#include <iot_config.h> // for IOT_CONFIG_USE_CIPHERSUITE switch
-#include <iot_clientcredential.h> // for USE_MQTT_BROKER switch
+#include "iot_config.h" // for IOT_CONFIG_USE_CIPHERSUITE switch
+#include "iot_clientcredential.h" // for USE_MQTT_BROKER switch
 
 
 

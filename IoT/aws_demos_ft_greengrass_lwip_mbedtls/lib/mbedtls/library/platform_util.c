@@ -25,7 +25,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #include "mbedtls/platform_util.h"

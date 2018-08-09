@@ -27,7 +27,7 @@
 #ifndef MBEDTLS_PADLOCK_H
 #define MBEDTLS_PADLOCK_H
 
-#include "mbedtls/aes.h"
+#include "aes.h"
 
 #define MBEDTLS_ERR_PADLOCK_DATA_MISALIGNED               -0x0030  /**< Input data should be aligned. */
 

@@ -26,10 +26,10 @@
 #ifndef MBEDTLS_SSL_CACHE_H
 #define MBEDTLS_SSL_CACHE_H
 
-#include "mbedtls/ssl.h"
+#include "ssl.h"
 
 #if defined(MBEDTLS_THREADING_C)
-#include "mbedtls/threading.h"
+#include "threading.h"
 #endif
 
 /**

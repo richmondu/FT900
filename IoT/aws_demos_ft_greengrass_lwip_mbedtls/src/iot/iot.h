@@ -45,8 +45,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
-
-/* FreeRTOS includes. */
+#include "net.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -56,9 +55,6 @@
 
 /* LWIP includes. */
 #include "lwipopts.h"
-#include "net.h"
-
-/* MQTT includes. */
 #include "aws_mqtt_lib.h"
 #include "aws_mqtt_agent.h"
 #include "aws_bufferpool.h"

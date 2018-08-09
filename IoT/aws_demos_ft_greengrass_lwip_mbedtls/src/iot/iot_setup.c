@@ -48,11 +48,9 @@
 /* LWIP includes. */
 #include "lwipopts.h"
 #include "lwip/ip_addr.h"
-#include "net.h"
-
-/* IOT includes. */
 #include "iot.h"
 #include "iot_config.h"
+#include "net.h"
 
 /* MQTT includes. */
 #include "aws_bufferpool.h"

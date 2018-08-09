@@ -28,7 +28,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_SSL_COOKIE_C)

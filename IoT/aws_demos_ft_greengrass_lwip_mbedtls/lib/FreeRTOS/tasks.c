@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.0.0
+ * FreeRTOS Kernel V10.0.1
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -10,8 +10,7 @@
  * subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software. If you wish to use our Amazon
- * FreeRTOS name, please do so in a fair use way that does not cause confusion.
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
@@ -38,7 +37,7 @@ task.h is included from an application file. */
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-//#include "timers.h"
+#include "timers.h"
 #include "stack_macros.h"
 
 /* Lint e961 and e750 are suppressed as a MISRA exception justified because the
@@ -110,6 +109,7 @@ set then don't fill the stack so there is no unnecessary dependency on memset. *
 /*
  * Macros used by vListTask to indicate which state a task is in.
  */
+#define tskRUNNING_CHAR		( 'X' )
 #define tskBLOCKED_CHAR		( 'B' )
 #define tskREADY_CHAR		( 'R' )
 #define tskDELETED_CHAR		( 'D' )
@@ -335,8 +335,6 @@ typedef struct tskTaskControlBlock
 	#if( INCLUDE_xTaskAbortDelay == 1 )
 		uint8_t ucDelayAborted;
 	#endif
-
-	//int lHeapAllocations;
 
 } tskTCB;
 
@@ -4211,6 +4209,9 @@ TCB_t *pxTCB;
 			{
 				switch( pxTaskStatusArray[ x ].eCurrentState )
 				{
+					case eRunning:		cStatus = tskRUNNING_CHAR;
+										break;
+
 					case eReady:		cStatus = tskREADY_CHAR;
 										break;
 

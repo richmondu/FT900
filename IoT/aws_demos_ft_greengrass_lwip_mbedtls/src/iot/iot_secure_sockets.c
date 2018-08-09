@@ -80,9 +80,9 @@
 
 #ifdef DEBUG
 #define DEBUG_CONNECT(...)
-#define DEBUG_CONNECT_VERBOSE(...)
+//#define DEBUG_CONNECT_VERBOSE(...)
 //#define DEBUG_CONNECT             DEBUG_MINIMAL
-//#define DEBUG_CONNECT_VERBOSE     DEBUG_PRINTF
+#define DEBUG_CONNECT_VERBOSE     DEBUG_PRINTF
 #define DEBUG_SEND(...)
 #define DEBUG_RECV(...)
 #else

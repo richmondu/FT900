@@ -1,7 +1,7 @@
 #ifndef __IOT_CLIENTCREDENTIAL__H__
 #define __IOT_CLIENTCREDENTIAL__H__
 
-#include <iot_config.h>
+#include "iot_config.h"
 
 
 

@@ -29,12 +29,12 @@
 #define MBEDTLS_CIPHER_WRAP_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "mbedtls/cipher.h"
+#include "cipher.h"
 
 #ifdef __cplusplus
 extern "C" {

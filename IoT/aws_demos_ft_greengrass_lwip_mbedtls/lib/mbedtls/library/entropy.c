@@ -24,7 +24,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_ENTROPY_C)
@@ -38,10 +38,12 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/entropy_poll.h"
 #include "mbedtls/platform_util.h"
+
+#if defined(FT32_PORT)
 #if defined(MBEDTLS_SHA512_C)
 #include "mbedtls/sha512.h"
-#endif
-
+#endif // MBEDTLS_SHA512_C
+#endif // FT32_PORT
 #include <string.h>
 
 #if defined(MBEDTLS_FS_IO)

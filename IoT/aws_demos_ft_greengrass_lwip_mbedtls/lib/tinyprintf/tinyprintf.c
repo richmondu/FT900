@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define PRINTF_LONG_SUPPORT
 
 /* Enable long long int support (implies long int support) */
-#define PRINTF_LONG_LONG_SUPPORT
+//#define PRINTF_LONG_LONG_SUPPORT
 
 /* Enable %z (size_t) support */
 #define PRINTF_SIZE_T_SUPPORT
@@ -118,7 +118,7 @@ static void _TFP_GCC_NO_INLINE_ ulli2a(
     *bf = 0;
 }
 
-static inline void lli2a(long long int num, struct param *p)
+static void lli2a(long long int num, struct param *p)
 {
     if (num < 0) {
         num = -num;
@@ -129,7 +129,7 @@ static inline void lli2a(long long int num, struct param *p)
 #endif
 
 #ifdef PRINTF_LONG_SUPPORT
-static inline void uli2a(unsigned long int num, struct param *p)
+static void uli2a(unsigned long int num, struct param *p)
 {
     int n = 0;
     unsigned long int d = 1;
@@ -148,7 +148,7 @@ static inline void uli2a(unsigned long int num, struct param *p)
     *bf = 0;
 }
 
-static inline void li2a(long num, struct param *p)
+static void li2a(long num, struct param *p)
 {
     if (num < 0) {
         num = -num;
@@ -158,7 +158,7 @@ static inline void li2a(long num, struct param *p)
 }
 #endif
 
-static inline void ui2a(unsigned int num, struct param *p)
+static void ui2a(unsigned int num, struct param *p)
 {
     int n = 0;
     unsigned int d = 1;
@@ -177,7 +177,7 @@ static inline void ui2a(unsigned int num, struct param *p)
     *bf = 0;
 }
 
-static inline void i2a(int num, struct param *p)
+static void i2a(int num, struct param *p)
 {
     if (num < 0) {
         num = -num;
@@ -186,7 +186,7 @@ static inline void i2a(int num, struct param *p)
     ui2a(num, p);
 }
 
-static inline int a2d(char ch)
+static int a2d(char ch)
 {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
@@ -198,7 +198,7 @@ static inline int a2d(char ch)
         return -1;
 }
 
-static inline char a2u(char ch, TFP_CONST char **src, int base, unsigned int *nump)
+static char a2u(char ch, TFP_CONST char **src, int base, unsigned int *nump)
 {
     TFP_CONST char *p = *src;
     unsigned int num = 0;
@@ -214,7 +214,7 @@ static inline char a2u(char ch, TFP_CONST char **src, int base, unsigned int *nu
     return ch;
 }
 
-static inline void putchw(void *putp, putcf putf, struct param *p)
+static void putchw(void *putp, putcf putf, struct param *p)
 {
     char ch;
     int n = p->width;
@@ -456,7 +456,6 @@ void tfp_printf(char *fmt, ...)
 #endif
 
 #if TINYPRINTF_DEFINE_TFP_SPRINTF
-
 struct _vsnprintf_putcf_data
 {
   size_t dest_capacity;
@@ -503,13 +502,11 @@ int tfp_snprintf(char *str, size_t size, TFP_CONST char *format, ...)
   return retval;
 }
 
-#if 0
 struct _vsprintf_putcf_data
 {
   char *dest;
   size_t num_chars;
 };
-
 
 static void _vsprintf_putcf(void *p, char c)
 {
@@ -537,6 +534,4 @@ int tfp_sprintf(char *str, TFP_CONST char *format, ...)
   va_end(ap);
   return retval;
 }
-#endif
-
 #endif

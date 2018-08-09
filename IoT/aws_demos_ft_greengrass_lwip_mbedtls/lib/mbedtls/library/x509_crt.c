@@ -36,7 +36,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
@@ -52,10 +52,10 @@
 #include "mbedtls/pem.h"
 #endif
 
+#if defined(FT32_PORT)
 #include "mbedtls/ecp.h"
 #include "mbedtls/pk.h"
-
-
+#endif // FT32_PORT
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
 #else
@@ -212,9 +212,12 @@ static int x509_profile_check_key( const mbedtls_x509_crt_profile *profile,
         pk_alg == MBEDTLS_PK_ECKEY ||
         pk_alg == MBEDTLS_PK_ECKEY_DH )
     {
-    	mbedtls_ecp_keypair* temp = mbedtls_pk_ec( *pk );
+#if defined(FT32_PORT)
+        mbedtls_ecp_keypair* temp = mbedtls_pk_ec( *pk );
         const mbedtls_ecp_group_id gid = temp->grp.id;
-
+#else // FT32_PORT
+        const mbedtls_ecp_group_id gid = mbedtls_pk_ec( *pk )->grp.id;
+#endif // FT32_PORT
         if( ( profile->allowed_curves & MBEDTLS_X509_ID_FLAG( gid ) ) != 0 )
             return( 0 );
 
@@ -1018,7 +1021,6 @@ int mbedtls_x509_crt_parse( mbedtls_x509_crt *chain, const unsigned char *buf, s
 
     if( buf_format == MBEDTLS_X509_FORMAT_DER )
         return mbedtls_x509_crt_parse_der( chain, buf, buflen );
-
 #else
     return mbedtls_x509_crt_parse_der( chain, buf, buflen );
 #endif
@@ -1249,7 +1251,7 @@ cleanup:
 }
 #endif /* MBEDTLS_FS_IO */
 
-#if defined(MBEDTLS_X509_CRT_INFO)
+#if ((defined(MBEDTLS_X509_CRT_INFO) && defined(FT32_PORT)) || !defined(FT32_PORT))
 static int x509_info_subject_alt_name( char **buf, size_t *size,
                                        const mbedtls_x509_sequence *subject_alt_name )
 {
@@ -1515,9 +1517,9 @@ int mbedtls_x509_crt_info( char *buf, size_t size, const char *prefix,
 
     return( (int) ( size - n ) );
 }
-#endif
+#endif // FT32_PORT
 
-#if defined(MBEDTLS_X509_CRT_VERIFY_INFO)
+#if ((defined(MBEDTLS_X509_CRT_VERIFY_INFO) && defined(FT32_PORT)) || !defined(FT32_PORT))
 struct x509_crt_verify_string {
     int code;
     const char *string;
@@ -1560,21 +1562,21 @@ int mbedtls_x509_crt_verify_info( char *buf, size_t size, const char *prefix,
         if( ( flags & cur->code ) == 0 )
             continue;
 
-        ret = tfp_snprintf( p, n, "%s%s\n", prefix, cur->string );
+        ret = mbedtls_snprintf( p, n, "%s%s\n", prefix, cur->string );
         MBEDTLS_X509_SAFE_SNPRINTF;
         flags ^= cur->code;
     }
 
     if( flags != 0 )
     {
-        ret = tfp_snprintf( p, n, "%sUnknown reason "
+        ret = mbedtls_snprintf( p, n, "%sUnknown reason "
                                        "(this should not happen)\n", prefix );
         MBEDTLS_X509_SAFE_SNPRINTF;
     }
 
     return( (int) ( size - n ) );
 }
-#endif
+#endif // FT32_PORT
 
 #if defined(MBEDTLS_X509_CHECK_KEY_USAGE)
 int mbedtls_x509_crt_check_key_usage( const mbedtls_x509_crt *crt,

@@ -94,7 +94,7 @@
 /* These are used in porting code (Source\portable). */
 #define configTICK_RATE_HZ                          ((TickType_t)1000)
 #if defined(__FT900__)
-#include <iot_clientcredential.h>
+#include "iot_clientcredential.h"
 
 #if IOT_CONFIG_USE_TLS
     #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
@@ -211,7 +211,7 @@
 //#define traceTASK_DELAY                             portTASK_DELAY
 
 
-#define configPRINTF( x )          //tfp_printf x
+#define configPRINTF( x ) //tfp_printf x
 
 #define DEBUG
 #ifdef DEBUG
