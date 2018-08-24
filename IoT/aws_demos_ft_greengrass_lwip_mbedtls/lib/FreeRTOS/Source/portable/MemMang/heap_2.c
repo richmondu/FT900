@@ -26,6 +26,8 @@
  * 1 tab == 4 spaces!
  */
 
+#if (!defined(VFW_PORT) && defined(FT32_PORT_HEAP) && (FT32_PORT_HEAP == 2))
+#warning HEAP METHOD 2 used
 /*
  * A sample implementation of pvPortMalloc() and vPortFree() that permits
  * allocated blocks to be freed, but does not combine adjacent free blocks
@@ -65,7 +67,11 @@ static void prvHeapInit( void );
 	heap - probably so it can be placed in a special segment or address. */
 	extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #else
-	static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+	#if defined(FT32_PORT_HEAP)
+		uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+	#else // defined(FT32_PORT_HEAP)
+		static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+	#endif // defined(FT32_PORT_HEAP)	
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
 
 
@@ -82,7 +88,11 @@ static const uint16_t heapSTRUCT_SIZE	= ( ( sizeof ( BlockLink_t ) + ( portBYTE_
 #define heapMINIMUM_BLOCK_SIZE	( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
 
 /* Create a couple of list links to mark the start and end of the list. */
+#if defined(FT32_PORT_HEAP)
+BlockLink_t xStart, xEnd;
+#else // defined(FT32_PORT_HEAP)
 static BlockLink_t xStart, xEnd;
+#endif // defined(FT32_PORT_HEAP)
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
 fragmentation. */
@@ -97,7 +107,7 @@ static size_t xFreeBytesRemaining = configADJUSTED_HEAP_SIZE;
  */
 #define prvInsertBlockIntoFreeList( pxBlockToInsert )								\
 {																					\
-BlockLink_t *pxIterator;															\
+BlockLink_t *pxIterator;																\
 size_t xBlockSize;																	\
 																					\
 	xBlockSize = pxBlockToInsert->xBlockSize;										\
@@ -271,3 +281,15 @@ uint8_t *pucAlignedHeap;
 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 /*-----------------------------------------------------------*/
+
+void* pvPortGetHeapStart()
+{
+	return &xStart;
+}
+
+void* pvPortGetHeapEnd()
+{
+	return &xEnd;
+}
+
+#endif  //FT32_PORT_HEAP

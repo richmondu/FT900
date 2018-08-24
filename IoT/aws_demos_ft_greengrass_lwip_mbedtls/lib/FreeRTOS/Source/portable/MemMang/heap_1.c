@@ -26,7 +26,8 @@
  * 1 tab == 4 spaces!
  */
 
-
+#if (!defined(VFW_PORT) && defined(FT32_PORT_HEAP) && (FT32_PORT_HEAP == 1))
+#warning HEAP METHOD 1 used
 /*
  * The simplest possible implementation of pvPortMalloc().  Note that this
  * implementation does NOT allow allocated memory to be freed again.
@@ -144,5 +145,14 @@ size_t xPortGetFreeHeapSize( void )
 	return ( configADJUSTED_HEAP_SIZE - xNextFreeByte );
 }
 
+void* pvPortGetHeapStart()
+{
+	return &ucHeap;
+}
 
+void* pvPortGetHeapEnd()
+{
+	return (uint8_t*)&ucHeap + xNextFreeByte;
+}
 
+#endif  //FT32_PORT_HEAP

@@ -26,6 +26,9 @@
  * 1 tab == 4 spaces!
  */
 
+#if (!defined(VFW_PORT) && defined(FT32_PORT_HEAP) && (FT32_PORT_HEAP == 3))
+#warning HEAP METHOD 3 used
+//kahho:: FIXME, it seems this method cannot allocate more than 1KB now due to malloc() implementation.
 
 /*
  * Implementation of pvPortMalloc() and vPortFree() that relies on the
@@ -94,5 +97,4 @@ void vPortFree( void *pv )
 	}
 }
 
-
-
+#endif  //FT32_PORT_HEAP
