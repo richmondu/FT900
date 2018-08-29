@@ -41,7 +41,7 @@
 
 /* BufferPool includes. */
 #include "aws_bufferpool.h"
-#include "aws_bufferpool_config.h"
+#include "config_files/aws_bufferpool_config.h"
 
 /* Make sure that proper config options are defined. */
 #ifndef bufferpoolconfigNUM_BUFFERS

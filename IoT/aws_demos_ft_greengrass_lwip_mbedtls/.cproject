@@ -37,16 +37,13 @@
 								</option>
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.1501824464" name="Include paths (-I)" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mbedtls/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/arch}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include/private}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/config_files}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/private}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
@@ -264,6 +261,43 @@
 							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.778278989" name="Resource Custom Build Step Output Type"/>
 						</tool>
 					</fileInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1007037996" name="/" resourcePath="lib/FreeRTOS">
+						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.1024242875" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007.1203508729" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1058912644.425323195" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1058912644"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1927728132.1531870295" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1927728132"/>
+							<option id="com.ftdichip.ft90x.build.gcc.option.target.board.1596939376.579047123" name="Target Board" superClass="com.ftdichip.ft90x.build.gcc.option.target.board.1596939376"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<tool id="com.ftdichip.compiler.ft900.debug.base.1629855443" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.base.1747447051">
+								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.576479200" name="Include paths (-I)" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mbedtls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/arch}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/config_files}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/private}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.211866055" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1419849546" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1644609745"/>
+							<tool id="com.ftdichip.linker.ft900.debug.base.1122055946" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.debug.base.1183259732"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.426503487" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1975652291"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1360722626" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1504773763"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.368951435" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1168659799">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.555828782" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1405465503" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1043074259"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.1894928266" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.1713225679"/>
+						</toolChain>
+					</folderInfo>
 					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.2010529987.1055405554" name="/" resourcePath="lib/FreeRTOS/Demo">
 						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.1067663836" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007.1584825747" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.244074007"/>
@@ -562,16 +596,13 @@
 								<option id="gnu.c.compiler.option.dialect.std.1505072723" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="com.ftdichip.compiler.ft900.release.base.option.include.paths.2080132774" name="Include paths (-I)" superClass="com.ftdichip.compiler.ft900.release.base.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mbedtls/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/arch}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include/private}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/config_files}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/private}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
@@ -774,6 +805,42 @@
 							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.287581166" name="Resource Custom Build Step Output Type"/>
 						</tool>
 					</fileInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900release.base.94040321.1246353880" name="/" resourcePath="lib/FreeRTOS">
+						<toolChain id="com.ftdichip.toolchain.ft900.release.base.1798092100" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.release.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1787607979.1397527383" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1787607979"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1212745008.691302878" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1212745008"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1880932192.1506202232" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1880932192"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<tool id="com.ftdichip.compiler.ft900.release.base.1755497852" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.release.base.766018931">
+								<option id="com.ftdichip.compiler.ft900.release.base.option.include.paths.1759837541" name="Include paths (-I)" superClass="com.ftdichip.compiler.ft900.release.base.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/iot}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mbedtls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/arch}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/config_files}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include/private}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/mqtt/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.893080474" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1976230617" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1024954152"/>
+							<tool id="com.ftdichip.linker.ft900.release.base.834525502" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.release.base.197857314"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1395978394" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.882026182"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.388994870" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1406639621"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1626646891" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1614022799">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1104587172" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1810119145" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1216964347"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.1301524345" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.1523122973"/>
+						</toolChain>
+					</folderInfo>
 					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900release.base.94040321.1017470236" name="/" resourcePath="lib/FreeRTOS/Demo">
 						<toolChain id="com.ftdichip.toolchain.ft900.release.base.659826154" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.release.base" unusedChildren="">
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1787607979.752411589" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1787607979"/>

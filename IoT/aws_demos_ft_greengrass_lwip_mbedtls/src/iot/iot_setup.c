@@ -67,7 +67,7 @@
 
 // Do not modify unless you know what you are doing
 // These are currently the most optimal stack size for this application
-#define TASK_SYSTEM_STACK_SIZE      (208)
+#define TASK_SYSTEM_STACK_SIZE      (224)
 #define TASK_SYSTEM_PRIORITY        (configMAX_PRIORITIES-1)
 #define TASK_MQTTAPP_STACK_SIZE     (208)
 #define TASK_MQTTAPP_PRIORITY       (tskIDLE_PRIORITY + 1)

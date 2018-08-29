@@ -20,9 +20,9 @@ set TOPIC=""
 set MESSAGE=""
 
 :: Connect to AWS Greengrass
-python ft900simulator_AWSIoTPythonSDK.py --endpoint %GREENGRASS_CORE% --rootCA %GREENGRASS_GROUP_CACERT% --cert %GREENGRASS_DEVICE_CERT% --key %GREENGRASS_DEVICE_KEY% --thingName %GREENGRASS_DEVICE_CLIENTID% --mode %MODE% --topic %TOPIC% --message %MESSAGE%
+::python ft900simulator_AWSIoTPythonSDK.py --endpoint %GREENGRASS_CORE% --rootCA %GREENGRASS_GROUP_CACERT% --cert %GREENGRASS_DEVICE_CERT% --key %GREENGRASS_DEVICE_KEY% --thingName %GREENGRASS_DEVICE_CLIENTID% --mode %MODE% --topic %TOPIC% --message %MESSAGE%
 
 :: Connect to AWS IoT
-::python ft900simulator_AWSIoTPythonSDK.py --endpoint %AWS_IOT_CORE% --rootCA %AWS_IOT_CACERT% --cert %GREENGRASS_DEVICE_CERT% --key %GREENGRASS_DEVICE_KEY% --thingName %GREENGRASS_DEVICE_CLIENTID% --mode %MODE% --topic %TOPIC% --message %MESSAGE%
+python ft900simulator_AWSIoTPythonSDK.py --endpoint %AWS_IOT_CORE% --rootCA %AWS_IOT_CACERT% --cert %GREENGRASS_DEVICE_CERT% --key %GREENGRASS_DEVICE_KEY% --thingName %GREENGRASS_DEVICE_CLIENTID% --mode %MODE% --topic %TOPIC% --message %MESSAGE%
 
 pause

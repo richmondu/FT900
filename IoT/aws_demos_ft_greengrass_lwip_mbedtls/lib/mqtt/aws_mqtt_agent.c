@@ -33,8 +33,8 @@
 /* MQTT agent includes. */
 #include <iot_secure_sockets.h>
 #include "aws_mqtt_agent.h"
-#include "aws_mqtt_agent_config.h"
-#include "aws_mqtt_agent_config_defaults.h"
+#include "config_files/aws_mqtt_agent_config.h"
+#include "private/aws_mqtt_agent_config_defaults.h"
 
 /* Buffer Pool includes. */
 #include "aws_bufferpool.h"

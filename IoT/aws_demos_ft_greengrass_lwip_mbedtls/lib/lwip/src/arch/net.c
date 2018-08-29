@@ -76,8 +76,10 @@ static fn_status_cb gfn_status = NULL;
 /**
  @brief Default network hostname.
  */
-//static char current_hostname[64] =
-//        {'F','T','9','0','x', 0, 0, 0,};
+#if LWIP_NETIF_HOSTNAME
+static char current_hostname[64] =
+        {'F','T','9','0','x', 0, 0, 0,};
+#endif
 
 /** @brief Pointer to network interface structure.
  * @details This is used by lwIP to address an interface. We have only one interface
@@ -349,7 +351,7 @@ err_t net_init(ip_addr_t ip,
     struct eeprom_net_config er;
 #endif
 
-#if 0
+#if LWIP_NETIF_HOSTNAME
     // Implement defaults if required.
     if (hostname != NULL)
     {

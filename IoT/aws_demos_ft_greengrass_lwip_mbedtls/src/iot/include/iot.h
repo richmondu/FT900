@@ -55,14 +55,14 @@
 
 /* LWIP includes. */
 #include "lwipopts.h"
+
+/* MQTT includes. */
 #include "aws_mqtt_lib.h"
 #include "aws_mqtt_agent.h"
 #include "aws_bufferpool.h"
-
-/* MQTT config includes. */
-#include "aws_bufferpool_config.h"
-#include "aws_mqtt_agent_config.h"
-#include "aws_mqtt_config.h"
+#include "config_files/aws_bufferpool_config.h"
+#include "config_files/aws_mqtt_agent_config.h"
+#include "config_files/aws_mqtt_config.h"
 
 /* MBEDTLS includes. */
 #include "mbedtls_config.h"

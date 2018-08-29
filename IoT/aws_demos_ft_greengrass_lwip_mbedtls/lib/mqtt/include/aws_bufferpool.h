@@ -36,6 +36,7 @@
 #define _AWS_BUFFER_POOL_H_
 
 #include <stdint.h>
+#include "FreeRTOS.h"
 
 /**
  * @brief Initializes the central buffer pool.

@@ -11,7 +11,7 @@
  *   2. disable NET_USE_EEPROM in net.h (to hardcode the MAC address as well)
  *   3. and update ip address, gateway and subnet mask manually for each FT900 device
  */
-#include "iot_secure_sockets.h" // for SOCKETS_inet_addr_quick
+#include "../src/iot/include/iot_secure_sockets.h" // for SOCKETS_inet_addr_quick
 #define IOT_CONFIG_IP_ADDRESS SOCKETS_inet_addr_quick(0, 0, 0, 0)
 #define IOT_CONFIG_IP_GATEWAY SOCKETS_inet_addr_quick(0, 0, 0, 0)
 #define IOT_CONFIG_IP_SUBNET  SOCKETS_inet_addr_quick(255, 255, 255, 0)

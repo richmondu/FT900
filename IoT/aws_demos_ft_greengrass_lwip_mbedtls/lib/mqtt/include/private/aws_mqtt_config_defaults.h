@@ -35,7 +35,7 @@
 
 #ifndef _AWS_MQTT_CONFIG_DEFAULTS_H_
 #define _AWS_MQTT_CONFIG_DEFAULTS_H_
-#include "aws_mqtt_agent_config.h"
+#include "config_files/aws_mqtt_agent_config.h"
 
 /**
  * @brief Enable subscription management.

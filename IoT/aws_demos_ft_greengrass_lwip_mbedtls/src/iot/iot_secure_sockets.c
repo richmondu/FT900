@@ -38,9 +38,7 @@
  * @file secure_sockets.c
  * @brief Secure Socket interface implementation for FT900 board using mbedTLS and LWIP
  */
-#include <iot_clientcredential.h>
-#include <iot_config.h>
-#include <iot_secure_sockets.h>
+
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
@@ -72,7 +70,10 @@
 #include "mbedtls/net_sockets.h"
 #endif // IOT_CONFIG_USE_TLS
 
-
+/* IoT includes. */
+#include "iot_clientcredential.h"
+#include "iot_config.h"
+#include "iot_secure_sockets.h"
 
 
 
