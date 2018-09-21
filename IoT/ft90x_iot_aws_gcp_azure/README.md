@@ -15,11 +15,13 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
 ### Amazon AWS IoT Core
     1. Endpoint: NAME.iot.REGION.amazonaws.com
     2. ClientId: DEVICE_ID
-    3. Username: none
-    4. Password: none
+    3. Username: NONE
+    4. Password: NONE
     5. CA: OPTIONAL
     6. Certificate: REQUIRED
     7. PrivateKey: REQUIRED
+    8. PublishTopic: ANY
+    9. SubscribeTopic: ANY
     * CA, device certificate and private key must be registered in Amazon AWS IoT Core
 
 ### Google Cloud IoT Core
@@ -30,6 +32,8 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
     5. CA: OPTIONAL
     6. Certificate: OPTIONAL
     7. PrivateKey: OPTIONAL
+    8. PublishTopic: /devices/DEVICE_ID/events
+    9. SubscribeTopic: NOT SUPPORTED
     * Device certificate must be registered in Google Cloud IoT Core
 
 ### Microsoft Azure IoT Hub
@@ -40,6 +44,8 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
     5. CA: OPTIONAL
     6. Certificate: OPTIONAL
     7. PrivateKey: OPTIONAL
+    8. PublishTopic: /devices/DEVICE_ID/messages/events
+    9. SubscribeTopic: NOT YET TESTED
     * CA, device certificate and private key are optional.
   
 
