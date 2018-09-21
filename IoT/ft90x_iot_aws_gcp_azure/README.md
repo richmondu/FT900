@@ -8,8 +8,8 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
     3. Improvement of net.c Ethernet abstraction layer for simplification of user application code
     4. MQTT subscription in addition to MQTT publish
     5. Generation of security tokens created with current time retrieved from SNTP server
-    6. Handling of network unplugging and replugging
-It also contains 3 set of device certificates that connects to all 3 cloud services
+    6. Improved handling of network unplugging and replugging for stability and reliability
+    It also contains 3 set of device certificates that connects to all 3 cloud services
 
 
 ### Amazon AWS IoT Core
