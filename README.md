@@ -1,6 +1,6 @@
 # FT900 IoT Demo applications
 
-This contains IoT demo applications for FT900 series of microcontrollers. 
+This contains IoT demo applications for FTDI/Bridgetek's FT900 series of microcontrollers. 
 
 #### FT900 AWS IoT Demo
 - This demonstrates secure MQTT connectivity to Amazon AWS IoT Core and AWS Greengrass using MQTT library from Amazon FreeRTOS.
