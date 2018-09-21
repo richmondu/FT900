@@ -7,7 +7,7 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
     2. Use of LWIP's MQTT library with ALTCP_TLS instead of MQTT library from Amazon FreeRTOS
     3. Improvement of net.c Ethernet abstraction layer for simplification of user application code
     4. MQTT subscription in addition to MQTT publish
-    5. Generation of security tokens parameterized by current time retrieved from SNTP server
+    5. Generation of security tokens created with current time retrieved from SNTP server
 It also contains 3 set of device certificates that connects to all 3 cloud services
 
 
@@ -25,7 +25,7 @@ It also contains 3 set of device certificates that connects to all 3 cloud servi
     1. Endpoint: mqtt.googleapis.com
     2. ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. Username: ANY
-    4. Password: JSON Web Token (JWT) security token (contains signature signed with device private key)
+    4. Password: JSON Web Token (JWT) security token (contains signature created with device private key)
     5. CA: OPTIONAL
     6. Certificate: OPTIONAL
     7. PrivateKey: OPTIONAL
@@ -35,7 +35,7 @@ It also contains 3 set of device certificates that connects to all 3 cloud servi
     1. Endpoint: HUB_NAME.azure-devices.net
     2. ClientId: DEVICE_ID
     3. Username: HUB_NAME/DEVICE_ID
-    4. Password: Shared Access Signature (SAS) security token (contains signature signed with Shared access key)
+    4. Password: Shared Access Signature (SAS) security token (contains signature created with shared access key)
     5. CA: OPTIONAL
     6. Certificate: OPTIONAL
     7. PrivateKey: OPTIONAL
