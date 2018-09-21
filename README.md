@@ -9,3 +9,5 @@ This contains IoT demo applications for FTDI/Bridgetek's FT900 series of microco
 #### FT900 IoT Cloud Demo
 - This demonstrates secure MQTT connectivity to IoT cloud services: Amazon AWS IoT Core, Google Cloud IoT Core, Microsoft Azure IoT Hub.
 - This is currently under development. 
+
+Third-party libraries used: mbedTLS, LWIP, FreeRTOS, tinyprintf
