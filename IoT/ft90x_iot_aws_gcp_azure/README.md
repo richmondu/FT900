@@ -22,8 +22,8 @@ It also contains 3 set of device certificates that connects to all 3 cloud servi
     * CA, device certificate and private key must be registered in Amazon AWS IoT Core
 
 ### Google Cloud IoT Core
-    1. Endpoint: "mqtt.googleapis.com"
-    2. ClientId: "projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID"
+    1. Endpoint: mqtt.googleapis.com
+    2. ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. Username: ANY
     4. Password: JSON Web Token (JWT) security token (contains signature signed with device private key)
     5. CA: OPTIONAL
@@ -32,9 +32,9 @@ It also contains 3 set of device certificates that connects to all 3 cloud servi
     * Device certificate must be registered in Google Cloud IoT Core
 
 ### Microsoft Azure IoT Hub
-    1. Endpoint: "mqtt.googleapis.com"
+    1. Endpoint: HUB_NAME.azure-devices.net
     2. ClientId: DEVICE_ID
-    3. Username: "<HUB_NAME>/<DEVICE_ID>"
+    3. Username: HUB_NAME/DEVICE_ID
     4. Password: Shared Access Signature (SAS) security token (contains signature signed with Shared access key)
     5. CA: OPTIONAL
     6. Certificate: OPTIONAL
