@@ -69,7 +69,8 @@
 static ip_addr_t ip      = IPADDR4_INIT_BYTES(192, 168, 22, 100);
 static ip_addr_t gateway = IPADDR4_INIT_BYTES(192, 168, 22, 1);
 static ip_addr_t mask    = IPADDR4_INIT_BYTES(255, 255, 255, 0);
-static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
+static char hostname[]   = "FT9xx";
+//static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -208,7 +209,9 @@ static void iot_app_task(void *pvParameters)
 {
     (void) pvParameters;
 
-    net_init(ip, gateway, mask, USE_DHCP, dns, NULL, NULL);
+    DEBUG_PRINTF("Task %s started.\r\n", __FUNCTION__);
+
+    net_init(ip, gateway, mask, USE_DHCP, hostname, NULL);
 
     while (1)
     {
@@ -263,7 +266,7 @@ static inline err_t mqtt_connect_async(mqtt_client_t *client, struct altcp_tls_c
         }
         break;
     }
-    while (net_is_link_up());
+    while (net_is_ready());
 
     memset(&ci, 0, sizeof(ci));
     ci.tls_config = config;
@@ -318,7 +321,7 @@ static void mqtt_connect_callback(mqtt_client_t *client, void *arg, mqtt_connect
 
 static inline int mqtt_is_connected(mqtt_client_t *client)
 {
-    return mqtt_client_is_connected(client) && net_is_link_up();
+    return mqtt_client_is_connected(client) && net_is_ready();
 }
 
 static void mqtt_pubsub_callback(void *arg, err_t result)
