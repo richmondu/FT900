@@ -8,12 +8,13 @@
 #define MQTT_BROKER_GCP_IOT           2    // Google Cloud Platform IoT cloud
 #define MQTT_BROKER_MAZ_IOT           3    // Microsoft Azure IoT cloud
 #define MQTT_BROKER_AWS_GREENGRASS    4    // local AWS Greengrass broker
-#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
-#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
+//#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
+//#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
 
 #define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_MAZ_IOT
+//#define USE_MQTT_BROKER               MQTT_BROKER_AWS_GREENGRASS
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -65,6 +66,10 @@
     #define DEVICE_ID                 USE_DEVICE_ID
     #define MQTT_CLIENT_NAME          DEVICE_ID
     #define SHARED_KEY_ACCESS         "H1VCQmfWxjpuq+NY2d/PFbX9N7tyr9cgB5LCTTG0j+o="
+#elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    #define MQTT_BROKER               "192.168.22.12" // local Greengrass server
+    #define DEVICE_ID                 USE_DEVICE_ID
+    #define MQTT_CLIENT_NAME          DEVICE_ID
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -73,9 +78,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Root CA certificate of all the device certificates below
 #if USE_ROOT_CA
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    // This certificate refers to rootca_gg.crt
+    extern __flash__ uint8_t ca_data[]        asm("rootca_gg_crt");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_crt_end");
+#else
     // This certificate refers to rootca.crt
     extern __flash__ uint8_t ca_data[]        asm("rootca_crt");
     extern __flash__ uint8_t ca_data_end[]    asm("rootca_crt_end");
+#endif
 #endif // USE_ROOT_CA
 
 // Device certificates signed by the root CA above

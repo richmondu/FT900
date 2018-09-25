@@ -77,7 +77,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 ///////////////////////////////////////////////////////////////////////////////////
 #define IOT_APP_MODE_PUBLISH   1
 
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
 #define IOT_APP_MODE_SUBSCRIBE 0 // Disabled by default; tested working
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
 #define IOT_APP_MODE_SUBSCRIBE 0 // Disabled by default; tested working for /config not /events
@@ -92,7 +92,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 /* Task configurations. */
 #define IOT_APP_TASK_NAME                "iot_task"
 #define IOT_APP_TASK_PRIORITY            (2)
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
 #define IOT_APP_TASK_STACK_SIZE          (1024)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
 #define IOT_APP_TASK_STACK_SIZE          (1536)
@@ -340,7 +340,7 @@ static inline err_t mqtt_publish_async(mqtt_client_t *client, const char* topic,
 {
     err_t err;
     u8_t retain = 0;
-    u8_t qos = 1;
+    u8_t qos = 0;
 
     err = mqtt_publish(client, topic, msg, msg_len, qos, retain, mqtt_pubsub_callback, "PUBLISH");
     if (err != ERR_OK)
@@ -357,7 +357,7 @@ static inline err_t mqtt_publish_async(mqtt_client_t *client, const char* topic,
 
 static inline int user_generate_publish_topic(char* topic, int size, const char* param)
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     return tfp_snprintf(topic, size, "device/%s/devicePayload", param);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     return tfp_snprintf(topic, size, "/devices/%s/events", (char*)iot_getdeviceid());
@@ -441,7 +441,7 @@ static void mqtt_subscribe_recv_payload(void *arg, const u8_t *data, u16_t len, 
 
 static inline char* user_generate_subscribe_topic()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     // Lets subscribe to the messages we published
     return "device/#";
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
@@ -466,7 +466,7 @@ static void iot_app_process(void)
     err_t err = ERR_OK;
     mqtt_client_t mqtt = {0};
     struct altcp_tls_config *config = NULL;
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     const uint8_t *ca = NULL;
     const uint8_t *cert = NULL;
     const uint8_t *pkey = NULL;
@@ -482,7 +482,7 @@ static void iot_app_process(void)
     // Initialize certificates
     //
 
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     // Amazon AWS IoT requires certificate and private key but ca is optional (but recommended)
     ca = iot_certificate_getca(&ca_len);
     cert = iot_certificate_getcert(&cert_len);
