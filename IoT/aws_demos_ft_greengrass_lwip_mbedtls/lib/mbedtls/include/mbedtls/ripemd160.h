@@ -27,9 +27,9 @@
 #define MBEDTLS_RIPEMD160_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #include <stddef.h>
@@ -57,7 +57,7 @@ typedef struct
 mbedtls_ripemd160_context;
 
 #else  /* MBEDTLS_RIPEMD160_ALT */
-#include "../../../../../src/lib/mbedtls/include/mbedtls/ripemd160.h"
+#include "ripemd160.h"
 #endif /* MBEDTLS_RIPEMD160_ALT */
 
 /**

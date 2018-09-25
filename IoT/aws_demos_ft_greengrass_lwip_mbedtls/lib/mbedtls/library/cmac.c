@@ -45,7 +45,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_CMAC_C)
@@ -830,6 +830,7 @@ static int cmac_test_subkeys( int verbose,
         mbedtls_cipher_free( &ctx );
     }
 
+    ret = 0;
     goto exit;
 
 cleanup:
@@ -885,6 +886,7 @@ static int cmac_test_wth_cipher( int verbose,
         if( verbose != 0 )
             mbedtls_printf( "passed\n" );
     }
+    ret = 0;
 
 exit:
     return( ret );

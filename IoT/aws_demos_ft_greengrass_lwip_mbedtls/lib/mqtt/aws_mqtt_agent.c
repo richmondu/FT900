@@ -31,10 +31,10 @@
  */
 
 /* MQTT agent includes. */
-#include <secure_sockets.h>
+#include <iot_secure_sockets.h>
 #include "aws_mqtt_agent.h"
-#include "aws_mqtt_agent_config.h"
-#include "aws_mqtt_agent_config_defaults.h"
+#include "config_files/aws_mqtt_agent_config.h"
+#include "private/aws_mqtt_agent_config_defaults.h"
 
 /* Buffer Pool includes. */
 #include "aws_bufferpool.h"
@@ -396,7 +396,7 @@ static void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConnection 
  *
  * @param[in] pxSocket The socket on which the data is available for reading.
  */
-static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
+//static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket );
 
 /**
  * @brief Notifies the application task about the received CONNACK message.
@@ -886,6 +886,7 @@ static inline BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEve
 
         if( pxConnection->xSocket != SOCKETS_INVALID_SOCKET )
         {
+#if 0
             /* Set a callback function that will unblock the MQTT task when data
              * is received on a socket. */
             ( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
@@ -893,6 +894,7 @@ static inline BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEve
                                          SOCKETS_SO_WAKEUP_CALLBACK,
                                          ( void * ) prvMQTTClientSocketWakeupCallback, /*lint !e9087 !e9074 The cast is ok as we are setting the callback here. */
                                          sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
+#endif
 
             /* Set secure socket option if it is a secured connection. */
             if( ( pxConnection->uxFlags & mqttCONNECTION_SECURED ) == mqttCONNECTION_SECURED )
@@ -1011,6 +1013,7 @@ static inline void prvGracefulSocketClose( MQTTBrokerConnection_t * const pxConn
 }
 /*-----------------------------------------------------------*/
 
+#if 0
 static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
 {
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 20 );
@@ -1038,6 +1041,8 @@ static void prvMQTTClientSocketWakeupCallback( Socket_t pxSocket )
         ( void ) xQueueSendToBack( xCommandQueue, &xEventData, xTicksToWait );
     }
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 static inline void prvProcessReceivedCONNACK( MQTTBrokerConnection_t * const pxConnection,

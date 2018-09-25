@@ -24,7 +24,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
@@ -53,6 +53,7 @@ static void platform_free_uninit( void *ptr )
 #define MBEDTLS_PLATFORM_STD_FREE     platform_free_uninit
 #endif /* !MBEDTLS_PLATFORM_STD_FREE */
 
+#if defined(FT32_PORT)
 static void * (*mbedtls_calloc_func)( size_t, size_t ) = mbedtls_calloc;
 static void (*mbedtls_free_func)( void * ) = mbedtls_free;
 
@@ -78,6 +79,31 @@ int mbedtls_platform_set_calloc_free( void * (*calloc_func)( size_t, size_t ),
     mbedtls_free_func = mbedtls_free;
     return( 0 );
 }
+#else // FT32_PORT
+
+static void * (*mbedtls_calloc_func)( size_t, size_t ) = MBEDTLS_PLATFORM_STD_CALLOC;
+static void (*mbedtls_free_func)( void * ) = MBEDTLS_PLATFORM_STD_FREE;
+
+void * mbedtls_calloc( size_t nmemb, size_t size )
+{
+    return (*mbedtls_calloc_func)( nmemb, size );
+}
+
+void mbedtls_free( void * ptr )
+{
+    (*mbedtls_free_func)( ptr );
+}
+
+int mbedtls_platform_set_calloc_free( void * (*calloc_func)( size_t, size_t ),
+                              void (*free_func)( void * ) )
+{
+    mbedtls_calloc_func = calloc_func;
+    mbedtls_free_func = free_func;
+    return( 0 );
+}
+
+#endif // FT32_PORT
+
 #endif /* MBEDTLS_PLATFORM_MEMORY */
 
 #if defined(_WIN32)
@@ -125,6 +151,7 @@ static int platform_snprintf_uninit( char * s, size_t n,
 #define MBEDTLS_PLATFORM_STD_SNPRINTF    platform_snprintf_uninit
 #endif /* !MBEDTLS_PLATFORM_STD_SNPRINTF */
 
+#if defined(FT32_PORT)
 int (*mbedtls_snprintf)( char * s, size_t n,
                           const char * format,
                           ... ) = tfp_snprintf;
@@ -136,6 +163,20 @@ int mbedtls_platform_set_snprintf( int (*snprintf_func)( char * s, size_t n,
     mbedtls_snprintf = tfp_snprintf;
     return( 0 );
 }
+#else // FT32_PORT
+int (*mbedtls_snprintf)( char * s, size_t n,
+                          const char * format,
+                          ... ) = MBEDTLS_PLATFORM_STD_SNPRINTF;
+
+int mbedtls_platform_set_snprintf( int (*snprintf_func)( char * s, size_t n,
+                                                 const char * format,
+                                                 ... ) )
+{
+    mbedtls_snprintf = snprintf_func;
+    return( 0 );
+}
+#endif // FT32_PORT
+
 #endif /* MBEDTLS_PLATFORM_SNPRINTF_ALT */
 
 #if defined(MBEDTLS_PLATFORM_PRINTF_ALT)
@@ -152,6 +193,7 @@ static int platform_printf_uninit( const char *format, ... )
 #define MBEDTLS_PLATFORM_STD_PRINTF    platform_printf_uninit
 #endif /* !MBEDTLS_PLATFORM_STD_PRINTF */
 
+#if defined(FT32_PORT)
 int (*mbedtls_printf)( const char *, ... ) = tfp_printf;
 
 int mbedtls_platform_set_printf( int (*printf_func)( const char *, ... ) )
@@ -159,6 +201,16 @@ int mbedtls_platform_set_printf( int (*printf_func)( const char *, ... ) )
     mbedtls_printf = tfp_printf;
     return( 0 );
 }
+#else // FT32_PORT
+int (*mbedtls_printf)( const char *, ... ) = MBEDTLS_PLATFORM_STD_PRINTF;
+
+int mbedtls_platform_set_printf( int (*printf_func)( const char *, ... ) )
+{
+    mbedtls_printf = printf_func;
+    return( 0 );
+}
+#endif // FT32_PORT
+
 #endif /* MBEDTLS_PLATFORM_PRINTF_ALT */
 
 #if defined(MBEDTLS_PLATFORM_FPRINTF_ALT)

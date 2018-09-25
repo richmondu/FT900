@@ -27,15 +27,15 @@
 #define MBEDTLS_DEBUG_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "mbedtls/ssl.h"
+#include "ssl.h"
 
 #if defined(MBEDTLS_ECP_C)
-#include "mbedtls/ecp.h"
+#include "ecp.h"
 #endif
 
 #if defined(MBEDTLS_DEBUG_C)
@@ -69,7 +69,6 @@
 
 #else /* MBEDTLS_DEBUG_C */
 
-//#define MBEDTLS_SSL_DEBUG_MSG( level, args )            tfp_printf args
 #define MBEDTLS_SSL_DEBUG_MSG( level, args )            do { } while( 0 )
 #define MBEDTLS_SSL_DEBUG_RET( level, text, ret )       do { } while( 0 )
 #define MBEDTLS_SSL_DEBUG_BUF( level, text, buf, len )  do { } while( 0 )

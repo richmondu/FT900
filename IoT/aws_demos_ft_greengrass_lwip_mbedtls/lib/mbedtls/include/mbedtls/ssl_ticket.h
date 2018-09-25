@@ -32,11 +32,11 @@
  * secrecy, when MBEDTLS_HAVE_TIME is defined.
  */
 
-#include "mbedtls/cipher.h"
-#include "mbedtls/ssl.h"
+#include "ssl.h"
+#include "cipher.h"
 
 #if defined(MBEDTLS_THREADING_C)
-#include "mbedtls/threading.h"
+#include "threading.h"
 #endif
 
 #ifdef __cplusplus

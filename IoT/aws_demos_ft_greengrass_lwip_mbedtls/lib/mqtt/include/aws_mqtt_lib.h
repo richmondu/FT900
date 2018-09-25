@@ -37,12 +37,12 @@
  * providing MQTTConfig.h. All the config values in this case are
  * taken from MQTTConfigDefaults.h. */
 #ifndef mqttDO_NOT_USE_CUSTOM_CONFIG
-    #include "aws_mqtt_config.h"
+    #include "config_files/aws_mqtt_config.h"
 #endif
-#include "aws_mqtt_config_defaults.h"
+#include "private/aws_mqtt_config_defaults.h"
 
 /* MQTT buffer includes. */
-#include "aws_mqtt_buffer.h"
+#include "private/aws_mqtt_buffer.h"
 
 /**
  * @defgroup FixedHeaderSize Macros to define MQTT fixed header size.

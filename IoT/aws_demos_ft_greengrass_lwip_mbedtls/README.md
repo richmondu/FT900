@@ -1,9 +1,17 @@
+### FT900 AWS IoT Dashboard Solution
+
+An end-to-end dashboard IoT solution has been created for FTDI-Bridgetek's FT900 series of microcontrollers that securely connect to AWS cloud services using AmazonMQTT (MQTT library from Amazon FreeRTOS SDK) on mbedTLS and LWIP over Ethernet connection. The backend cloud solution utilizes various Amazon cloud services such as IoT Core, Greengrass, Lambda, API Gateway, DynamoDB, SNS and S3 for time series data visualization of sensor connected to FT900 MCU. Below is the system architecture diagram of the IoT solution. 
+
+![](https://github.com/richmondu/FT900/blob/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls/doc/FT900%20AWS%20IoT%20-%20System%20Architecture.jpeg)
+
+
+### mbedTLS Integration
+
 MbedTLS has been integrated to FT900 to enable secure IoT connectivity via MQTT protocol over LWIP running on Ethernet connection. 
 This enables FT900 to communicate with MQTT brokers that require secure TLS/SSL connection, 
 such as Amazon AWS Greengrass and AWS IoT cloud, as well as local Mosquitto broker (with TLS/SSL enabled).
 
-
-### mbedTLS configuration
+mbedTLS configuration
 
 1. The TLS client configuration for FT900 AWS IoT demo only enables the following ciphersuites due to memory constraints.
 
@@ -19,6 +27,8 @@ such as Amazon AWS Greengrass and AWS IoT cloud, as well as local Mosquitto brok
 
    Additional ciphersuites may be later added to support Microsoft Azure and Google Cloud.
 
+   Update: ECDHE_RSA and AES_GCM ciphersuites have been supported. 
+   These stronger ciphersuites can be enabled via a macro (See Security section below).
 
 2. To use these 2 ciphersuites, the following macros and its dependencies are enabled:
 
@@ -105,6 +115,14 @@ This application has been tested to work successfully with the following test se
       - then subscribe to mosquitto broker using mosquitto_sub.exe to verify packets sent
 
 
+### Test simulators
+Simulators for FT900 device has been provided. This can be used for testing the backend cloud solution. Refer to the test folder.
+
+1. Javascript code for MQTT.FX
+2. Python code using AWS IoT SDK API for Python
+
+
+
 ### Troubleshooting utilities
 
 1. MQTT.FX is a helpful GUI-based MQTT client tool which can be used for troubleshooting MQTT connection
@@ -117,22 +135,26 @@ This application has been tested to work successfully with the following test se
 
 ### Memory footprint
 
-1. The available memory footprint for sensor data has been tripled from 25kB to 75kB.
-   1. code size for AWS Greengrass demo: 181 kB (70% of 256 kB)
+1. The available program memory for sensor data has been tripled from 25kB to 75kB.
+   1. Program memory for AWS Greengrass demo: 181 kB (70% of 256 kB)
       - text: 130856 (128 kB)
       - data: 23332 (22 kB)
       - bss:  30292 (30 kB)
       - total: 181 kB flash memory (70% of 256 kB)
       - available memory for sensor data: 75 kB (30% of 256 kB)
-   2. code size for different test combinations:
+   2. Program memory for different test combinations:
       - AWS_GREENGRASS, release mode: 184892 (181 kB)
       - AWS_GREENGRASS, debug mode: 216012 (211 kB)
       - AWS_IOT, release mode: 198848 (194 kB)
       - AWS_IOT, debug mode: 233200 (228 kB)
       - MOSQUITTO, release mode: 198416 (194 kB)
       - MOSQUITTO, debug mode: 230824 (225 kB)
+      
+2. The available data memory for sensor data has been increased by 3KB (or 4.5kb when ROOTCA is enabled),
+   1. Data memory for AWS Greengrass demo: 51kb (13kb available for sensor code)
+   2. Data memory for AWS IoT demo: 56kb (8kb available for sensor code)
 
-2. The optimizations performed include the following:
+3. The optimizations performed include the following:
    1. Use small send and recv buffer size of MQTT
       Whats the use of big buffers if our MQTT packets are small.
       Set these buffers small but big enough to fit our expected send and recv packets.
@@ -157,6 +179,12 @@ This application has been tested to work successfully with the following test se
       Provided centralized debugging macro for minimal and verbose debug logs.
    10. Removed 1 unnecessary macro in mbedTLS configuration.
       Also used mbedTLS configurables intended for memory footprint optimization.
+   11. Move certificates (CA certificate, device certificate, device private key) from data section to text section, 
+       that is from data memory to program memory using __flash__ and memcpy_pm2dat.
+       Then data is loaded to heap memory and immediately freed after calling mbedTLS function
+       since the mbedTLS function allocates heap memory and performs deep copy.
+       Since we already have a lots of program memory available, 
+       this helps provide a balanced memory headroom (data memory and program memory) for the sensor integration.
 
 
 ### Scalability
@@ -183,7 +211,7 @@ This application has been tested to work successfully with the following test se
    - It can be enabled by setting the macro USE_ROOTCA
    - Advantage: prevent man-in-the-middle attacks
    - Disadvantage: enabling this adds 2kb memory footprint (for DEBUG mode).
-   - Note that this has been tested working on AWS Greengrass scenario. Not yet tested on AWS IoT scenario due to data memory issue.
+   - Note that this has been tested working on AWS Greengrass and AWS IoT brokers.
    - For production release, server certificate verification is a must.
    
 2. Elliptic Curve Cryptography (ECC) ciphersuite support and AES_GCM support
@@ -200,3 +228,21 @@ This application has been tested to work successfully with the following test se
       - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
       - MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
    - By default, USE_CIPHERSUITE is set to CIPHERSUITE_OPTION_1 which is a good enough encryption.
+   
+
+### AWS Cloud 
+
+#### Back-end
+   0. FT900
+   1. Greengrass
+   2. IoT
+   3. Lambda
+   4. DynamoDB
+   5. SNS
+   
+#### Front-end 
+   0. Browser
+   1. S3
+   2. API Gateway
+   3. Lambda
+   4. DynamoDB

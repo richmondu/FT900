@@ -26,32 +26,34 @@
 #ifndef MBEDTLS_SSL_INTERNAL_H
 #define MBEDTLS_SSL_INTERNAL_H
 
-#include "mbedtls/cipher.h"
-#include "mbedtls/ssl.h"
+#include "ssl.h"
+#include "cipher.h"
 
 #if defined(MBEDTLS_MD5_C)
-#include "mbedtls/md5.h"
+#include "md5.h"
 #endif
 
 #if defined(MBEDTLS_SHA1_C)
-#include "mbedtls/sha1.h"
+#include "sha1.h"
 #endif
 
 #if defined(MBEDTLS_SHA256_C)
-#include "mbedtls/sha256.h"
+#include "sha256.h"
 #endif
 
 #if defined(MBEDTLS_SHA512_C)
-#include "mbedtls/sha512.h"
+#include "sha512.h"
 #endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
-#include "mbedtls/ecjpake.h"
+#include "ecjpake.h"
 #endif
 
+#if defined(FT32_PORT)
 #if defined(MBEDTLS_ECDH_C)
-#include "mbedtls/ecdh.h"
-#endif
+#include "ecdh.h"
+#endif // MBEDTLS_ECDH_C
+#endif // FT32_PORT
 
 #if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
     !defined(inline) && !defined(__cplusplus)
@@ -149,32 +151,73 @@
 #define MBEDTLS_SSL_PADDING_ADD              0
 #endif
 
-#define MBEDTLS_SSL_PAYLOAD_LEN ( MBEDTLS_SSL_MAX_CONTENT_LEN    \
-                        + MBEDTLS_SSL_COMPRESSION_ADD            \
-                        + MBEDTLS_MAX_IV_LENGTH                  \
-                        + MBEDTLS_SSL_MAC_ADD                    \
-                        + MBEDTLS_SSL_PADDING_ADD                \
-                        )
+#define MBEDTLS_SSL_PAYLOAD_OVERHEAD ( MBEDTLS_SSL_COMPRESSION_ADD +    \
+                                       MBEDTLS_MAX_IV_LENGTH +          \
+                                       MBEDTLS_SSL_MAC_ADD +            \
+                                       MBEDTLS_SSL_PADDING_ADD          \
+                                       )
+
+#define MBEDTLS_SSL_IN_PAYLOAD_LEN ( MBEDTLS_SSL_PAYLOAD_OVERHEAD + \
+                                     ( MBEDTLS_SSL_IN_CONTENT_LEN ) )
+
+#define MBEDTLS_SSL_OUT_PAYLOAD_LEN ( MBEDTLS_SSL_PAYLOAD_OVERHEAD + \
+                                      ( MBEDTLS_SSL_OUT_CONTENT_LEN ) )
+
+/* Maximum length we can advertise as our max content length for
+   RFC 6066 max_fragment_length extension negotiation purposes
+   (the lesser of both sizes, if they are unequal.)
+ */
+#define MBEDTLS_TLS_EXT_ADV_CONTENT_LEN (                            \
+        (MBEDTLS_SSL_IN_CONTENT_LEN > MBEDTLS_SSL_OUT_CONTENT_LEN)   \
+        ? ( MBEDTLS_SSL_OUT_CONTENT_LEN )                            \
+        : ( MBEDTLS_SSL_IN_CONTENT_LEN )                             \
+        )
 
 /*
  * Check that we obey the standard's message size bounds
  */
 
 #if MBEDTLS_SSL_MAX_CONTENT_LEN > 16384
-#error Bad configuration - record content too large.
+#error "Bad configuration - record content too large."
 #endif
 
-#if MBEDTLS_SSL_PAYLOAD_LEN > 16384 + 2048
-#error Bad configuration - protected record payload too large.
+#if MBEDTLS_SSL_IN_CONTENT_LEN > MBEDTLS_SSL_MAX_CONTENT_LEN
+#error "Bad configuration - incoming record content should not be larger than MBEDTLS_SSL_MAX_CONTENT_LEN."
 #endif
+
+#if MBEDTLS_SSL_OUT_CONTENT_LEN > MBEDTLS_SSL_MAX_CONTENT_LEN
+#error "Bad configuration - outgoing record content should not be larger than MBEDTLS_SSL_MAX_CONTENT_LEN."
+#endif
+
+#if MBEDTLS_SSL_IN_PAYLOAD_LEN > MBEDTLS_SSL_MAX_CONTENT_LEN + 2048
+#error "Bad configuration - incoming protected record payload too large."
+#endif
+
+#if MBEDTLS_SSL_OUT_PAYLOAD_LEN > MBEDTLS_SSL_MAX_CONTENT_LEN + 2048
+#error "Bad configuration - outgoing protected record payload too large."
+#endif
+
+/* Calculate buffer sizes */
 
 /* Note: Even though the TLS record header is only 5 bytes
    long, we're internally using 8 bytes to store the
    implicit sequence number. */
 #define MBEDTLS_SSL_HEADER_LEN 13
 
-#define MBEDTLS_SSL_BUFFER_LEN  \
-    ( ( MBEDTLS_SSL_HEADER_LEN ) + ( MBEDTLS_SSL_PAYLOAD_LEN ) )
+#define MBEDTLS_SSL_IN_BUFFER_LEN  \
+    ( ( MBEDTLS_SSL_HEADER_LEN ) + ( MBEDTLS_SSL_IN_PAYLOAD_LEN ) )
+
+#define MBEDTLS_SSL_OUT_BUFFER_LEN  \
+    ( ( MBEDTLS_SSL_HEADER_LEN ) + ( MBEDTLS_SSL_OUT_PAYLOAD_LEN ) )
+
+#ifdef MBEDTLS_ZLIB_SUPPORT
+/* Compression buffer holds both IN and OUT buffers, so should be size of the larger */
+#define MBEDTLS_SSL_COMPRESS_BUFFER_LEN (                               \
+        ( MBEDTLS_SSL_IN_BUFFER_LEN > MBEDTLS_SSL_OUT_BUFFER_LEN )      \
+        ? MBEDTLS_SSL_IN_BUFFER_LEN                                     \
+        : MBEDTLS_SSL_OUT_BUFFER_LEN                                    \
+        )
+#endif
 
 /*
  * TLS extension flags (for extensions with outgoing ServerHello content

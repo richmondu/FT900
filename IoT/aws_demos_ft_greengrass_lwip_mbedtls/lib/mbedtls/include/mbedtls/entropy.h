@@ -27,29 +27,29 @@
 #define MBEDTLS_ENTROPY_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
-#include "mbedtls_config.h"//MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #include <stddef.h>
 
 #if defined(MBEDTLS_SHA512_C) && !defined(MBEDTLS_ENTROPY_FORCE_SHA256)
-#include "mbedtls/sha512.h"
+#include "sha512.h"
 #define MBEDTLS_ENTROPY_SHA512_ACCUMULATOR
 #else
 #if defined(MBEDTLS_SHA256_C)
 #define MBEDTLS_ENTROPY_SHA256_ACCUMULATOR
-#include "mbedtls/sha256.h"
+#include "sha256.h"
 #endif
 #endif
 
 #if defined(MBEDTLS_THREADING_C)
-#include "mbedtls/threading.h"
+#include "threading.h"
 #endif
 
 #if defined(MBEDTLS_HAVEGE_C)
-#include "mbedtls/havege.h"
+#include "havege.h"
 #endif
 
 #define MBEDTLS_ERR_ENTROPY_SOURCE_FAILED                 -0x003C  /**< Critical entropy source failure. */
@@ -128,9 +128,13 @@ typedef struct
 #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
     mbedtls_sha512_context  accumulator;
 #else
+#if defined(FT32_PORT)
 #if defined(MBEDTLS_SHA256_C)
     mbedtls_sha256_context  accumulator;
-#endif
+#endif // MBEDTLS_SHA256_C
+#else // FT32_PORT
+    mbedtls_sha256_context  accumulator;
+#endif // FT32_PORT
 #endif
     int             source_count;
     mbedtls_entropy_source_state    source[MBEDTLS_ENTROPY_MAX_SOURCES];
