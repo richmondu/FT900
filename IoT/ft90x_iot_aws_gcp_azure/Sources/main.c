@@ -66,8 +66,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /* Default network configuration. */
 #define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-static ip_addr_t ip      = IPADDR4_INIT_BYTES(192, 168, 254, 100);
-static ip_addr_t gateway = IPADDR4_INIT_BYTES(192, 168, 254, 254);
+static ip_addr_t ip      = IPADDR4_INIT_BYTES(192, 168, 22, 100);
+static ip_addr_t gateway = IPADDR4_INIT_BYTES(192, 168, 22, 1);
 static ip_addr_t mask    = IPADDR4_INIT_BYTES(255, 255, 255, 0);
 static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 ///////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
 #define IOT_APP_MODE_SUBSCRIBE 0 // Disabled by default; tested working
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-#define IOT_APP_MODE_SUBSCRIBE 0 // Google Cloud IoT does not support MQTT Subscribe
+#define IOT_APP_MODE_SUBSCRIBE 0 // Disabled by default; tested working for /config not /events
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
 #define IOT_APP_MODE_SUBSCRIBE 0 // Not yet tested
 #endif
@@ -445,8 +445,11 @@ static inline char* user_generate_subscribe_topic()
     // Lets subscribe to the messages we published
     return "device/#";
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    // Google does not support MQTT subscribe; Theres a different protocol to subscribe.
-    return NULL;
+    // Google Cloud does not seem to support MQTT subscribe for telemetry events, only for config
+    static char topic[64] = {0};
+    tfp_snprintf(topic, sizeof(topic), "/devices/%s/config", (char*)iot_getdeviceid());
+    //tfp_snprintf(topic, sizeof(topic), "/devices/%s/events", (char*)iot_getdeviceid());
+    return topic;
 #else
     return NULL;
 #endif

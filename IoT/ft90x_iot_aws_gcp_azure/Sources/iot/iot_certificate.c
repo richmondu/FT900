@@ -1,10 +1,10 @@
 #include "ft900.h"
-#include "FreeRTOS.h" // For pvPortMalloc
-#include "iot_config.h"      // For USE_MQTT_BROKER
+#include "FreeRTOS.h"   // For pvPortMalloc
+#include "iot_config.h" // For USE_MQTT_BROKER
 
 
 
-static const
+static const inline
 uint8_t* certificate_get(__flash__ uint8_t* data, __flash__ uint8_t* data_end, size_t* len)
 {
     uint8_t *buf = NULL;
