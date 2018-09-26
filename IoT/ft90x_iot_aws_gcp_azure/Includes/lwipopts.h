@@ -118,7 +118,7 @@
  * Enable Internet Control Message Protocol
  * Allow support for ICMP which includes ping.
  */
-#define LWIP_ICMP                  0
+#define LWIP_ICMP                  1
 
 /* LWIP_SNMP
  * Disable Simple Network Management Protocol
