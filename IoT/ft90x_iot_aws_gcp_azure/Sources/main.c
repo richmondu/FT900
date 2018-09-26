@@ -66,9 +66,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /* Default network configuration. */
 #define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-static ip_addr_t ip      = IPADDR4_INIT_BYTES(192, 168, 22, 100);
-static ip_addr_t gateway = IPADDR4_INIT_BYTES(192, 168, 22, 1);
-static ip_addr_t mask    = IPADDR4_INIT_BYTES(255, 255, 255, 0);
+static ip_addr_t ip      = IPADDR4_INIT_BYTES(0, 0, 0, 0);
+static ip_addr_t gateway = IPADDR4_INIT_BYTES(0, 0, 0, 0);
+static ip_addr_t mask    = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 static char hostname[]   = "FT9xx";
 //static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 ///////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ static inline void uart_setup()
     gpio_function(49, pad_func_3);
 
     uart_open(UART0, 1,
-            UART_DIVIDER_9600_BAUD, uart_data_bits_8, uart_parity_none,
+            UART_DIVIDER_115200_BAUD, uart_data_bits_8, uart_parity_none,
             uart_stop_bits_1);
     /* Enable tfp_printf() functionality... */
     init_printf(UART0, myputc);
@@ -217,7 +217,7 @@ static void iot_app_task(void *pvParameters)
     {
         /* Wait for valid IP address */
         DEBUG_PRINTF("Waiting for configuration...");
-        while (net_get_ip().addr == IPADDR_ANY) {
+        while (!net_is_ready()) {
             vTaskDelay(pdMS_TO_TICKS(500));
             DEBUG_PRINTF(".");
         }
