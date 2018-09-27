@@ -140,7 +140,7 @@ struct eeprom_net_config {
  */
 #if LWIP_NETIF_HOSTNAME
 static char default_hostname[8] =
-{'F','T','9','0','x', 0, 0, 0};
+        {'F','T','9','0','x', 0, 0, 0,};
 #endif
 
 /** @brief Pointer to network interface structure.
@@ -553,7 +553,7 @@ err_t net_tick(void)
  */
 err_t net_init(ip_addr_t ip,
         ip_addr_t gw, ip_addr_t mask,
-		int dhcp, char *hostname,
+        int dhcp, ip_addr_t dns, char *hostname,
         fn_status_cb pfn_status)
 {
 #if NET_USE_EEPROM
@@ -689,12 +689,23 @@ err_t net_init(ip_addr_t ip,
 #if LWIP_DHCP
 	/* Start DHCP if requested. */
 	if (g_dhcp)
-{
+	{
 		NET_DEBUG_PRINTF("DHCP starting...\r\n");
 		dhcp_start(&g_netif);
 		g_dhcp = 1;
-}
-#endif
+	}
+	else
+#endif // LWIP_DHCP
+	{
+#if LWIP_DNS
+		/* Add DNS server specified by application. */
+		ip_addr_t dnsserver = { dns.addr };
+		if (dnsserver.addr != 0) 
+		{
+			dns_setserver(0, &dnsserver);
+		}
+#endif // LWIP_DNS
+	}
 
 	/* All done. Application must wait for net_is_ready to return
 	 * non-zero before starting applications. */

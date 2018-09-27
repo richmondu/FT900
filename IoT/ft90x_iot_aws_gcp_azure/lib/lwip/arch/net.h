@@ -87,7 +87,7 @@ typedef void (*fn_status_cb)(int callback);
 
 err_t net_init(ip_addr_t ip,
 		ip_addr_t gw, ip_addr_t mask,
-		int dhcp, char *hostname,
+		int dhcp, ip_addr_t dns, char *hostname,
 		fn_status_cb pfn_status);
 struct netif* net_get_netif();
 uint8_t net_is_ready(void);

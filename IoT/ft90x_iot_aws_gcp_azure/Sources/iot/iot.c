@@ -43,7 +43,7 @@ extern uint32_t iot_sntp_get_time();
 
 void iot_init()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT) || USE_PAYLOAD_TIMESTAMP
     // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
     iot_sntp_start();
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -52,7 +52,7 @@ void iot_init()
 
 void iot_free()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT) || USE_PAYLOAD_TIMESTAMP
     // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
     iot_sntp_stop();
 #endif
@@ -103,8 +103,20 @@ const char* iot_getusername()
 const char* iot_getpassword()
 {
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+
+#if USE_PAYLOAD_TIMESTAMP
+    DEBUG_PRINTF("Waiting time request...");
+    do {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        DEBUG_PRINTF(".");
+    }
+    while (!iot_sntp_get_time() && net_is_ready());
+    DEBUG_PRINTF("done!\r\n\r\n");
+#endif
+
     return NULL;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
+
     const uint8_t *pkey = NULL;
     size_t pkey_len = 0;
 
@@ -116,7 +128,7 @@ const char* iot_getpassword()
             vTaskDelay(pdMS_TO_TICKS(1000));
             DEBUG_PRINTF(".");
         }
-        while (!iot_sntp_get_time() && net_is_link_up());
+        while (!iot_sntp_get_time() && net_is_ready());
         DEBUG_PRINTF("done!\r\n\r\n");
 
         token = token_create_jwt(PROJECT_ID, pkey, pkey_len, iot_sntp_get_time());
@@ -124,7 +136,9 @@ const char* iot_getpassword()
     }
 
     return token;
+
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+
     static char resourceUri[64] = {0};
     tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
 
@@ -135,11 +149,12 @@ const char* iot_getpassword()
         vTaskDelay(pdMS_TO_TICKS(1000));
         DEBUG_PRINTF(".");
     }
-    while (!iot_sntp_get_time() && net_is_link_up());
+    while (!iot_sntp_get_time() && net_is_ready());
     DEBUG_PRINTF("Waiting time request...done!\r\n\r\n");
 
     token = token_create_sas(resourceUri, SHARED_KEY_ACCESS, iot_sntp_get_time());
     return token;
+
 #else
     return NULL;
 #endif
