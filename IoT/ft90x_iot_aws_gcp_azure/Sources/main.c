@@ -70,6 +70,7 @@ static ip_addr_t ip      = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 static ip_addr_t gateway = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 static ip_addr_t mask    = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
+static char hostname[]   = "FT9xx";
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -145,7 +146,7 @@ static inline void uart_setup()
     gpio_function(49, pad_func_3);
 
     uart_open(UART0, 1,
-            UART_DIVIDER_9600_BAUD, uart_data_bits_8, uart_parity_none,
+            UART_DIVIDER_115200_BAUD, uart_data_bits_8, uart_parity_none,
             uart_stop_bits_1);
     /* Enable tfp_printf() functionality... */
     init_printf(UART0, myputc);
@@ -208,7 +209,9 @@ static void iot_app_task(void *pvParameters)
 {
     (void) pvParameters;
 
-    net_init(ip, gateway, mask, USE_DHCP, dns, NULL, NULL);
+    DEBUG_PRINTF("Task %s started.\r\n", __FUNCTION__);
+
+    net_init(ip, gateway, mask, USE_DHCP, dns, hostname, NULL);
 
     while (1)
     {
@@ -513,16 +516,16 @@ static void iot_app_process(void)
     ca = iot_certificate_getca(&ca_len);
     cert = iot_certificate_getcert(&cert_len);
     pkey = iot_certificate_getpkey(&pkey_len);
-    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, cert, cert_len, pkey, pkey_len);
+    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len);
     vPortFree((uint8_t *)cert);
     vPortFree((uint8_t *)pkey);
     vPortFree((uint8_t *)ca);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     // Google GCP IoT requires JWT token (created with private key) as MQTT password; no certificate needs to be sent
-    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
+    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0, NULL, 0);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     // Microsoft Azure IoT requires SAS token (created with shared access key) as MQTT password; no certificates need to be sent
-    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
+    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0, NULL, 0);
 #endif
     if (config == NULL)
     {

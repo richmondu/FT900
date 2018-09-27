@@ -42,22 +42,44 @@
  */
 
 #include "netif_arch.h"
+#include "net.h"
+#include "lwipopts.h"
 
-// Use TCP_MSS instead of hardcoded 1500
-// Note that TCP_MSS can be lowered for RAM purposes
-// All peers will understand this and only send small packets
+/** @brief Use TCP_MSS instead of hardcoded 1500.
+ * @details Note that TCP_MSS can be lowered for RAM purposes.
+ * All peers will understand this and only send small packets.
+ */
+#ifndef USE_TCP_MSS_VALUE
 #define USE_TCP_MSS_VALUE 1
+#endif // USE_TCP_MSS_VALUE
 
-// Use task notification instead of polling
-#define FIX_POLLING_BEHAVIOR 0
+/** @brief Use task notification instead of polling.
+ * @details A callback to the net.c code will be used if there
+ * is a received packet to be dealt with by lwIP.
+ * The callback will be performed at IRQ level.
+ */
+#ifndef FT9XX_PACKET_CALLBACK
+#define FT9XX_PACKET_CALLBACK 1
+#endif // FT9XX_PACKET_CALLBACK
 
-
+/** @brief Use safe write to Ethernet FIFO for Rev B devices.
+ * @details Normally writing to the FIFO will be done with a
+ * streamout assembler command. This can be changed to a discrete
+ * register write to overcome a streamout FIFO issue in Rev B
+ * silicon.
+ * When used the time taken to write to the FIFO increases by
+ * 2.2 to 2.5 times depending on packet size.
+ * NOTE: This does not affect Rev C silicon. This macro can be
+ * set to zero if
+ */
+#ifndef FT9XX_REV_B_SAFEWRITE
+#define FT9XX_REV_B_SAFEWRITE 1
+#endif // FT9XX_REV_B_SAFEWRITE
 
 #define MIN(a,b) ((a<b)?a:b)
 #define ARCH_HW_HLEN ETH_PAD_SIZE
 
 #if USE_TCP_MSS_VALUE
-#include "lwipopts.h"
 #define FT900_MAX_PACKET ((TCP_MSS+40) + ETHERNET_WRITE_HEADER + ARCH_HW_HLEN + sizeof(uint32_t))
 #else // USE_TCP_MSS_VALUE
 #define FT900_MAX_PACKET (1500 + ETHERNET_WRITE_HEADER + ARCH_HW_HLEN + sizeof(uint32_t))
@@ -75,13 +97,17 @@ extern u32_t millis(void);
 
 static struct ifstats  arch_ft900_stats = {0};
 
+#if FT9XX_REV_B_SAFEWRITE
+static uint8_t revB;
+#endif // FT9XX_REV_B_SAFEWRITE
+
 /* Reserve space to receive up to 2 packets at a time from the Ethernet interface.
  */
-static uint8_t netif_rx_data[2 * FT900_MAX_PACKET] = {0xff};
+static uint8_t netif_rx_data[2 * FT900_MAX_PACKET];
 
 static void arch_ft900_ethernet_ISR(void);
 
-#if 0
+#if LWIP_STATS
 void arch_ft900_stats_display()
 {
 	LWIP_PLATFORM_DIAG(("\nFT900\n\t"));
@@ -122,6 +148,10 @@ err_t arch_ft900_igmp_mac_filter(struct netif *netif,
 err_t arch_ft900_init(struct netif *netif)
 {
 	LWIP_DEBUGF(NETIF_DEBUG, ("arch_ft900_init: FT900 Driver init called\r\n"));
+
+#if FT9XX_REV_B_SAFEWRITE
+	revB = sys_check_ft900_revB();
+#endif // FT9XX_REV_B_SAFEWRITE
 
 	// Setup lwIP arch interface.
 	netif->output = etharp_output;
@@ -209,7 +239,7 @@ err_t arch_ft900_link_output(struct netif *netif, struct pbuf *pfirst)
 	/* Check to see if transmission is enabled. */
 	if ((ETH->ETH_TX_CNTL & MASK_ETH_TCR_TX_ENABLE) == 0)
 	{
-		/* Tranmit is disabled. */
+		/* Transmit is disabled. */
 		return -1;
 	}
 
@@ -315,7 +345,9 @@ err_t arch_ft900_link_output(struct netif *netif, struct pbuf *pfirst)
 							/* Use a memcpy.b op code to copy bytewise from the
 							 * original pbuf to the new pbuf.
 							 */
+							CRITICAL_SECTION_BEGIN
 							__asm__("memcpy.b %0,%1,%2" : :"r"(dest), "r"(src), "r"(size));
+							CRITICAL_SECTION_END
 
 							/* Adjust the new pbuf with the sizes of the original
 							 * pbufs. The original pbufs are not modified or freed
@@ -342,9 +374,29 @@ err_t arch_ft900_link_output(struct netif *netif, struct pbuf *pfirst)
 			/* Stream the aligned buffer to the ethernet transmit buffer.
 			 * The settings for lwIP in lwipopts.h prevent us overflowing
 			 * the 2 kB buffer.
-			 */
+			 * NOTE: Maximum length of streamin transfer is 2047 bytes. */
 			LWIP_DEBUGF(NETIF_DEBUG, ("arch_ft900_link_output: streaming %"U32_F"\n", size));
+
+#if FT9XX_REV_B_SAFEWRITE
+			if (!revB)
+#endif // FT9XX_REV_B_SAFEWRITE
+			{
+				CRITICAL_SECTION_BEGIN
 			__asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size));
+				CRITICAL_SECTION_END
+			}
+#if FT9XX_REV_B_SAFEWRITE
+			else
+			{
+				CRITICAL_SECTION_BEGIN
+				while (size > 0)
+				{
+					*data_reg = *src++;
+					size -= 4;
+				}
+				CRITICAL_SECTION_END
+			}
+#endif // FT9XX_REV_B_SAFEWRITE
 
 			/* Send the packet! */
 			ETH->ETH_TR_REQ = MASK_ETH_TRR_NEXTX;
@@ -427,6 +479,8 @@ static void arch_ft900_ethernet_ISR(void)
 		/* Number of packets waiting in hardware Rx FIFO. */
 		uint32_t c0;
 
+		/* Collect any packets in Rx FIFO into RAM. */
+
 		/* How many packets have been received and are
 		 * waiting in the Rx FIFO.
 		 */
@@ -444,12 +498,14 @@ static void arch_ft900_ethernet_ISR(void)
 		/* Move pointer to next dword in destination buffer. */
 		dst++;
 
-		/* Calculate length of packet (excluding first dword). */
+		/* Calculate length of packet (excluding first dword).
+		 * NOTE: Maximum length of streamin transfer is 2047 bytes. */
 		w0 &= 0x07ff;
 		w0 -= 1;
 		w0 &= (~3);
 
-		/* Get the remaining packet data in using the streamin.l opcode. */
+		/* Get the remaining packet data in using the streamin.l opcode.
+		 * This occurs at IRQ level so will not be interrupted. */
 		__asm__("streamin.l %0,%1,%2" : :"r"(dst), "r"(data_reg), "r"(w0));
 
 		/* Update destination pointer to point to the end
@@ -458,12 +514,10 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		dst = (uint32_t *)(((uint8_t *)dst) + w0);
 
-		//tfp_printf("w0=%d\r\n", w0);
-
 		/* Reduce available space for new packets. */
 		rlen -= w0;
-		/* Read any more packets available. */
 
+		/* Read any more packets available. */
 		loopstop:
 
 		/* Write end of packets marker in destination buffer. */
@@ -474,9 +528,9 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		arch_ft900_recv_off();
 
-#if FIX_POLLING_BEHAVIOR
+#if FT9XX_PACKET_CALLBACK
 		net_packet_available();
-#endif //FIX_POLLING_BEHAVIOR
+#endif //FT9XX_PACKET_CALLBACK
 	}
 
 	if (isr & MASK_ETH_IACK_TX_EMPTY)
@@ -546,7 +600,9 @@ err_t arch_ft900_tick(struct netif *netif)
 				dst = (uint32_t*)pnew->payload;
 
 				/* Copy from receive buffer to aligned pbuf payload. */
+				CRITICAL_SECTION_BEGIN
 				__asm__("memcpy.l %0,%1,%2" : :"r"(dst), "r"(src), "r"(len32));
+				CRITICAL_SECTION_END
 
 				/* Add the new pbuf to the end of a queue.
 				 * The queue is broken into separate pbufs before processing.
