@@ -516,16 +516,16 @@ static void iot_app_process(void)
     ca = iot_certificate_getca(&ca_len);
     cert = iot_certificate_getcert(&cert_len);
     pkey = iot_certificate_getpkey(&pkey_len);
-    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, cert, cert_len, pkey, pkey_len);
+    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len);
     vPortFree((uint8_t *)cert);
     vPortFree((uint8_t *)pkey);
     vPortFree((uint8_t *)ca);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     // Google GCP IoT requires JWT token (created with private key) as MQTT password; no certificate needs to be sent
-    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
+    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0, NULL, 0);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     // Microsoft Azure IoT requires SAS token (created with shared access key) as MQTT password; no certificates need to be sent
-    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
+    config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0, NULL, 0);
 #endif
     if (config == NULL)
     {
