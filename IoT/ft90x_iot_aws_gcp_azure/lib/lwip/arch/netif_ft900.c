@@ -382,7 +382,7 @@ err_t arch_ft900_link_output(struct netif *netif, struct pbuf *pfirst)
 #endif // FT9XX_REV_B_SAFEWRITE
 			{
 				CRITICAL_SECTION_BEGIN
-			__asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size));
+				__asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size));
 				CRITICAL_SECTION_END
 			}
 #if FT9XX_REV_B_SAFEWRITE

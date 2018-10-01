@@ -61,6 +61,7 @@
 #include <lwip/dhcp.h>
 #include <lwip/ip_addr.h>
 #include <lwip/igmp.h>
+#include <lwip/dns.h>
 
 #include "netif_arch.h"
 

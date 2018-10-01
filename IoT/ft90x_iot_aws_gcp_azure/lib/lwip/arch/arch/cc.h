@@ -54,7 +54,7 @@
 
 #ifndef CC_DEBUG
 // Default is off for debugging,
-#define CC_DEBUG 0
+#define CC_DEBUG 1
 #endif
 
 #if CC_DEBUG
@@ -110,15 +110,24 @@ typedef uintptr_t   mem_ptr_t;
 
 #define LWIP_RAND() ((u32_t)rand())
 
-#else
+#define MEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
+#define SMEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
 
+#else
 #define PACK_STRUCT_FIELD(x)  x
 #define PACK_STRUCT_STRUCT
 #define PACK_STRUCT_USE_INCLUDES
 // Diagnostic output
 #define LWIP_PLATFORM_DIAG(x) 
 #define LWIP_PLATFORM_ASSERT(x) 
-
 #endif // defined(__FT32__)
 
 #define U8_F    "u"

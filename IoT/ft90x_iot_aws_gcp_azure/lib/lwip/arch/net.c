@@ -74,13 +74,19 @@
 
 /**
  @brief Address of EEPROM on I2C bus.
-*/
+ @details This can be set in the lwipopts.h file and override this value.
+ */
+#ifndef NET_EEPROM_ADDR
 #define NET_EEPROM_ADDR 0xA0
+#endif // NET_EEPROM_ADDR
 
 /**
  @brief Offset in EEPROM for MAC address.
+ @details This can be set in the lwipopts.h file and override this value.
  */
+#ifndef NET_EEPROM_OFFSET_MACADDRESS
 #define NET_EEPROM_OFFSET_MACADDRESS 0xfa
+#endif // NET_EEPROM_OFFSET_MACADDRESS
 
 #endif // NET_USE_EEPROM
 
@@ -91,11 +97,19 @@
  stack overflows) that may occur or trace reports.
  The Stacksize has been determined experimentally using the
  uxTaskGetStackHighWaterMark function with configUSE_TRACE_FACILITY on.
+ If Stacksize and Priority are set in the lwIPopts.h file then the
+ values here will be overridden.
  */
 //@{
 #define NET_ETHERNET_INPUT_TASK 			"Ethernet"
+
+#ifndef NET_ETHERNET_INPUT_TASK_STACKSIZE
 #define NET_ETHERNET_INPUT_TASK_STACKSIZE 	(1500 / sizeof(StackType_t))
+#endif // NET_ETHERNET_INPUT_TASK_STACKSIZE
+
+#ifndef NET_ETHERNET_INPUT_TASK_PRIO
 #define NET_ETHERNET_INPUT_TASK_PRIO 		1
+#endif // NET_ETHERNET_INPUT_TASK_PRIO
 //@}
 #endif
 
@@ -140,7 +154,7 @@ struct eeprom_net_config {
  */
 #if LWIP_NETIF_HOSTNAME
 static char default_hostname[8] =
-        {'F','T','9','0','x', 0, 0, 0,};
+{'F','T','9','0','x', 0, 0, 0};
 #endif
 
 /** @brief Pointer to network interface structure.
@@ -192,10 +206,10 @@ static int8_t ee_write(uint8_t location, uint8_t *data, const uint16_t len)
 	/* Transfer a block of data by carrying out a series of byte writes
        and waiting for the write to complete */
 	for (i = 0; (i < len) && (retval == 0); ++i)
-{
+	{
 		retval |= i2cm_write(NET_EEPROM_ADDR, location++, data++, 1);
 		delayms(5); // Wait a write cycle time
-}
+	}
 
 	return retval;
 }
@@ -255,14 +269,14 @@ int8_t net_update_eeprom(ip_addr_t ip, ip_addr_t gw, ip_addr_t mask, uint8_t dhc
 	struct eeprom_net_config curval;
 	struct eeprom_net_config setval;
 
-    /* Set the I2C Master pins to channel 1 */
-    sys_i2c_swop(1);
-    i2cm_init(I2CM_NORMAL_SPEED, 10000);
+	/* Set the I2C Master pins to channel 1 */
+	sys_i2c_swop(1);
+	i2cm_init(I2CM_NORMAL_SPEED, 10000);
 
 	/* Read structure from EEPROM. */
 	i2c_status = ee_read(0, (uint8_t *)&curval, sizeof(struct eeprom_net_config));
-    if (i2c_status == 0)
-    {
+	if (i2c_status == 0)
+	{
 		/* Set values in structure. */
 		setval.key = EEPROM_VALID_KEY;
 		setval.dhcp = dhcp;
@@ -295,14 +309,14 @@ int8_t net_update_eeprom(ip_addr_t ip, ip_addr_t gw, ip_addr_t mask, uint8_t dhc
 			ip4.addr = setval.mask.addr;
 			NET_DEBUG_PRINTF("  mask = %s\n", ipaddr_ntoa(&ip4));
 #endif // NET_EEPROM_DEBUG
-        }
-    }
-    /* Set the I2C Master pins back to channel 0 */
-    i2cm_init(I2CM_NORMAL_SPEED, 100000);
-    sys_i2c_swop(0);
+		}
+	}
+	/* Set the I2C Master pins back to channel 0 */
+	i2cm_init(I2CM_NORMAL_SPEED, 100000);
+	sys_i2c_swop(0);
 #endif // NET_USE_EEPROM
 
-    return i2c_status;
+	return i2c_status;
 }
 
 /** @brief Read network parameters from the EEPROM.
@@ -318,14 +332,14 @@ int8_t net_get_eeprom(ip_addr_t *ip, ip_addr_t *gw, ip_addr_t *mask, uint8_t *dh
 #if NET_USE_EEPROM
 	struct eeprom_net_config getval;
 
-    /* Set the I2C Master pins to channel 1 */
-    sys_i2c_swop(1);
-    i2cm_init(I2CM_NORMAL_SPEED, 10000);
+	/* Set the I2C Master pins to channel 1 */
+	sys_i2c_swop(1);
+	i2cm_init(I2CM_NORMAL_SPEED, 10000);
 
 	/* Read structure from EEPROM. */
 	i2c_status = ee_read(0, (uint8_t *)&getval, sizeof(struct eeprom_net_config));
-    if (i2c_status == 0)
-    {
+	if (i2c_status == 0)
+	{
 #ifdef NET_EEPROM_DEBUG
 		for (int i = 0; i < sizeof(struct eeprom_net_config); i++)
 		{
@@ -352,13 +366,13 @@ int8_t net_get_eeprom(ip_addr_t *ip, ip_addr_t *gw, ip_addr_t *mask, uint8_t *dh
 			NET_DEBUG_PRINTF("  mask = %s\r\n", ipaddr_ntoa(mask));
 #endif // NET_EEPROM_DEBUG
 		}
-    }
-    /* Set the I2C Master pins back to channel 0 */
-    i2cm_init(I2CM_NORMAL_SPEED, 100000);
-    sys_i2c_swop(0);
+	}
+	/* Set the I2C Master pins back to channel 0 */
+	i2cm_init(I2CM_NORMAL_SPEED, 100000);
+	sys_i2c_swop(0);
 #endif // NET_USE_EEPROM
 
-    return i2c_status;
+	return i2c_status;
 }
 
 /** @brief Display network status for the interface.
@@ -380,13 +394,13 @@ void net_status_cb(struct netif *netif)
 #endif // INCLUDE_uxTaskGetStackHighWaterMark
 #if NET_USE_EEPROM
 	if (net_is_ready())
-    {
+	{
 		NET_DEBUG_PRINTF("Ready status\r\n");
 
-    if (gfn_status) {
+		if (gfn_status) {
 			gfn_status(NET_CALLBACK_READY);
-    }
-}
+		}
+	}
 #endif // NET_USE_EEPROM
 
 	/*mdns_resp_netif_settings_changed();*/
@@ -405,9 +419,9 @@ void net_packet_available()
 	/* Signal vTaskNetwork to perform networking tasks. */
 	/* Note: This callback is at ISR level. */
 	if (g_task_ethernet_input)
-{
+	{
 		xTaskNotify(g_task_ethernet_input, (uint32_t)1, eSetValueWithOverwrite);
-    }
+	}
 }
 
 /** @brief Gets the MAC address of the interface.
@@ -416,7 +430,7 @@ void net_packet_available()
  */
 uint8_t *net_get_mac()
 {
-    return g_netif.hwaddr;
+	return g_netif.hwaddr;
 }
 
 /** @brief Gets the currently configured IP address of the interface.
@@ -426,7 +440,7 @@ uint8_t *net_get_mac()
  */
 ip_addr_t net_get_ip()
 {
-    return g_netif.ip_addr;
+	return g_netif.ip_addr;
 }
 
 /** @brief Gets the currently configured gateway address of the interface.
@@ -436,7 +450,7 @@ ip_addr_t net_get_ip()
  */
 ip_addr_t net_get_gateway()
 {
-    return g_netif.gw;
+	return g_netif.gw;
 }
 
 /** @brief Gets the currently configured network mask of the interface.
@@ -446,7 +460,7 @@ ip_addr_t net_get_gateway()
  */
 ip_addr_t net_get_netmask()
 {
-    return g_netif.netmask;
+	return g_netif.netmask;
 }
 
 /** @brief Gets the currently configured status of DHCP for the interface.
@@ -464,13 +478,13 @@ uint8_t net_get_dhcp()
 }*/
 
 static void net_timeout(void *arg)
-    {
+{
 	struct netif *netif = (struct netif *)arg;
 
 	if (netif_is_link_up(netif))
-        {
-            if (!ethernet_is_link_up())
-            {
+	{
+		if (!ethernet_is_link_up())
+		{
 			netif_set_link_down(netif);
 #if LWIP_DHCP
 			dhcp_network_changed(netif);
@@ -479,12 +493,12 @@ static void net_timeout(void *arg)
 			if (gfn_status) {
 				gfn_status(NET_CALLBACK_LINK_DOWN);
 			}
-            }
-        }
-        else
-        {
-            if (ethernet_is_link_up())
-            {
+		}
+	}
+	else
+	{
+		if (ethernet_is_link_up())
+		{
 			netif_set_link_up(netif);
 #if LWIP_DHCP
 			dhcp_network_changed(netif);
@@ -492,11 +506,11 @@ static void net_timeout(void *arg)
 			NET_DEBUG_PRINTF("Ethernet connected.\n");
 			if (gfn_status) {
 				gfn_status(NET_CALLBACK_LINK_UP);
-            }
-        }
-        }
+			}
+		}
+	}
 	sys_timeout(250, net_timeout, arg);
-    }
+}
 
 #if defined(NO_SYS) && (NO_SYS==0)
 /** @brief Adds packets received from the Ethernet at IRQ level to lwIP.
@@ -552,12 +566,12 @@ err_t net_tick(void)
  *  @returns ERR_OK if the network was initialised successfully.
  */
 err_t net_init(ip_addr_t ip,
-        ip_addr_t gw, ip_addr_t mask,
+		ip_addr_t gw, ip_addr_t mask,
         int dhcp, ip_addr_t dns, char *hostname,
-        fn_status_cb pfn_status)
+		fn_status_cb pfn_status)
 {
 #if NET_USE_EEPROM
-    int8_t i2c_status;
+	int8_t i2c_status;
 #endif
 
 #if LWIP_DHCP
@@ -565,79 +579,79 @@ err_t net_init(ip_addr_t ip,
 #endif
 
 #if NET_USE_EEPROM
-    /* Set the I2C Master pins to channel 1 */
+	/* Set the I2C Master pins to channel 1 */
 	/* Read Network parameters from EEPROM */
 	if ((ip.addr == IPADDR_ANY) && (!g_dhcp))
-    {
+	{
 		/* If the EEPROM contents are valid, the application has not supplied
 		 * an IP address then we can use the stored values UNLESS DHCP is
 		 * set. DHCP can be enabled from the EEPROM as well.
 		 */
 		net_get_eeprom(&ip, &gw, &mask, &g_dhcp);
-        }
-        if (ip.addr == IPADDR_ANY)
-        {
+	}
+	if (ip.addr == IPADDR_ANY)
+	{
 		NET_DEBUG_PRINTF("Enabling DHCP\r\n");
-            // Rescue an incorrect IP address.
+		// Rescue an incorrect IP address.
 		g_dhcp = 1;
-    }
+	}
 #endif // NET_USE_EEPROM
 
 	/* Read MAC address from pre-programmed area of EEPROM. */
-    g_netif.hwaddr_len = 6;
+	g_netif.hwaddr_len = 6;
 
 #if NET_USE_EEPROM
 	/* Set the I2C Master pins to channel 1 */
 	sys_i2c_swop(1);
 	i2cm_init(I2CM_NORMAL_SPEED, 10000);
 
-    i2c_status = ee_read(NET_EEPROM_OFFSET_MACADDRESS, &g_netif.hwaddr[0], 6);
+	i2c_status = ee_read(NET_EEPROM_OFFSET_MACADDRESS, &g_netif.hwaddr[0], 6);
 	if (i2c_status != 0)
 	{
 		NET_DEBUG_PRINTF("MAC address read failed\r\n");
 		return ERR_IF;
 	}
 
-    /* Set the I2C Master pins back to channel 0 */
-    i2cm_init(I2CM_NORMAL_SPEED, 100000);
-    sys_i2c_swop(0);
+	/* Set the I2C Master pins back to channel 0 */
+	i2cm_init(I2CM_NORMAL_SPEED, 100000);
+	sys_i2c_swop(0);
 #else // NET_USE_EEPROM
 	/* If no EEPROM then application must implement this function to
 	 * supply a MAC address. */
 	net_supply_mac(&g_netif.hwaddr[0]);
 #endif // NET_USE_EEPROM
 
-    NET_DEBUG_PRINTF("MAC = %02x:%02x:%02x:%02x:%02x:%02x\r\n",
-            g_netif.hwaddr[0], g_netif.hwaddr[1], g_netif.hwaddr[2],
-            g_netif.hwaddr[3], g_netif.hwaddr[4], g_netif.hwaddr[5]);
+	NET_DEBUG_PRINTF("MAC = %02x:%02x:%02x:%02x:%02x:%02x\r\n",
+			g_netif.hwaddr[0], g_netif.hwaddr[1], g_netif.hwaddr[2],
+			g_netif.hwaddr[3], g_netif.hwaddr[4], g_netif.hwaddr[5]);
 
-    NETIF_SET_NAME(&(g_netif),' ','1');
-
-    g_netif.next = NULL;
+	NETIF_SET_NAME(&(g_netif),' ','1');
+	g_netif.next = NULL;
 
 	/* Initialize lwIP. */
 #if defined(NO_SYS) && (NO_SYS==0)
-    tcpip_init(NULL, NULL);
+	tcpip_init(NULL, NULL);
 #else
-    lwip_init();
+	lwip_init();
 #endif
 
 	/* Add our netif to LWIP (netif_add calls our driver initialization function) */
-    if (netif_add(&g_netif,
-            &ip,
-            &mask,
-            &gw,
-            NULL,
-            arch_ft900_init,
-            ethernet_input) == NULL)
-    {
-        NET_DEBUG_PRINTF("netif_add failed\r\n");
-        return ERR_IF;
-    }
+	if (netif_add(&g_netif,
+			&ip,
+			&mask,
+			&gw,
+			NULL,
+			arch_ft900_init,
+			ethernet_input) == NULL)
+	{
+		NET_DEBUG_PRINTF("netif_add failed\r\n");
+		return ERR_IF;
+	}
 
 	/* Initial state of Ethernet link is set to down.
 	 * net_timeout will change it later. */
 	netif_set_link_down(&g_netif);
+
 #if LWIP_NETIF_HOSTNAME
 	/* Use default hostname if required. */
 	netif_set_hostname(&g_netif, default_hostname);
@@ -653,22 +667,22 @@ err_t net_init(ip_addr_t ip,
 #endif
 
 	/* Set global callback for status change. */
-    gfn_status = pfn_status;
+	gfn_status = pfn_status;
 
 	/* Set this (and only) network interface to be the default interface. */
-    netif_set_default(&g_netif);
+	netif_set_default(&g_netif);
 
 	/* Initialise callback functions. */
 #if LWIP_NETIF_STATUS_CALLBACK
-    netif_set_status_callback(&g_netif, net_status_cb);
+	netif_set_status_callback(&g_netif, net_status_cb);
 #endif
 
 #if LWIP_NETIF_LINK_CALLBACK
-    netif_set_link_callback(&g_netif, net_status_cb);
+	netif_set_link_callback(&g_netif, net_status_cb);
 #endif
 
 	/* Netif software configuration completed. */
-    netif_set_up(&g_netif);
+	netif_set_up(&g_netif);
 
 	/* Poll for physical link. */
 	net_timeout(&g_netif);
@@ -678,9 +692,9 @@ err_t net_init(ip_addr_t ip,
 	g_task_ethernet_input = sys_thread_new(NET_ETHERNET_INPUT_TASK, net_tick, (void *)&g_netif,
 			NET_ETHERNET_INPUT_TASK_STACKSIZE, NET_ETHERNET_INPUT_TASK_PRIO);
 	if (g_task_ethernet_input == NULL)
-    {
+	{
 		NET_DEBUG_PRINTF(NET_ETHERNET_INPUT_TASK" Thread failed\r\n");
-    }
+	}
 #endif
 
 	/* Turn on Ethernet receiver. */
@@ -695,15 +709,10 @@ err_t net_init(ip_addr_t ip,
 		g_dhcp = 1;
 	}
 	else
-#endif // LWIP_DHCP
+#endif
 	{
 #if LWIP_DNS
-		/* Add DNS server specified by application. */
-		ip_addr_t dnsserver = { dns.addr };
-		if (dnsserver.addr != 0) 
-		{
-			dns_setserver(0, &dnsserver);
-		}
+		dns_setserver(0, &dns);
 #endif // LWIP_DNS
 	}
 
