@@ -586,7 +586,7 @@
 #define SNTP_SET_SYSTEM_TIME(sec)       iot_sntp_set_system_time(sec)
 
 #define MQTT_OUTPUT_RINGBUF_SIZE        768
-
+#define MQTT_CONNECT_TIMOUT             5000
 
 #endif /* NO_SYS */
 

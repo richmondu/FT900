@@ -4,13 +4,14 @@ INDIR = .
 RELDIR = ../Certificates
 
 CRT_SRCS += \
-rootca.crt \
-ft900device1_cert.crt \
-ft900device2_cert.crt \
-ft900device3_cert.crt \
-ft900device1_pkey.crt \
-ft900device2_pkey.crt \
-ft900device3_pkey.crt
+rootca.pem \
+ft900device1_cert.pem \
+ft900device2_cert.pem \
+ft900device3_cert.pem \
+ft900device1_pkey.pem \
+ft900device2_pkey.pem \
+ft900device3_pkey.pem \
+rootca_gg.pem
 
 
 CRT_S += \
@@ -20,7 +21,8 @@ $(OUTDIR)/ft900device2_cert.S \
 $(OUTDIR)/ft900device3_cert.S \
 $(OUTDIR)/ft900device1_pkey.S \
 $(OUTDIR)/ft900device2_pkey.S \
-$(OUTDIR)/ft900device3_pkey.S
+$(OUTDIR)/ft900device3_pkey.S \
+$(OUTDIR)/rootca_gg.S
 
 
 #-------------------------------------------------------------------------------
@@ -36,7 +38,7 @@ $(OUTDIR):
 	mkdir $(OUTDIR)
 
 # Each subdirectory must supply rules for building sources it contributes
-$(OUTDIR)/%.S: $(INDIR)/%.crt
+$(OUTDIR)/%.S: $(INDIR)/%.pem
 	@echo 'Building file: $<'
 	@echo 'Making S file: $@'
 	$(eval SYMNAME = $(subst .,_, $(notdir $<)))

@@ -9,9 +9,6 @@
 
 /* mbedTLS Headers. */
 #include "mbedtls/pk.h"       // For mbedtls_pk_xxx
-#include "mbedtls/entropy.h"  // For mbedtls_entropy_xxx
-#include "mbedtls/ctr_drbg.h" // For mbedtls_ctr_drb_xxx
-#include "mbedtls/base64.h"   // For mbedtls_base64_encode
 
 /* LWIP Headers. */
 #include "lwipopts.h"         // For ALTCP_MBEDTLS_ENTROPY_xxx
@@ -21,7 +18,7 @@
 
 
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
 #else
@@ -56,6 +53,50 @@ char* urlEncode(const char* data, int len)
     }
 
     return out;
+}
+
+static const char base64en[] = {
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+	'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+	'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+	'w', 'x', 'y', 'z', '0', '1', '2', '3',
+	'4', '5', '6', '7', '8', '9', '-', '_',
+};
+
+static int base64url_encode(const unsigned char *in, unsigned int inlen, char *out)
+{
+	unsigned int i, j;
+
+	for (i = j = 0; i < inlen; i++) {
+		int s = i % 3;
+		switch (s) {
+			case 0:
+				out[j++] = base64en[(in[i] >> 2) & 0x3F];
+				continue;
+			case 1:
+				out[j++] = base64en[((in[i-1] & 0x3) << 4) + ((in[i] >> 4) & 0xF)];
+				continue;
+			case 2:
+				out[j++] = base64en[((in[i-1] & 0xF) << 2) + ((in[i] >> 6) & 0x3)];
+				out[j++] = base64en[in[i] & 0x3F];
+		}
+	}
+
+	i -= 1;
+	if ((i % 3) == 0) {
+		out[j++] = base64en[(in[i] & 0x3) << 4];
+		//out[j++] = BASE64_PAD;
+		//out[j++] = BASE64_PAD;
+	} else if ((i % 3) == 1) {
+		out[j++] = base64en[(in[i] & 0xF) << 2];
+		//out[j++] = BASE64_PAD;
+	}
+	out[j++] = 0;
+
+	return 0;
 }
 
 //
@@ -225,12 +266,12 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
 
     // Create header
     const char pcHdr[] = "{\"typ\":\"JWT\",\"alg\":\"RS256\"}";
-    //DEBUG_PRINTF("pcHdr %s %d\r\n", pcHdr, strlen(pcHdr));
+    DEBUG_PRINTF("pcHdr %s %d\r\n", pcHdr, strlen(pcHdr));
 
     // Encode header
 
-    mbedtls_base64_encode((unsigned char *)pcTemp, sizeof(pcTemp), &olen, (const unsigned char *)pcHdr, strlen(pcHdr));
-    //DEBUG_PRINTF("Encoded pcHdr %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
+    base64url_encode((unsigned char *)pcHdr, strlen(pcHdr), pcTemp);
+    DEBUG_PRINTF("Encoded pcHdr %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
 
     // Build JWT packet
     strcat(pcJWT, pcTemp);
@@ -242,17 +283,17 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     //
 
     // python time.mktime(datetime.datetime.now().timetuple())
-    uint32_t iat = timeNow;         // Set the time.
-    uint32_t exp = iat + 3600*12; // Set the expiry time after 12 hours.
-    char pcBody[60] = {0};
+    uint32_t iat = timeNow;    // Set the time.
+    uint32_t exp = iat + 3600*12; // Set the expiry time after 1 hour.
+    char pcBody[64] = {0};
+    memset(pcBody, 0, sizeof(pcBody));
     tfp_snprintf(pcBody, sizeof(pcBody), "{\"iat\":%u,\"exp\":%u,\"aud\":\"%s\"}", (unsigned int)iat, (unsigned int)exp, projectId);
-    //DEBUG_PRINTF("pcBody %s %d\r\n", pcBody, strlen(pcBody));
+    DEBUG_PRINTF("pcBody %s %d\r\n", pcBody, strlen(pcBody));
 
     // Encode body
     memset(pcTemp, 0, sizeof(pcTemp));
-    mbedtls_base64_encode((unsigned char *)pcTemp, sizeof(pcTemp), &olen, (const unsigned char *)pcBody, strlen(pcBody));
-    //base64url_encode((unsigned char *)pcBody, strlen(pcBody), pcTemp);
-    //DEBUG_PRINTF("Encoded pcBody %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
+    base64url_encode((unsigned char *)pcBody, strlen(pcBody), pcTemp);
+    DEBUG_PRINTF("Encoded pcBody %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
 
     // Build JWT packet
     strcat(pcJWT, pcTemp);
@@ -264,8 +305,6 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
 
     uint8_t pcSignature[256+1] = {0};
     mbedtls_pk_context pk_context;
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
     size_t retSize;
 
 
@@ -277,17 +316,11 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
         return NULL;
     }
 
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-    mbedtls_entropy_init(&entropy);
-    mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, ALTCP_MBEDTLS_ENTROPY_PTR, ALTCP_MBEDTLS_ENTROPY_LEN);
-
     memset(pcTemp, 0, sizeof(pcTemp));
     rc = mbedtls_md(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), (unsigned char*)pcJWT, strlen((char*)pcJWT), (unsigned char*)pcTemp);
     if (rc != 0) {
         DEBUG_PRINTF("token_create_jwt failed! mbedtls_md: %d (-0x%x)\r\n", rc, -rc);
         mbedtls_pk_free(&pk_context);
-        mbedtls_ctr_drbg_free(&ctr_drbg);
-        mbedtls_entropy_free(&entropy);
         return NULL;
     }
 
@@ -296,24 +329,19 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     if (rc != 0) {
         DEBUG_PRINTF("token_create_jwt failed! mbedtls_pk_sign: %d (-0x%x)\r\n", rc, -rc);
         mbedtls_pk_free(&pk_context);
-        mbedtls_ctr_drbg_free(&ctr_drbg);
-        mbedtls_entropy_free(&entropy);
         return NULL;
     }
     //DEBUG_PRINTF("pcSignature %d %d\r\n", strlen(pcSignature), retSize);
-    mbedtls_ctr_drbg_free(&ctr_drbg);
-    mbedtls_entropy_free(&entropy);
     mbedtls_pk_free(&pk_context);
 
     // Encode signature
-    mbedtls_base64_encode((unsigned char *)pcTemp, sizeof(pcTemp), &olen, (const unsigned char *)pcSignature, retSize);
-    //base64url_encode((unsigned char *)pcSignature, retSize, pcTemp);
+    base64url_encode((unsigned char *)pcSignature, retSize, pcTemp);
     //DEBUG_PRINTF("Encoded pcSignature %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
 
     // Build JWT packet
     strcat(pcJWT, ".");
     strcat(pcJWT, pcTemp);
-    //DEBUG_PRINTF("JWT %s %d\r\n\r\n", pcJWT, strlen(pcJWT));
+    DEBUG_PRINTF("%s %d\r\n\r\n", pcJWT, strlen(pcJWT));
 
     return pcJWT;
 }

@@ -79,7 +79,7 @@ static fn_status_cb gfn_status = NULL;
  @brief Default network hostname.
  */
 #if LWIP_NETIF_HOSTNAME
-static char current_hostname[64] =
+static char default_hostname[8] =
         {'F','T','9','0','x', 0, 0, 0,};
 #endif
 
@@ -141,6 +141,22 @@ void net_set_link_down()
 uint8_t net_is_up()
 {
     return netif_is_up(&g_netif);
+}
+
+/** @brief Query the status for the network.
+ *  @details The status is ready when there is a valid connection to another
+ *  Ethernet device such as a switch or router AND a valid IP address is
+ *  configured.
+ *  @returns Non-zero if the network is ready.
+ */
+uint8_t net_is_ready(void)
+{
+    if (netif_is_link_up(&g_netif))
+    {
+        /* Valid IP address set and link is UP. */
+        return (g_netif.ip_addr.addr != IPADDR_ANY);
+    }
+    return 0;
 }
 
 #ifdef NET_USE_EEPROM
@@ -276,21 +292,6 @@ uint8_t *net_get_mac()
  */
 ip_addr_t net_get_ip()
 {
-    ip_addr_t temp = {0};
-
-    if (!netif_is_link_up(&g_netif))
-    {
-        return temp;
-    }
-/*
-    if (g_dhcp)
-    {
-        if (!dhcp_supplied_address(&g_netif))
-        {
-            return temp;
-        }
-    }
-    */
     return g_netif.ip_addr;
 }
 
@@ -316,7 +317,7 @@ ip_addr_t net_get_netmask()
 
 #if (NO_SYS==0)
 
-#define TASK_CONNECT_STACK_SIZE       (400)           //Task Stack Size
+#define TASK_CONNECT_STACK_SIZE       (512)           //Task Stack Size
 #define TASK_CONNECT_PRIORITY         (1)             //Task Priority
 static TaskHandle_t gx_TaskConnect;
 
@@ -385,7 +386,7 @@ err_t net_init(ip_addr_t ip,
     {
         if (*hostname == '\0')
         {
-            strncpy(current_hostname, hostname, sizeof(current_hostname));
+            strncpy(default_hostname, hostname, sizeof(default_hostname));
         }
     }
 #endif
@@ -399,11 +400,7 @@ err_t net_init(ip_addr_t ip,
     i2c_status = ee_read(0, (uint8_t *)&er, sizeof(struct eeprom_net_config));
     if (i2c_status == 0)
     {
-#if LWIP_NETIF_STATUS_CALLBACK || LWIP_NETIF_LINK_CALLBACK
         if (er.key != EEPROM_VALID_KEY && ip.addr != IPADDR_ANY)
-#else
-        if (ip.addr != IPADDR_ANY)
-#endif
         {
             // EEPROM is blank
             // Copy network configuration from EEPROM.
@@ -490,8 +487,8 @@ err_t net_init(ip_addr_t ip,
     }
 
 #if LWIP_NETIF_HOSTNAME
-    netif_set_hostname(&g_netif, current_hostname);
-    NET_DEBUG_PRINTF("Hostname = \"%s\"\r\n", current_hostname);
+    netif_set_hostname(&g_netif, default_hostname);
+    NET_DEBUG_PRINTF("Hostname = \"%s\"\r\n", default_hostname);
 #endif // LWIP_NETIF_HOSTNAME
 
 #if LWIP_NETIF_STATUS_CALLBACK || LWIP_NETIF_LINK_CALLBACK
@@ -520,17 +517,7 @@ err_t net_init(ip_addr_t ip,
     //netif_set_link_up(&g_netif);
     netif_set_up(&g_netif);
 
-    // Turn on Ethernet receiver.
-    arch_ft900_recv_on();
-
-#if LWIP_DHCP
-    if (dhcp)
-    {
-        net_set_dhcp(1);
-    }
-#endif
-
-#if (NO_SYS==0)
+#if defined(NO_SYS) && (NO_SYS==0)
     if (xTaskCreate(vTaskConnect,
             "Connect",
             TASK_CONNECT_STACK_SIZE,
@@ -538,6 +525,16 @@ err_t net_init(ip_addr_t ip,
             TASK_CONNECT_PRIORITY,
             &gx_TaskConnect) != pdTRUE) {
         NET_DEBUG_PRINTF("Connect Thread failed\r\n");
+    }
+#endif
+
+    // Turn on Ethernet receiver.
+    arch_ft900_recv_on();
+
+#if LWIP_DHCP
+    if (dhcp)
+    {
+        net_set_dhcp(1);
     }
 #endif
 
