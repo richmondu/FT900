@@ -10,8 +10,7 @@ ft900device2_cert.crt \
 ft900device3_cert.crt \
 ft900device1_pkey.crt \
 ft900device2_pkey.crt \
-ft900device3_pkey.crt \
-rootca_gg.crt
+ft900device3_pkey.crt
 
 
 CRT_S += \
@@ -21,8 +20,7 @@ $(OUTDIR)/ft900device2_cert.S \
 $(OUTDIR)/ft900device3_cert.S \
 $(OUTDIR)/ft900device1_pkey.S \
 $(OUTDIR)/ft900device2_pkey.S \
-$(OUTDIR)/ft900device3_pkey.S \
-$(OUTDIR)/rootca_gg.S
+$(OUTDIR)/ft900device3_pkey.S
 
 
 #-------------------------------------------------------------------------------

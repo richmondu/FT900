@@ -44,8 +44,7 @@ extern uint32_t iot_sntp_get_time();
 void iot_init()
 {
 #if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
-    iot_sntp_start();
+	iot_sntp_start();
     vTaskDelay(pdMS_TO_TICKS(1000));
 #endif
 }
@@ -53,8 +52,7 @@ void iot_init()
 void iot_free()
 {
 #if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
-    iot_sntp_stop();
+	iot_sntp_stop();
 #endif
 }
 
@@ -70,7 +68,7 @@ u16_t iot_getbrokerport()
 
 const char* iot_getid()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
     return MQTT_CLIENT_NAME;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     static char client_id[128] = {0};
@@ -87,7 +85,7 @@ const char* iot_getid()
 
 const char* iot_getusername()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
     return NULL;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     return USERNAME_ID;
@@ -102,7 +100,7 @@ const char* iot_getusername()
 
 const char* iot_getpassword()
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
     return NULL;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     const uint8_t *pkey = NULL;
