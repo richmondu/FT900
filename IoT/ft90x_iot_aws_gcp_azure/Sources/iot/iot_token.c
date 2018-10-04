@@ -21,7 +21,7 @@
 
 
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
 #else

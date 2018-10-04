@@ -123,7 +123,6 @@ err_t net_init(ip_addr_t ip,
 		ip_addr_t gw, ip_addr_t mask,
 		int dhcp, ip_addr_t dns, char *hostname,
 		fn_status_cb pfn_status);
-uint8_t net_is_ready(void);
 err_t net_tick(void);
 
 uint8_t net_is_link_up(void);

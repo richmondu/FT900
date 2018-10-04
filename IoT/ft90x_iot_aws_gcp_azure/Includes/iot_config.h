@@ -25,11 +25,6 @@
 // If disabled, client authentication, no server authentication, prone to man-in-the-middle attacks
 // This must be enabled in production environment
 #define USE_ROOT_CA                   1
-
-// USE_PAYLOAD_TIMESTAMP
-// If enabled, RTC will be used.
-// Note that enabling this increases memory footprint
-#define USE_PAYLOAD_TIMESTAMP         1
 ///////////////////////////////////////////////////////////////////////////////////
 
 

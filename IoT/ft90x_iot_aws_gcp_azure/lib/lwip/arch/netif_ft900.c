@@ -48,6 +48,10 @@
 // All peers will understand this and only send small packets
 #define USE_TCP_MSS_VALUE 1
 
+// rlen < FT900_MAX_PACKET will always be true on 2nd try
+// so the loopstart is useless
+#define FIX_USELESS_LOOP 1
+
 // Use task notification instead of polling
 #define FIX_POLLING_BEHAVIOR 0
 
@@ -427,6 +431,29 @@ static void arch_ft900_ethernet_ISR(void)
 		/* Number of packets waiting in hardware Rx FIFO. */
 		uint32_t c0;
 
+		/* Collect any packets in Rx FIFO into RAM. */
+
+#if FIX_USELESS_LOOP
+#else // FIX_USELESS_LOOP
+		/* This utilises labels and gotos to improve speed. */
+		loopstart:
+
+		/* We require enough room to store a maximum sized packet
+		 * in the receive buffer. This is calculated as 1500 bytes
+		 * of payload, an ethernet header, the size of the packet
+		 * length and an end of packets marker.
+		 */
+		if (rlen < FT900_MAX_PACKET)
+		{
+			//tfp_printf("rlen(%d) < FT900_MAX_PACKET(%d)\r\n", rlen, FT900_MAX_PACKET);
+
+			/* No room left for a full packet.
+			 * It will get read in the next time.
+			 */
+			goto loopstop;
+		}
+#endif // FIX_USELESS_LOOP
+
 		/* How many packets have been received and are
 		 * waiting in the Rx FIFO.
 		 */
@@ -463,6 +490,13 @@ static void arch_ft900_ethernet_ISR(void)
 		/* Reduce available space for new packets. */
 		rlen -= w0;
 		/* Read any more packets available. */
+
+#if FIX_USELESS_LOOP
+		// Note loopstartif condition will always fail on the 2nd try (rlen < FT900_MAX_PACKET)
+		// Just exit the loop my goodness gracious
+#else // FIX_USELESS_LOOP
+		goto loopstart;
+#endif // FIX_USELESS_LOOP
 
 		loopstop:
 

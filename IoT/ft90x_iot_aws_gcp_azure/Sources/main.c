@@ -2,7 +2,7 @@
  * ============================================================================
  * History
  * =======
- * 16 Sep 2018 : Created
+ * 29 Dec 2015 : Created
  *
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
@@ -66,9 +66,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /* Default network configuration. */
 #define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-static ip_addr_t ip      = IPADDR4_INIT_BYTES(0, 0, 0, 0);
-static ip_addr_t gateway = IPADDR4_INIT_BYTES(0, 0, 0, 0);
-static ip_addr_t mask    = IPADDR4_INIT_BYTES(0, 0, 0, 0);
+static ip_addr_t ip      = IPADDR4_INIT_BYTES(192, 168, 22, 100);
+static ip_addr_t gateway = IPADDR4_INIT_BYTES(192, 168, 22, 1);
+static ip_addr_t mask    = IPADDR4_INIT_BYTES(255, 255, 255, 0);
 static ip_addr_t dns     = IPADDR4_INIT_BYTES(0, 0, 0, 0);
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -214,8 +214,8 @@ static void iot_app_task(void *pvParameters)
     {
         /* Wait for valid IP address */
         DEBUG_PRINTF("Waiting for configuration...");
-        while (!net_is_ready()) {
-            vTaskDelay(pdMS_TO_TICKS(1000));
+        while (net_get_ip().addr == IPADDR_ANY) {
+            vTaskDelay(pdMS_TO_TICKS(500));
             DEBUG_PRINTF(".");
         }
         DEBUG_PRINTF("\r\n");
@@ -263,7 +263,7 @@ static inline err_t mqtt_connect_async(mqtt_client_t *client, struct altcp_tls_c
         }
         break;
     }
-    while (net_is_ready());
+    while (net_is_link_up());
 
     memset(&ci, 0, sizeof(ci));
     ci.tls_config = config;
@@ -318,7 +318,7 @@ static void mqtt_connect_callback(mqtt_client_t *client, void *arg, mqtt_connect
 
 static inline int mqtt_is_connected(mqtt_client_t *client)
 {
-    return mqtt_client_is_connected(client) && net_is_ready();
+    return mqtt_client_is_connected(client) && net_is_link_up();
 }
 
 static void mqtt_pubsub_callback(void *arg, err_t result)
@@ -370,32 +370,7 @@ static inline int user_generate_publish_topic(char* topic, int size, const char*
 
 static inline int user_generate_publish_payload(char* payload, int size, const char* param)
 {
-    int len = 0;
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    int format = 1; // YYYYMMDDHH:mm:SS
-#else
-    int format = 0; // YYYY-MM-DDTHH:mm:SS.000
-#endif
-
-
-#if USE_PAYLOAD_TIMESTAMP
-    len = tfp_snprintf(payload, size,
-        "{\r\n"
-        " \"deviceId\": \"%s\",\r\n"
-        " \"timeStampEpoch\": %llu,\r\n"
-        " \"timeStampIso\": \"%s\",\r\n"
-        " \"sensorReading\": %d,\r\n"
-        " \"batteryCharge\": %d,\r\n"
-        " \"batteryDischargeRate\": %d\r\n"
-        "}",
-        param,
-        iot_rtc_get_time_epoch(),
-        iot_rtc_get_time_iso(format),
-        rand() % 10 + 30,
-        rand() % 30 - 10,
-        rand() % 5);
-#else
-    len = tfp_snprintf(payload, size,
+    int len = tfp_snprintf(payload, size,
         "{\r\n"
         " \"deviceId\": \"%s\",\r\n"
         " \"sensorReading\": %d,\r\n"
@@ -406,7 +381,6 @@ static inline int user_generate_publish_payload(char* payload, int size, const c
         rand() % 10 + 30,
         rand() % 30 - 10,
         rand() % 5);
-#endif
 
     return len;
 }
@@ -518,10 +492,10 @@ static void iot_app_process(void)
     vPortFree((uint8_t *)pkey);
     vPortFree((uint8_t *)ca);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    // Google GCP IoT requires JWT token (created with private key) as MQTT password; no certificate needs to be sent
+    // Google GCP IoT requires JWT token (created with private key) as MQTT password key but no certificate needs to be sent
     config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Microsoft Azure IoT requires SAS token (created with shared access key) as MQTT password; no certificates need to be sent
+    // Microsoft Azure IoT requires SAS token as MQTT password; no certificates need to be sent
     config = altcp_tls_create_config_client_2wayauth(NULL, 0, NULL, 0, NULL, 0);
 #endif
     if (config == NULL)
@@ -546,7 +520,7 @@ static void iot_app_process(void)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    while (!mqtt_is_connected(&mqtt));
+    while (mqtt_is_connected(&mqtt) == 0);
     vTaskDelay(pdMS_TO_TICKS(1000));
 
 
@@ -572,7 +546,7 @@ static void iot_app_process(void)
     char *devices[3] = {"hopper", "knuth", "turing"};
     int device_count = sizeof(devices)/sizeof(devices[0]);
     char topic[48] = {0};
-    char payload[192] = {0};
+    char payload[104] = {0};
 
     while (mqtt_is_connected(&mqtt) && err==ERR_OK)
     {

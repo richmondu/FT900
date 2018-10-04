@@ -94,7 +94,7 @@
 /* These are used in porting code (Source\portable). */
 #define configTICK_RATE_HZ                          ((TickType_t)1000)
 #if defined(__FT900__)
-#define configTOTAL_HEAP_SIZE                       ((size_t)(42 * 1024))
+#define configTOTAL_HEAP_SIZE                       ((size_t)(41 * 1024))
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))
 #endif
