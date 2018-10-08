@@ -11,7 +11,8 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
        This abstracts the user from Ethernet initialization. Now, user simply calls net_init() and poll for net_is_ready().
     4. MQTT subscription in addition to MQTT publish
     5. Generation of security tokens created with current time retrieved from SNTP server
-       GCP and Azure requires authentication using security tokens instead of certificates
+       GCP and Azure requires authentication using security tokens instead of certificates.
+       Using security token enables to save memory since CA and client certificate dont need to be saved in the device anymore.
     6. Improved handling of network unplugging and replugging for stability and reliability
     7. Adding of timestamps in the MQTT-published packets by using RTC library 
        The RTC is initialized with time queried from SNTP.
