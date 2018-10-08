@@ -3,13 +3,14 @@
 
 This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
 
-    1. Connectivity to IoT cloud services: Amazon AWS, Google Cloud and Microsoft Azure
+    1. Secure connectivity with IoT cloud providers: Amazon AWS, Google Cloud and Microsoft Azure
     2. Use of LWIP's MQTT library with ALTCP_TLS instead of MQTT library from Amazon FreeRTOS
+       Also refer to the MQTT and TLS related bug fixes contributed to LWIP open-source community 
     3. Improvement of net.c Ethernet abstraction layer for simplification of user application code
     4. MQTT subscription in addition to MQTT publish
     5. Generation of security tokens created with current time retrieved from SNTP server
     6. Improved handling of network unplugging and replugging for stability and reliability
-    It also contains 3 set of device certificates that connects to all 3 cloud services
+    It also contains 3 set of device certificates that can be used to connect to all 3 cloud services
 
 
 ### Amazon AWS IoT Core
