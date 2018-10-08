@@ -1,7 +1,7 @@
 ### Auto-generated file by certificates.mak ### 
-.global ft900device1_cert_crt 
-ft900device1_cert_crt: 
-.incbin "../Certificates/ft900device1_cert.crt" 
+.global ft900device1_cert_pem 
+ft900device1_cert_pem: 
+.incbin "../Certificates/ft900device1_cert.pem" 
 .byte 0 
-.global ft900device1_cert_crt_end 
-ft900device1_cert_crt_end: 
+.global ft900device1_cert_pem_end 
+ft900device1_cert_pem_end: 

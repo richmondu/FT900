@@ -85,37 +85,37 @@
 #if USE_ROOT_CA
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     // This certificate refers to rootca_gg.crt
-    extern __flash__ uint8_t ca_data[]        asm("rootca_gg_crt");
-    extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_crt_end");
+    extern __flash__ uint8_t ca_data[]        asm("rootca_gg_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_pem_end");
 #else
     // This certificate refers to rootca.crt
-    extern __flash__ uint8_t ca_data[]        asm("rootca_crt");
-    extern __flash__ uint8_t ca_data_end[]    asm("rootca_crt_end");
+    extern __flash__ uint8_t ca_data[]        asm("rootca_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_pem_end");
 #endif
 #endif // USE_ROOT_CA
 
 // Device certificates signed by the root CA above
 #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
     // This certificate refers to ft900device1_cert.crt
-    extern __flash__ uint8_t cert_data[]      asm("ft900device1_cert_crt");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device1_cert_crt_end");
+    extern __flash__ uint8_t cert_data[]      asm("ft900device1_cert_pem");
+    extern __flash__ uint8_t cert_data_end[]  asm("ft900device1_cert_pem_end");
     // This private key refers to ft900device1_pkey.crt
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device1_pkey_crt");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device1_pkey_crt_end");
+    extern __flash__ uint8_t pkey_data[]      asm("ft900device1_pkey_pem");
+    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device1_pkey_pem_end");
 #elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_2)
     // This certificate refers to ft900device2_cert.crt
-    extern __flash__ uint8_t cert_data[]      asm("ft900device2_cert_crt");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device2_cert_crt_end");
+    extern __flash__ uint8_t cert_data[]      asm("ft900device2_cert_pem");
+    extern __flash__ uint8_t cert_data_end[]  asm("ft900device2_cert_pem_end");
     // This private key refers to ft900device2_pkey.crt
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device2_pkey_crt");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device2_pkey_crt_end");
+    extern __flash__ uint8_t pkey_data[]      asm("ft900device2_pkey_pem");
+    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device2_pkey_pem_end");
 #elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_3)
     // This certificate refers to ft900device3_cert.crt
-    extern __flash__ uint8_t cert_data[]      asm("ft900device3_cert_crt");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device3_cert_crt_end");
+    extern __flash__ uint8_t cert_data[]      asm("ft900device3_cert_pem");
+    extern __flash__ uint8_t cert_data_end[]  asm("ft900device3_cert_pem_end");
     // This private key refers to ft900device3_pkey.crt
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device3_pkey_crt");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device3_pkey_crt_end");
+    extern __flash__ uint8_t pkey_data[]      asm("ft900device3_pkey_pem");
+    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device3_pkey_pem_end");
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 
