@@ -593,7 +593,7 @@ static void iot_app_process(void)
         }
     }
 #else // IOT_APP_MODE_PUBLISH
-    while (mqtt_is_connected(&mqtt));
+    while (mqtt_is_connected(&mqtt))
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
