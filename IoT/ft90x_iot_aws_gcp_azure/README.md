@@ -21,38 +21,86 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
 
 ### Amazon AWS IoT Core
     1. Endpoint: NAME.iot.REGION.amazonaws.com
-    2. ClientId: DEVICE_ID
+    2. ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. Username: NONE
     4. Password: NONE
-    5. CA: OPTIONAL
+    5. CA: REQUIRED (required for production, optional for testing)
     6. Certificate: REQUIRED
     7. PrivateKey: REQUIRED
     8. PublishTopic: ANY
     9. SubscribeTopic: ANY
-    * CA, device certificate and private key must be registered in Amazon AWS IoT Core
+    * CLOUD: CA, device certificate and private key must be registered in Amazon AWS IoT Core
+      AWS IoT actually provides certificate generation.
+    * DEVICE: Sends CA, device certificate, device private key for TLS connection
 
+### Amazon AWS Greengrass
+    1. Endpoint: local Greengrass device hostname or IP address
+    2. ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
+    3. Username: NONE
+    4. Password: NONE
+    5. CA: REQUIRED (Greengrass Group CA; dynamically generated, expires 7 days default, configurable 30 days max)
+    6. Certificate: REQUIRED
+    7. PrivateKey: REQUIRED
+    8. PublishTopic: ANY
+    9. SubscribeTopic: ANY
+    * CLOUD: CA, device certificate and private key must be registered in Amazon AWS IoT Core
+      AWS IoT actually provides certificate generation.
+    * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
+    
 ### Google Cloud IoT Core
     1. Endpoint: mqtt.googleapis.com
     2. ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. Username: ANY
     4. Password: JSON Web Token (JWT) security token (contains signature created with asymmetric device private key)
-    5. CA: OPTIONAL
-    6. Certificate: OPTIONAL
-    7. PrivateKey: OPTIONAL
+    5. CA: NONE
+    6. Certificate: REQUIRED (registered in cloud)
+    7. PrivateKey: REQUIRED (used to generate JWT Token)
     8. PublishTopic: /devices/DEVICE_ID/events
     9. SubscribeTopic: NOT SUPPORTED
-    * Device certificate must be registered in Google Cloud IoT Core
-
+    * CLOUD: Certificate must be registered in Google Cloud IoT Core
+    * DEVICE: No certificate is sent for TLS connection
+    
 ### Microsoft Azure IoT Hub
-    1. Endpoint: HUB_NAME.azure-devices.net
-    2. ClientId: DEVICE_ID
-    3. Username: HUB_NAME/DEVICE_ID
-    4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
-    5. CA: OPTIONAL
-    6. Certificate: OPTIONAL
-    7. PrivateKey: OPTIONAL
-    8. PublishTopic: /devices/DEVICE_ID/messages/events
-    9. SubscribeTopic: NOT YET TESTED
-    * CA, device certificate and private key are optional.
+    A. Authentication with Symmetric Key (SAS Token)
+       1. Endpoint: HUB_NAME.azure-devices.net
+       2. ClientId: DEVICE_ID
+       3. Username: HUB_NAME/DEVICE_ID
+       4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
+       5. CA: BALTIMORE CA [chain of 4 certificates]
+       6. Certificate: OPTIONAL
+       7. PrivateKey: OPTIONAL
+       8. PublishTopic: /devices/DEVICE_ID/messages/events
+       9. SubscribeTopic: NOT YET TESTED
+       * CLOUD: copy the shared access key for SAS TOKEN generation
+       * DEVICE: send BALTIMORE CA for TLS connection?
+         (* Saving the BALTIMORE CA, which is a certificate chain of 4 certificates requires 6KB of memory already.)
+         
+    B. Authentication with X.509 Self-Signed
+       1. Endpoint: HUB_NAME.azure-devices.net
+       2. ClientId: DEVICE_ID
+       3. Username: HUB_NAME/DEVICE_ID
+       4. Password: NULL? (or hash of device cert?)
+       5. CA: NULL? (or BALTIMORE Root CA?)
+       6. Certificate: REQUIRED
+       7. PrivateKey: REQUIRED
+       8. PublishTopic: /devices/DEVICE_ID/messages/events
+       9. SubscribeTopic: NOT YET TESTED
+       * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
+       * DEVICE: send device certificate and private key for TLS connection? (need to send BALTIMORE Root CA as well?)
+       
+    C. Authentication with X.509 CA Signed
+       1. Endpoint: HUB_NAME.azure-devices.net
+       2. ClientId: DEVICE_ID
+       3. Username: HUB_NAME/DEVICE_ID
+       4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
+       5. CA: REQUIRED
+       6. Certificate: NULL?
+       7. PrivateKey: NULL?
+       8. PublishTopic: /devices/DEVICE_ID/messages/events
+       9. SubscribeTopic: NOT YET TESTED
+       * CLOUD: set CA and activate with verification code
+       * DEVICE: send CA only for TLS connection?
+       
+       
   
 
