@@ -64,43 +64,28 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
     A. Authentication with Symmetric Key (SAS Token)
        1. Endpoint: HUB_NAME.azure-devices.net
        2. ClientId: DEVICE_ID
-       3. Username: HUB_NAME/DEVICE_ID
+       3. Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
        4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
-       5. CA: BALTIMORE CA [chain of 4 certificates]
-       6. Certificate: OPTIONAL
-       7. PrivateKey: OPTIONAL
-       8. PublishTopic: /devices/DEVICE_ID/messages/events
-       9. SubscribeTopic: NOT YET TESTED
+       5. CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
+       6. Certificate: NULL
+       7. PrivateKey: NULL
+       8. PublishTopic: devices/DEVICE_ID/messages/events/
+       9. SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
        * CLOUD: copy the shared access key for SAS TOKEN generation
-       * DEVICE: send BALTIMORE CA for TLS connection?
-         (* Saving the BALTIMORE CA, which is a certificate chain of 4 certificates requires 6KB of memory already.)
+       * DEVICE: send ms.der as CA for TLS connection
          
     B. Authentication with X.509 Self-Signed
        1. Endpoint: HUB_NAME.azure-devices.net
        2. ClientId: DEVICE_ID
-       3. Username: HUB_NAME/DEVICE_ID
-       4. Password: NULL? (or hash of device cert?)
-       5. CA: NULL? (or BALTIMORE Root CA?)
+       3. Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
+       4. Password: NULL
+       5. CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
        6. Certificate: REQUIRED
        7. PrivateKey: REQUIRED
-       8. PublishTopic: /devices/DEVICE_ID/messages/events
-       9. SubscribeTopic: NOT YET TESTED
+       8. PublishTopic: devices/DEVICE_ID/messages/events/
+       9. SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
-       * DEVICE: send device certificate and private key for TLS connection? (need to send BALTIMORE Root CA as well?)
-       
-    C. Authentication with X.509 CA Signed
-       1. Endpoint: HUB_NAME.azure-devices.net
-       2. ClientId: DEVICE_ID
-       3. Username: HUB_NAME/DEVICE_ID
-       4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
-       5. CA: REQUIRED
-       6. Certificate: NULL?
-       7. PrivateKey: NULL?
-       8. PublishTopic: /devices/DEVICE_ID/messages/events
-       9. SubscribeTopic: NOT YET TESTED
-       * CLOUD: set CA and activate with verification code
-       * DEVICE: send CA only for TLS connection?
-       
-       
-  
+       * DEVICE: send ms.der, device certificate and private key for TLS connection
+              
+Note: Use MQTT.FX to test validity of MQTT settings and TLS certificates.   
 
