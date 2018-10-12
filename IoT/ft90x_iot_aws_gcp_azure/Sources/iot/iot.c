@@ -94,7 +94,7 @@ const char* iot_getusername()
     return USERNAME_ID;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     static char client_user[128] = {0};
-    tfp_snprintf(client_user, sizeof(client_user), "%s/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
+    tfp_snprintf(client_user, sizeof(client_user), "%s/%s/api-version=2016-11-14", (char*)MQTT_BROKER, (char*)DEVICE_ID);
     return client_user;
 #else
     return NULL;
@@ -140,6 +140,9 @@ const char* iot_getpassword()
 
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
 
+#if (USE_MQTT_DEVICE==SAMPLE_DEVICE_2)
+    return NULL;
+#elif (USE_MQTT_DEVICE==SAMPLE_DEVICE_1)
     static char resourceUri[64] = {0};
     tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
 
@@ -155,6 +158,7 @@ const char* iot_getpassword()
 
     token = token_create_sas(resourceUri, SHARED_KEY_ACCESS, iot_sntp_get_time());
     return token;
+#endif
 
 #else
     return NULL;

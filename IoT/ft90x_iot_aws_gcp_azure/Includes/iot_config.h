@@ -67,10 +67,10 @@
     #define REGISTRY_ID               "ft900registryid"
     #define USERNAME_ID               " "
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    #define MQTT_BROKER               "ft900iot.azure-devices.net"
+    #define MQTT_BROKER               "FT900IoTHub.azure-devices.net"
     #define DEVICE_ID                 USE_DEVICE_ID
     #define MQTT_CLIENT_NAME          DEVICE_ID
-    #define SHARED_KEY_ACCESS         "H1VCQmfWxjpuq+NY2d/PFbX9N7tyr9cgB5LCTTG0j+o="
+    #define SHARED_KEY_ACCESS         "tRPYFaLWukSQlGSLAUjxSwk88xjl5OQecJecKR3ECAU="
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define MQTT_BROKER               "192.168.22.12" // local Greengrass server
     #define DEVICE_ID                 USE_DEVICE_ID
@@ -87,6 +87,10 @@
     // This certificate refers to rootca_gg.pem
     extern __flash__ uint8_t ca_data[]        asm("rootca_gg_pem");
     extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_pem_end");
+#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+    // This certificate refers to rootca_azure.pem
+    extern __flash__ uint8_t ca_data[]        asm("rootca_azure_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_azure_pem_end");
 #else
     // This certificate refers to rootca.pem
     extern __flash__ uint8_t ca_data[]        asm("rootca_pem");

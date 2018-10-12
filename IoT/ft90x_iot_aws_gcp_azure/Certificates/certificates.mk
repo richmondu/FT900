@@ -11,8 +11,8 @@ ft900device3_cert.pem \
 ft900device1_pkey.pem \
 ft900device2_pkey.pem \
 ft900device3_pkey.pem \
+rootca_azure.pem \
 rootca_gg.pem
-
 
 CRT_S += \
 $(OUTDIR)/rootca.S \
@@ -22,7 +22,9 @@ $(OUTDIR)/ft900device3_cert.S \
 $(OUTDIR)/ft900device1_pkey.S \
 $(OUTDIR)/ft900device2_pkey.S \
 $(OUTDIR)/ft900device3_pkey.S \
+$(OUTDIR)/rootca_azure.S \
 $(OUTDIR)/rootca_gg.S
+
 
 
 #-------------------------------------------------------------------------------

@@ -34,7 +34,7 @@ char* urlEncode(const char* data, int len)
     int count = 0;
 
     for (int i=0; i<len; i++) {
-        if (data[i]=='/')
+        if (data[i]=='/' || data[i]=='+' || data[i]=='=')
             count++;
     }
 
@@ -45,6 +45,14 @@ char* urlEncode(const char* data, int len)
     for (int i=0,j=0; i<len; i++) {
         if (data[i]=='/') {
             strcat(out, "%2F");
+            j+=3;
+        }
+        else if (data[i]=='+') {
+            strcat(out, "%2B");
+            j+=3;
+        }
+        else if (data[i]=='=') {
+            strcat(out, "%3D");
             j+=3;
         }
         else {
@@ -110,6 +118,7 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
     char* token = NULL;
     char* decodedSharedAccessKey = NULL;
     char* encodedResourceUri = NULL;
+    char* encodedHashedRequest = NULL;
     char* dataToSign = NULL;
 
 
@@ -212,25 +221,32 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
         goto cleanup;
     }
     tfp_printf("hashedRequest: %s [%d]\r\n", hashedRequest, sizeof(hashedRequest));
+    encodedHashedRequest = urlEncode(pcTemp, strlen(pcTemp));
+    if (encodedHashedRequest == NULL) {
+        DEBUG_PRINTF("token_create_sas failed! urlEncode\r\n");
+        goto cleanup;
+    }
+    int encodedHashedRequestLen = strlen(encodedHashedRequest);
     tfp_printf("Encoded hashedRequest %s [%d] [%d] \r\n\r\n", pcTemp, strlen(pcTemp), olen);
 
 
     //
     // Construct the token
     //
-    olen = 48 + encodedResourceUriLen + strlen(pcTemp) + 12 + 1;
+    olen = 34 + encodedResourceUriLen + encodedHashedRequestLen + 10 + 1;
     token = pvPortMalloc(olen);
     if (token == NULL)
     {
         DEBUG_PRINTF("pvPortMalloc failed!\r\n");
-        return NULL;
+        goto cleanup;
     }
     memset(token, 0, olen);
-    ret = tfp_snprintf(token, olen, "SharedAccessSignature sr=%s&sig=%s&se=%u", encodedResourceUri, pcTemp, (unsigned int)expiry);
+    ret = tfp_snprintf(token, olen, "SharedAccessSignature sr=%s&sig=%s&se=%u", encodedResourceUri, encodedHashedRequest, (unsigned int)expiry);
     DEBUG_PRINTF("data %s [%d] [%d] [%d] \r\n\r\n", token, strlen(token), ret, olen);
 
 
 cleanup:
+    vPortFree(encodedHashedRequest);
     vPortFree(decodedSharedAccessKey);
     vPortFree(encodedResourceUri);
     vPortFree(dataToSign);

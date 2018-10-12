@@ -369,7 +369,7 @@ static inline int user_generate_publish_topic(char* topic, int size, const char*
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     return tfp_snprintf(topic, size, "/devices/%s/events", (char*)iot_getdeviceid());
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    return tfp_snprintf(topic, size, "/devices/%s/messages/events", (char*)iot_getdeviceid());
+    return tfp_snprintf(topic, size, "devices/%s/messages/events/", (char*)iot_getdeviceid());
 #else
     return 0;
 #endif
@@ -485,7 +485,10 @@ static inline char* user_generate_subscribe_topic()
     //tfp_snprintf(topic, sizeof(topic), "/devices/%s/events", (char*)iot_getdeviceid());
     return topic;
 #else
-    return NULL;
+    static char topic[64] = {0};
+    tfp_snprintf(topic, sizeof(topic), "devices/%s/messages/devicebound/#", (char*)iot_getdeviceid());
+    //tfp_snprintf(topic, sizeof(topic), "devices/%s/messages/events/#", (char*)iot_getdeviceid());
+    return topic;
 #endif
 }
 
@@ -501,6 +504,13 @@ static void iot_app_process(void)
     mqtt_client_t mqtt = {0};
     struct altcp_tls_config *config = NULL;
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    const uint8_t *ca = NULL;
+    const uint8_t *cert = NULL;
+    const uint8_t *pkey = NULL;
+    size_t ca_len = 0;
+    size_t cert_len = 0;
+    size_t pkey_len = 0;
+#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     const uint8_t *ca = NULL;
     const uint8_t *cert = NULL;
     const uint8_t *pkey = NULL;
@@ -530,7 +540,20 @@ static void iot_app_process(void)
     config = altcp_tls_create_config_client(NULL, 0);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     // Microsoft Azure IoT requires SAS token (created with shared access key) as MQTT password; no certificates need to be sent
-    config = altcp_tls_create_config_client(NULL, 0);
+#if (USE_MQTT_DEVICE==SAMPLE_DEVICE_2)
+    ca = iot_certificate_getca(&ca_len);
+    cert = iot_certificate_getcert(&cert_len);
+    pkey = iot_certificate_getpkey(&pkey_len);
+    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len);
+    vPortFree((uint8_t *)cert);
+    vPortFree((uint8_t *)pkey);
+    vPortFree((uint8_t *)ca);
+#elif (USE_MQTT_DEVICE==SAMPLE_DEVICE_1)
+    ca = iot_certificate_getca(&ca_len);
+    config = altcp_tls_create_config_client(ca, ca_len);
+    vPortFree((uint8_t *)ca);
+#endif
+
 #endif
     if (config == NULL)
     {
