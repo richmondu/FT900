@@ -20,72 +20,73 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
 
 
 ### Amazon AWS IoT Core
-    1. Endpoint: NAME.iot.REGION.amazonaws.com
-    2. ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
-    3. Username: NONE
-    4. Password: NONE
-    5. CA: REQUIRED (required for production, optional for testing)
-    6. Certificate: REQUIRED
-    7. PrivateKey: REQUIRED
-    8. PublishTopic: ANY
-    9. SubscribeTopic: ANY
+    1. MQTT Endpoint: NAME.iot.REGION.amazonaws.com
+    2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
+    3. MQTT Username: NONE
+    4. MQTT Password: NONE
+    5. TLS CA: REQUIRED (required for production, optional for testing)
+    6. TLS Certificate: REQUIRED
+    7. TLS PrivateKey: REQUIRED
+    8. MQTT PublishTopic: ANY
+    9. MQTT SubscribeTopic: ANY
     * CLOUD: CA, device certificate and private key must be registered in Amazon AWS IoT Core
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends CA, device certificate, device private key for TLS connection
 
 ### Amazon AWS Greengrass
-    1. Endpoint: local Greengrass device hostname or IP address
-    2. ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
-    3. Username: NONE
-    4. Password: NONE
-    5. CA: REQUIRED (Greengrass Group CA; dynamically generated, expires 7 days default, configurable 30 days max)
-    6. Certificate: REQUIRED
-    7. PrivateKey: REQUIRED
-    8. PublishTopic: ANY
-    9. SubscribeTopic: ANY
+    1. MQTT Endpoint: local Greengrass device hostname or IP address
+    2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
+    3. MQTT Username: NONE
+    4. MQTT Password: NONE
+    5. TLS CA: REQUIRED (Greengrass Group CA; dynamically generated, expires 7 days default, configurable 30 days max)
+    6. TLS Certificate: REQUIRED
+    7. TLS PrivateKey: REQUIRED
+    8. MQTT PublishTopic: ANY
+    9. MQTT SubscribeTopic: ANY
     * CLOUD: CA, device certificate and private key must be registered in Amazon AWS IoT Core
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
     
 ### Google Cloud IoT Core
-    1. Endpoint: mqtt.googleapis.com
-    2. ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
-    3. Username: ANY
-    4. Password: JSON Web Token (JWT) security token (contains signature created with asymmetric device private key)
-    5. CA: NONE
-    6. Certificate: REQUIRED (registered in cloud)
-    7. PrivateKey: REQUIRED (used to generate JWT Token)
-    8. PublishTopic: /devices/DEVICE_ID/events
-    9. SubscribeTopic: NOT SUPPORTED
+    1. MQTT Endpoint: mqtt.googleapis.com
+    2. MQTT ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
+    3. MQTT Username: ANY
+    4. MQTT Password: JSON Web Token (JWT) security token (contains signature created with asymmetric device private key)
+    5. TLS CA: NONE
+    6. TLS Certificate: REQUIRED (registered in cloud)
+    7. TLS PrivateKey: REQUIRED (used to generate JWT Token)
+    8. MQTT PublishTopic: /devices/DEVICE_ID/events
+    9. MQTT SubscribeTopic: NOT SUPPORTED
     * CLOUD: Certificate must be registered in Google Cloud IoT Core
     * DEVICE: No certificate is sent for TLS connection
     
 ### Microsoft Azure IoT Hub
     A. Authentication with Symmetric Key (SAS Token)
-       1. Endpoint: HUB_NAME.azure-devices.net
-       2. ClientId: DEVICE_ID
-       3. Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
-       4. Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
-       5. CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
-       6. Certificate: NULL
-       7. PrivateKey: NULL
-       8. PublishTopic: devices/DEVICE_ID/messages/events/
-       9. SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
+       1. MQTT Endpoint: HUB_NAME.azure-devices.net
+       2. MQTT ClientId: DEVICE_ID
+       3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
+       4. MQTT Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
+       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
+       6. TLS Certificate: NULL
+       7. TLS PrivateKey: NULL
+       8. MQTT PublishTopic: devices/DEVICE_ID/messages/events/
+       9. MQTT SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
        * CLOUD: copy the shared access key for SAS TOKEN generation
        * DEVICE: send ms.der as CA for TLS connection
          
-    B. Authentication with X.509 Self-Signed
-       1. Endpoint: HUB_NAME.azure-devices.net
-       2. ClientId: DEVICE_ID
-       3. Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
-       4. Password: NULL
-       5. CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
-       6. Certificate: REQUIRED
-       7. PrivateKey: REQUIRED
-       8. PublishTopic: devices/DEVICE_ID/messages/events/
-       9. SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
+    B. Authentication with X.509 Self-Signed Certificates
+       1. MQTT Endpoint: HUB_NAME.azure-devices.net
+       2. MQTT ClientId: DEVICE_ID
+       3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
+       4. MQTT Password: NULL
+       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
+       6. TLS Certificate: REQUIRED
+       7. TLS PrivateKey: REQUIRED
+       8. MQTT PublishTopic: devices/DEVICE_ID/messages/events/
+       9. MQTT SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
-Note: Use MQTT.FX to test validity of MQTT settings and TLS certificates.   
-
+Notes
+1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
+2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 to support Azure IoT connectivity. 
