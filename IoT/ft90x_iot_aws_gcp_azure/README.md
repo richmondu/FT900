@@ -1,10 +1,11 @@
 # FT900 IoT Cloud demo
 
 
-This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
+This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . This new project demonstrates:
 
-    1. Secure connectivity with IoT cloud providers: Amazon AWS, Google Cloud and Microsoft Azure
-       The choice of cloud provider is configurable with a macro USE_MQTT_BROKER
+    1. Secure connectivity with IoT cloud providers: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
+       The choice of cloud provider is configurable with a macro USE_MQTT_BROKER.
+       User needs to update iot_config.h to configure settings corresponding to their account of their chosen cloud provider.
     2. Use of LWIP's MQTT library with ALTCP_TLS instead of MQTT library from Amazon FreeRTOS
        Also refer to the MQTT and TLS related bug fixes contributed to LWIP open-source community 
     3. Improvement of net.c Ethernet abstraction layer for simplification of user application code
@@ -18,6 +19,8 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
        The RTC is initialized with time queried from SNTP.
     It also contains 3 set of device certificates that can be used to connect to all 3 cloud services
 
+
+Below are the MQTT settings and TLS credentials needed to connect to IoT cloud services of AWS, GCP and Azure. 
 
 ### Amazon AWS IoT Core
     1. MQTT Endpoint: NAME.iot.REGION.amazonaws.com
@@ -47,7 +50,7 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
     
-### Google Cloud IoT Core
+### Google Cloud Platform IoT Core
     1. MQTT Endpoint: mqtt.googleapis.com
     2. MQTT ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. MQTT Username: ANY
@@ -87,6 +90,6 @@ This demo is an improvement of the FT900 AWS IoT demo. It demonstrates:
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
-Notes
-1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
-2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 to support Azure IoT connectivity. 
+Notes:
+    1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
+    2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 to support Azure IoT connectivity. 
