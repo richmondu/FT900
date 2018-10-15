@@ -1,7 +1,8 @@
 # FT900 IoT Cloud demo
 
 
-This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . This new project demonstrates:
+This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . 
+This new project demonstrates:
 
     1. Secure connectivity with IoT cloud providers: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
        The choice of cloud provider is configurable with a macro USE_MQTT_BROKER.
