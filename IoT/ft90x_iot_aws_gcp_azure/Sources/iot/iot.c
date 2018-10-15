@@ -27,9 +27,12 @@ extern void  iot_sntp_stop();
 extern uint32_t iot_sntp_get_time();
 
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+
+#if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
 static char* token = NULL;
 extern char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uint32_t timeNow);
 extern void  token_free(char** token);
+#endif
 
 extern void  iot_sntp_start();
 extern void  iot_sntp_stop();
@@ -116,6 +119,7 @@ const char* iot_getpassword()
 #endif
 
     return NULL;
+
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
 
     const uint8_t *pkey = NULL;
@@ -140,9 +144,7 @@ const char* iot_getpassword()
 
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
 
-#if (USE_MQTT_DEVICE==SAMPLE_DEVICE_2)
-    return NULL;
-#elif (USE_MQTT_DEVICE==SAMPLE_DEVICE_1)
+#if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
     static char resourceUri[64] = {0};
     tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
 
@@ -158,6 +160,8 @@ const char* iot_getpassword()
 
     token = token_create_sas(resourceUri, SHARED_KEY_ACCESS, iot_sntp_get_time());
     return token;
+#elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
+    return NULL;
 #endif
 
 #else

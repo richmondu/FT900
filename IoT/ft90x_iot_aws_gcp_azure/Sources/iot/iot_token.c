@@ -144,8 +144,8 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
     }
     memset(decodedSharedAccessKey, 0, decodedSharedAccessKeyLen+1);
     memcpy(decodedSharedAccessKey, pcTemp, decodedSharedAccessKeyLen);
-    tfp_printf("sharedAccessKey: %s [%d]\r\n", sharedAccessKey, strlen(sharedAccessKey));
-    tfp_printf("decoded SharedAccessKey: [%d][%d]\r\n", decodedSharedAccessKeyLen, olen);
+    DEBUG_PRINTF("sharedAccessKey: %s [%d]\r\n", sharedAccessKey, strlen(sharedAccessKey));
+    DEBUG_PRINTF("decoded SharedAccessKey: [%d][%d]\r\n", decodedSharedAccessKeyLen, olen);
 
 
     //
@@ -157,8 +157,8 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
         goto cleanup;
     }
     int encodedResourceUriLen = strlen(encodedResourceUri);
-    tfp_printf("resourceUri: %s [%d]\r\n", resourceUri, strlen(resourceUri));
-    tfp_printf("encoded ResourceUri: [%s][%d]\r\n", encodedResourceUri, encodedResourceUriLen);
+    DEBUG_PRINTF("resourceUri: %s [%d]\r\n", resourceUri, strlen(resourceUri));
+    DEBUG_PRINTF("encoded ResourceUri: [%s][%d]\r\n", encodedResourceUri, encodedResourceUriLen);
 
 
     //
@@ -173,17 +173,10 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
     }
     memset(dataToSign, 0, dataToSignLen);
     dataToSignLen = tfp_snprintf(dataToSign, dataToSignLen, "%s\n%u", encodedResourceUri, (unsigned int)expiry);
-    tfp_printf("dataToSign: %s [%d]\r\n", dataToSign, dataToSignLen);
-
-
-
-    //int encodedRequestStringLen = mbedtls_base64_encode((unsigned char *)encodedRequestString, sizeof(encodedRequestString), &olen, (const unsigned char *)requestString, ret);
-    //tfp_printf("encodedRequestString: [%s][%d][%d]\r\n", encodedRequestString, ret, olen);
-
+    DEBUG_PRINTF("dataToSign: %s [%d]\r\n", dataToSign, dataToSignLen);
 
 
     uint8_t hashedRequest[64+1] = {0};
-
     {
         mbedtls_md_context_t md_ctx;
         mbedtls_md_init(&md_ctx);
@@ -205,7 +198,7 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
             mbedtls_md_free(&md_ctx);
             goto cleanup;
         }
-        tfp_printf("mbedtls_md_get_size: %d\r\n", mbedtls_md_get_size(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256)));
+        DEBUG_PRINTF("mbedtls_md_get_size: %d\r\n", mbedtls_md_get_size(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256)));
 
         if ((ret = mbedtls_md_hmac_finish(&md_ctx, hashedRequest)) != 0) {
             DEBUG_PRINTF("HMAC update failed! returned %d (-0x%04x)\r\n", ret, -ret);
@@ -220,14 +213,14 @@ char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uin
         DEBUG_PRINTF("Encoding device key failed! returned %d (-0x%04x)\r\n", ret, -ret);
         goto cleanup;
     }
-    tfp_printf("hashedRequest: %s [%d]\r\n", hashedRequest, sizeof(hashedRequest));
+    DEBUG_PRINTF("hashedRequest: %s [%d]\r\n", hashedRequest, sizeof(hashedRequest));
     encodedHashedRequest = urlEncode(pcTemp, strlen(pcTemp));
     if (encodedHashedRequest == NULL) {
         DEBUG_PRINTF("token_create_sas failed! urlEncode\r\n");
         goto cleanup;
     }
     int encodedHashedRequestLen = strlen(encodedHashedRequest);
-    tfp_printf("Encoded hashedRequest %s [%d] [%d] \r\n\r\n", pcTemp, strlen(pcTemp), olen);
+    DEBUG_PRINTF("Encoded hashedRequest %s [%d] [%d] \r\n\r\n", pcTemp, strlen(pcTemp), olen);
 
 
     //

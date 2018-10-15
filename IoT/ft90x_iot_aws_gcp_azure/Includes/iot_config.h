@@ -70,7 +70,15 @@
     #define MQTT_BROKER               "FT900IoTHub.azure-devices.net"
     #define DEVICE_ID                 USE_DEVICE_ID
     #define MQTT_CLIENT_NAME          DEVICE_ID
-    #define SHARED_KEY_ACCESS         "tRPYFaLWukSQlGSLAUjxSwk88xjl5OQecJecKR3ECAU="
+    // Microsoft support 2 authentication types: SASToken and X509Certificates
+    #define AUTH_TYPE_SASTOKEN        0
+    #define AUTH_TYPE_X509CERT        1
+    #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
+        #define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
+        #define SHARED_KEY_ACCESS     "tRPYFaLWukSQlGSLAUjxSwk88xjl5OQecJecKR3ECAU="
+    #else // SAMPLE_DEVICE_2 and SAMPLE_DEVICE_3
+        #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
+    #endif
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define MQTT_BROKER               "192.168.22.12" // local Greengrass server
     #define DEVICE_ID                 USE_DEVICE_ID

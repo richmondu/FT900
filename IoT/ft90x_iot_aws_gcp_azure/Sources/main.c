@@ -524,8 +524,15 @@ static void iot_app_process(void)
 
     //
     // Initialize certificates
+    // Below is an overview of the authentication for Amazon, Google and Azure:
+    // 1. Amazon IoT and Greengrass
+    // -  supports X509 Certificates for authentication
+    // 2. Google IoT
+    // -  supports Security Token (JWT) for authentication
+    // 3. Microsoft Azure
+    // -  supports Security Token (SAS) for authentication
+    // -  supports X509 Certificates for authentication
     //
-
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     // Amazon AWS IoT requires certificate and private key but ca is optional (but recommended)
     ca = iot_certificate_getca(&ca_len);
@@ -536,24 +543,26 @@ static void iot_app_process(void)
     vPortFree((uint8_t *)pkey);
     vPortFree((uint8_t *)ca);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    // Google GCP IoT requires JWT token (created with private key) as MQTT password; no certificate needs to be sent
+    // Google GCP IoT requires JWT token (created with private key) as MQTT password;
+    // no certificate needs to be sent
     config = altcp_tls_create_config_client(NULL, 0);
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Microsoft Azure IoT requires SAS token (created with shared access key) as MQTT password; no certificates need to be sent
-#if (USE_MQTT_DEVICE==SAMPLE_DEVICE_2)
-    ca = iot_certificate_getca(&ca_len);
-    cert = iot_certificate_getcert(&cert_len);
-    pkey = iot_certificate_getpkey(&pkey_len);
-    config = altcp_tls_create_config_client_2wayauth(ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len);
-    vPortFree((uint8_t *)cert);
-    vPortFree((uint8_t *)pkey);
-    vPortFree((uint8_t *)ca);
-#elif (USE_MQTT_DEVICE==SAMPLE_DEVICE_1)
-    ca = iot_certificate_getca(&ca_len);
-    config = altcp_tls_create_config_client(ca, ca_len);
-    vPortFree((uint8_t *)ca);
-#endif
-
+    // Microsoft Azure provides two authentication types: SAS TOKEN and X509 Certificates
+    #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
+        // Demonstrate authentication using SAS Token
+        ca = iot_certificate_getca(&ca_len);
+        config = altcp_tls_create_config_client(ca, ca_len);
+        vPortFree((uint8_t *)ca);
+    #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
+        // Demonstrate authentication using X509 Certificates
+        ca = iot_certificate_getca(&ca_len);
+        cert = iot_certificate_getcert(&cert_len);
+        pkey = iot_certificate_getpkey(&pkey_len);
+        config = altcp_tls_create_config_client_2wayauth(ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len);
+        vPortFree((uint8_t *)cert);
+        vPortFree((uint8_t *)pkey);
+        vPortFree((uint8_t *)ca);
+    #endif
 #endif
     if (config == NULL)
     {

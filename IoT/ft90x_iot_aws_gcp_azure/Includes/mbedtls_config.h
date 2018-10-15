@@ -133,15 +133,15 @@
 /*-----------------------------------------------------------*/
 
 // Optimization related configuration
-#if USE_ECC_CIPHERSUITE
-	#define MBEDTLS_SSL_MAX_CONTENT_LEN (3072+320)
+#if 1
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (3072+512) // Increase from 3072 to support Azure IoT
+#define MBEDTLS_MPI_MAX_SIZE 512     // Increased from 256 to support Azure IoT
 #else
-	//#define MBEDTLS_SSL_MAX_CONTENT_LEN (4096)
-	#define MBEDTLS_SSL_MAX_CONTENT_LEN (3072)
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (3072) // Works with AWS IoT/Greengrass and GCP IoT
+#define MBEDTLS_MPI_MAX_SIZE 256     // Works with AWS IoT/Greengrass and GCP IoT
 #endif
 #define MBEDTLS_AES_ROM_TABLES       // decreases code size by 896 bytes
 #define MBEDTLS_MPI_WINDOW_SIZE 1    // decreases code size by 808 bytes
-#define MBEDTLS_MPI_MAX_SIZE 256     // decreases code size by 64 bytes
 #define MBEDTLS_SHA256_SMALLER       // decreases code size by 2944 bytes
 #define MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_KEY_EXCHANGE
 
