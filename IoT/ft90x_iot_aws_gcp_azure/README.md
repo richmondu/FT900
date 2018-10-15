@@ -65,7 +65,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     * DEVICE: No certificate is sent for TLS connection
     
 ### Microsoft Azure IoT Hub
-    A. Authentication with Symmetric Key (SAS Token)
+    A. Authentication with SAS Security Token
        1. MQTT Endpoint: HUB_NAME.azure-devices.net
        2. MQTT ClientId: DEVICE_ID
        3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
@@ -91,6 +91,6 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
-Notes:
+### Notes:
     1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
-    2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 to support Azure IoT connectivity. 
+    2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity. 
