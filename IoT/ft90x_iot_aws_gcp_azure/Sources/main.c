@@ -503,21 +503,12 @@ static void iot_app_process(void)
     err_t err = ERR_OK;
     mqtt_client_t mqtt = {0};
     struct altcp_tls_config *config = NULL;
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     const uint8_t *ca = NULL;
     const uint8_t *cert = NULL;
     const uint8_t *pkey = NULL;
     size_t ca_len = 0;
     size_t cert_len = 0;
     size_t pkey_len = 0;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    const uint8_t *ca = NULL;
-    const uint8_t *cert = NULL;
-    const uint8_t *pkey = NULL;
-    size_t ca_len = 0;
-    size_t cert_len = 0;
-    size_t pkey_len = 0;
-#endif
 
     iot_init();
 

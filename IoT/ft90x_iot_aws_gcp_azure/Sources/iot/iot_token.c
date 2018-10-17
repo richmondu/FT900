@@ -28,7 +28,7 @@
 
 
 
-char* urlEncode(const char* data, int len)
+static char* urlEncode(const char* data, int len)
 {
     char* out = NULL;
     int count = 0;
