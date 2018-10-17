@@ -92,5 +92,21 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
 ### Notes:
-    1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
-    2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity. 
+       1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
+       2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity. 
+
+
+Below are the IoT cloud solutions architecture used for this demo application.
+
+### Amazon AWS Architecture
+       1. BACKEND: ft900 -> Greengrass -> IoT Core -> Lambda -> DynamoDB 
+       2. FRONTEND: browser -> (Webpage) S3 -> API Gateway -> Lambda -> DynamoDB
+
+### Google Cloud Architecture
+       1. BACKEND: ft900 -> IoT Core -> Pub/Sub -> Dataflow -> BigQuery
+       2. FRONTEND: browser -> (Webpage w/NodeJS script) Storage -> BigQuery
+
+### Microsoft Azure Architecture
+       1. BACKEND: ft900 -> IoT Hub -> Stream Analytics -> CosmosDB
+       2. FRONTEND: TODO
+
