@@ -146,6 +146,11 @@ const char* iot_getpassword()
 
 #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
     static char resourceUri[64] = {0};
+    size_t sharedAccessKeyLen = 0;
+    // Read the shared access key for device from a file ft900deviceX_sas_azure.pem
+    // Reading from a file instead of hardcoded macro makes it easier to deploy for more devices
+    const uint8_t *sharedAccessKey = iot_sas_getkey(&sharedAccessKeyLen);
+
     tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
 
     token_free(&token);
@@ -158,7 +163,8 @@ const char* iot_getpassword()
     while (!iot_sntp_get_time() && net_is_ready());
     DEBUG_PRINTF("Waiting time request...done!\r\n\r\n");
 
-    token = token_create_sas(resourceUri, SHARED_KEY_ACCESS, iot_sntp_get_time());
+    token = token_create_sas(resourceUri, sharedAccessKey, iot_sntp_get_time());
+    vPortFree(sharedAccessKey);
     return token;
 #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
     return NULL;

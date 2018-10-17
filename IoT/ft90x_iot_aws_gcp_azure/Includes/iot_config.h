@@ -74,9 +74,10 @@
     #define AUTH_TYPE_SASTOKEN        0
     #define AUTH_TYPE_X509CERT        1
     #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
+        // We have set our sample device1 to use SAS Token authentication
         #define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
-        #define SHARED_KEY_ACCESS     "tRPYFaLWukSQlGSLAUjxSwk88xjl5OQecJecKR3ECAU="
     #else // SAMPLE_DEVICE_2 and SAMPLE_DEVICE_3
+        // We have set our sample device2 and device 3 to use X509 Certificate authentication
         #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
     #endif
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
@@ -128,6 +129,15 @@
     // This private key refers to ft900device3_pkey.pem
     extern __flash__ uint8_t pkey_data[]      asm("ft900device3_pkey_pem");
     extern __flash__ uint8_t pkey_data_end[]  asm("ft900device3_pkey_pem_end");
+#endif
+
+// Shared Access Key for Microsoft Azure IoT
+#if (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT && MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
+    // For Microsoft, we have configured our device 1 to use SAS Security Token authentication,
+    // not X509 certificate authentication
+    // This SharedAccessKey refers to ft900device1_sas_azure.pem
+    extern __flash__ uint8_t sas_data[]      asm("ft900device1_sas_azure_pem");
+    extern __flash__ uint8_t sas_data_end[]  asm("ft900device1_sas_azure_pem_end");
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 

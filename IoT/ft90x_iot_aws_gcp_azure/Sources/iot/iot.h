@@ -28,6 +28,7 @@ const char* iot_getdeviceid();
 const uint8_t* iot_certificate_getca(size_t* len);
 const uint8_t* iot_certificate_getcert(size_t* len);
 const uint8_t* iot_certificate_getpkey(size_t* len);
+const uint8_t* iot_sas_getkey(size_t* len);
 
 #if USE_PAYLOAD_TIMESTAMP
 int64_t iot_rtc_get_time_epoch();
