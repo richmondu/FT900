@@ -3,16 +3,18 @@
 // This javascript code queries a Google Cloud BigQuery database
 //
 // Prerequisites:
-// A. Google Cloud
+// A. NodeJS
+//    1. npm install --save @google-cloud/bigquery
+// B. Google Cloud
 //    1. gcloud iam service-accounts create bigqueryclient
 //    2. gcloud projects add-iam-policy-binding ft900iotproject --member "serviceAccount:bigqueryclient@ft900iotproject.iam.gserviceaccount.com" --role "roles/owner"
 //    3. gcloud iam service-accounts keys create bigqueryclient.json --iam-account bigqueryclient@ft900iotproject.iam.gserviceaccount.com
-// B. NodeJS
-//    1. npm install --save @google-cloud/bigquery
 //
 // To run this application:
-// 1. Run FT90x for 1 minute to send data to IoTCore then save to BigQuery
-// 2. Run this application "node bigquery.js"
+// 1. Set GOOGLE_APPLICATION_CREDENTIALS=C:\Users\richmond\Desktop\bigquery\bigqueryclient.json
+// 2. Update the configurable parameters
+// 3. Run FT90x for 1 minute to send data to IoTCore then save to BigQuery
+// 4. Run this application "node bigqueryclient.js"
 //
 ////////////////////////////////////////////////////////////////////
 
@@ -26,9 +28,8 @@
 const projectId = "ft900iotproject";
 const dataSetId = "dataset";
 const tableId   = "timeseriestable";
-const accessKey = "C:\\Users\\richmond\\Desktop\\bigquery\\bigqueryclient2.json"
-const timeSpan  = 1000 * 60 * 5; // 5 minutes
-const maxItems  = 25;
+const timeSpan  = 1000 * 60 * 1; // 1 minute of data only
+const maxItems  = 60;
 ////////////////////////////////////////////////////////////////////
 
 
@@ -56,15 +57,6 @@ async function asyncQuery(sqlQuery, projectId)
     rows.forEach(row => console.log(row));
 }
 
-function getTimeRange(timeSpan)
-{
-    var timeNow = Date.now();
-    var timeRange = timeNow-timeSpan;
-
-    console.log('getTimeRange(): ' + timeRange + '\n');
-    return timeRange;
-}
-
 function getSQLQueryString(bigQueryId, timeRange, maxItems, deviceId)
 {
     var sqlQuery = "SELECT * FROM `" + bigQueryId 
@@ -76,12 +68,27 @@ function getSQLQueryString(bigQueryId, timeRange, maxItems, deviceId)
     return sqlQuery;
 }
 
+function getTimeRange(timeSpan)
+{
+    var timeNow = Date.now();
+    var timeRange = timeNow-timeSpan;
+
+    console.log('getTimeRange(): ' + timeRange + '\n');
+    return timeRange;
+}
+
+async function handleError(error) 
+{
+    console.log("\nAn error with code '" + error.code + "' has occurred:");
+    console.log("\t" + error.body || error);
+}
+
 
 ////////////////////////////////////////////////////////////////////
-var timeRange = getTimeRange(timeSpan)
-asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'hopper'), projectId)
-//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'turing'), projectId)
-//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'knuth'), projectId)
+var timeRange = getTimeRange(timeSpan);
+asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'hopper'), projectId).catch(handleError);
+//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'turing'), projectId).catch(handleError);
+//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'knuth'), projectId).catch(handleError);
 ////////////////////////////////////////////////////////////////////
 
 
