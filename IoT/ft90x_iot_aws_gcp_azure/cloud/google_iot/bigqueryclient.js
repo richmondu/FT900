@@ -26,7 +26,7 @@
 const projectId = "ft900iotproject";
 const dataSetId = "dataset";
 const tableId   = "timeseriestable";
-const accessKey = "C:\\Users\\richmond\\Desktop\\bigquery\\bigqueryclient.json"
+const accessKey = "C:\\Users\\richmond\\Desktop\\bigquery\\bigqueryclient2.json"
 const timeSpan  = 1000 * 60 * 5; // 5 minutes
 const maxItems  = 25;
 ////////////////////////////////////////////////////////////////////
@@ -34,10 +34,10 @@ const maxItems  = 25;
 
 const bigQueryId = projectId + "." + dataSetId + "." + tableId;
 
-async function asyncQuery(sqlQuery, projectId, accessKey) 
+async function asyncQuery(sqlQuery, projectId) 
 {
     const BigQuery = require('@google-cloud/bigquery');
-    const bq = new BigQuery({projectId, accessKey});
+    const bq = new BigQuery({projectId});
     const options = {query: sqlQuery, useLegacySql: false};
 
     const [job] = await bq.createQueryJob(options);
@@ -79,9 +79,9 @@ function getSQLQueryString(bigQueryId, timeRange, maxItems, deviceId)
 
 ////////////////////////////////////////////////////////////////////
 var timeRange = getTimeRange(timeSpan)
-asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'hopper'), projectId, accessKey)
-//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'turing'), projectId, accessKey)
-//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'knuth'), projectId, accessKey)
+asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'hopper'), projectId)
+//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'turing'), projectId)
+//asyncQuery(getSQLQueryString(bigQueryId, timeRange, maxItems, 'knuth'), projectId)
 ////////////////////////////////////////////////////////////////////
 
 
