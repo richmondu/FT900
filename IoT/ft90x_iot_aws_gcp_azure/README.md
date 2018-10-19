@@ -100,13 +100,18 @@ Below are the IoT cloud solutions architecture used for this demo application.
 
 ### Amazon AWS Architecture
        1. BACKEND: ft900 -> Greengrass -> IoT Core -> Lambda -> DynamoDB 
-       2. FRONTEND: browser -> (Webpage) S3 -> API Gateway -> Lambda -> DynamoDB
+       2. FRONTEND: browser -> (Dashboard webpage) S3 -> API Gateway -> Lambda -> DynamoDB
 
 ### Google Cloud Architecture
+       0. Refer to FT900IoTDemo_SetupGuide_GoogleCloud.docx
        1. BACKEND: ft900 -> IoT Core -> Pub/Sub -> Dataflow -> BigQuery
-       2. FRONTEND: browser -> (Webpage w/NodeJS script) Storage -> BigQuery
-
+       2. FRONTEND: bigqueryclient.js -> BigQuery
+          FRONTEND: browser -> (Dashboard webpage using bigqueryclient.js) Storage -> BigQuery [TODO]
+          
 ### Microsoft Azure Architecture
+       0. Refer to FT900IoTDemo_SetupGuide_MicrosoftAzure.docx
        1. BACKEND: ft900 -> IoT Hub -> Stream Analytics -> CosmosDB
-       2. FRONTEND: TODO
+       2. FRONTEND: cosmosdbclient.js -> CosmosDB
+          FRONTEND: browser -> (Dashboard webpage using cosmosdbclient.js) Storage -> CosmosDB [TODO]
+       
 
