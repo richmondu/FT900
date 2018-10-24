@@ -253,7 +253,6 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     int len = 512;//464; // TODO
     char pcTemp[352] = {0};
     char* pcJWT = NULL;
-    size_t olen = 0;
 
 
     if (privateKey == NULL || privateKeySize == 0 || timeNow == 0) {
@@ -294,15 +293,26 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     // python time.mktime(datetime.datetime.now().timetuple())
     uint32_t iat = timeNow;    // Set the time.
     uint32_t exp = iat + 3600*12; // Set the expiry time after 1 hour.
+
+#if 1
+    len = 45 + strlen(projectId);
+    char* pcBody = pvPortMalloc(len);
+    memset(pcBody, 0, len);
+    tfp_snprintf(pcBody, len, "{\"iat\":%u,\"exp\":%u,\"aud\":\"%s\"}", (unsigned int)iat, (unsigned int)exp, projectId);
+#else
     char pcBody[64] = {0};
     memset(pcBody, 0, sizeof(pcBody));
     tfp_snprintf(pcBody, sizeof(pcBody), "{\"iat\":%u,\"exp\":%u,\"aud\":\"%s\"}", (unsigned int)iat, (unsigned int)exp, projectId);
-    DEBUG_PRINTF("pcBody %s %d\r\n", pcBody, strlen(pcBody));
+#endif
+    DEBUG_PRINTF("pcBody %s %d %d\r\n", pcBody, strlen(pcBody), len);
 
     // Encode body
     memset(pcTemp, 0, sizeof(pcTemp));
     base64url_encode((unsigned char *)pcBody, strlen(pcBody), pcTemp);
     DEBUG_PRINTF("Encoded pcBody %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
+#if 1
+    vPortFree(pcBody);
+#endif
 
     // Build JWT packet
     strcat(pcJWT, pcTemp);
