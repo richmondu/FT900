@@ -108,11 +108,13 @@ Below are the IoT cloud solutions architecture used for this demo application.
        1. BACKEND: ft900 -> IoT Core -> Pub/Sub -> Dataflow -> BigQuery
        2. FRONTEND: bigqueryclient.js -> BigQuery
           FRONTEND: browser -> (Dashboard webpage using bigqueryclient.js) Storage -> BigQuery [TODO]
+          bigqueryclient.js demonstrates authenticating and querying of Big Query database
           
 ### Microsoft Azure Architecture
        0. Refer to FT900IoTDemo_SetupGuide_MicrosoftAzure.docx for step-by-step Microsoft Azure IoT setup procedures
        1. BACKEND: ft900 -> IoT Hub -> Stream Analytics -> CosmosDB
        2. FRONTEND: cosmosdbclient.js -> CosmosDB
           FRONTEND: browser -> (Dashboard webpage using cosmosdbclient.js) Storage -> CosmosDB [TODO]
+          cosmosdbclient.js demonstrates authenticating and querying of CosmosDB database
        
 
