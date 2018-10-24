@@ -93,7 +93,8 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
               
 ### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
-       2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity. 
+       2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity.
+       3. The "MQTT publish topic" for Google Cloud IoT and Microsoft Azure IoT have fixed format. See above. Only AWS supports any topic.
 
 
 Below are the IoT cloud solutions architecture used for this demo application.
