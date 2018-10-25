@@ -276,7 +276,11 @@ static inline err_t mqtt_connect_async(
 
 static int mqtt_connect_callback_err = 0;
 
-static void mqtt_connect_callback( mqtt_client_t *client, void *arg, mqtt_connection_status_t status )
+static void mqtt_connect_callback(
+    mqtt_client_t *client,
+    void *arg,
+    mqtt_connection_status_t status
+    )
 {
     if ( status == MQTT_CONNECT_ACCEPTED ) {
         DEBUG_PRINTF( "MQTT CONNECTED\r\n" );
@@ -314,18 +318,21 @@ static void mqtt_pubsub_callback( void *arg, err_t result )
 
 #if USE_MQTT_SUBSCRIBE
 
-static inline err_t mqtt_subscribe_async(mqtt_client_t *client, const char* topic)
+static inline err_t mqtt_subscribe_async(
+    mqtt_client_t *client, const char* topic)
 {
     err_t err;
     u8_t qos = 1;
 
-    err = mqtt_subscribe( client, topic, qos, mqtt_pubsub_callback, "SUBSCRIBE" );
+    err = mqtt_subscribe(
+        client, topic, qos, mqtt_pubsub_callback, "SUBSCRIBE" );
     if ( err != ERR_OK ) {
         DEBUG_PRINTF( "\r\nmqtt_subscribe failed! %d\r\n", err );
     }
     else {
         DEBUG_PRINTF( "\r\nMQTT SUBSCRIBE: %s\r\n\r\n", topic );
-        mqtt_set_inpub_callback( client, mqtt_subscribe_recv_topic, mqtt_subscribe_recv_payload, NULL );
+        mqtt_set_inpub_callback(
+            client, mqtt_subscribe_recv_topic, mqtt_subscribe_recv_payload, NULL );
     }
 
     return err;
@@ -335,7 +342,8 @@ static char* subscribe_recv = NULL;
 static uint8_t subscribe_recv_size = 0;
 static uint8_t subscribe_recv_off = 0;
 
-static void mqtt_subscribe_recv_topic( void *arg, const char *topic, u32_t tot_len )
+static void mqtt_subscribe_recv_topic(
+    void *arg, const char *topic, u32_t tot_len )
 {
     DEBUG_PRINTF( "\r\nMQTT RECEIVE: %s [%d]\r\n", topic, (unsigned int)tot_len );
     subscribe_recv_off = 0;
@@ -350,7 +358,8 @@ static void mqtt_subscribe_recv_topic( void *arg, const char *topic, u32_t tot_l
     }
 }
 
-static void mqtt_subscribe_recv_payload( void *arg, const u8_t *data, u16_t len, u8_t flags )
+static void mqtt_subscribe_recv_payload(
+    void *arg, const u8_t *data, u16_t len, u8_t flags )
 {
     if ( subscribe_recv ) {
         memcpy( subscribe_recv + subscribe_recv_off, data, len );
@@ -372,13 +381,17 @@ static inline char* user_generate_subscribe_topic()
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     // Google Cloud does not seem to support MQTT subscribe for telemetry events, only for config
     static char topic[64] = {0};
-    tfp_snprintf( topic, sizeof(topic), "/devices/%s/config", (char*)iot_getdeviceid() );
-    //tfp_snprintf(topic, sizeof(topic), "/devices/%s/events", (char*)iot_getdeviceid());
+    tfp_snprintf( topic, sizeof(topic),
+        "/devices/%s/config", (char*)iot_getdeviceid() );
+    //tfp_snprintf(topic, sizeof(topic),
+        "/devices/%s/events", (char*)iot_getdeviceid());
     return topic;
 #else
     static char topic[64] = {0};
-    tfp_snprintf( topic, sizeof(topic), "devices/%s/messages/devicebound/#", (char*)iot_getdeviceid() );
-    //tfp_snprintf(topic, sizeof(topic), "devices/%s/messages/events/#", (char*)iot_getdeviceid());
+    tfp_snprintf( topic, sizeof(topic),
+        "devices/%s/messages/devicebound/#", (char*)iot_getdeviceid() );
+    //tfp_snprintf(topic, sizeof(topic),
+        "devices/%s/messages/events/#", (char*)iot_getdeviceid());
     return topic;
 #endif
 }
@@ -392,13 +405,15 @@ static inline char* user_generate_subscribe_topic()
 ///////////////////////////////////////////////////////////////////////////////////
 
 #if USE_MQTT_PUBLISH
-static inline err_t mqtt_publish_async( mqtt_client_t *client, const char* topic, const char* msg, int msg_len )
+static inline err_t mqtt_publish_async(
+    mqtt_client_t *client, const char* topic, const char* msg, int msg_len )
 {
     err_t err;
     u8_t retain = 0;
     u8_t qos = 0;
 
-    err = mqtt_publish( client, topic, msg, msg_len, qos, retain, mqtt_pubsub_callback, "PUBLISH" );
+    err = mqtt_publish(
+        client, topic, msg, msg_len, qos, retain, mqtt_pubsub_callback, "PUBLISH" );
     if ( err != ERR_OK ) {
         DEBUG_PRINTF( "\r\nmqtt_publish failed! %d\r\n", err );
     }
@@ -409,20 +424,27 @@ static inline err_t mqtt_publish_async( mqtt_client_t *client, const char* topic
     return err;
 }
 
-static inline int user_generate_publish_topic( char* topic, int size, const char* param )
+static inline int user_generate_publish_topic(
+    char* topic, int size, const char* param )
 {
+    // Google Cloud IoT and Microsoft Azure IoT have fixed format for MQTT publish topic
+    // Amazon AWS IoT supports any format for MQTT publish topic
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    // Any format - can be modified
     return tfp_snprintf( topic, size, "device/%s/devicePayload", param );
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
+    // Fixed format - do not modify
     return tfp_snprintf( topic, size, "/devices/%s/events", (char*)iot_getdeviceid() );
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+    // Fixed format - do not modify
     return tfp_snprintf( topic, size, "devices/%s/messages/events/", (char*)iot_getdeviceid() );
 #else
     return 0;
 #endif
 }
 
-static inline int user_generate_publish_payload( char* payload, int size, const char* param )
+static inline int user_generate_publish_payload(
+    char* payload, int size, const char* param )
 {
     int len = 0;
 
@@ -470,6 +492,15 @@ static inline int user_generate_publish_payload( char* payload, int size, const 
 
 
 
+//
+// Initialize TLS certificates
+// Initialize MQTT settings/credentials
+// Establish secure MQTT connection via TLS
+// Subscribe from a topic
+// While connected:
+//     Publish sensor data to a topic
+// Release resources
+//
 static void iot_app_process( void )
 {
     err_t err = ERR_OK;
@@ -496,7 +527,8 @@ static void iot_app_process( void )
         info.tls_config = altcp_tls_create_config_client( ca, ca_len );
     }
     else {
-        info.tls_config = altcp_tls_create_config_client_2wayauth( ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len );
+        info.tls_config = altcp_tls_create_config_client_2wayauth(
+            ca, ca_len, pkey, pkey_len, NULL, 0, cert, cert_len );
     }
     iot_freecertificates( ca, cert, pkey );
     if ( info.tls_config == NULL ) {
@@ -514,7 +546,7 @@ static void iot_app_process( void )
 
 
     //
-    // Establish secure MQTT connection
+    // Establish secure MQTT connection via TLS
     //
     err = mqtt_connect_async(
         &mqtt, iot_getbrokername(), iot_getbrokerport(), &info );
@@ -536,7 +568,7 @@ static void iot_app_process( void )
 
 #if USE_MQTT_SUBSCRIBE
     //
-    // Subscribe from MQTT server
+    // Subscribe from a topic
     //
     err = mqtt_subscribe_async( &mqtt, user_generate_subscribe_topic() );
     if (err != ERR_OK) {
@@ -547,7 +579,7 @@ static void iot_app_process( void )
 
 #if USE_MQTT_PUBLISH
     //
-    // Publish sensor data to MQTT server
+    // Publish sensor data to a topic
     //
     char *devices[3] = { "hopper", "knuth", "turing" };
     int device_count = sizeof( devices )/sizeof( devices[0] );
@@ -560,7 +592,7 @@ static void iot_app_process( void )
         // Publish sensor data for each sensor device
         // In this demo, there are 3 sensor device - hopper, knuth, turing
         // In normal scenario, there is usually only 1 sensor device
-        for (int i=0; i<device_count && mqtt_is_connected( &mqtt ) && err==ERR_OK; i++) {
+        for ( int i=0; i<device_count && mqtt_is_connected( &mqtt ) && err==ERR_OK; i++ ) {
 
             // Generate the publish topic and payload
             // Note that the topic usually does not change
