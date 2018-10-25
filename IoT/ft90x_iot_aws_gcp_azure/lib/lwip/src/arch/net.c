@@ -109,6 +109,27 @@ static int8_t ee_write(uint8_t location, uint8_t *data, const uint16_t len);
 
 /* FUNCTIONS ***********************************************************************/
 
+void net_setup()
+{
+    /* Set up Ethernet */
+    sys_enable(sys_device_ethernet);
+
+#ifdef NET_USE_EEPROM
+    /* Set up I2C */
+    sys_enable(sys_device_i2c_master);
+
+    /* Setup I2C channel 0 pins */
+    /* Use sys_i2c_swop(0) to activate. */
+    gpio_function(44, pad_i2c0_scl); /* I2C0_SCL */
+    gpio_function(45, pad_i2c0_sda); /* I2C0_SDA */
+
+    /* Setup I2C channel 1 pins for EEPROM */
+    /* Use sys_i2c_swop(1) to activate. */
+    gpio_function(46, pad_i2c1_scl); /* I2C1_SCL */
+    gpio_function(47, pad_i2c1_sda); /* I2C1_SDA */
+#endif
+}
+
 /** @brief Query the link status for the interface.
  *  @details The link status is up when there is a valid connection to another
  *      Ethernet device such as a switch or router. It does not mean that the

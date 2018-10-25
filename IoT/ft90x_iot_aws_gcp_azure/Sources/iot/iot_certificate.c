@@ -10,15 +10,15 @@ uint8_t* read_file(__flash__ uint8_t* data, __flash__ uint8_t* data_end, size_t*
     uint8_t *buf = NULL;
     size_t buf_len;
 
-    buf_len = (data_end - data);
+    buf_len = (data_end - data) + 1;
     buf = pvPortMalloc(buf_len);
     if (buf == NULL)
     {
         *len = 0;
         return NULL;
     }
-    memcpy_pm2dat(buf, data, buf_len);
-    buf[buf_len] = '\0';
+    memcpy_pm2dat(buf, data, buf_len-1);
+    buf[buf_len-1] = '\0';
     *len = buf_len;
 
     return buf;

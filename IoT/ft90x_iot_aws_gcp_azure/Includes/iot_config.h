@@ -35,9 +35,11 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-#define SAMPLE_DEVICE_1               1
-#define SAMPLE_DEVICE_2               2
-#define SAMPLE_DEVICE_3               3
+// This demo application provides 3 sets of device certificates
+// Each one will work for Amazon AWS, Google Cloud and Microsoft Azure
+#define SAMPLE_DEVICE_1               1 // corresponds to ft900device1_cert.pem
+#define SAMPLE_DEVICE_2               2 // corresponds to ft900device2_cert.pem
+#define SAMPLE_DEVICE_3               3 // corresponds to ft900device3_cert.pem
 
 #define USE_MQTT_DEVICE               SAMPLE_DEVICE_1
 
@@ -66,11 +68,14 @@
     #define LOCATION_ID               "us-central1"
     #define REGISTRY_ID               "ft900registryid"
     #define USERNAME_ID               " "
+    // Google IoT does not need a root CA
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               0
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     #define MQTT_BROKER               "FT900IoTHub.azure-devices.net"
     #define DEVICE_ID                 USE_DEVICE_ID
     #define MQTT_CLIENT_NAME          DEVICE_ID
-    // Microsoft support 2 authentication types: SASToken and X509Certificates
+    // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
     #define AUTH_TYPE_SASTOKEN        0
     #define AUTH_TYPE_X509CERT        1
     #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
@@ -80,6 +85,9 @@
         // We have set our sample device2 and device 3 to use X509 Certificate authentication
         #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
     #endif
+    // Microsoft IoT requires a root CA
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               1
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define MQTT_BROKER               "192.168.22.12" // local Greengrass server
     #define DEVICE_ID                 USE_DEVICE_ID

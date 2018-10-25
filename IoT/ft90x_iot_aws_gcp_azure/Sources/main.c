@@ -153,23 +153,7 @@ static inline void uart_setup()
 
 static inline void ethernet_setup()
 {
-    /* Set up Ethernet */
-    sys_enable(sys_device_ethernet);
-
-#ifdef NET_USE_EEPROM
-    /* Set up I2C */
-    sys_enable(sys_device_i2c_master);
-
-    /* Setup I2C channel 0 pins */
-    /* Use sys_i2c_swop(0) to activate. */
-    gpio_function(44, pad_i2c0_scl); /* I2C0_SCL */
-    gpio_function(45, pad_i2c0_sda); /* I2C0_SDA */
-
-    /* Setup I2C channel 1 pins for EEPROM */
-    /* Use sys_i2c_swop(1) to activate. */
-    gpio_function(46, pad_i2c1_scl); /* I2C1_SCL */
-    gpio_function(47, pad_i2c1_sda); /* I2C1_SDA */
-#endif
+    net_setup();
 }
 
 int main(void)
@@ -218,6 +202,7 @@ static void iot_app_task(void *pvParameters)
             vTaskDelay(pdMS_TO_TICKS(1000));
             DEBUG_PRINTF(".");
         }
+        vTaskDelay(pdMS_TO_TICKS(1000));
         DEBUG_PRINTF("\r\n");
 
         /* Display IP information */
@@ -230,9 +215,9 @@ static void iot_app_task(void *pvParameters)
         DEBUG_PRINTF("GW=%s\r\n", inet_ntoa(addr));
         addr = net_get_netmask();
         DEBUG_PRINTF("MA=%s\r\n", inet_ntoa(addr));
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
         /* MQTT application */
-        vTaskDelay(pdMS_TO_TICKS(1000));
         DEBUG_PRINTF("Starting...\r\n\r\n");
         iot_app_process();
     }
@@ -282,10 +267,11 @@ static inline err_t mqtt_connect_async(mqtt_client_t *client, struct altcp_tls_c
                 inet_ntoa(host_addr),
                 iot_getbrokerport());
 
-        DEBUG_PRINTF("client_id: %s\r\nclient_user: %s\r\nclient_pass: %s\r\n\r\n",
+        DEBUG_PRINTF("client_id: %s\r\nclient_user: %s\r\nclient_pass: %s [%d]\r\n\r\n",
                 ci.client_id,
                 ci.client_user ? ci.client_user : "NULL",
-                ci.client_pass ? ci.client_pass : "NULL" );
+                ci.client_pass ? ci.client_pass : "NULL",
+                ci.client_pass ? strlen(ci.client_pass) : 0);
 
         err = mqtt_client_connect(client, &host_addr, iot_getbrokerport(), mqtt_connect_callback, (void *)config, &ci);
         if (err != ERR_OK)
@@ -306,19 +292,14 @@ static int mqtt_connect_callback_err = 0;
 
 static void mqtt_connect_callback(mqtt_client_t *client, void *arg, mqtt_connection_status_t status)
 {
-    static int lExponentialBackoff = 2;
-
     if (status == MQTT_CONNECT_ACCEPTED)
     {
         DEBUG_PRINTF("MQTT CONNECTED\r\n");
+        mqtt_connect_callback_err = 0;
     }
     else
     {
         DEBUG_PRINTF("MQTT CONNECT FAILED! mqtt_connect_callback result: %d\r\n\r\n\r\n", status);
-
-        vTaskDelay(pdMS_TO_TICKS(lExponentialBackoff*1000));
-        lExponentialBackoff = (lExponentialBackoff>32) ? 1 : lExponentialBackoff * 2;
-
         mqtt_connect_callback_err = 1;
     }
 }
@@ -610,20 +591,32 @@ static void iot_app_process(void)
     int device_count = sizeof(devices)/sizeof(devices[0]);
     char topic[48] = {0};
     char payload[192] = {0};
+    int retries = 0;
 
     while (mqtt_is_connected(&mqtt) && err==ERR_OK)
     {
         // Publish sensor data for each sensor device
-        // In normal scenario, there should be only 1 device
+        // In this demo, there are 3 sensor device - hopper, knuth, turing
+        // In normal scenario, there is usually only 1 sensor device
         for (int i=0; i<device_count && mqtt_is_connected(&mqtt) && err==ERR_OK; i++)
         {
             int len = user_generate_publish_topic(topic, sizeof(topic), devices[i]);
             len = user_generate_publish_payload(payload, sizeof(payload), devices[i]);
 
-            err = mqtt_publish_async(&mqtt, topic, payload, len);
-            if (err==ERR_OK) {
-                vTaskDelay(pdMS_TO_TICKS(1000));
-            }
+            // If publish fails, retry a few times
+            // Sometimes it succeeds after retrying 1-3 times
+            do {
+                err = mqtt_publish_async(&mqtt, topic, payload, len);
+                if (err==ERR_OK) {
+                    retries = 0;
+                    vTaskDelay(pdMS_TO_TICKS(750));
+                    break;
+                }
+                else {
+                    retries++;
+                    vTaskDelay(pdMS_TO_TICKS(1000));
+                }
+            } while ( mqtt_is_connected(&mqtt) && retries<5 );
         }
     }
 #else // IOT_APP_MODE_PUBLISH

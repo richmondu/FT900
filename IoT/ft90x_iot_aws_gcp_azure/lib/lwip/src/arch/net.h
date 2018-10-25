@@ -119,6 +119,7 @@ struct eeprom_net_config {
 */
 typedef void (*fn_status_cb)(int netif_up, int link_up);
 
+void net_setup();
 err_t net_init(ip_addr_t ip,
 		ip_addr_t gw, ip_addr_t mask,
 		int dhcp, ip_addr_t dns, char *hostname,

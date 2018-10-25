@@ -9,6 +9,7 @@
 
 /* mbedTLS Headers. */
 #include "mbedtls/pk.h"       // For mbedtls_pk_xxx
+#include "mbedtls/base64.h"   // For mbedtls_base64_xxx
 
 /* LWIP Headers. */
 #include "lwipopts.h"         // For ALTCP_MBEDTLS_ENTROPY_xxx
@@ -292,27 +293,19 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
 
     // python time.mktime(datetime.datetime.now().timetuple())
     uint32_t iat = timeNow;    // Set the time.
-    uint32_t exp = iat + 3600*12; // Set the expiry time after 1 hour.
+    uint32_t exp = iat + 3600*12; // Set the expiry time after 12 hours.
 
-#if 1
     len = 45 + strlen(projectId);
     char* pcBody = pvPortMalloc(len);
     memset(pcBody, 0, len);
     tfp_snprintf(pcBody, len, "{\"iat\":%u,\"exp\":%u,\"aud\":\"%s\"}", (unsigned int)iat, (unsigned int)exp, projectId);
-#else
-    char pcBody[64] = {0};
-    memset(pcBody, 0, sizeof(pcBody));
-    tfp_snprintf(pcBody, sizeof(pcBody), "{\"iat\":%u,\"exp\":%u,\"aud\":\"%s\"}", (unsigned int)iat, (unsigned int)exp, projectId);
-#endif
     DEBUG_PRINTF("pcBody %s %d %d\r\n", pcBody, strlen(pcBody), len);
 
     // Encode body
     memset(pcTemp, 0, sizeof(pcTemp));
     base64url_encode((unsigned char *)pcBody, strlen(pcBody), pcTemp);
     DEBUG_PRINTF("Encoded pcBody %s %d\r\n\r\n", pcTemp, strlen(pcTemp));
-#if 1
     vPortFree(pcBody);
-#endif
 
     // Build JWT packet
     strcat(pcJWT, pcTemp);
@@ -323,7 +316,7 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     //
 
     uint8_t pcSignature[256+1] = {0};
-    mbedtls_pk_context pk_context;
+    mbedtls_pk_context pk_context = {0};
     size_t retSize;
 
 
@@ -332,6 +325,8 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     if (rc != 0) {
         DEBUG_PRINTF("token_create_jwt failed! mbedtls_pk_parse_key: %d (-0x%x)\r\n", rc, -rc);
         mbedtls_pk_free(&pk_context);
+        vPortFree(pcJWT);
+        pcJWT = NULL;
         return NULL;
     }
 
@@ -340,6 +335,8 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     if (rc != 0) {
         DEBUG_PRINTF("token_create_jwt failed! mbedtls_md: %d (-0x%x)\r\n", rc, -rc);
         mbedtls_pk_free(&pk_context);
+        vPortFree(pcJWT);
+        pcJWT = NULL;
         return NULL;
     }
 
@@ -348,6 +345,8 @@ char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t 
     if (rc != 0) {
         DEBUG_PRINTF("token_create_jwt failed! mbedtls_pk_sign: %d (-0x%x)\r\n", rc, -rc);
         mbedtls_pk_free(&pk_context);
+        vPortFree(pcJWT);
+        pcJWT = NULL;
         return NULL;
     }
     //DEBUG_PRINTF("pcSignature %d %d\r\n", strlen(pcSignature), retSize);
