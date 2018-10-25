@@ -581,6 +581,7 @@ static void iot_app_process(void)
     if (mqtt_connect_callback_err)
     {
         DEBUG_PRINTF("MQTT CONNECT: mqtt_connect_callback_err failed!\r\n");
+        mqtt_connect_callback_err = 0;
         goto close;
     }
     vTaskDelay(pdMS_TO_TICKS(1000));
