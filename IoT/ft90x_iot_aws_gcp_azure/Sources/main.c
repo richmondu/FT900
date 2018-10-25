@@ -195,9 +195,11 @@ static void iot_app_task( void *pvParameters )
     {
         /* Wait for valid IP address */
         DEBUG_PRINTF( "Waiting for configuration..." );
+        int i = 0;
         while ( !net_is_ready() ) {
             vTaskDelay( pdMS_TO_TICKS(1000) );
             DEBUG_PRINTF( "." );
+            if(++i>30) i=1/0;
         }
         vTaskDelay( pdMS_TO_TICKS(1000) );
         DEBUG_PRINTF( "\r\n" );
