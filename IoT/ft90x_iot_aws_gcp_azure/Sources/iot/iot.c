@@ -179,3 +179,70 @@ const char* iot_getdeviceid()
 {
     return DEVICE_ID;
 }
+
+const int iot_getcertificates(
+    const uint8_t** ca, size_t* ca_len,
+    const uint8_t** cert, size_t* cert_len,
+    const uint8_t** pkey, size_t* pkey_len
+    )
+{
+    //
+    // Initialize certificates
+    // Below is an overview of the authentication for Amazon, Google and Azure:
+    // 1. Amazon IoT and Greengrass
+    // -  supports X509 Certificates for authentication
+    // 2. Google IoT
+    // -  supports Security Token (JWT) for authentication
+    // 3. Microsoft Azure
+    // -  supports Security Token (SAS) for authentication
+    // -  supports X509 Certificates for authentication
+    //
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    // Amazon AWS IoT requires certificate and private key but ca is optional (but recommended)
+    *ca = iot_certificate_getca(ca_len);
+    *cert = iot_certificate_getcert(cert_len);
+    *pkey = iot_certificate_getpkey(pkey_len);
+#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
+    // No certificates required to be sent for Google IoT
+    // But private key will be used for creating JWT token
+    *ca = NULL;
+    ca_len = 0;
+    *cert = NULL;
+    cert_len = 0;
+    *pkey = NULL;
+    pkey_len = 0;
+#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+    // Microsoft Azure provides two authentication types: SAS TOKEN and X509 Certificates
+    #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
+        // Demonstrate authentication using SAS Token
+        *ca = iot_certificate_getca(ca_len);
+        *cert = NULL;
+        cert_len = 0;
+        *pkey = NULL;
+        pkey_len = 0;
+    #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
+        // Demonstrate authentication using X509 Certificates
+        *ca = iot_certificate_getca(ca_len);
+        *cert = iot_certificate_getcert(cert_len);
+        *pkey = iot_certificate_getpkey(pkey_len);
+    #endif
+#else
+    *ca = iot_certificate_getca(ca_len);
+    *cert = iot_certificate_getcert(cert_len);
+    *pkey = iot_certificate_getpkey(pkey_len);
+#endif
+
+    return 0;
+}
+
+void iot_freecertificates(
+    const uint8_t* ca,
+    const uint8_t* cert,
+    const uint8_t* pkey
+    )
+{
+    vPortFree((uint8_t*)ca);
+    vPortFree((uint8_t*)cert);
+    vPortFree((uint8_t*)pkey);
+}
+

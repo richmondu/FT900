@@ -24,6 +24,16 @@ const char* iot_getid();
 const char* iot_getusername();
 const char* iot_getpassword();
 const char* iot_getdeviceid();
+const int iot_getcertificates(
+    const uint8_t** ca, size_t* ca_len,
+    const uint8_t** cert, size_t* cert_len,
+    const uint8_t** pkey, size_t* pkey_len
+    );
+void iot_freecertificates(
+    const uint8_t* ca,
+    const uint8_t* cert,
+    const uint8_t* pkey
+    );
 
 const uint8_t* iot_certificate_getca(size_t* len);
 const uint8_t* iot_certificate_getcert(size_t* len);

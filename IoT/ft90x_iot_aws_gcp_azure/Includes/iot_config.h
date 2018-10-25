@@ -11,8 +11,8 @@
 //#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
 //#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
 
-#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
-//#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
+//#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
+#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_MAZ_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_AWS_GREENGRASS
 ///////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,19 @@
 // If enabled, RTC will be used.
 // Note that enabling this increases memory footprint
 #define USE_PAYLOAD_TIMESTAMP         1
+
+// USE_MQTT_PUBLISH, USE_MQTT_SUBSCRIBE
+// By default, just do publish, no subscribe.
+#define USE_MQTT_PUBLISH              1
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+#define USE_MQTT_SUBSCRIBE            0 // Disabled by default; tested working
+#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
+#define USE_MQTT_SUBSCRIBE            0 // Disabled by default; tested working for /config not /events
+#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+#define USE_MQTT_SUBSCRIBE            0 // Azure does not support MQTT subscribe
+#else
+#define USE_MQTT_SUBSCRIBE            0
+#endif
 ///////////////////////////////////////////////////////////////////////////////////
 
 
