@@ -28,6 +28,11 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 
+// Added this for optimization purposes
+// Remove this if not using mbedtls for iot
+#include <iot_config.h> // For USE_MBEDTLS_MAX_SIZES
+
+
 
 /*-----------------------------------------------------------*/
 
@@ -36,6 +41,10 @@
 #define CIPHERSUITE_OPTION_3         3 // strongest: ECDHE_RSA_AES128_CBC_SHA, ECDHE_RSA_AES256_CBC_SHA
 #define CIPHERSUITE_OPTION_DEFAULT   CIPHERSUITE_OPTION_1
 #define USE_CIPHERSUITE              CIPHERSUITE_OPTION_DEFAULT
+
+#ifndef USE_MBEDTLS_MAX_SIZES
+#define USE_MBEDTLS_MAX_SIZES        1
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -133,7 +142,7 @@
 /*-----------------------------------------------------------*/
 
 // Optimization related configuration
-#if 1
+#if USE_MBEDTLS_MAX_SETTINGS
 #define MBEDTLS_SSL_MAX_CONTENT_LEN  (3072+512) // Increase from 3072 to support Azure IoT
 #define MBEDTLS_MPI_MAX_SIZE 512     // Increased from 256 to support Azure IoT
 #else

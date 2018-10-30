@@ -1,248 +1,457 @@
+/*
+ * ============================================================================
+ * History
+ * =======
+ * 29 Oct 2018 : Created
+ *
+ * Copyright (C) Bridgetek Pte Ltd
+ * ============================================================================
+ *
+ * This source code ("the Software") is provided by Bridgetek Pte Ltd
+ * ("Bridgetek") subject to the licence terms set out
+ * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
+ * You must read the Licence Terms before downloading or using the Software.
+ * By installing or using the Software you agree to the Licence Terms. If you
+ * do not agree to the Licence Terms then do not download or use the Software.
+ *
+ * Without prejudice to the Licence Terms, here is a summary of some of the key
+ * terms of the Licence Terms (and in the event of any conflict between this
+ * summary and the Licence Terms then the text of the Licence Terms will
+ * prevail).
+ *
+ * The Software is provided "as is".
+ * There are no warranties (or similar) in relation to the quality of the
+ * Software. You use it at your own risk.
+ * The Software should not be used in, or for, any medical device, system or
+ * appliance. There are exclusions of Bridgetek liability for certain types of loss
+ * such as: special loss or damage; incidental loss or damage; indirect or
+ * consequential loss or damage; loss of income; loss of business; loss of
+ * profits; loss of revenue; loss of contracts; business interruption; loss of
+ * the use of money or anticipated savings; loss of information; loss of
+ * opportunity; loss of goodwill or reputation; and/or loss of, damage to or
+ * corruption of data.
+ * There is a monetary cap on Bridgetek's liability.
+ * The Software may have subsequently been amended by another user and then
+ * distributed by that other user ("Adapted Software").  If so that user may
+ * have additional licence terms that apply to those amendments. However, Bridgetek
+ * has no liability in relation to those amendments.
+ * ============================================================================
+ */
+
 #include <ft900.h>
+#include "tinyprintf.h"
 
-#include "tinyprintf.h"     // For tfp_printf
-#include "lwip/apps/mqtt.h" // For MQTT_TLS_PORT
-#include "FreeRTOS.h"       // For pvPortMalloc
-#include "iot.h"            // For USE_MQTT_BROKER
+/* FreeRTOS Headers. */
+#include "FreeRTOS.h"
+
+/* netif Abstraction Header. */
+#include "net.h"
+
+/* IOT Headers. */
+#include "iot_utils.h"
+#include <iot_config.h>
 
 
 
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+///////////////////////////////////////////////////////////////////////////////////
+#if DEBUG_IOT_API
+#define DEBUG_PRINTF(...) do {CRITICAL_SECTION_BEGIN;tfp_printf(__VA_ARGS__);CRITICAL_SECTION_END;} while (0)
 #else
 #define DEBUG_PRINTF(...)
 #endif
+///////////////////////////////////////////////////////////////////////////////////
 
 
 
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-static char* token = NULL;
-extern char* token_create_jwt(const char* projectId, const uint8_t* privateKey, size_t privateKeySize, uint32_t timeNow);
-extern void  token_free(char** token);
+///////////////////////////////////////////////////////////////////////////////////
+/* MQTT-related abstractions */
+static inline err_t mqtt_connect_async( mqtt_client_t *client,
+    const char* broker, uint16_t port, struct mqtt_connect_client_info_t *info );
+static void mqtt_connect_callback( mqtt_client_t *client,
+    void *arg, mqtt_connection_status_t status);
+static void mqtt_pubsub_callback( void *arg, err_t result );
 
-extern void  iot_sntp_start();
-extern void  iot_sntp_stop();
-//extern void  iot_sntp_set_system_time(uint32_t sec);
-extern uint32_t iot_sntp_get_time();
+#if USE_MQTT_PUBLISH
+static inline err_t mqtt_publish_async( mqtt_client_t *client,
+    const char* topic, const char* msg, int msg_len );
+#endif // USE_MQTT_PUBLISH
 
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-
-#if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
-static char* token = NULL;
-extern char* token_create_sas(const char* resourceUri, const char* sharedAccessKey, uint32_t timeNow);
-extern void  token_free(char** token);
-#endif
-
-extern void  iot_sntp_start();
-extern void  iot_sntp_stop();
-//extern void  iot_sntp_set_system_time(uint32_t sec);
-extern uint32_t iot_sntp_get_time();
-#endif
-
+#if USE_MQTT_SUBSCRIBE
+static inline err_t mqtt_subscribe_async(
+    mqtt_client_t *client, const char* topic, iot_subscribe_cb subscribe_cb);
+static void mqtt_subscribe_recv_topic(
+    void *arg, const char *topic, u32_t tot_len);
+static void mqtt_subscribe_recv_payload(
+    void *arg, const u8_t *data, u16_t len, u8_t flags);
+#endif // USE_MQTT_SUBSCRIBE
+///////////////////////////////////////////////////////////////////////////////////
 
 
 
-
-void iot_init()
+static inline err_t mqtt_connect_async(
+    mqtt_client_t *client,
+    const char* broker, uint16_t port,
+    struct mqtt_connect_client_info_t *info
+    )
 {
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT) || USE_PAYLOAD_TIMESTAMP
-    // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
-    iot_sntp_start();
-    vTaskDelay(pdMS_TO_TICKS(1000));
-#endif
-}
+    err_t err = 0;
+    ip_addr_t host_addr = {0};
+    struct hostent *host = NULL;
 
-void iot_free()
-{
-#if (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT) || USE_PAYLOAD_TIMESTAMP
-    // Google Cloud and Microsoft Azure requires current time as a parameter of the security token
-    iot_sntp_stop();
-#endif
-}
 
-const char* iot_getbrokername()
-{
-    return MQTT_BROKER;
-}
-
-u16_t iot_getbrokerport()
-{
-    return MQTT_BROKER_PORT;
-}
-
-const char* iot_getid()
-{
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    return MQTT_CLIENT_NAME;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    static char client_id[128] = {0};
-    tfp_snprintf(client_id, sizeof(client_id), "projects/%s/locations/%s/registries/%s/devices/%s",
-        (char*)PROJECT_ID, (char*)LOCATION_ID, (char*)REGISTRY_ID, (char*)DEVICE_ID);
-    return client_id;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    return MQTT_CLIENT_NAME;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
-    return MQTT_CLIENT_NAME;
-#else
-    return NULL;
-#endif
-}
-
-const char* iot_getusername()
-{
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    return NULL;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    return USERNAME_ID;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    static char client_user[128] = {0};
-    tfp_snprintf(client_user, sizeof(client_user), "%s/%s/api-version=2016-11-14", (char*)MQTT_BROKER, (char*)DEVICE_ID);
-    return client_user;
-#else
-    return NULL;
-#endif
-}
-
-const char* iot_getpassword()
-{
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-
-#if USE_PAYLOAD_TIMESTAMP
-    DEBUG_PRINTF("Waiting time request...");
+    /* Get IP address given host name */
     do {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        DEBUG_PRINTF(".");
-    }
-    while (!iot_sntp_get_time() && net_is_ready());
-    DEBUG_PRINTF("done!\r\n\r\n");
-#endif
-
-    return NULL;
-
-#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-
-    const uint8_t *pkey = NULL;
-    size_t pkey_len = 0;
-
-    token_free(&token);
-    pkey = iot_certificate_getpkey(&pkey_len);
-    if (pkey) {
-        DEBUG_PRINTF("Waiting time request...");
-        do {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            DEBUG_PRINTF(".");
+        host = gethostbyname( broker );
+        if (host == NULL) {
+            DEBUG_PRINTF( "gethostbyname failed\r\n" );
+            vTaskDelay( pdMS_TO_TICKS(1000) );
+            continue;
         }
-        while (!iot_sntp_get_time() && net_is_ready());
-        DEBUG_PRINTF("done!\r\n\r\n");
+        break;
+    }
+    while ( net_is_ready() );
 
-        token = token_create_jwt(PROJECT_ID, pkey, pkey_len, iot_sntp_get_time());
-        vPortFree((uint8_t *)pkey);
+    /* copy the network address to sockaddr_in structure */
+    if ( (host->h_addrtype == AF_INET) && (host->h_length == sizeof(ip_addr_t)) ) {
+        memcpy( &host_addr, host->h_addr_list[0], sizeof(ip_addr_t) );
+        err = mqtt_client_connect(
+            client, &host_addr, port, mqtt_connect_callback, info->tls_config, info );
+        if (err != ERR_OK) {
+            DEBUG_PRINTF( "mqtt_client_connect failed! %d\r\n", err );
+        }
+    }
+    else {
+        DEBUG_PRINTF( "gethostbyname invalid\r\n" );
+        return -1;
     }
 
-    return token;
+    return err;
+}
 
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+static int mqtt_connect_callback_err = 0;
 
-#if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
-    static char resourceUri[64] = {0};
-    size_t sharedAccessKeyLen = 0;
-    // Read the shared access key for device from a file ft900deviceX_sas_azure.pem
-    // Reading from a file instead of hardcoded macro makes it easier to deploy for more devices
-    const uint8_t *sharedAccessKey = iot_sas_getkey(&sharedAccessKeyLen);
+static void mqtt_connect_callback(
+    mqtt_client_t *client,
+    void *arg,
+    mqtt_connection_status_t status
+    )
+{
+    if ( status == MQTT_CONNECT_ACCEPTED ) {
+        DEBUG_PRINTF( "MQTT CONNECTED\r\n" );
+        mqtt_connect_callback_err = 0;
+    }
+    else {
+        DEBUG_PRINTF( "mqtt_connect_callback failed! %d\r\n\r\n\r\n", status );
+        mqtt_connect_callback_err = 1;
+    }
+}
 
-    tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
+static void mqtt_pubsub_callback( void *arg, err_t result )
+{
+    if (result != ERR_OK) {
+        DEBUG_PRINTF( "MQTT %s result: %d\r\n", (char*)arg, result );
+    }
+}
 
-    token_free(&token);
 
-    DEBUG_PRINTF("Waiting time request...");
+
+///////////////////////////////////////////////////////////////////////////////////
+// IOT SUBSCRIBE
+///////////////////////////////////////////////////////////////////////////////////
+
+#if USE_MQTT_SUBSCRIBE
+
+static iot_subscribe_rcv* subscribe_recv = NULL;
+
+static inline err_t mqtt_subscribe_async(
+    mqtt_client_t *client, const char* topic, iot_subscribe_cb subscribe_cb)
+{
+    err_t err;
+    u8_t qos = 1;
+
+    err = mqtt_subscribe(
+        client, topic, qos, mqtt_pubsub_callback, "SUBSCRIBE" );
+    if ( err != ERR_OK ) {
+        DEBUG_PRINTF( "\r\nmqtt_subscribe failed! %d\r\n", err );
+    }
+    else {
+        subscribe_recv = pvPortMalloc( sizeof(iot_subscribe_rcv) );
+        memset( subscribe_recv, 0, sizeof(iot_subscribe_rcv) );
+        mqtt_set_inpub_callback(
+            client, mqtt_subscribe_recv_topic, mqtt_subscribe_recv_payload, subscribe_cb );
+    }
+
+    return err;
+}
+
+static void mqtt_subscribe_recv_topic(
+    void *arg, const char *topic, u32_t tot_len )
+{
+    //DEBUG_PRINTF( "\r\nMQTT RECEIVE: %s [%d]\r\n", topic, (unsigned int)tot_len );
+    if ( !subscribe_recv ) {
+        return;
+    }
+    if ( subscribe_recv->topic ) {
+        if ( strncmp(subscribe_recv->topic, topic, strlen(subscribe_recv->topic))!=0 ) {
+            vPortFree( (char*)subscribe_recv->topic );
+            subscribe_recv->topic = NULL;
+        }
+        if ( subscribe_recv->payload_size < tot_len + 1 ) {
+            vPortFree( (char*)subscribe_recv->payload );
+            subscribe_recv->payload_size = tot_len + 1 + 10;
+            subscribe_recv->payload = pvPortMalloc( subscribe_recv->payload_size );
+        }
+        subscribe_recv->payload_len = tot_len;
+        subscribe_recv->payload_off = 0;
+        memset( (char*)subscribe_recv->payload, 0, subscribe_recv->payload_size );
+    }
+    if ( !subscribe_recv->topic ) {
+        int len = strlen(topic);
+        subscribe_recv->topic = pvPortMalloc( len + 1 );
+        strncpy( (char*)subscribe_recv->topic, topic, len );
+        ((char*)subscribe_recv->topic)[len] = '\0';
+
+        subscribe_recv->payload_len = tot_len;
+        subscribe_recv->payload_off = 0;
+        if ( subscribe_recv->payload == NULL ) {
+            subscribe_recv->payload_size = tot_len + 1 + 10;
+            subscribe_recv->payload = pvPortMalloc( subscribe_recv->payload_size );
+            memset( (char*)subscribe_recv->payload, 0, subscribe_recv->payload_size );
+        }
+    }
+}
+
+static void mqtt_subscribe_recv_payload(
+    void *arg, const u8_t *data, u16_t len, u8_t flags )
+{
+    if ( subscribe_recv ) {
+        if (subscribe_recv->payload) {
+            memcpy( (char*)subscribe_recv->payload + subscribe_recv->payload_off, data, len );
+            subscribe_recv->payload_off += len;
+            if ( subscribe_recv->payload_off == subscribe_recv->payload_len ) {
+                //DEBUG_PRINTF( "%s\r\n\r\n", subscribe_recv->payload );
+                ((iot_subscribe_cb)arg)(subscribe_recv);
+            }
+        }
+    }
+}
+
+#endif // USE_MQTT_SUBSCRIBE
+
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// IOT PUBLISH
+///////////////////////////////////////////////////////////////////////////////////
+
+#if USE_MQTT_PUBLISH
+
+static inline err_t mqtt_publish_async(
+    mqtt_client_t *client, const char* topic, const char* msg, int msg_len )
+{
+    err_t err;
+    u8_t retain = 0;
+    u8_t qos = 0;
+
+    err = mqtt_publish(
+        client, topic, msg, msg_len, qos, retain, mqtt_pubsub_callback, "PUBLISH" );
+    if ( err != ERR_OK ) {
+        DEBUG_PRINTF( "\r\nmqtt_publish failed! %d ready=%d connected=%d\r\n",
+            err, net_is_ready(), mqtt_client_is_connected( client ) );
+    }
+
+    return err;
+}
+
+#endif // USE_MQTT_PUBLISH
+
+
+
+/** @brief IoT Context for internal use only
+ */
+typedef struct _iot_context {
+    struct altcp_tls_config *tls_config;
+    mqtt_client_t mqtt;
+} iot_context;
+
+/** @brief Establish secure IoT connectivity using TLS certificates and MQTT credentials
+ *  @param certificates_cb Callback function for specifying the TLS certificates
+ *  @param credentials_cb Callback function for specifying the MQTT credentials
+ *  @returns Returns a handle to be used for succeeding IoT calls
+ */
+void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb credentials_cb )
+{
+    struct mqtt_connect_client_info_t mqtt_info = {0};
+    iot_context* handle = NULL;
+    err_t err = ERR_OK;
+    iot_certificates tls_certificates = {0};
+    iot_credentials mqtt_credentials = {0};
+
+
+    if ( !certificates_cb|| !credentials_cb ) {
+        return NULL;
+    }
+
+    memset( &mqtt_info, 0, sizeof( mqtt_info ) );
+    handle = pvPortMalloc(sizeof( iot_context ));
+    if (!handle) {
+        return NULL;
+    }
+    memset( handle, 0, sizeof( iot_context ) );
+
+    certificates_cb( &tls_certificates );
+    if (!tls_certificates.cert) {
+        mqtt_info.tls_config = altcp_tls_create_config_client(
+            tls_certificates.ca, tls_certificates.ca_len );
+    }
+    else {
+        mqtt_info.tls_config = altcp_tls_create_config_client_2wayauth(
+            tls_certificates.ca, tls_certificates.ca_len,
+            tls_certificates.pkey, tls_certificates.pkey_len, NULL, 0,
+            tls_certificates.cert, tls_certificates.cert_len );
+    }
+    vPortFree( (u8_t*)tls_certificates.ca );
+    vPortFree( (u8_t*)tls_certificates.cert );
+    vPortFree( (u8_t*)tls_certificates.pkey );
+    if ( mqtt_info.tls_config == NULL ) {
+        DEBUG_PRINTF( "altcp_tls_create_config_client failed!\r\n" );
+        vPortFree(handle);
+        return NULL;
+    }
+
+    //
+    // Initialize MQTT settings/credentials
+    //
+    credentials_cb( &mqtt_credentials );
+    mqtt_info.client_id = mqtt_credentials.client_id;
+    mqtt_info.client_user = mqtt_credentials.client_user;
+    mqtt_info.client_pass = mqtt_credentials.client_pass;
+
+    //
+    // Establish secure MQTT connection via TLS
+    //
+    err = mqtt_connect_async(
+        &handle->mqtt,
+        mqtt_credentials.server_host,
+        mqtt_credentials.server_port,
+        &mqtt_info );
+    if ( err != ERR_OK ) {
+        DEBUG_PRINTF( "mqtt_connect_async failed! %d\r\n", err );
+        altcp_tls_free_config( mqtt_info.tls_config );
+        vPortFree( handle );
+        return NULL;
+    }
+
+    //
+    // Wait until connection is established
+    //
     do {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        DEBUG_PRINTF(".");
+        vTaskDelay( pdMS_TO_TICKS(1000) );
     }
-    while (!iot_sntp_get_time() && net_is_ready());
-    DEBUG_PRINTF("Waiting time request...done!\r\n\r\n");
+    while ( !mqtt_client_is_connected( &handle->mqtt ) && net_is_ready() && !mqtt_connect_callback_err );
+    if ( mqtt_connect_callback_err || !net_is_ready() ) {
+        mqtt_connect_callback_err = 0;
+        altcp_tls_free_config( mqtt_info.tls_config );
+        mqtt_disconnect( &handle->mqtt );
+        vPortFree( handle );
+        return NULL;
+    }
+    vTaskDelay( pdMS_TO_TICKS(1000) );
 
-    token = token_create_sas(resourceUri, sharedAccessKey, iot_sntp_get_time());
-    vPortFree(sharedAccessKey);
-    return token;
-#elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
-    return NULL;
-#endif
-
-#else
-    return NULL;
-#endif
+    handle->tls_config = mqtt_info.tls_config;
+    return handle;
 }
 
-const char* iot_getdeviceid()
+/** @brief Disconnects IoT connectivity and cleans up resoures used
+ *  @param handle Handle returned by the call to iot_connect()
+ *  @returns Returns None
+ */
+void iot_disconnect(void* handle)
 {
-    return DEVICE_ID;
+	iot_context* _handle = ( iot_context* )handle;
+
+    if ( _handle ) {
+        mqtt_disconnect( &_handle->mqtt );
+        altcp_tls_free_config( _handle->tls_config );
+        vPortFree( _handle );
+
+#if USE_MQTT_SUBSCRIBE
+        if ( subscribe_recv ) {
+            if ( subscribe_recv->topic ) {
+                vPortFree( (char*)subscribe_recv->topic );
+                subscribe_recv->topic = NULL;
+            }
+            if ( subscribe_recv->payload ) {
+                vPortFree( (char*)subscribe_recv->payload );
+                subscribe_recv->payload = NULL;
+            }
+            vPortFree( subscribe_recv );
+            subscribe_recv = NULL;
+        }
+#endif // USE_MQTT_SUBSCRIBE
+    }
 }
 
-const int iot_getcertificates(
-    const uint8_t** ca, size_t* ca_len,
-    const uint8_t** cert, size_t* cert_len,
-    const uint8_t** pkey, size_t* pkey_len
-    )
+/** @brief Register callback function for a specified subscription topic
+ *  @param handle Handle returned by the call to iot_connect()
+ *  @param topic Topic of data to subscribe from
+ *  @param subscribe_cb Callback function to be called when there is data on the specified topic
+ *  @returns Returns 0 if success, negative value err_t otherwise
+ */
+int iot_subscribe( void* handle, const char* topic, iot_subscribe_cb subscribe_cb )
 {
+    err_t err = ERR_OK;
+    iot_context *_handle = ( iot_context * )handle;
+
+
+    if ( !_handle ) {
+        return -1;
+    }
+
+#if USE_MQTT_SUBSCRIBE
     //
-    // Initialize certificates
-    // Below is an overview of the authentication for Amazon, Google and Azure:
-    // 1. Amazon IoT and Greengrass
-    // -  supports X509 Certificates for authentication
-    // 2. Google IoT
-    // -  supports Security Token (JWT) for authentication
-    // 3. Microsoft Azure
-    // -  supports Security Token (SAS) for authentication
-    // -  supports X509 Certificates for authentication
+    // Subscribe from a topic
     //
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    // Amazon AWS IoT requires certificate and private key but ca is optional (but recommended)
-    *ca = iot_certificate_getca(ca_len);
-    *cert = iot_certificate_getcert(cert_len);
-    *pkey = iot_certificate_getpkey(pkey_len);
-#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    // No certificates required to be sent for Google IoT
-    // But private key will be used for creating JWT token
-    *ca = NULL;
-    ca_len = 0;
-    *cert = NULL;
-    cert_len = 0;
-    *pkey = NULL;
-    pkey_len = 0;
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Microsoft Azure provides two authentication types: SAS TOKEN and X509 Certificates
-    #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
-        // Demonstrate authentication using SAS Token
-        *ca = iot_certificate_getca(ca_len);
-        *cert = NULL;
-        cert_len = 0;
-        *pkey = NULL;
-        pkey_len = 0;
-    #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
-        // Demonstrate authentication using X509 Certificates
-        *ca = iot_certificate_getca(ca_len);
-        *cert = iot_certificate_getcert(cert_len);
-        *pkey = iot_certificate_getpkey(pkey_len);
-    #endif
-#else
-    *ca = iot_certificate_getca(ca_len);
-    *cert = iot_certificate_getcert(cert_len);
-    *pkey = iot_certificate_getpkey(pkey_len);
-#endif
+    err = mqtt_subscribe_async( &_handle->mqtt, topic, subscribe_cb );
+#endif // USE_MQTT_SUBSCRIBE
 
-    return 0;
+    return (int)err;
 }
 
-void iot_freecertificates(
-    const uint8_t* ca,
-    const uint8_t* cert,
-    const uint8_t* pkey
-    )
+/** @brief Send/publish data on a specified topic
+ *  @param handle Handle returned by the call to iot_connect()
+ *  @param topic Topic of data to publish to
+ *  @param payload Data to send/publish
+ *  @param payload_len Length of data to send/publish
+ *  @returns Returns 0 if success, negative value err_t otherwise
+ */
+int iot_publish( void* handle, const char* topic, const char* payload, int payload_len )
 {
-    vPortFree((uint8_t*)ca);
-    vPortFree((uint8_t*)cert);
-    vPortFree((uint8_t*)pkey);
+    err_t err = ERR_OK;
+    iot_context *_handle = ( iot_context * )handle;
+
+
+    if ( !_handle ) {
+        return -1;
+    }
+
+#if USE_MQTT_PUBLISH
+    // If publish fails with ERR_MEM, retry a few times
+    // Sometimes it succeeds after retrying 1-5 times
+    int retries = 0;
+    do {
+        err = mqtt_publish_async( &_handle->mqtt, topic, payload, payload_len );
+        if ( err == ERR_MEM ) {
+            retries++;
+            vTaskDelay( pdMS_TO_TICKS(1000) );
+        }
+        else {
+            break;
+        }
+    }
+    while ( net_is_ready() && retries<5 );
+#endif // USE_MQTT_PUBLISH
+
+    return (int)err;
 }
 

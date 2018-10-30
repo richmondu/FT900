@@ -3,7 +3,7 @@
 #include "tinyprintf.h"     // For tfp_printf
 #include "lwip/apps/mqtt.h" // For MQTT_TLS_PORT
 #include "FreeRTOS.h"       // For pvPortMalloc
-#include "iot.h"            // For USE_MQTT_BROKER
+#include "iot_utils.h"      // For USE_MQTT_BROKER
 
 #if USE_PAYLOAD_TIMESTAMP
 #include "ext_rtc.h"        // For ext_rtc_xxx
@@ -82,7 +82,7 @@ static int iot_rtc_get_time(struct tm* time_tm)
     return 1;
 }
 
-int64_t iot_rtc_get_time_epoch()
+int64_t iot_utils_gettimeepoch()
 {
     int64_t time_epoch = 0;
     struct tm time_tm = {0};
@@ -97,7 +97,7 @@ int64_t iot_rtc_get_time_epoch()
     return time_epoch*1000;
 }
 
-const char* iot_rtc_get_time_iso(int format)
+const char* iot_utils_gettimeiso(int format)
 {
     static char timeStampIso[24] = {0};
     struct tm time_tm = {0};
