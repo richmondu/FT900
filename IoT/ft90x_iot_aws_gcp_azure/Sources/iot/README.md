@@ -46,7 +46,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
     - Google Cloud IoT
 	  - MQTT_BROKER = “mqtt.googleapis.com”
 	  - MQTT_BROKER_PORT = 8883
-          - MQTT_CLIENT_NAME = “projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID”
+	  - MQTT_CLIENT_NAME = “projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID”
 	  - MQTT_CLIENT_USER = “ “ // any
 	  - MQTT_CLIENT_PASS = JWT security token (generated with private key)
     - Microsoft Azure IoT (SAS security token authentication)
@@ -60,7 +60,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 	  - MQTT_BROKER_PORT = 8883
 	  - MQTT_CLIENT_NAME = DEVICE_ID
 	  - MQTT_CLIENT_USER = “HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14”
-          - MQTT_CLIENT_PASS = NULL // not needed
+	  - MQTT_CLIENT_PASS = NULL // not needed
 
     Certificates folder 
     - Must contain the TLS certificates needed for IoT connectivity. 
