@@ -22,8 +22,8 @@ The IoT Library simplifies IoT development by abstracting MQTT protocol, togethe
 
 ### IoT configuration and certificates
 
-    iot_config.h - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. 
-    Certificates folder - Must contain the TLS certificates needed for IoT connectivity.
+    iot_config.h - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. iot_utils.c will generate or derive the actual MQTT credentials based on the information stored in iot_config.h
+    Certificates folder - Must contain the TLS certificates needed for IoT connectivity. The certificate names must correspond to the names registered in iot_config.h
 
 ### IoT sample usage
 
