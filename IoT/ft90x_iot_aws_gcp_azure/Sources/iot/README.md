@@ -97,7 +97,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 	
         iot_handle = iot_connect( iot_utils_getcertificates, iot_utils_getcredentials )
 	
-	topic_sub = user_generate_subscribe_topic( iot_utils_getdeviceid() )
+        topic_sub = user_generate_subscribe_topic( iot_utils_getdeviceid() )
         iot_subscribe( iot_handle, topic_sub, subscribe_cb )
 	
         while (1) {
