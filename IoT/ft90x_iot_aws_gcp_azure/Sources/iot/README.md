@@ -24,7 +24,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 
     iot_config.h 
     - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. 
-    - Generates or derives the actual MQTT credentials based on the information stored in iot_config.h
+    - iot_utils.c generates/derives the actual MQTT credentials based on the information stored in iot_config.h
     - Default:
 	  - MQTT_BROKER
 	  - MQTT_BROKER_PORT = 8883
