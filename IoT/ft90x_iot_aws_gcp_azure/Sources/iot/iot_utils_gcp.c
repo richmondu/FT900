@@ -154,7 +154,7 @@ int iot_utils_getcredentials( iot_credentials* mqtt_credentials )
     mqtt_credentials->client_pass = token;
 
 
-    DEBUG_PRINTF("MQTT CREDENTIALS\r\nhost: %s:%d\r\nid: %s\r\nuser: %s\r\npass: %s\r\n\r\n",
+    DEBUG_PRINTF("MQTT CREDENTIALS\r\nhost: %s:%d\r\nid:   %s\r\nuser: %s\r\npass: %s\r\n\r\n",
         mqtt_credentials->server_host, mqtt_credentials->server_port,
         mqtt_credentials->client_id ? mqtt_credentials->client_id : "NULL",
         mqtt_credentials->client_user ? mqtt_credentials->client_user : "NULL",
