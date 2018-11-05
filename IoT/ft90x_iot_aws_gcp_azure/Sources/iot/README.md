@@ -20,8 +20,10 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
     iot_utils_getdeviceid - Get the device id
     Refer to iot_utils.h for the function definitions and documentation.
     
-    iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for connectivity with AWS, GCP and Azure, respectively.
+    These functions are implemented in iot_utils.c.
     iot_utils.c can be used for generic connectivity with other cloud services or local MQTT brokers.
+    iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for connectivity with AWS, GCP and Azure, respectively.
+    
 
 ### IoT configuration and certificates
 
