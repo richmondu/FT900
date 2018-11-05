@@ -18,6 +18,8 @@ This new project demonstrates:
     6. Improved handling of network unplugging and replugging for stability and reliability
     7. Adding of timestamps in the MQTT-published packets by using RTC library 
        The RTC is initialized with time queried from SNTP.
+    8. Use of FT900 IoT Library, composed of API interface and utilities.
+       https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure/Sources/iot
     It also contains 3 set of device certificates that can be used to connect to all 3 cloud services
 
 
