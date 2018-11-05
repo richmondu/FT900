@@ -12,7 +12,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 
 ### IoT utilities
 
-    iot_init, iot_free
+    iot_utils_init, iot_utils_free
     iot_utils_getcertificates - Sets the TLS certificates needed for the secure authentication with AWS, GCP and Azure.
     iot_utils_getcredentials - Sets the MQTT credentials needed for the cloud connectivity with AWS, GCP and Azure.
     iot_utils_gettimestampepoch - Get the current time since epoch in decimal format
