@@ -12,19 +12,25 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 
 ### IoT utilities
 
-    iot_init, iot_free
+    iot_utils_init, iot_utils_free
     iot_utils_getcertificates - Sets the TLS certificates needed for the secure authentication with AWS, GCP and Azure.
     iot_utils_getcredentials - Sets the MQTT credentials needed for the cloud connectivity with AWS, GCP and Azure.
     iot_utils_gettimestampepoch - Get the current time since epoch in decimal format
     iot_utils_gettimestampiso - Get the current time since epoch in string format
     iot_utils_getdeviceid - Get the device id
     Refer to iot_utils.h for the function definitions and documentation.
+    
+    These functions are implemented in iot_utils.c.
+    iot_utils.c can be used for generic connectivity with other cloud services or local MQTT brokers.
+    iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for connectivity with AWS, GCP and Azure, respectively.
+    
 
 ### IoT configuration and certificates
 
     iot_config.h 
     - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. 
     - iot_utils.c generates/derives the actual MQTT credentials based on the information stored in iot_config.h
+      iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for AWS, GCP and Azure, respectively.
     - Default:
 	  - MQTT_BROKER
 	  - MQTT_BROKER_PORT = 8883
