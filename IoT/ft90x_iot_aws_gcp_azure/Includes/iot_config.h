@@ -14,6 +14,7 @@
 //#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
 //#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
 
+//#define USE_MQTT_BROKER               MQTT_BROKER_UNKNOWN
 //#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
 #define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_MAZ_IOT

@@ -90,6 +90,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
     #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
         #define IOT_APP_TASK_STACK_SIZE          (1024 + 64)
     #endif
+#else
+#define IOT_APP_TASK_STACK_SIZE                  (1024 + 64)
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 

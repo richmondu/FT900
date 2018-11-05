@@ -7,7 +7,7 @@
 
 
 
-#if (USE_MQTT_BROKER <= MQTT_BROKER_UNKNOWN) || (USE_MQTT_BROKER > MQTT_BROKER_AWS_GREENGRASS)
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
 
 #define DEBUG
 #ifdef DEBUG
@@ -27,7 +27,6 @@ extern uint32_t iot_sntp_get_time();
 extern const uint8_t* iot_certificate_getca(size_t* len);
 extern const uint8_t* iot_certificate_getcert(size_t* len);
 extern const uint8_t* iot_certificate_getpkey(size_t* len);
-
 
 
 
@@ -57,6 +56,7 @@ const char* iot_utils_getdeviceid()
  */
 int iot_utils_getcertificates( iot_certificates* tls_certificates )
 {
+    // Amazon AWS IoT requires certificate and private key but ca is optional (but recommended)
     tls_certificates->ca = iot_certificate_getca(&tls_certificates->ca_len);
     tls_certificates->cert = iot_certificate_getcert(&tls_certificates->cert_len);
     tls_certificates->pkey = iot_certificate_getpkey(&tls_certificates->pkey_len);
@@ -104,4 +104,4 @@ int iot_utils_getcredentials( iot_credentials* mqtt_credentials )
     return 0;
 }
 
-#endif // #if (USE_MQTT_BROKER <= MQTT_BROKER_UNKNOWN) || (USE_MQTT_BROKER > MQTT_BROKER_AWS_GREENGRASS)
+#endif // #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
