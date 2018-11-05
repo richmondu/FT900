@@ -72,6 +72,8 @@
 #elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_3)
 #define USE_DEVICE_ID                 "ft900device3"
 #endif
+
+#define DEVICE_ID                     USE_DEVICE_ID
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -116,70 +118,6 @@
 //     MQTT_CLIENT_USER = “HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14”
 //     MQTT_CLIENT_PASS = NULL // not needed
 //
-///////////////////////////////////////////////////////////////////////////////////
-#define MQTT_BROKER_PORT              MQTT_TLS_PORT
-
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-    #define MQTT_BROKER               "amasgua12bmkv.iot.us-east-1.amazonaws.com"
-    #define DEVICE_ID                 USE_DEVICE_ID
-    #define MQTT_CLIENT_NAME          DEVICE_ID
-    #define MQTT_CLIENT_USER          NULL // not needed
-    #define MQTT_CLIENT_PASS          NULL // not needed
-    #define USE_MBEDTLS_MAX_SIZES     0
-#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    #define MQTT_BROKER               "mqtt.googleapis.com"
-    #define DEVICE_ID                 USE_DEVICE_ID
-    #define PROJECT_ID                "ft900iotproject"
-    #define LOCATION_ID               "us-central1"
-    #define REGISTRY_ID               "ft900registryid"
-    //#define MQTT_CLIENT_NAME        // dynamically generated from above info
-    #define MQTT_CLIENT_USER          " "
-    //#define MQTT_CLIENT_PASS        // dynamically generated from above info
-    // Google IoT does not need a root CA
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               0
-    #define USE_MBEDTLS_MAX_SIZES     0
-#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    #define MQTT_BROKER               "FT900IoTHub.azure-devices.net"
-    #define DEVICE_ID                 USE_DEVICE_ID
-    #define MQTT_CLIENT_NAME          DEVICE_ID
-    // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
-    #define AUTH_TYPE_SASTOKEN        0
-    #define AUTH_TYPE_X509CERT        1
-    #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
-        // We have set our sample device1 to use SAS Token authentication
-        #define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
-        //#define MQTT_CLIENT_USER    // dynamically generated from above info
-        //#define MQTT_CLIENT_PASS    // dynamically generated from above info
-    #else // SAMPLE_DEVICE_2 and SAMPLE_DEVICE_3
-        // We have set our sample device2 and device 3 to use X509 Certificate authentication
-        #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
-        //#define MQTT_CLIENT_USER    // dynamically generated from above info
-        #define MQTT_CLIENT_PASS      NULL
-    #endif
-    // Microsoft IoT requires a root CA
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               1
-#elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    #define MQTT_BROKER               "192.168.22.12" // local Greengrass server
-    #define DEVICE_ID                 USE_DEVICE_ID
-    #define MQTT_CLIENT_NAME          DEVICE_ID
-    #define MQTT_CLIENT_USER          NULL // not needed
-    #define MQTT_CLIENT_PASS          NULL // not needed
-    #define USE_MBEDTLS_MAX_SIZES     0
-#else
-    #define MQTT_BROKER               ""
-    #define DEVICE_ID                 USE_DEVICE_ID
-    #define MQTT_CLIENT_NAME          DEVICE_ID
-    #define MQTT_CLIENT_USER          ""
-    #define MQTT_CLIENT_PASS          ""
-#endif
-///////////////////////////////////////////////////////////////////////////////////
-
-
-
-///////////////////////////////////////////////////////////////////////////////////
-//
 // TLS CERTIFICATES
 // Authentication with Amazon AWS, Google Cloud and Microsoft Azure
 //   Sample for Amazon AWS IoT (using TLS certificate authentication)
@@ -203,55 +141,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-// Root CA certificate of all the device certificates below
-#if USE_ROOT_CA
-#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    // This certificate refers to rootca_gg.pem
-    extern __flash__ uint8_t ca_data[]        asm("rootca_gg_pem");
-    extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_pem_end");
+#if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
+    #include <iot_config_aws.h>
+    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
+#elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
+    // Google IoT does not need a root CA
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               0 // memory footprint optimization
+    #include <iot_config_gcp.h>
+    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // This certificate refers to rootca_azure.pem
-    extern __flash__ uint8_t ca_data[]        asm("rootca_azure_pem");
-    extern __flash__ uint8_t ca_data_end[]    asm("rootca_azure_pem_end");
+    // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
+    #define AUTH_TYPE_SASTOKEN        0
+    #define AUTH_TYPE_X509CERT        1
+    #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
+        // We have set our sample device1 to use SAS Token authentication
+        #define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
+    #else // SAMPLE_DEVICE_2 and SAMPLE_DEVICE_3
+        // We have set our sample device2 and device 3 to use X509 Certificate authentication
+        #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
+    #endif
+    #include <iot_config_azure.h>
+
+    // Microsoft IoT requires a root CA
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               1
 #else
-    // This certificate refers to rootca.pem
-    extern __flash__ uint8_t ca_data[]        asm("rootca_pem");
-    extern __flash__ uint8_t ca_data_end[]    asm("rootca_pem_end");
-#endif
-#endif // USE_ROOT_CA
-
-// Device certificates signed by the root CA above
-#if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
-    // This certificate refers to ft900device1_cert.pem
-    extern __flash__ uint8_t cert_data[]      asm("ft900device1_cert_pem");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device1_cert_pem_end");
-    // This private key refers to ft900device1_pkey.pem
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device1_pkey_pem");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device1_pkey_pem_end");
-#elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_2)
-    // This certificate refers to ft900device2_cert.pem
-    extern __flash__ uint8_t cert_data[]      asm("ft900device2_cert_pem");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device2_cert_pem_end");
-    // This private key refers to ft900device2_pkey.pem
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device2_pkey_pem");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device2_pkey_pem_end");
-#elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_3)
-    // This certificate refers to ft900device3_cert.pem
-    extern __flash__ uint8_t cert_data[]      asm("ft900device3_cert_pem");
-    extern __flash__ uint8_t cert_data_end[]  asm("ft900device3_cert_pem_end");
-    // This private key refers to ft900device3_pkey.pem
-    extern __flash__ uint8_t pkey_data[]      asm("ft900device3_pkey_pem");
-    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device3_pkey_pem_end");
+    #define MQTT_BROKER_PORT          MQTT_TLS_PORT
+    #define MQTT_BROKER               ""
+    #define MQTT_CLIENT_NAME          DEVICE_ID
+    #define MQTT_CLIENT_USER          NULL
+    #define MQTT_CLIENT_PASS          NULL
 #endif
 
-// Shared Access Key for Microsoft Azure IoT
-#if (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT && MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
-    // For Microsoft, we have configured our device 1 to use SAS Security Token authentication,
-    // not X509 certificate authentication
-    // This SharedAccessKey refers to ft900device1_sas_azure.pem
-    extern __flash__ uint8_t sas_data[]      asm("ft900device1_sas_azure_pem");
-    extern __flash__ uint8_t sas_data_end[]  asm("ft900device1_sas_azure_pem_end");
-#endif
 ///////////////////////////////////////////////////////////////////////////////////
 
 

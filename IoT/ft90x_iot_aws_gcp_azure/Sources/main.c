@@ -231,6 +231,9 @@ static void iot_app_task( void *pvParameters )
          */
         handle = iot_connect(
             iot_utils_getcertificates, iot_utils_getcredentials );
+        if ( !handle ) {
+            continue;
+        }
 
         /* subscribe and publish from/to server */
 #if USE_MQTT_SUBSCRIBE
@@ -338,7 +341,7 @@ static inline int user_generate_publish_topic(
     // Fixed format - do not modify
     return tfp_snprintf( topic, size, "devices/%s/messages/events/", (char*)iot_utils_getdeviceid() );
 #else
-    return 0;
+    return tfp_snprintf( topic, size, "topic/subtopic" );
 #endif
 }
 
