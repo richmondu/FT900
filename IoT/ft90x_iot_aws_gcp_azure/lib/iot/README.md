@@ -2,6 +2,14 @@
 
 The IoT library simplifies IoT development by abstracting MQTT protocol, together with secure authentication (TLS certificates or JWT/SAS security tokens), time management (SNTP and RTC) and IoT connectivity with the leading cloud platforms Amazon AWS, Google Cloud and Microsoft Azure.
 
+### Dependencies
+
+    The IoT library depends on the following 3rd-party libraries
+    LWIP - for MQTT, SNTP and ALTCP_TLS
+    mbedTLS - for authentication and secure communication, also used by ALTCP_TLS
+    FreeRTOS
+    tinyprintf
+
 ### IoT interface
 
     iot_connect - Establish secure IoT connectivity using TLS certificates and MQTT credentials
