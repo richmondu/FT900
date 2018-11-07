@@ -1,6 +1,6 @@
 # FT900 IoT library
 
-The IoT library simplifies IoT development by abstracting MQTT protocol, together with secure authentication (TLS certificates or JWT/SAS security tokens), time management (SNTP and RTC) and IoT connectivity with the leading cloud platforms Amazon AWS, Google Cloud and Microsoft Azure.
+The IoT library simplifies IoT development by abstracting MQTT protocol, together with secure authentication (TLS certificates and JWT/SAS security tokens), time management (SNTP and RTC) and IoT connectivity with the leading cloud platforms Amazon AWS, Google Cloud and Microsoft Azure.
 
 ### Dependencies
 
@@ -36,7 +36,9 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 ### IoT configuration and certificates
 
     iot_config.h 
-    - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. 
+    - Must be updated by user to enable/disable IoT settings
+    - iot_config_aws.h, iot_config_gcp.h, iot_config_azure.h must also be updated by user 
+      to specify "raw" MQTT credentials and TLS certificates. 
     - iot_utils.c generates/derives the actual MQTT credentials based on the information stored in iot_config.h
       iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for AWS, GCP and Azure, respectively.
     
@@ -45,12 +47,6 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
     - The certificate names must correspond to the names registered in iot_config.h
     
     MQTT credentials
-    - Default:
-	  - MQTT_BROKER
-	  - MQTT_BROKER_PORT = 8883
-	  - MQTT_CLIENT_NAME
-	  - MQTT_CLIENT_USER
-	  - MQTT_CLIENT_PASS
     - Amazon AWS IoT
 	  - MQTT_BROKER = “IDENTIFIER.iot.REGION.amazonaws.com”
 	  - MQTT_BROKER_PORT = 8883
@@ -103,21 +99,23 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 	  - Ft900device1_pkey.pem
 
 ### IoT sample usage
-
-    net_init()
-    iot_utils_init()
+ 
+    net_init() // initialize network
+    iot_utils_init() // initialize iot utilities
     
     while (1) {
     
-        while ( !net_is_ready() ) {
-            sleep()
-        }
+        // wait until network is ready
+        while ( !net_is_ready() ) { sleep( 1_second ) }
 	
+	// securely connect to MQTT server using TLS certificates and MQTT credentials
         iot_handle = iot_connect( iot_utils_getcertificates, iot_utils_getcredentials )
 	
+	// subscribe to an MQTT topic to receive messages sent by other devices or by server
         topic_sub = user_generate_subscribe_topic( iot_utils_getdeviceid() )
         iot_subscribe( iot_handle, topic_sub, subscribe_cb )
 	
+	// publish to an MQTT topic to send messages containing sensor data for data analytics
         while (1) {
             topic_pub = user_generate_publish_topic( iot_utils_getdeviceid() )
             topic_sub = user_generate_publish_payload( iot_utils_getdeviceid(), iot_utils_gettimestampepoch() )
@@ -129,4 +127,4 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
         iot_disconnect( iot_handle )
     }
     
-    iot_utils_free()
+    iot_utils_free() // cleanup resources used by iot utilities
