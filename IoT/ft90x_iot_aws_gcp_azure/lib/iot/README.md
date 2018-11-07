@@ -108,20 +108,21 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
         // wait until network is ready
         while ( !net_is_ready() ) { sleep( 1_second ) }
 	
-	// securely connect to MQTT server using TLS certificates and MQTT credentials
+        // securely connect to MQTT server using TLS certificates and MQTT credentials
         iot_handle = iot_connect( iot_utils_getcertificates, iot_utils_getcredentials )
 	
-	// subscribe to an MQTT topic to receive messages sent by other devices or by server
+        // subscribe to an MQTT topic to receive messages sent by other devices or by server
         topic_sub = user_generate_subscribe_topic( iot_utils_getdeviceid() )
         iot_subscribe( iot_handle, topic_sub, subscribe_cb )
 	
-	// publish to an MQTT topic to send messages containing sensor data for data analytics
+        // publish to an MQTT topic to send messages containing sensor data for data analytics
         while (1) {
             topic_pub = user_generate_publish_topic( iot_utils_getdeviceid() )
             topic_sub = user_generate_publish_payload( iot_utils_getdeviceid(), iot_utils_gettimestampepoch() )
             if ( iot_publish( iot_handle, topic_pub, payload, payload_len ) != 0 ) {
                 break;
             }
+            sleep( 1_second )
         }
 	
         iot_disconnect( iot_handle )
