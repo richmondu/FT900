@@ -30,7 +30,7 @@
 #ifndef MBEDTLS_CMAC_H
 #define MBEDTLS_CMAC_H
 
-#include "../../../mbedtls/include/mbedtls/cipher.h"
+#include "mbedtls/cipher.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -31,12 +31,12 @@
 #define MBEDTLS_MD_WRAP_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../../mbedtls/include/mbedtls/md.h"
+#include "md.h"
 
 #ifdef __cplusplus
 extern "C" {

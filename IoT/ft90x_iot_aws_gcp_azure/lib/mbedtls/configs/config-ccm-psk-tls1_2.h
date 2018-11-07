@@ -85,6 +85,6 @@
  */
 #define MBEDTLS_SSL_MAX_CONTENT_LEN             512
 
-#include "../../mbedtls/include/mbedtls/check_config.h"
+#include "mbedtls/check_config.h"
 
 #endif /* MBEDTLS_CONFIG_H */

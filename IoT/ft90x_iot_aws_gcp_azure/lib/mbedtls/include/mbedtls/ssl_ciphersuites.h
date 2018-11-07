@@ -26,9 +26,9 @@
 #ifndef MBEDTLS_SSL_CIPHERSUITES_H
 #define MBEDTLS_SSL_CIPHERSUITES_H
 
-#include "../../../mbedtls/include/mbedtls/cipher.h"
-#include "../../../mbedtls/include/mbedtls/md.h"
-#include "../../../mbedtls/include/mbedtls/pk.h"
+#include "pk.h"
+#include "cipher.h"
+#include "md.h"
 
 #ifdef __cplusplus
 extern "C" {

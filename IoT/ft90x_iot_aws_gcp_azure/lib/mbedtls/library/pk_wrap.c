@@ -22,33 +22,33 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PK_C)
-#include "../../mbedtls/include/mbedtls/pk_internal.h"
+#include "mbedtls/pk_internal.h"
 
 /* Even if RSA not activated, for the sake of RSA-alt */
-#include "../../mbedtls/include/mbedtls/rsa.h"
+#include "mbedtls/rsa.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_ECP_C)
-#include "../../mbedtls/include/mbedtls/ecp.h"
+#include "mbedtls/ecp.h"
 #endif
 
 #if defined(MBEDTLS_ECDSA_C)
-#include "../../mbedtls/include/mbedtls/ecdsa.h"
+#include "mbedtls/ecdsa.h"
 #endif
 
 #if defined(MBEDTLS_PK_RSA_ALT_SUPPORT)
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/platform_util.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_calloc    calloc

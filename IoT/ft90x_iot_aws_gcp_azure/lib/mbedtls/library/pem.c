@@ -22,25 +22,25 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PEM_PARSE_C) || defined(MBEDTLS_PEM_WRITE_C)
 
-#include "../../mbedtls/include/mbedtls/pem.h"
-#include "../../mbedtls/include/mbedtls/base64.h"
-#include "../../mbedtls/include/mbedtls/des.h"
-#include "../../mbedtls/include/mbedtls/aes.h"
-#include "../../mbedtls/include/mbedtls/md5.h"
-#include "../../mbedtls/include/mbedtls/cipher.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/pem.h"
+#include "mbedtls/base64.h"
+#include "mbedtls/des.h"
+#include "mbedtls/aes.h"
+#include "mbedtls/md5.h"
+#include "mbedtls/cipher.h"
+#include "mbedtls/platform_util.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_calloc    calloc

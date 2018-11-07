@@ -23,16 +23,16 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_RSA_C)
 
-#include "../../mbedtls/include/mbedtls/rsa.h"
-#include "../../mbedtls/include/mbedtls/bignum.h"
-#include "../../mbedtls/include/mbedtls/rsa_internal.h"
+#include "mbedtls/rsa.h"
+#include "mbedtls/bignum.h"
+#include "mbedtls/rsa_internal.h"
 
 /*
  * Compute RSA prime factors from public and private exponents

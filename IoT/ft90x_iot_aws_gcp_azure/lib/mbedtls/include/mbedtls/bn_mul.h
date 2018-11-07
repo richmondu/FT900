@@ -40,7 +40,7 @@
 #ifndef MBEDTLS_BN_MUL_H
 #define MBEDTLS_BN_MUL_H
 
-#include "../../../mbedtls/include/mbedtls/bignum.h"
+#include "bignum.h"
 
 #if defined(MBEDTLS_HAVE_ASM)
 

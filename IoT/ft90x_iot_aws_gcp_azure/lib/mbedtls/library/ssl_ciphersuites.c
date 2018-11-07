@@ -24,7 +24,7 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -32,13 +32,13 @@
 #if defined(MBEDTLS_SSL_TLS_C)
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #endif
 
-#include "../../mbedtls/include/mbedtls/ssl_ciphersuites.h"
-#include "../../mbedtls/include/mbedtls/ssl.h"
+#include "mbedtls/ssl_ciphersuites.h"
+#include "mbedtls/ssl.h"
 
 #include <string.h>
 

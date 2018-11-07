@@ -33,16 +33,16 @@
 #define MBEDTLS_RSA_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../../mbedtls/include/mbedtls/bignum.h"
-#include "../../../mbedtls/include/mbedtls/md.h"
+#include "bignum.h"
+#include "md.h"
 
 #if defined(MBEDTLS_THREADING_C)
-#include "../../../mbedtls/include/mbedtls/threading.h"
+#include "threading.h"
 #endif
 
 /*

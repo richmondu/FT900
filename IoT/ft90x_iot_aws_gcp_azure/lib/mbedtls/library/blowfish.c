@@ -28,15 +28,15 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_BLOWFISH_C)
 
-#include "../../mbedtls/include/mbedtls/blowfish.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/blowfish.h"
+#include "mbedtls/platform_util.h"
 
 #include <string.h>
 

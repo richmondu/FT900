@@ -27,27 +27,27 @@
 #define MBEDTLS_SSL_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../../mbedtls/include/mbedtls/bignum.h"
-#include "../../../mbedtls/include/mbedtls/ecp.h"
+#include "bignum.h"
+#include "ecp.h"
 
-#include "../../../mbedtls/include/mbedtls/ssl_ciphersuites.h"
+#include "ssl_ciphersuites.h"
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
-#include "../../../mbedtls/include/mbedtls/x509_crt.h"
-#include "../../../mbedtls/include/mbedtls/x509_crl.h"
+#include "x509_crt.h"
+#include "x509_crl.h"
 #endif
 
 #if defined(MBEDTLS_DHM_C)
-#include "../../../mbedtls/include/mbedtls/dhm.h"
+#include "dhm.h"
 #endif
 
 #if defined(MBEDTLS_ECDH_C)
-#include "../../../mbedtls/include/mbedtls/ecdh.h"
+#include "ecdh.h"
 #endif
 
 #if defined(MBEDTLS_ZLIB_SUPPORT)
@@ -64,7 +64,7 @@
 #endif
 
 #if defined(MBEDTLS_HAVE_TIME)
-#include "../../../mbedtls/include/mbedtls/platform_time.h"
+#include "mbedtls/platform_time.h"
 #endif
 
 /*

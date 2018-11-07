@@ -27,7 +27,7 @@
 #ifndef MBEDTLS_HKDF_H
 #define MBEDTLS_HKDF_H
 
-#include "../../../mbedtls/include/mbedtls/md.h"
+#include "md.h"
 
 /**
  *  \name HKDF Error codes

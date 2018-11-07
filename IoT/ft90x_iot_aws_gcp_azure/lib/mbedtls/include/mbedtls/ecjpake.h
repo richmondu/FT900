@@ -43,8 +43,8 @@
  * also be use outside TLS.
  */
 
-#include "../../../mbedtls/include/mbedtls/ecp.h"
-#include "../../../mbedtls/include/mbedtls/md.h"
+#include "ecp.h"
+#include "md.h"
 
 #ifdef __cplusplus
 extern "C" {

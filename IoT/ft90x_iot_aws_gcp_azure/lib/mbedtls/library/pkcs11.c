@@ -25,7 +25,7 @@
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
-#include "../../mbedtls/include/mbedtls/pkcs11.h"
+#include "mbedtls/pkcs11.h"
 
 #if defined(MBEDTLS_PKCS11_C)
 

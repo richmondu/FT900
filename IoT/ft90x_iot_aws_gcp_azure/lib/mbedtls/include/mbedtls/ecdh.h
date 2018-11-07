@@ -36,7 +36,7 @@
 #ifndef MBEDTLS_ECDH_H
 #define MBEDTLS_ECDH_H
 
-#include "../../../mbedtls/include/mbedtls/ecp.h"
+#include "ecp.h"
 
 #ifdef __cplusplus
 extern "C" {

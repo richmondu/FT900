@@ -36,13 +36,13 @@
 #define MBEDTLS_PLATFORM_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_HAVE_TIME)
-#include "../../../mbedtls/include/mbedtls/platform_time.h"
+#include "mbedtls/platform_time.h"
 #endif
 
 #ifdef __cplusplus

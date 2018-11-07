@@ -23,12 +23,12 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/platform_util.h"
 
 #include <stddef.h>
 #include <string.h>

@@ -35,7 +35,7 @@
 #ifndef MBEDTLS_CTR_DRBG_H
 #define MBEDTLS_CTR_DRBG_H
 
-#include "../../../mbedtls/include/mbedtls/aes.h"
+#include "aes.h"
 
 #if defined(MBEDTLS_THREADING_C)
 #include "mbedtls/threading.h"

@@ -27,7 +27,7 @@
 #define MBEDTLS_ENTROPY_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -35,21 +35,21 @@
 #include <stddef.h>
 
 #if defined(MBEDTLS_SHA512_C) && !defined(MBEDTLS_ENTROPY_FORCE_SHA256)
-#include "../../../mbedtls/include/mbedtls/sha512.h"
+#include "sha512.h"
 #define MBEDTLS_ENTROPY_SHA512_ACCUMULATOR
 #else
 #if defined(MBEDTLS_SHA256_C)
 #define MBEDTLS_ENTROPY_SHA256_ACCUMULATOR
-#include "../../../mbedtls/include/mbedtls/sha256.h"
+#include "sha256.h"
 #endif
 #endif
 
 #if defined(MBEDTLS_THREADING_C)
-#include "../../../mbedtls/include/mbedtls/threading.h"
+#include "threading.h"
 #endif
 
 #if defined(MBEDTLS_HAVEGE_C)
-#include "../../../mbedtls/include/mbedtls/havege.h"
+#include "havege.h"
 #endif
 
 #define MBEDTLS_ERR_ENTROPY_SOURCE_FAILED                 -0x003C  /**< Critical entropy source failure. */

@@ -34,8 +34,8 @@
 #ifndef MBEDTLS_ECDSA_H
 #define MBEDTLS_ECDSA_H
 
-#include "../../../mbedtls/include/mbedtls/ecp.h"
-#include "../../../mbedtls/include/mbedtls/md.h"
+#include "ecp.h"
+#include "md.h"
 
 /*
  * RFC-4492 page 20:

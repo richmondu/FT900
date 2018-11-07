@@ -28,20 +28,20 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_ECDSA_C)
 
-#include "../../mbedtls/include/mbedtls/ecdsa.h"
-#include "../../mbedtls/include/mbedtls/asn1write.h"
+#include "mbedtls/ecdsa.h"
+#include "mbedtls/asn1write.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_ECDSA_DETERMINISTIC)
-#include "../../mbedtls/include/mbedtls/hmac_drbg.h"
+#include "mbedtls/hmac_drbg.h"
 #endif
 
 /*

@@ -34,26 +34,26 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
 
-#include "../../mbedtls/include/mbedtls/x509_crt.h"
-#include "../../mbedtls/include/mbedtls/oid.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/x509_crt.h"
+#include "mbedtls/oid.h"
+#include "mbedtls/platform_util.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #if defined(MBEDTLS_PEM_PARSE_C)
-#include "../../mbedtls/include/mbedtls/pem.h"
+#include "mbedtls/pem.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_free       free

@@ -26,7 +26,7 @@
 #ifndef MBEDTLS_ASN1_WRITE_H
 #define MBEDTLS_ASN1_WRITE_H
 
-#include "../../../mbedtls/include/mbedtls/asn1.h"
+#include "asn1.h"
 
 #define MBEDTLS_ASN1_CHK_ADD(g, f) do { if( ( ret = f ) < 0 ) return( ret ); else   \
                                 g += ret; } while( 0 )

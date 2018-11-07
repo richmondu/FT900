@@ -26,14 +26,14 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_MD_C)
 
-#include "../../mbedtls/include/mbedtls/md_internal.h"
+#include "mbedtls/md_internal.h"
 
 #if defined(MBEDTLS_MD2_C)
 #include "mbedtls/md2.h"
@@ -44,27 +44,27 @@
 #endif
 
 #if defined(MBEDTLS_MD5_C)
-#include "../../mbedtls/include/mbedtls/md5.h"
+#include "mbedtls/md5.h"
 #endif
 
 #if defined(MBEDTLS_RIPEMD160_C)
-#include "../../mbedtls/include/mbedtls/ripemd160.h"
+#include "mbedtls/ripemd160.h"
 #endif
 
 #if defined(MBEDTLS_SHA1_C)
-#include "../../mbedtls/include/mbedtls/sha1.h"
+#include "mbedtls/sha1.h"
 #endif
 
 #if defined(MBEDTLS_SHA256_C)
-#include "../../mbedtls/include/mbedtls/sha256.h"
+#include "mbedtls/sha256.h"
 #endif
 
 #if defined(MBEDTLS_SHA512_C)
-#include "../../mbedtls/include/mbedtls/sha512.h"
+#include "mbedtls/sha512.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_calloc    calloc

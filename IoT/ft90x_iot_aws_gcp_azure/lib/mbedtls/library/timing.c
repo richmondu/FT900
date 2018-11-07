@@ -22,13 +22,13 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #define mbedtls_printf     printf
@@ -36,7 +36,7 @@
 
 #if defined(MBEDTLS_TIMING_C)
 
-#include "../../mbedtls/include/mbedtls/timing.h"
+#include "mbedtls/timing.h"
 
 #if !defined(MBEDTLS_TIMING_ALT)
 

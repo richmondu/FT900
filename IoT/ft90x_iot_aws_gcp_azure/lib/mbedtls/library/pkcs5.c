@@ -32,25 +32,25 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PKCS5_C)
 
-#include "../../mbedtls/include/mbedtls/pkcs5.h"
+#include "mbedtls/pkcs5.h"
 
 #if defined(MBEDTLS_ASN1_PARSE_C)
-#include "../../mbedtls/include/mbedtls/asn1.h"
-#include "../../mbedtls/include/mbedtls/cipher.h"
-#include "../../mbedtls/include/mbedtls/oid.h"
+#include "mbedtls/asn1.h"
+#include "mbedtls/cipher.h"
+#include "mbedtls/oid.h"
 #endif /* MBEDTLS_ASN1_PARSE_C */
 
 #include <string.h>
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #define mbedtls_printf printf

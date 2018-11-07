@@ -22,25 +22,25 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PK_C)
-#include "../../mbedtls/include/mbedtls/pk.h"
-#include "../../mbedtls/include/mbedtls/pk_internal.h"
+#include "mbedtls/pk.h"
+#include "mbedtls/pk_internal.h"
 
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/platform_util.h"
 
 #if defined(MBEDTLS_RSA_C)
-#include "../../mbedtls/include/mbedtls/rsa.h"
+#include "mbedtls/rsa.h"
 #endif
 #if defined(MBEDTLS_ECP_C)
-#include "../../mbedtls/include/mbedtls/ecp.h"
+#include "mbedtls/ecp.h"
 #endif
 #if defined(MBEDTLS_ECDSA_C)
-#include "../../mbedtls/include/mbedtls/ecdsa.h"
+#include "mbedtls/ecdsa.h"
 #endif
 
 #include <limits.h>

@@ -38,21 +38,21 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_BIGNUM_C)
 
-#include "../../mbedtls/include/mbedtls/bignum.h"
-#include "../../mbedtls/include/mbedtls/bn_mul.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/bignum.h"
+#include "mbedtls/bn_mul.h"
+#include "mbedtls/platform_util.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #include <stdlib.h>

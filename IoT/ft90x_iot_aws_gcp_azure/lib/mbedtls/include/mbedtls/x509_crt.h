@@ -27,13 +27,13 @@
 #define MBEDTLS_X509_CRT_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../../mbedtls/include/mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../../mbedtls/include/mbedtls/x509.h"
-#include "../../../mbedtls/include/mbedtls/x509_crl.h"
+#include "x509.h"
+#include "x509_crl.h"
 
 /**
  * \addtogroup x509_module

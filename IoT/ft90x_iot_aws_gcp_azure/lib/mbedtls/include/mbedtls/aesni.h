@@ -26,7 +26,7 @@
 #ifndef MBEDTLS_AESNI_H
 #define MBEDTLS_AESNI_H
 
-#include "../../../mbedtls/include/mbedtls/aes.h"
+#include "aes.h"
 
 #define MBEDTLS_AESNI_AES      0x02000000u
 #define MBEDTLS_AESNI_CLMUL    0x00000002u

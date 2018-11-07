@@ -29,7 +29,7 @@
 
 #include <ft900.h>
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -38,18 +38,18 @@
 
 #include <string.h>
 
-#include "../../mbedtls/include/mbedtls/aes.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/aes.h"
+#include "mbedtls/platform_util.h"
 #if defined(MBEDTLS_PADLOCK_C)
-#include "../../mbedtls/include/mbedtls/padlock.h"
+#include "mbedtls/padlock.h"
 #endif
 #if defined(MBEDTLS_AESNI_C)
-#include "../../mbedtls/include/mbedtls/aesni.h"
+#include "mbedtls/aesni.h"
 #endif
 
 #if defined(MBEDTLS_SELF_TEST)
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #define mbedtls_printf printf

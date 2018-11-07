@@ -22,18 +22,18 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_ERROR_C) || defined(MBEDTLS_ERROR_STRERROR_DUMMY)
-#include "../../mbedtls/include/mbedtls/error.h"
+#include "mbedtls/error.h"
 #include <string.h>
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #define mbedtls_snprintf snprintf
 #define mbedtls_time_t   time_t
@@ -44,11 +44,11 @@
 #include <stdio.h>
 
 #if defined(MBEDTLS_AES_C)
-#include "../../mbedtls/include/mbedtls/aes.h"
+#include "mbedtls/aes.h"
 #endif
 
 #if defined(MBEDTLS_ARC4_C)
-#include "../../mbedtls/include/mbedtls/arc4.h"
+#include "mbedtls/arc4.h"
 #endif
 
 #if defined(MBEDTLS_ARIA_C)
@@ -56,27 +56,27 @@
 #endif
 
 #if defined(MBEDTLS_BASE64_C)
-#include "../../mbedtls/include/mbedtls/base64.h"
+#include "mbedtls/base64.h"
 #endif
 
 #if defined(MBEDTLS_BIGNUM_C)
-#include "../../mbedtls/include/mbedtls/bignum.h"
+#include "mbedtls/bignum.h"
 #endif
 
 #if defined(MBEDTLS_BLOWFISH_C)
-#include "../../mbedtls/include/mbedtls/blowfish.h"
+#include "mbedtls/blowfish.h"
 #endif
 
 #if defined(MBEDTLS_CAMELLIA_C)
-#include "../../mbedtls/include/mbedtls/camellia.h"
+#include "mbedtls/camellia.h"
 #endif
 
 #if defined(MBEDTLS_CCM_C)
-#include "../../mbedtls/include/mbedtls/ccm.h"
+#include "mbedtls/ccm.h"
 #endif
 
 #if defined(MBEDTLS_CIPHER_C)
-#include "../../mbedtls/include/mbedtls/cipher.h"
+#include "mbedtls/cipher.h"
 #endif
 
 #if defined(MBEDTLS_CMAC_C)
@@ -84,39 +84,39 @@
 #endif
 
 #if defined(MBEDTLS_CTR_DRBG_C)
-#include "../../mbedtls/include/mbedtls/ctr_drbg.h"
+#include "mbedtls/ctr_drbg.h"
 #endif
 
 #if defined(MBEDTLS_DES_C)
-#include "../../mbedtls/include/mbedtls/des.h"
+#include "mbedtls/des.h"
 #endif
 
 #if defined(MBEDTLS_DHM_C)
-#include "../../mbedtls/include/mbedtls/dhm.h"
+#include "mbedtls/dhm.h"
 #endif
 
 #if defined(MBEDTLS_ECP_C)
-#include "../../mbedtls/include/mbedtls/ecp.h"
+#include "mbedtls/ecp.h"
 #endif
 
 #if defined(MBEDTLS_ENTROPY_C)
-#include "../../mbedtls/include/mbedtls/entropy.h"
+#include "mbedtls/entropy.h"
 #endif
 
 #if defined(MBEDTLS_GCM_C)
-#include "../../mbedtls/include/mbedtls/gcm.h"
+#include "mbedtls/gcm.h"
 #endif
 
 #if defined(MBEDTLS_HKDF_C)
-#include "../../mbedtls/include/mbedtls/hkdf.h"
+#include "mbedtls/hkdf.h"
 #endif
 
 #if defined(MBEDTLS_HMAC_DRBG_C)
-#include "../../mbedtls/include/mbedtls/hmac_drbg.h"
+#include "mbedtls/hmac_drbg.h"
 #endif
 
 #if defined(MBEDTLS_MD_C)
-#include "../../mbedtls/include/mbedtls/md.h"
+#include "mbedtls/md.h"
 #endif
 
 #if defined(MBEDTLS_MD2_C)
@@ -128,59 +128,59 @@
 #endif
 
 #if defined(MBEDTLS_MD5_C)
-#include "../../mbedtls/include/mbedtls/md5.h"
+#include "mbedtls/md5.h"
 #endif
 
 #if defined(MBEDTLS_NET_C)
-#include "../../mbedtls/include/mbedtls/net_sockets.h"
+#include "mbedtls/net_sockets.h"
 #endif
 
 #if defined(MBEDTLS_OID_C)
-#include "../../mbedtls/include/mbedtls/oid.h"
+#include "mbedtls/oid.h"
 #endif
 
 #if defined(MBEDTLS_PADLOCK_C)
-#include "../../mbedtls/include/mbedtls/padlock.h"
+#include "mbedtls/padlock.h"
 #endif
 
 #if defined(MBEDTLS_PEM_PARSE_C) || defined(MBEDTLS_PEM_WRITE_C)
-#include "../../mbedtls/include/mbedtls/pem.h"
+#include "mbedtls/pem.h"
 #endif
 
 #if defined(MBEDTLS_PK_C)
-#include "../../mbedtls/include/mbedtls/pk.h"
+#include "mbedtls/pk.h"
 #endif
 
 #if defined(MBEDTLS_PKCS12_C)
-#include "../../mbedtls/include/mbedtls/pkcs12.h"
+#include "mbedtls/pkcs12.h"
 #endif
 
 #if defined(MBEDTLS_PKCS5_C)
-#include "../../mbedtls/include/mbedtls/pkcs5.h"
+#include "mbedtls/pkcs5.h"
 #endif
 
 #if defined(MBEDTLS_RIPEMD160_C)
-#include "../../mbedtls/include/mbedtls/ripemd160.h"
+#include "mbedtls/ripemd160.h"
 #endif
 
 #if defined(MBEDTLS_RSA_C)
-#include "../../mbedtls/include/mbedtls/rsa.h"
+#include "mbedtls/rsa.h"
 #endif
 
 #if defined(MBEDTLS_SHA1_C)
-#include "../../mbedtls/include/mbedtls/sha1.h"
+#include "mbedtls/sha1.h"
 #endif
 
 #if defined(MBEDTLS_SHA256_C)
-#include "../../mbedtls/include/mbedtls/sha256.h"
+#include "mbedtls/sha256.h"
 #endif
 
 #if defined(MBEDTLS_SHA512_C)
-#include "../../mbedtls/include/mbedtls/sha512.h"
+#include "mbedtls/sha512.h"
 #endif
 
 #if defined(MBEDTLS_SSL_TLS_C)
-#include "../../mbedtls/include/mbedtls/ssl.h"
+#include "mbedtls/ssl.h"
 #endif
 
 #if defined(MBEDTLS_THREADING_C)
@@ -188,11 +188,11 @@
 #endif
 
 #if defined(MBEDTLS_X509_USE_C) || defined(MBEDTLS_X509_CREATE_C)
-#include "../../mbedtls/include/mbedtls/x509.h"
+#include "mbedtls/x509.h"
 #endif
 
 #if defined(MBEDTLS_XTEA_C)
-#include "../../mbedtls/include/mbedtls/xtea.h"
+#include "mbedtls/xtea.h"
 #endif
 
 

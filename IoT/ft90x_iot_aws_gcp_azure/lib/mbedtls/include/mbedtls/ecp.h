@@ -38,7 +38,7 @@
 #ifndef MBEDTLS_ECP_H
 #define MBEDTLS_ECP_H
 
-#include "../../../mbedtls/include/mbedtls/bignum.h"
+#include "bignum.h"
 
 /*
  * ECP error codes

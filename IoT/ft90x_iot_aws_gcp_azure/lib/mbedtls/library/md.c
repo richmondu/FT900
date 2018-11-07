@@ -26,19 +26,19 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_MD_C)
 
-#include "../../mbedtls/include/mbedtls/md.h"
-#include "../../mbedtls/include/mbedtls/md_internal.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/md.h"
+#include "mbedtls/md_internal.h"
+#include "mbedtls/platform_util.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_calloc    calloc

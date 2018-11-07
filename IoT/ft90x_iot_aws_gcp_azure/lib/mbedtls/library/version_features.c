@@ -22,14 +22,14 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_VERSION_C)
 
-#include "../../mbedtls/include/mbedtls/version.h"
+#include "mbedtls/version.h"
 
 #include <string.h>
 

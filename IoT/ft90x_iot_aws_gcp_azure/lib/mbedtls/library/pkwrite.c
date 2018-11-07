@@ -22,34 +22,34 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PK_WRITE_C)
 
-#include "../../mbedtls/include/mbedtls/pk.h"
-#include "../../mbedtls/include/mbedtls/asn1write.h"
-#include "../../mbedtls/include/mbedtls/oid.h"
+#include "mbedtls/pk.h"
+#include "mbedtls/asn1write.h"
+#include "mbedtls/oid.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_RSA_C)
-#include "../../mbedtls/include/mbedtls/rsa.h"
+#include "mbedtls/rsa.h"
 #endif
 #if defined(MBEDTLS_ECP_C)
-#include "../../mbedtls/include/mbedtls/ecp.h"
+#include "mbedtls/ecp.h"
 #endif
 #if defined(MBEDTLS_ECDSA_C)
-#include "../../mbedtls/include/mbedtls/ecdsa.h"
+#include "mbedtls/ecdsa.h"
 #endif
 #if defined(MBEDTLS_PEM_WRITE_C)
-#include "../../mbedtls/include/mbedtls/pem.h"
+#include "mbedtls/pem.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #define mbedtls_calloc    calloc

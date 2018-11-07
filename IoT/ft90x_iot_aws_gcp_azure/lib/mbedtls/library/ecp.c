@@ -44,23 +44,23 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_ECP_C)
 
-#include "../../mbedtls/include/mbedtls/ecp.h"
-#include "../../mbedtls/include/mbedtls/threading.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/ecp.h"
+#include "mbedtls/threading.h"
+#include "mbedtls/platform_util.h"
 
 #include <string.h>
 
 #if !defined(MBEDTLS_ECP_ALT)
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,7 +69,7 @@
 #define mbedtls_free       free
 #endif
 
-#include "../../mbedtls/include/mbedtls/ecp_internal.h"
+#include "mbedtls/ecp_internal.h"
 
 #if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
     !defined(inline) && !defined(__cplusplus)

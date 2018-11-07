@@ -22,12 +22,12 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "../../mbedtls/include/mbedtls/certs.h"
+#include "mbedtls/certs.h"
 
 #if defined(MBEDTLS_CERTS_C)
 
@@ -218,7 +218,6 @@ __flash__ const char mbedtls_test_ca_key_rsa[] =
 const size_t mbedtls_test_ca_key_rsa_len = sizeof( mbedtls_test_ca_key_rsa );
 
 __flash__ const char mbedtls_test_ca_pwd_rsa[] = "PolarSSLTest";
-//static __flash__ const unsigned char data__404_html[] = {
 const size_t mbedtls_test_ca_pwd_rsa_len = sizeof( mbedtls_test_ca_pwd_rsa ) - 1;
 
 __flash__ const char mbedtls_test_srv_crt_rsa[] =

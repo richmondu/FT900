@@ -40,22 +40,22 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_RSA_C)
 
-#include "../../mbedtls/include/mbedtls/rsa.h"
-#include "../../mbedtls/include/mbedtls/rsa_internal.h"
-#include "../../mbedtls/include/mbedtls/oid.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/rsa.h"
+#include "mbedtls/rsa_internal.h"
+#include "mbedtls/oid.h"
+#include "mbedtls/platform_util.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_PKCS1_V21)
-#include "../../mbedtls/include/mbedtls/md.h"
+#include "mbedtls/md.h"
 #endif
 
 #if defined(MBEDTLS_PKCS1_V15) && !defined(__OpenBSD__)
@@ -63,7 +63,7 @@
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #define mbedtls_printf printf
@@ -2190,7 +2190,7 @@ void mbedtls_rsa_free( mbedtls_rsa_context *ctx )
 
 #if defined(MBEDTLS_SELF_TEST)
 
-#include "../../mbedtls/include/mbedtls/sha1.h"
+#include "mbedtls/sha1.h"
 
 /*
  * Example RSA-1024 keypair, for test purposes

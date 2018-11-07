@@ -22,7 +22,7 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -35,12 +35,12 @@
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdlib.h>
 #endif
 
-#include "../../mbedtls/include/mbedtls/net_sockets.h"
+#include "mbedtls/net_sockets.h"
 
 #include <string.h>
 

@@ -51,7 +51,7 @@
 #ifndef MBEDTLS_CCM_H
 #define MBEDTLS_CCM_H
 
-#include "../../../mbedtls/include/mbedtls/cipher.h"
+#include "cipher.h"
 
 #define MBEDTLS_ERR_CCM_BAD_INPUT       -0x000D /**< Bad input parameters to the function. */
 #define MBEDTLS_ERR_CCM_AUTH_FAILED     -0x000F /**< Authenticated decryption failed. */

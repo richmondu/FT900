@@ -26,26 +26,26 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_CIPHER_C)
 
-#include "../../mbedtls/include/mbedtls/cipher.h"
-#include "../../mbedtls/include/mbedtls/cipher_internal.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/cipher.h"
+#include "mbedtls/cipher_internal.h"
+#include "mbedtls/platform_util.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 #if defined(MBEDTLS_GCM_C)
-#include "../../mbedtls/include/mbedtls/gcm.h"
+#include "mbedtls/gcm.h"
 #endif
 
 #if defined(MBEDTLS_CCM_C)
-#include "../../mbedtls/include/mbedtls/ccm.h"
+#include "mbedtls/ccm.h"
 #endif
 
 #if defined(MBEDTLS_CMAC_C)
@@ -53,7 +53,7 @@
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #define mbedtls_calloc calloc
 #define mbedtls_free   free

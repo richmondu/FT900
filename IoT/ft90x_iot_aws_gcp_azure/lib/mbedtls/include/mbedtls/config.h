@@ -2306,7 +2306,7 @@
  *
  * This module provides networking routines.
  */
-#undef MBEDTLS_NET_C
+#define MBEDTLS_NET_C
 
 /**
  * \def MBEDTLS_OID_C
@@ -2994,6 +2994,6 @@
 #include MBEDTLS_USER_CONFIG_FILE
 #endif
 
-#include "../../../mbedtls/include/mbedtls/check_config.h"
+#include "check_config.h"
 
 #endif /* MBEDTLS_CONFIG_H */

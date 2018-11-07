@@ -27,15 +27,15 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "../../mbedtls/include/mbedtls/config.h"
+#include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_SHA512_C)
 
-#include "../../mbedtls/include/mbedtls/sha512.h"
-#include "../../mbedtls/include/mbedtls/platform_util.h"
+#include "mbedtls/sha512.h"
+#include "mbedtls/platform_util.h"
 
 #if defined(_MSC_VER) || defined(__WATCOMC__)
   #define UL64(x) x##ui64
@@ -47,7 +47,7 @@
 
 #if defined(MBEDTLS_SELF_TEST)
 #if defined(MBEDTLS_PLATFORM_C)
-#include "../../mbedtls/include/mbedtls/platform.h"
+#include "mbedtls/platform.h"
 #else
 #include <stdio.h>
 #include <stdlib.h>
