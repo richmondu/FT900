@@ -14,9 +14,9 @@
 //#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
 //#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
 
-//#define USE_MQTT_BROKER               MQTT_BROKER_UNKNOWN
+#define USE_MQTT_BROKER               MQTT_BROKER_UNKNOWN
 //#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
-#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
+//#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_MAZ_IOT
 //#define USE_MQTT_BROKER               MQTT_BROKER_AWS_GREENGRASS
 ///////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +171,8 @@
     #define MQTT_CLIENT_NAME          DEVICE_ID
     #define MQTT_CLIENT_USER          NULL
     #define MQTT_CLIENT_PASS          NULL
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               0
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
