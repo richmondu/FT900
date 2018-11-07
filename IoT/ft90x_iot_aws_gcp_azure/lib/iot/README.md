@@ -39,6 +39,12 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
     - Must be updated by user to specify "raw" MQTT credentials and TLS certificates. 
     - iot_utils.c generates/derives the actual MQTT credentials based on the information stored in iot_config.h
       iot_utils_aws.c, iot_utils_gcp.c and iot_utils_azure.c are provided for AWS, GCP and Azure, respectively.
+    
+    Certificates folder 
+    - Must contain the TLS certificates needed for IoT connectivity. 
+    - The certificate names must correspond to the names registered in iot_config.h
+    
+    MQTT credentials
     - Default:
 	  - MQTT_BROKER
 	  - MQTT_BROKER_PORT = 8883
@@ -76,9 +82,7 @@ The IoT library simplifies IoT development by abstracting MQTT protocol, togethe
 	  - MQTT_CLIENT_USER = “HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14”
 	  - MQTT_CLIENT_PASS = NULL // not needed
 
-    Certificates folder 
-    - Must contain the TLS certificates needed for IoT connectivity. 
-    - The certificate names must correspond to the names registered in iot_config.h
+    TLS certificates
     - Sample for Amazon AWS IoT
 	  - Rootca.pem
 	  - Ft900device1_cert.pem
