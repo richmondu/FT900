@@ -22,7 +22,6 @@
 #define MQTT_BROKER_PORT          MQTT_TLS_PORT
 #define MQTT_BROKER               "mqtt.googleapis.com"
 
-#define DEVICE_ID                 USE_DEVICE_ID
 #define PROJECT_ID                "ft900iotproject"
 #define LOCATION_ID               "us-central1"
 #define REGISTRY_ID               "ft900registryid"
