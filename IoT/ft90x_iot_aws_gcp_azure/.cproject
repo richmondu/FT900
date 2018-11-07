@@ -21,7 +21,7 @@
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x.649180017" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
-							<builder buildPath="${workspace_loc:/Free RTOS lwIP Example}/FT900_Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.2099686990" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
+							<builder buildPath="${workspace_loc:/ft90x_iot_aws_gcp_azure}/FT900_Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.2099686990" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.ftdichip.compiler.ft900.debug.base.1227203840" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.base">
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.1255959416" name="Other optimization flags" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.567215193" name="Debug Level" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
@@ -394,7 +394,7 @@
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.886615635" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1196635454" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x.482373163" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
-							<builder buildPath="${workspace_loc:/Free RTOS lwIP Example}/FT900_Release" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.1577111571" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
+							<builder buildPath="${workspace_loc:/ft90x_iot_aws_gcp_azure}/FT900_Release" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.ftdichip.managedbuild.gnu.cross.ft90x.builder.1577111571" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.ftdichip.compiler.ft900.release.base.1004524887" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.release.base">
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.1514785160" name="Optimization Level" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.625232768" name="Debug Level" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
@@ -720,7 +720,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="Free RTOS lwIP Example.com.ftdichip.ft90x.build.gcc.ft9xxproj.base.1416874653" name="Executable" projectType="com.ftdichip.ft90x.build.gcc.ft9xxproj.base"/>
+		<project id="ft90x_iot_aws_gcp_azure.com.ftdichip.ft90x.build.gcc.ft9xxproj.base.1416874653" name="Executable" projectType="com.ftdichip.ft90x.build.gcc.ft9xxproj.base"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
@@ -735,10 +735,10 @@
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="FT900_Debug">
-			<resource resourceType="PROJECT" workspacePath="/Free RTOS lwIP Example"/>
+			<resource resourceType="PROJECT" workspacePath="/ft90x_iot_aws_gcp_azure"/>
 		</configuration>
 		<configuration configurationName="FT900_Release">
-			<resource resourceType="PROJECT" workspacePath="/Free RTOS lwIP Example"/>
+			<resource resourceType="PROJECT" workspacePath="/ft90x_iot_aws_gcp_azure"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
