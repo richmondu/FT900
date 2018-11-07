@@ -40,7 +40,7 @@
 
 #include "ft900.h"
 #include "FreeRTOS.h"   // For pvPortMalloc
-#include "iot_config.h" // For USE_MQTT_BROKER
+#include <iot_config.h> // For USE_MQTT_BROKER
 
 
 

@@ -43,7 +43,7 @@
 #include "tinyprintf.h"     // For tfp_printf
 #include "lwip/apps/mqtt.h" // For MQTT_TLS_PORT
 #include "FreeRTOS.h"       // For pvPortMalloc
-#include "iot_utils.h"      // For USE_MQTT_BROKER
+#include "../../include/iot/iot_utils.h"      // For USE_MQTT_BROKER
 
 #if USE_PAYLOAD_TIMESTAMP
 #include "ext_rtc.h"        // For ext_rtc_xxx

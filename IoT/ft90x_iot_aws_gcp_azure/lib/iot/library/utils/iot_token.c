@@ -55,7 +55,7 @@
 #include "lwipopts.h"         // For ALTCP_MBEDTLS_ENTROPY_xxx
 
 /* LWIP Headers. */
-#include "iot_utils.h"        // For ALTCP_MBEDTLS_ENTROPY_xxx
+#include "../../include/iot/iot_utils.h"        // For ALTCP_MBEDTLS_ENTROPY_xxx
 
 
 

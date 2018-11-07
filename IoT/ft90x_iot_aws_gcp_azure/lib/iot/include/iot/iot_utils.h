@@ -51,7 +51,7 @@
 #include "lwip/apps/sntp.h"
 #include "net.h"
 #include "iot.h"
-#include "iot_config.h"
+#include <iot_config.h>
 
 
 

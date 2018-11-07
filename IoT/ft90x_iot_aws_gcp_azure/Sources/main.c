@@ -177,6 +177,21 @@ int main( void )
     DEBUG_PRINTF( "Should never reach here!\r\n" );
 }
 
+static inline void display_network_info()
+{
+    uint8_t* mac = net_get_mac();
+    DEBUG_PRINTF( "MAC=%02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
+
+    ip_addr_t addr = net_get_ip();
+    DEBUG_PRINTF( "IP=%s\r\n", inet_ntoa(addr) );
+    addr = net_get_gateway();
+    DEBUG_PRINTF( "GW=%s\r\n", inet_ntoa(addr) );
+    addr = net_get_netmask();
+    DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
+    vTaskDelay( pdMS_TO_TICKS(1000) );
+}
+
 static void iot_app_task( void *pvParameters )
 {
     (void) pvParameters;
@@ -205,17 +220,7 @@ static void iot_app_task( void *pvParameters )
         }
         vTaskDelay( pdMS_TO_TICKS(1000) );
         DEBUG_PRINTF( "\r\n" );
-
-        uint8_t* mac = net_get_mac();
-        DEBUG_PRINTF( "MAC=%02X:%02X:%02X:%02X:%02X:%02X\r\n",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
-        ip_addr_t addr = net_get_ip();
-        DEBUG_PRINTF( "IP=%s\r\n", inet_ntoa(addr) );
-        addr = net_get_gateway();
-        DEBUG_PRINTF( "GW=%s\r\n", inet_ntoa(addr) );
-        addr = net_get_netmask();
-        DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
-        vTaskDelay( pdMS_TO_TICKS(1000) );
+        display_network_info();
 
 
         /*
@@ -248,7 +253,7 @@ static void iot_app_task( void *pvParameters )
         char topic_pub[48] = {0};
         char payload[192] = {0};
 
-        // Continuously publish sensor data every second
+        /* continuously publish sensor data every second */
         for ( int i=0 ; ; i++ ) {
 
             // Generate the publish topic and payload
@@ -260,6 +265,7 @@ static void iot_app_task( void *pvParameters )
             len = user_generate_publish_payload(
                 payload, sizeof(payload), devices[device_index] );
 
+            // Publish the generated payload containing sensor data
             if ( iot_publish( handle, topic_pub, payload, len ) != 0 ) {
                 break;
             }
@@ -299,13 +305,15 @@ static inline char* user_generate_subscribe_topic()
     //tfp_snprintf(topic, sizeof(topic),
     //    "/devices/%s/events", (char*)iot_getdeviceid());
     return topic;
-#else
+#elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     static char topic[64] = {0};
     tfp_snprintf( topic, sizeof(topic),
         "devices/%s/messages/devicebound/#", (char*)iot_getdeviceid() );
     //tfp_snprintf(topic, sizeof(topic),
     //    "devices/%s/messages/events/#", (char*)iot_getdeviceid());
     return topic;
+#else
+    return "#";
 #endif
 }
 

@@ -48,7 +48,7 @@
 #include "net.h"
 
 /* IOT Headers. */
-#include "iot_utils.h"
+#include "../include/iot/iot_utils.h"
 #include <iot_config.h>
 
 

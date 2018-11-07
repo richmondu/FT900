@@ -25,7 +25,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 // USE_ROOT_CA
-// If enabled, two-way authentication
+// If enabled, two-way authentication, client will also authenticate server
 // If disabled, client authentication, no server authentication, prone to man-in-the-middle attacks
 // This must be enabled in production environment
 #define USE_ROOT_CA                   1
@@ -151,6 +151,9 @@
     #include <iot_config_gcp.h>
     #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
+    // Microsoft IoT requires a root CA
+    #undef USE_ROOT_CA
+    #define USE_ROOT_CA               1
     // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
     #define AUTH_TYPE_SASTOKEN        0
     #define AUTH_TYPE_X509CERT        1
@@ -162,10 +165,6 @@
         #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
     #endif
     #include <iot_config_azure.h>
-
-    // Microsoft IoT requires a root CA
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               1
 #else
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_BROKER               ""
