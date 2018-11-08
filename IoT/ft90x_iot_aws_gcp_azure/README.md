@@ -119,4 +119,7 @@ Below are the IoT cloud solutions architecture used for this demo application.
           FRONTEND: browser -> (Dashboard webpage using cosmosdbclient.js) Storage -> CosmosDB [TODO]
           cosmosdbclient.js demonstrates authenticating and querying of CosmosDB database
        
+### FT900 Eclipse Toolchain
 
+       FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
+       This enables developers to easily create cloud-connected IoT applications in minutes.
