@@ -6,74 +6,51 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Choose your MQTT IoT Cloud Broker
+///////////////////////////////////////////////////////////////////////////////////
 #define MQTT_BROKER_UNKNOWN           0
 #define MQTT_BROKER_AWS_IOT           1    // Amazon Web Services IoT cloud
 #define MQTT_BROKER_GCP_IOT           2    // Google Cloud Platform IoT cloud
 #define MQTT_BROKER_MAZ_IOT           3    // Microsoft Azure IoT cloud
 #define MQTT_BROKER_AWS_GREENGRASS    4    // local AWS Greengrass broker
-//#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
-//#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
+//#define MQTT_BROKER_GCP_EDGE        5    // local Google IoT Edge broker
+//#define MQTT_BROKER_MAZ_EDGE        6    // local Microsoft IoT Edge broker
+#define MQTT_BROKER_COUNT             5
 
-#define USE_MQTT_BROKER               MQTT_BROKER_UNKNOWN
-//#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
-//#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
-//#define USE_MQTT_BROKER               MQTT_BROKER_MAZ_IOT
-//#define USE_MQTT_BROKER               MQTT_BROKER_AWS_GREENGRASS
+#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
 ///////////////////////////////////////////////////////////////////////////////////
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-// USE_ROOT_CA
-// If enabled, two-way authentication, client will also authenticate server
-// If disabled, client authentication, no server authentication, prone to man-in-the-middle attacks
-// This must be enabled in production environment
-#define USE_ROOT_CA                   1
-
-// USE_PAYLOAD_TIMESTAMP
-// If enabled, RTC will be used.
-// Note that enabling this increases memory footprint
-// Disable this to save some memory footprint for use of sensor
-#define USE_PAYLOAD_TIMESTAMP         1
-
-// USE_MQTT_PUBLISH, USE_MQTT_SUBSCRIBE
-// By default, just do publish, no subscribe.
-#define USE_MQTT_PUBLISH              1
+// Enable/disable for optimization purposes
+///////////////////////////////////////////////////////////////////////////////////
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-#define USE_MQTT_SUBSCRIBE            0 // Disabled by default; tested working
+    #define USE_ROOT_CA               1
+    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-#define USE_MQTT_SUBSCRIBE            0 // Disabled by default; tested working for /config not /events
+    // Google IoT does not need a root CA
+    #define USE_ROOT_CA               0 // memory footprint optimization
+    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-#define USE_MQTT_SUBSCRIBE            0 // Azure does not support MQTT subscribe
+    // Microsoft IoT requires a root CA
+    #define USE_ROOT_CA               1
 #else
-#define USE_MQTT_SUBSCRIBE            0
+    #define USE_ROOT_CA               0
 #endif
-
-// DEBUG_IOT_API
-// Set to enable/disable logs in iot.c
-#define DEBUG_IOT_API                 1
 ///////////////////////////////////////////////////////////////////////////////////
 
 
 
+///////////////////////////////////////////////////////////////////////////////////
+// Select the device to use
 ///////////////////////////////////////////////////////////////////////////////////
 // This demo application provides 3 sets of device certificates
 // Each one will work for Amazon AWS, Google Cloud and Microsoft Azure
 #define SAMPLE_DEVICE_1               1 // corresponds to ft900device1_cert.pem
 #define SAMPLE_DEVICE_2               2 // corresponds to ft900device2_cert.pem
 #define SAMPLE_DEVICE_3               3 // corresponds to ft900device3_cert.pem
-
-#define USE_MQTT_DEVICE               SAMPLE_DEVICE_1
-
-#if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
-#define USE_DEVICE_ID                 "ft900device1"
-#elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_2)
-#define USE_DEVICE_ID                 "ft900device2"
-#elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_3)
-#define USE_DEVICE_ID                 "ft900device3"
-#endif
-
-#define DEVICE_ID                     USE_DEVICE_ID
+#define USE_MQTT_DEVICE               SAMPLE_DEVICE_2
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -140,43 +117,25 @@
 //     Ft900device1_pkey.pem
 //
 ///////////////////////////////////////////////////////////////////////////////////
-
+// Load the configuration from a file for easier modification by users
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #include <iot_config_aws.h>
-    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    // Google IoT does not need a root CA
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               0 // memory footprint optimization
     #include <iot_config_gcp.h>
-    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
-    // Microsoft IoT requires a root CA
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               1
-    // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
-    #define AUTH_TYPE_SASTOKEN        0
-    #define AUTH_TYPE_X509CERT        1
-    #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
-        // We have set our sample device1 to use SAS Token authentication
-        #define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
-    #else // SAMPLE_DEVICE_2 and SAMPLE_DEVICE_3
-        // We have set our sample device2 and device 3 to use X509 Certificate authentication
-        #define MAZ_AUTH_TYPE         AUTH_TYPE_X509CERT
-    #endif
     #include <iot_config_azure.h>
 #else
+    // Set values here for unsupported/untested MQTT brokers
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_BROKER               ""
     #define MQTT_CLIENT_NAME          DEVICE_ID
     #define MQTT_CLIENT_USER          NULL
     #define MQTT_CLIENT_PASS          NULL
-    #undef USE_ROOT_CA
-    #define USE_ROOT_CA               0
 #endif
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+
+#include <iot/iot_config_defaults.h>
 
 #endif /* _IOT_CONFIG_H_ */
