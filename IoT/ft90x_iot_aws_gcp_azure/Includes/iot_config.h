@@ -50,7 +50,7 @@
 #define SAMPLE_DEVICE_1               1 // corresponds to ft900device1_cert.pem
 #define SAMPLE_DEVICE_2               2 // corresponds to ft900device2_cert.pem
 #define SAMPLE_DEVICE_3               3 // corresponds to ft900device3_cert.pem
-#define USE_MQTT_DEVICE               SAMPLE_DEVICE_2
+#define USE_MQTT_DEVICE               SAMPLE_DEVICE_1
 ///////////////////////////////////////////////////////////////////////////////////
 
 
