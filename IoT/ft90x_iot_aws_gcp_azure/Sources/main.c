@@ -86,7 +86,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
     #define IOT_APP_TASK_STACK_SIZE              (1536 + 16)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
-        #define IOT_APP_TASK_STACK_SIZE          (1536)
+        #define IOT_APP_TASK_STACK_SIZE          (1536 + 16)
     #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
         #define IOT_APP_TASK_STACK_SIZE          (1024 + 64)
     #endif
