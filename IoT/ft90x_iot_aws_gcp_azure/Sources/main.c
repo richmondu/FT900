@@ -83,7 +83,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define IOT_APP_TASK_STACK_SIZE              (1024 + 64)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
-    #define IOT_APP_TASK_STACK_SIZE              (1536 + 16)
+    #define IOT_APP_TASK_STACK_SIZE              (1536 + 32)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     #if (MAZ_AUTH_TYPE == AUTH_TYPE_SASTOKEN)
         #define IOT_APP_TASK_STACK_SIZE          (1536 + 16)
