@@ -2,8 +2,9 @@
 
 
 This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . 
-This new project demonstrates:
+This new project demonstrates the FT900 IoT framework:
 
+### IoT Framework
     1. Secure connectivity with IoT cloud providers: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
        The choice of cloud provider is configurable with a macro USE_MQTT_BROKER.
        User needs to update iot_config.h to configure settings corresponding to their account of their chosen cloud provider.
@@ -22,10 +23,10 @@ This new project demonstrates:
        https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure/lib/iot
     It also contains 3 set of device certificates that can be used to connect to all 3 cloud services
 
-
+### IoT Configurations
 Below are the MQTT settings and TLS credentials needed to connect to IoT cloud services of AWS, GCP and Azure. 
 
-### Amazon AWS IoT Core
+#### Amazon AWS IoT Core
     1. MQTT Endpoint: NAME.iot.REGION.amazonaws.com
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
@@ -39,7 +40,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends CA, device certificate, device private key for TLS connection
 
-### Amazon AWS Greengrass
+#### Amazon AWS Greengrass
     1. MQTT Endpoint: local Greengrass device hostname or IP address
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
@@ -53,7 +54,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
     
-### Google Cloud Platform IoT Core
+#### Google Cloud Platform IoT Core
     1. MQTT Endpoint: mqtt.googleapis.com
     2. MQTT ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. MQTT Username: ANY
@@ -66,7 +67,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     * CLOUD: Certificate must be registered in Google Cloud IoT Core
     * DEVICE: No certificate is sent for TLS connection
     
-### Microsoft Azure IoT Hub
+#### Microsoft Azure IoT Hub
     A. Authentication with SAS Security Token
        1. MQTT Endpoint: HUB_NAME.azure-devices.net
        2. MQTT ClientId: DEVICE_ID
@@ -93,26 +94,28 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
-### Notes:
+#### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
        2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity.
        3. The "MQTT publish topic" for Google Cloud IoT and Microsoft Azure IoT have fixed format. See above. Only AWS supports any topic.
 
 
+### IoT Cloud Architecture
+
 Below are the IoT cloud solutions architecture used for this demo application.
 
-### Amazon AWS Architecture
+#### Amazon AWS Architecture
        1. BACKEND: ft900 -> Greengrass -> IoT Core -> Lambda -> DynamoDB 
        2. FRONTEND: browser -> (Dashboard webpage) S3 -> API Gateway -> Lambda -> DynamoDB
 
-### Google Cloud Architecture
+#### Google Cloud Architecture
        0. Refer to FT900IoTDemo_SetupGuide_GoogleCloud.docx for step-by-step Google Cloud IoT setup procedures
        1. BACKEND: ft900 -> IoT Core -> Pub/Sub -> Dataflow -> BigQuery
        2. FRONTEND: bigqueryclient.js -> BigQuery
           FRONTEND: browser -> (Dashboard webpage using bigqueryclient.js) Storage -> BigQuery [TODO]
           bigqueryclient.js demonstrates authenticating and querying of Big Query database
           
-### Microsoft Azure Architecture
+#### Microsoft Azure Architecture
        0. Refer to FT900IoTDemo_SetupGuide_MicrosoftAzure.docx for step-by-step Microsoft Azure IoT setup procedures
        1. BACKEND: ft900 -> IoT Hub -> Stream Analytics -> CosmosDB
        2. FRONTEND: cosmosdbclient.js -> CosmosDB
@@ -122,4 +125,4 @@ Below are the IoT cloud solutions architecture used for this demo application.
 ### FT900 Eclipse Toolchain
 
        FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
-       This enables developers to easily create cloud-connected IoT applications in minutes.
+       This enables developers to easily create cloud-connected FT900 IoT applications.
