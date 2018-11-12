@@ -126,6 +126,7 @@
     #include <iot_config_azure.h>
 #else
     // Set values here for unsupported/untested MQTT brokers
+    #define DEVICE_ID                 "deviceid"
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_BROKER               ""
     #define MQTT_CLIENT_NAME          DEVICE_ID
