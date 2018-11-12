@@ -78,8 +78,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 
 ///////////////////////////////////////////////////////////////////////////////////
 /* Task configurations. */
-#define IOT_APP_TASK_NAME                "iot_task"
-#define IOT_APP_TASK_PRIORITY            (2)
+#define IOT_APP_TASK_NAME                        "iot_task"
+#define IOT_APP_TASK_PRIORITY                    (2)
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define IOT_APP_TASK_STACK_SIZE              (1024 + 64)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
