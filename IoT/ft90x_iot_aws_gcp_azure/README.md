@@ -93,7 +93,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
               
-### Notes:
+#### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
        2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity.
        3. The "MQTT publish topic" for Google Cloud IoT and Microsoft Azure IoT have fixed format. See above. Only AWS supports any topic.
@@ -124,4 +124,4 @@ Below are the IoT cloud solutions architecture used for this demo application.
 ### FT900 Eclipse Toolchain
 
        FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
-       This enables developers to easily create cloud-connected IoT applications in minutes.
+       This enables developers to easily create cloud-connected FT900 IoT applications.
