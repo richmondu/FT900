@@ -89,7 +89,7 @@ void iot_utils_free()
 
 const char* iot_utils_getdeviceid()
 {
-    return DEVICE_ID;
+    return USE_DEVICE_ID;
 }
 
 /** @brief Gets the TLS certificates. Support Amazon AWS, Google GCP and Microsoft Azure.
@@ -127,10 +127,10 @@ int iot_utils_getcredentials( iot_credentials* mqtt_credentials )
 
 
     static char client_id[IOT_MAX_LEN_CLIENT_ID] = {0};
-    if (42 + strlen(PROJECT_ID) + strlen(LOCATION_ID) + strlen(REGISTRY_ID) + strlen(DEVICE_ID) > IOT_MAX_LEN_CLIENT_ID)
+    if (42 + strlen(PROJECT_ID) + strlen(LOCATION_ID) + strlen(REGISTRY_ID) + strlen(iot_utils_getdeviceid()) > IOT_MAX_LEN_CLIENT_ID)
         return -1;
     tfp_snprintf(client_id, sizeof(client_id), "projects/%s/locations/%s/registries/%s/devices/%s",
-        (char*)PROJECT_ID, (char*)LOCATION_ID, (char*)REGISTRY_ID, (char*)DEVICE_ID);
+        (char*)PROJECT_ID, (char*)LOCATION_ID, (char*)REGISTRY_ID, (char*)iot_utils_getdeviceid());
     mqtt_credentials->client_id = client_id;
 
     mqtt_credentials->client_user = MQTT_CLIENT_USER;

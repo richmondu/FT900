@@ -27,16 +27,16 @@
 
 // This demo application provides 3 sets of device certificates
 #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
-#define DEVICE_ID                 "ft900device1" // corresponds to ft900device1_cert.pem
+#define USE_DEVICE_ID             "ft900device1" // corresponds to ft900device1_cert.pem
 #elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_2)
-#define DEVICE_ID                 "ft900device2" // corresponds to ft900device2_cert.pem
+#define USE_DEVICE_ID             "ft900device2" // corresponds to ft900device2_cert.pem
 #elif (USE_MQTT_DEVICE == SAMPLE_DEVICE_3)
-#define DEVICE_ID                 "ft900device3" // corresponds to ft900device3_cert.pem
+#define USE_DEVICE_ID             "ft900device3" // corresponds to ft900device3_cert.pem
 #endif
 
 #define MQTT_BROKER_PORT          MQTT_TLS_PORT
 #define MQTT_BROKER               "FT900IoTHub.azure-devices.net"
-#define MQTT_CLIENT_NAME          DEVICE_ID
+#define MQTT_CLIENT_NAME          USE_DEVICE_ID
 
 // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
 #define AUTH_TYPE_SASTOKEN        0

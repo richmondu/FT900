@@ -88,7 +88,7 @@ void iot_utils_free()
 
 const char* iot_utils_getdeviceid()
 {
-    return DEVICE_ID;
+    return USE_DEVICE_ID;
 }
 
 /** @brief Gets the TLS certificates. Support Amazon AWS, Google GCP and Microsoft Azure.

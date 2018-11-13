@@ -50,8 +50,8 @@
 #error "Unexpected USE_MQTT_BROKER value"
 #endif // USE_MQTT_BROKER
 
-#ifndef DEVICE_ID
-#error "DEVICE_ID must be set"
+#ifndef USE_DEVICE_ID
+#error "USE_DEVICE_ID must be set"
 #endif // DEVICE_ID
 ///////////////////////////////////////////////////////////////////////////////////
 

@@ -104,7 +104,7 @@ void iot_utils_free()
 
 const char* iot_utils_getdeviceid()
 {
-    return DEVICE_ID;
+    return USE_DEVICE_ID;
 }
 
 /** @brief Gets the TLS certificates. Support Amazon AWS, Google GCP and Microsoft Azure.
@@ -150,7 +150,7 @@ int iot_utils_getcredentials( iot_credentials* mqtt_credentials )
 
 
     static char client_user[IOT_MAX_LEN_CLIENT_USER] = {0};
-    tfp_snprintf(client_user, sizeof(client_user), "%s/%s/api-version=2016-11-14", (char*)MQTT_BROKER, (char*)DEVICE_ID);
+    tfp_snprintf(client_user, sizeof(client_user), "%s/%s/api-version=2016-11-14", (char*)MQTT_BROKER, (char*)iot_utils_getdeviceid());
     mqtt_credentials->client_user = client_user;
 
 
@@ -162,7 +162,7 @@ int iot_utils_getcredentials( iot_credentials* mqtt_credentials )
     // Reading from a file instead of hardcoded macro makes it easier to deploy for more devices
     const char *sharedAccessKey = (const char *)iot_sas_getkey(&sharedAccessKeyLen);
 
-    tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)DEVICE_ID);
+    tfp_snprintf(resourceUri, sizeof(resourceUri), "%s/devices/%s", (char*)MQTT_BROKER, (char*)iot_utils_getdeviceid());
 
     token_free(&token);
 
