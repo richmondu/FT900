@@ -56,7 +56,7 @@ $(OUTDIR)/%.S: $(INDIR)/%.pem
 	@echo $(SYMNAME)_end: >> $@
 	@echo 'Finished making file: $@'
 	@echo ' '
-	sleep 1
+	sleep 2
 
 .PHONY: clean
 clean:
