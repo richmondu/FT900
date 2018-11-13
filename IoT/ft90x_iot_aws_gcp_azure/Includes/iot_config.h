@@ -2,22 +2,24 @@
 #define _IOT_CONFIG_H_
 
 #include <ft900.h>
+#include <iot/iot_config_brokers.h>
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Choose your MQTT IoT Cloud Broker
+//   MQTT_BROKER_UNKNOWN
+//   MQTT_BROKER_AWS_IOT
+//   MQTT_BROKER_GCP_IOT
+//   MQTT_BROKER_MAZ_IOT
+//   MQTT_BROKER_AWS_GREENGRASS
+//   MQTT_BROKER_GCP_EDGE - not yet supported
+//   MQTT_BROKER_MAZ_EDGE - not yet supported
+//   Refer to iot_config_brokers.h
 ///////////////////////////////////////////////////////////////////////////////////
-#define MQTT_BROKER_UNKNOWN           0
-#define MQTT_BROKER_AWS_IOT           1    // Amazon Web Services IoT cloud
-#define MQTT_BROKER_GCP_IOT           2    // Google Cloud Platform IoT cloud
-#define MQTT_BROKER_MAZ_IOT           3    // Microsoft Azure IoT cloud
-#define MQTT_BROKER_AWS_GREENGRASS    4    // local AWS Greengrass broker
-//#define MQTT_BROKER_GCP_EDGE        5    // local Google IoT Edge broker
-//#define MQTT_BROKER_MAZ_EDGE        6    // local Microsoft IoT Edge broker
-#define MQTT_BROKER_COUNT             5
 
-#define USE_MQTT_BROKER               MQTT_BROKER_GCP_IOT
+#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -25,6 +27,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Enable/disable for optimization purposes
 ///////////////////////////////////////////////////////////////////////////////////
+
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define USE_ROOT_CA               1
     #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
@@ -38,6 +41,7 @@
 #else
     #define USE_ROOT_CA               0
 #endif
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -45,12 +49,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Select the device to use
 ///////////////////////////////////////////////////////////////////////////////////
+
 // This demo application provides 3 sets of device certificates
 // Each one will work for Amazon AWS, Google Cloud and Microsoft Azure
 #define SAMPLE_DEVICE_1               1 // corresponds to ft900device1_cert.pem
 #define SAMPLE_DEVICE_2               2 // corresponds to ft900device2_cert.pem
 #define SAMPLE_DEVICE_3               3 // corresponds to ft900device3_cert.pem
 #define USE_MQTT_DEVICE               SAMPLE_DEVICE_1
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -117,6 +123,7 @@
 //     Ft900device1_pkey.pem
 //
 ///////////////////////////////////////////////////////////////////////////////////
+
 // Load the configuration from a file for easier modification by users
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #include <iot_config_aws.h>
@@ -126,13 +133,14 @@
     #include <iot_config_azure.h>
 #else
     // Set values here for unsupported/untested MQTT brokers
-    #define DEVICE_ID                 "deviceid"
+    #define USE_DEVICE_ID             "deviceid"
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_BROKER               ""
-    #define MQTT_CLIENT_NAME          DEVICE_ID
+    #define MQTT_CLIENT_NAME          USE_DEVICE_ID
     #define MQTT_CLIENT_USER          NULL
     #define MQTT_CLIENT_PASS          NULL
 #endif
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 
