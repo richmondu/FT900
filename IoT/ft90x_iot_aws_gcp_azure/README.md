@@ -129,3 +129,4 @@ Below are the IoT cloud solutions architecture used for this demo application.
 
        FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
        This enables developers to easily create cloud-connected FT900 IoT applications.
+       IoT Configuration views are also provided so users can set the MQTT credentials using Eclipse view instead of code.
