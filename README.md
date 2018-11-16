@@ -12,7 +12,7 @@ I handle IoT security and cloud connectivity for FT900 microcontroller.
 This contains the IoT framework including IoT demo applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers.
 
 #### FT900 AWS IoT Demo
-- This demonstrates secure MQTT connectivity to Amazon AWS IoT Core and AWS Greengrass using MQTT library from Amazon AWS FreeRTOS SDK.
+- This demonstrates secure MQTT connectivity to Amazon AWS IoT Core and AWS Greengrass using MQTT library from Amazon FreeRTOS aka AWS IoT SDK.
 - It contains end-to-end demo including lambda functions for backend cloud and local gateway (Greengrass). 
 - This was made after I successfully integrated mbedTLS open-source library with optimal settings for memory footprint.
 - This was presented in Electronica 2018 https://brtchip.com/Brochures/FT900%20AWS%20IoT%20Demosheet.pdf
