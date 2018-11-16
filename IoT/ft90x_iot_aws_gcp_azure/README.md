@@ -22,7 +22,8 @@ This new project demonstrates the FT900 IoT framework:
     8. Use of FT900 IoT Library, composed of API interface and utilities.
        https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure/lib/iot
     9. Customized Eclipse C/C++ IDE (Java plugin) to provide IoT Project Templates (AWS IoT, GCP IoT and Azure IoT) 
-       to make it easy to develop cloud-connected IoT devices so developers can focus on ML/DL based data analytics.  
+       to make it easy to develop cloud-connected IoT devices so developers can focus on ML/DL based data analytics.
+       IoT Configurations Views are also provided so users can modify the MQTT credentials via UI instead of via code.
     It also contains 3 set of device certificates that can be used to connect to all 3 cloud services
 
 ### IoT Configurations
