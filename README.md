@@ -1,6 +1,6 @@
 # FT900 IoT Security and Cloud Connectivity
 
-I handle IoT security and cloud connectivity for FT900 microcontroller.
+I handle IoT security and cloud connectivity for FT900 series of microcontrollers.
 
 - IoT Security: IoT framework including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source contributions, and IoT Project Templates (for FT900 Eclipse IDE)
 - IoT Connectivity: Secure authentication and communication with IoT cloud platforms: Amazon Web Services, Google Cloud Platform and Microsoft Azure.
