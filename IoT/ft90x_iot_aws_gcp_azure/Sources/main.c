@@ -68,8 +68,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /* Default network configuration. */
 #define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-static ip_addr_t ip      = IPADDR4_INIT_BYTES( 192, 168, 254, 100 );
-static ip_addr_t gateway = IPADDR4_INIT_BYTES( 192, 168, 254, 254 );
+static ip_addr_t ip      = IPADDR4_INIT_BYTES( 192, 168, 22, 100 );
+static ip_addr_t gateway = IPADDR4_INIT_BYTES( 192, 168, 22, 1 );
 static ip_addr_t mask    = IPADDR4_INIT_BYTES( 255, 255, 255, 0 );
 static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 ///////////////////////////////////////////////////////////////////////////////////
