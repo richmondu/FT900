@@ -4,8 +4,8 @@
 //
 // Prerequisites:
 // A. NodeJS
-//    1. npm install async –save
-//    2. npm install @azure/cosmos
+//    1. npm install async –g
+//    2. npm install @azure/cosmos -g
 //
 // To run this application:
 // 1. Get the access in key CosmosDB
@@ -23,7 +23,7 @@
 // Configure this parameters
 ////////////////////////////////////////////////////////////////////
 const endpoint = "https://ft900iotcosmos.documents.azure.com:443/";
-const masterKey = "4Vh9PYHW699tyV5O8ZBKWhpuCdDUwRxeFl8y0DX8aCxCU8OG0q4aaAKDLB8FL5BzEfR4ZV2xe5eTwIIc5fRiqA==";
+const masterKey = "9eAPFh6cZ4geusIykcyvz1Epy2y95A7e1hqSk13XFdgvEeHoUF92g5YjvJHFhC3EIVBjG0QQnFwfJ5FfsoHcbA==";
 const databaseId = "timeseriestable";
 const containerId = "mycollections";
 const timeSpan  = 1000 * 60 * 1; // 1 minute of data only
