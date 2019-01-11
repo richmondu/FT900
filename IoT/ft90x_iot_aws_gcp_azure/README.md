@@ -2,7 +2,7 @@
 
 
 This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . 
-This new project demonstrates the FT900 IoT framework:
+This new project demonstrates the FT900 IoT framework including secure cloud connectivity with AWS, GCP and Azure.
 
 ### IoT Framework
     1. Secure connectivity with IoT cloud providers: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
