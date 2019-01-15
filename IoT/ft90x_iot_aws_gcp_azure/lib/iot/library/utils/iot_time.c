@@ -38,7 +38,7 @@
  * ============================================================================
  */
 
-#include <ft900.h>
+#include <ft900.h>          // For rtc_xxx, sys_check_ft900_revB
 
 #include "tinyprintf.h"     // For tfp_printf
 #include "lwip/apps/mqtt.h" // For MQTT_TLS_PORT
@@ -61,15 +61,16 @@
 
 
 #if USE_PAYLOAD_TIMESTAMP
-static int iot_rtc_set_time(uint32_t secs)
+// Uses external RTC (for Rev A and B)
+static int iot_rtc_set_time_ext(uint32_t secs)
 {
-    /* Disable all interrupts */
+    // Disable all interrupts
     ext_rtc_disable_interrupt(ALL_INT);
 
-    /* Initialize  RTC */
+    // Initialize  RTC
     ext_rtc_init(NULL);
 
-    /* additional input for time */
+    // Additional input for time
     time_t time = secs;
     struct tm *time_tm = localtime(&time);
     DEBUG_PRINTF("secs = %u\r\n", secs);
@@ -77,6 +78,7 @@ static int iot_rtc_set_time(uint32_t secs)
         time_tm->tm_year, time_tm->tm_mon, time_tm->tm_mday,
         time_tm->tm_hour, time_tm->tm_min, time_tm->tm_sec, time_tm->tm_wday);
 
+    // Set the time to RTC
     ext_rtc_time_t time_rtc = {0};
     time_rtc.year      = (uint8_t)(time_tm->tm_year-100);
     time_rtc.month     = (uint8_t)time_tm->tm_mon+1;
@@ -87,20 +89,23 @@ static int iot_rtc_set_time(uint32_t secs)
     time_rtc.sec       = (uint8_t)time_tm->tm_sec;
     time_rtc.fmt_12_24 = HOUR_FORMAT_24;
     time_rtc.AM_PM     = AM_HOUR_FORMAT;
-    if (ext_rtc_write(time_rtc)) {
-        DEBUG_PRINTF("iot_rtc_set_time failed! ext_rtc_write\r\n");
+
+    if (ext_rtc_write(&time_rtc)) {
+        DEBUG_PRINTF("iot_rtc_set_time_ext failed! ext_rtc_write\r\n");
         return 0;
     }
 
     return 1;
 }
 
-static int iot_rtc_get_time(struct tm* time_tm)
+// Uses external RTC (for Rev A and B)
+static int iot_rtc_get_time_ext(struct tm* time_tm)
 {
     ext_rtc_time_t time;
 
+    // Get the time from RTC
     if (ext_rtc_read(&time)) {
-        DEBUG_PRINTF("iot_rtc_get_time failed! ext_rtc_read\r\n");
+        DEBUG_PRINTF("iot_rtc_get_time_ext failed! ext_rtc_read\r\n");
         return 0;
     }
 
@@ -122,14 +127,71 @@ static int iot_rtc_get_time(struct tm* time_tm)
     return 1;
 }
 
+
+// Uses internal RTC (for Rev C)
+static int iot_rtc_set_time(uint32_t secs)
+{
+    // Initialise the RTC to run indefinitely...
+    rtc_init();
+
+    // Additional input for time
+    time_t time = secs;
+    struct tm *time_tm = localtime(&time);
+    DEBUG_PRINTF("secs = %u\r\n", secs);
+    DEBUG_PRINTF("set %04d-%02d-%02d %02d:%02d:%02d %d\r\n",
+        time_tm->tm_year, time_tm->tm_mon, time_tm->tm_mday,
+        time_tm->tm_hour, time_tm->tm_min, time_tm->tm_sec, time_tm->tm_wday);
+
+    // Set the time to RTC
+    if (rtc_write(time_tm) < 0) {
+        DEBUG_PRINTF("iot_rtc_set_time failed! rtc_write\r\n");
+        return 0;
+    }
+
+    // Use auto refresh mode
+    rtc_option(rtc_option_auto_refresh, 1);
+
+    // Start the RTC...
+    rtc_start();
+
+    return 1;
+}
+
+// Uses internal RTC (for Rev C)
+static int iot_rtc_get_time(struct tm* time_tm)
+{
+    // Get the time from RTC
+    if (rtc_read(time_tm)) {
+        DEBUG_PRINTF("iot_rtc_get_time failed! rtc_read\r\n");
+        return 0;
+    }
+
+    DEBUG_PRINTF("get2 %04d-%02d-%02d %02d:%02d:%02d %d\r\n",
+        time_tm->tm_year, time_tm->tm_mon, time_tm->tm_mday,
+        time_tm->tm_hour, time_tm->tm_min, time_tm->tm_sec, time_tm->tm_wday);
+
+    return 1;
+}
+
+
 int64_t iot_utils_gettimeepoch()
 {
     int64_t time_epoch = 0;
     struct tm time_tm = {0};
 
-    if (!iot_rtc_get_time(&time_tm)) {
-        DEBUG_PRINTF("iot_rtc_get_time_epoch failed! iot_rtc_get_time\r\n");
-        return time_epoch;
+    // if 90x series is NOT rev C, use external RTC
+    // Otherwise if using rev C, use internal RTC
+    if (sys_check_ft900_revB()) {
+        if (!iot_rtc_get_time_ext(&time_tm)) {
+            DEBUG_PRINTF("iot_utils_gettimeepoch failed! iot_rtc_get_time_ext\r\n");
+            return time_epoch;
+        }
+    }
+    else {
+        if (!iot_rtc_get_time(&time_tm)) {
+            DEBUG_PRINTF("iot_utils_gettimeepoch failed! iot_rtc_get_time\r\n");
+            return time_epoch;
+        }
     }
 
     time_epoch = mktime(&time_tm);
@@ -142,10 +204,19 @@ const char* iot_utils_gettimeiso(int format)
     static char timeStampIso[24] = {0};
     struct tm time_tm = {0};
 
-
-    if (!iot_rtc_get_time(&time_tm)) {
-        DEBUG_PRINTF("iot_rtc_get_time_iso failed! iot_rtc_get_time\r\n");
-        return NULL;
+    // if 90x series is NOT rev C, use external RTC
+    // Otherwise if using rev C, use internal RTC
+    if (sys_check_ft900_revB()) {
+        if (!iot_rtc_get_time_ext(&time_tm)) {
+            DEBUG_PRINTF("iot_utils_gettimeiso failed! iot_rtc_get_time_ext\r\n");
+            return NULL;
+        }
+    }
+    else {
+        if (!iot_rtc_get_time(&time_tm)) {
+            DEBUG_PRINTF("iot_utils_gettimeiso failed! iot_rtc_get_time\r\n");
+            return NULL;
+        }
     }
 
     switch (format) {
@@ -216,18 +287,26 @@ void iot_sntp_set_system_time(uint32_t sec)
 {
 #if USE_PAYLOAD_TIMESTAMP
     if (g_timenow == 0) {
-        iot_rtc_set_time(sec);
+        // if 90x series is NOT rev C, use external RTC
+        // Otherwise if using rev C, use internal RTC
+        if (sys_check_ft900_revB()) { 
+            iot_rtc_set_time_ext(sec);
+        }
+        else {
+            iot_rtc_set_time(sec);
+        }
     }
-#endif
+#endif // USE_PAYLOAD_TIMESTAMP
 
-#if 0
+#if 0 // debug the time received
     char buf[32] = {0};
     struct tm timeinfo = {0};
     time_t temp = sec;
     localtime_r(&temp, &timeinfo);
     strftime(buf, sizeof(buf), "%m.%d.%Y %H:%M:%S", &timeinfo);
     DEBUG_PRINTF("sntp_set_system_time: %s\r\n", buf);
-#endif
+#endif // debug the time received
+
     g_timenow = sec;
 }
 
