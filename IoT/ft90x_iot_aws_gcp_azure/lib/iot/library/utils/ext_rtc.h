@@ -307,11 +307,11 @@ int8_t ext_rtc_is_interrupted(ext_rtc_interrupt_t _interrupt);
 /**
  *
  *  @brief Set the Time and Date
- *  @param t to set the real time clock
+ *  @param t pointer to set the real time clock
  *  @return RTC_OK on success or RTC_ERROR on failure
  *
  */
-rtc_result ext_rtc_write(ext_rtc_time_t time);
+rtc_result ext_rtc_write(ext_rtc_time_t* time);
 
 /**
  *

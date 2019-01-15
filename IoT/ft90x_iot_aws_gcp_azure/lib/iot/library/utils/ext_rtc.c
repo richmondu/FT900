@@ -196,7 +196,7 @@ rtc_result ext_rtc_init(register_callback cb)
 		time.date = 01;
 		time.month = 01;
 		time.year = 17;
-		ext_rtc_write(time);
+		ext_rtc_write(&time);
 		iRet = enable_oscillator();checkStatus(iRet);
 	}
 
@@ -346,21 +346,21 @@ int8_t ext_rtc_is_interrupted(ext_rtc_interrupt_t interrupt)
  *  @return RTC_OK on success or RTC_ERROR on failure
  *
  */
-rtc_result ext_rtc_write(ext_rtc_time_t time)
+rtc_result ext_rtc_write(ext_rtc_time_t* time)
 {
 	rtc_result iRet = RTC_OK;
 	uint8_t txBuffer[7] = {0};
 	uint8_t time_fmt;
 	disable_oscillator();
-	txBuffer[0] = dec2bcd(time.sec) /*| osc_st*/;
-	txBuffer[1] = dec2bcd(time.min);
-	time_fmt 	=  ((time.fmt_12_24 << MASK_HOUR_12) & HOUR_12) |\
-				   ((time.AM_PM << MASK_HOUR_AM_PM) & HOUR_AM_PM);
-	txBuffer[2] = dec2bcd(time.hour) | time_fmt;
-	txBuffer[3] = time.day;
-	txBuffer[4] = dec2bcd(time.date);
-	txBuffer[5] = dec2bcd(time.month);
-	txBuffer[6] = dec2bcd(time.year);
+	txBuffer[0] = dec2bcd(time->sec) /*| osc_st*/;
+	txBuffer[1] = dec2bcd(time->min);
+	time_fmt 	=  ((time->fmt_12_24 << MASK_HOUR_12) & HOUR_12) |\
+				   ((time->AM_PM << MASK_HOUR_AM_PM) & HOUR_AM_PM);
+	txBuffer[2] = dec2bcd(time->hour) | time_fmt;
+	txBuffer[3] = time->day;
+	txBuffer[4] = dec2bcd(time->date);
+	txBuffer[5] = dec2bcd(time->month);
+	txBuffer[6] = dec2bcd(time->year);
 	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,txBuffer,7);checkStatus(iRet);
 	enable_oscillator();
 
