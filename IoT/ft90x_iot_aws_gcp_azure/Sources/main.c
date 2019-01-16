@@ -237,6 +237,9 @@ static void iot_app_task( void *pvParameters )
         handle = iot_connect(
             iot_utils_getcertificates, iot_utils_getcredentials );
         if ( !handle ) {
+            /* make sure to replace the dummy certificates in the Certificates folder */
+            DEBUG_PRINTF( "Error! Please check your certificates and credentials.\r\n\r\n" );
+            vTaskDelay( pdMS_TO_TICKS(1000) );
             continue;
         }
 
