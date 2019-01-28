@@ -5,7 +5,7 @@ This project is an improvement of my FT900 AWS IoT demo located at https://githu
 This new project demonstrates the FT900 IoT framework including secure IoT cloud connectivity with AWS, GCP and Azure.
 
 ### IoT Framework
-    1. Secure connectivity with IoT cloud providers: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
+    1. Secure connectivity with IoT cloud providers using mbedTLS: Amazon Web Services (AWS), Google Cloud Platform (GCP) and Microsoft Azure
        The choice of cloud provider is configurable with a macro USE_MQTT_BROKER.
        User needs to update iot_config.h to configure settings corresponding to their account of their chosen cloud provider.
     2. Use of LWIP's MQTT library with ALTCP_TLS instead of MQTT library from Amazon FreeRTOS
