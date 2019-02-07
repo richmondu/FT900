@@ -39,8 +39,6 @@
 #define MQTT_CLIENT_NAME          USE_DEVICE_ID
 
 // Microsoft IoT support 2 authentication types: SASToken and X509Certificates
-#define AUTH_TYPE_SASTOKEN        0
-#define AUTH_TYPE_X509CERT        1
 #if (USE_MQTT_DEVICE == SAMPLE_DEVICE_1)
 	// We have set our sample device1 to use SAS Token authentication
 	#define MAZ_AUTH_TYPE         AUTH_TYPE_SASTOKEN
