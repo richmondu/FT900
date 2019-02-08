@@ -42,6 +42,7 @@ var searchData=
   ['netbios_5fname_5fhdr',['netbios_name_hdr',['../structnetbios__name__hdr.html',1,'']]],
   ['netbios_5fname_5flen',['NETBIOS_NAME_LEN',['../netbiosns_8c.html#a4b83658c5bbb9ac90aca4351086a9a00',1,'netbiosns.c']]],
   ['netbios_5fname_5fttl',['NETBIOS_NAME_TTL',['../netbiosns_8c.html#a35d43ea3290f6412e45598b610f03cf1',1,'netbiosns.c']]],
+  ['netbios_5fquestion_5fhdr',['netbios_question_hdr',['../structnetbios__question__hdr.html',1,'']]],
   ['netbios_5fresp',['netbios_resp',['../structnetbios__resp.html',1,'']]],
   ['netbios_20responder',['NETBIOS responder',['../group__netbiosns.html',1,'']]],
   ['netbiosns_2ec',['netbiosns.c',['../netbiosns_8c.html',1,'']]],

@@ -1,6 +1,7 @@
 var netbiosns_8c =
 [
     [ "netbios_hdr", "structnetbios__hdr.html", null ],
+    [ "netbios_question_hdr", "structnetbios__question__hdr.html", null ],
     [ "netbios_name_hdr", "structnetbios__name__hdr.html", null ],
     [ "netbios_resp", "structnetbios__resp.html", null ],
     [ "netbios_answer", "structnetbios__answer.html", "structnetbios__answer" ],

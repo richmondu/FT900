@@ -6,6 +6,7 @@ var searchData=
   ['netbios_5fanswer',['netbios_answer',['../structnetbios__answer.html',1,'']]],
   ['netbios_5fhdr',['netbios_hdr',['../structnetbios__hdr.html',1,'']]],
   ['netbios_5fname_5fhdr',['netbios_name_hdr',['../structnetbios__name__hdr.html',1,'']]],
+  ['netbios_5fquestion_5fhdr',['netbios_question_hdr',['../structnetbios__question__hdr.html',1,'']]],
   ['netbios_5fresp',['netbios_resp',['../structnetbios__resp.html',1,'']]],
   ['netbuf',['netbuf',['../structnetbuf.html',1,'']]],
   ['netconn',['netconn',['../structnetconn.html',1,'']]],
