@@ -93,10 +93,29 @@
 
 /* These are used in porting code (Source\portable). */
 #define configTICK_RATE_HZ                          ((TickType_t)1000)
+/* To calculate the absolute maximum size of configTOTAL_HEAP_SIZE:
+ * - Undefine the macro configSTATIC_STORAGE and compile project.
+ * - Examine compiler output. Typical output will be as follows:
+ *         ft32-elf-size --format=berkeley -x "project.elf"
+           text    data   bss     dec     hex   filename
+           0xTTTTT 0xDDDD 0xBBBB  dddddd  hhhhh AzureTest.elf
+ * - Fill in values for "data" and "bss" in the definition of configSTATIC_STORAGE.
+ *   FT900: #define configSTATIC_STORAGE ((size_t)(0xDDDD + 0xBBBB))
+ * - Define configSTATIC_STORAGE and recompile project.
+ * This will need to be redone should any changes be made to the global or
+ * static variables in the project.
+ */
+//#define configSTATIC_STORAGE                        ((size_t)(0xDDDD + 0xBBBB))
+#if !defined(configSTATIC_STORAGE)
 #if defined(__FT900__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(46 * 1024))
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))
+#endif
+#elif defined(__FT900__)
+#define configTOTAL_HEAP_SIZE                       ((size_t)(0x10000 - 0x10 - configSTATIC_STORAGE))
+#elif defined(__FT930__)
+#define configTOTAL_HEAP_SIZE                       ((size_t)(0x8000 - 0x10 - configSTATIC_STORAGE))
 #endif
 #define configUSE_MALLOC_FAILED_HOOK                1
 
