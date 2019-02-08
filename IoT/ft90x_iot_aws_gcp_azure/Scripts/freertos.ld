@@ -34,7 +34,7 @@ SECTIONS
     *(.dtors)
     ___dtors_end = . ;
   } > ram
-  .data	  : AT (ADDR (.text) + SIZEOF (.text) )
+  .data	  :
   {
   	. = ALIGN(4);
     __data = .;
@@ -43,7 +43,7 @@ SECTIONS
 	*(.rodata)
     *(.rodata*)
      _edata = . ;
-  }  > ram
+  }  > ram AT>flash
   . = ALIGN(4);
   .bss  SIZEOF(.data) + ADDR(.data) (NOLOAD) :
   {
