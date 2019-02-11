@@ -74,6 +74,7 @@ void *sys_mem_calloc(mem_size_t count, mem_size_t size);
 #define SYS_MBOX_NULL (NULL)
 #define SYS_SEM_NULL (NULL)
 
+// Disable due to compile warnings
 //typedef void * sys_sem_t;
 //typedef void * sys_mbox_t;
 typedef void * sys_thread_t;

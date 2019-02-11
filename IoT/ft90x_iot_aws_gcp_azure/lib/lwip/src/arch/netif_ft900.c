@@ -59,7 +59,7 @@
  * The callback will be performed at IRQ level.
  */
 #ifndef FT9XX_PACKET_CALLBACK
-#define FT9XX_PACKET_CALLBACK 0
+#define FT9XX_PACKET_CALLBACK 1
 #endif // FT9XX_PACKET_CALLBACK
 
 /** @brief Use safe write to Ethernet FIFO for Rev B devices.
@@ -98,12 +98,12 @@ extern u32_t millis(void);
 static struct ifstats  arch_ft900_stats = {0};
 
 #if FT9XX_REV_B_SAFEWRITE
-static uint8_t revB = 0;
+static uint8_t revB;
 #endif // FT9XX_REV_B_SAFEWRITE
 
 /* Reserve space to receive up to 2 packets at a time from the Ethernet interface.
  */
-static uint8_t netif_rx_data[2 * FT900_MAX_PACKET] = {0xff};
+static uint8_t netif_rx_data[2 * FT900_MAX_PACKET];
 
 static void arch_ft900_ethernet_ISR(void);
 
