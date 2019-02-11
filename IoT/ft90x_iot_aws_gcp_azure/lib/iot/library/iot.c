@@ -100,16 +100,18 @@ static inline err_t mqtt_connect_async(
 
 
     /* Get IP address given host name */
+    int trials = 0;
     do {
         host = gethostbyname( broker );
         if (host == NULL) {
             DEBUG_PRINTF( "gethostbyname failed\r\n" );
             vTaskDelay( pdMS_TO_TICKS(1000) );
+            trials++;
             continue;
         }
         break;
     }
-    while ( net_is_ready() );
+    while ( net_is_ready() && trials < 5 );
 
     /* copy the network address to sockaddr_in structure */
     if ( (host->h_addrtype == AF_INET) && (host->h_length == sizeof(ip_addr_t)) ) {
