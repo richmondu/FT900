@@ -2,13 +2,23 @@
 #define AVS_CONFIG_H
 
 
-#define AVS_SERVER_ADDR           PP_HTONL(LWIP_MAKEU32(192, 168, 22, 6))
-#define AVS_SERVER_PORT           11234
 
-#define AVS_SAMPLING_RATE         SAMPLING_RATE_44100HZ
-
-#define AVS_RXTX_BUFFER_SIZE      (1460*2)
-#define AVS_AUDIO_BUFFER_SIZE     (2048)
+///////////////////////////////////////////////////////////////////////////////////
+// Set your server IP address
+///////////////////////////////////////////////////////////////////////////////////
+#define AVS_CONFIG_SERVER_ADDR      PP_HTONL(LWIP_MAKEU32(192, 168, 22, 6))
 
 
+///////////////////////////////////////////////////////////////////////////////////
+// Choose your sampling rate
+//   SAMPLING_RATE_44100HZ
+//   SAMPLING_RATE_48KHZ
+//   SAMPLING_RATE_32KHZ
+//   SAMPLING_RATE_8KHZ
+///////////////////////////////////////////////////////////////////////////////////
+#define AVS_CONFIG_SAMPLING_RATE    SAMPLING_RATE_48KHZ
+
+
+
+#include <avs/avs_config_defaults.h>
 #endif // AVS_CONFIG_H
