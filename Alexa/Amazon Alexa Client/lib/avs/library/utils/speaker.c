@@ -74,26 +74,26 @@ static reg_t i2c_data[] =
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x00 << 1|1, 0x80},
+    {0x00 << 1, 0x79},
 
     /* 0x0 Right Line In -
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
-
     */
-    //{0x01 << 1|1, 0x80},
+    {0x01 << 1, 0x79},
+
 
     /* 0x2 Left Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : LZCEN       - Left Channel Zero Cross detect 1 = Enable
     */
-    {0x02 << 1|1, 0x79},
+    {0x02 << 1, 0x79},
 
     /* 0x2 Right Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : RZCEN       - Right Channel Zero Cross detect 1 = Enable
-  */
-    //{0x03 << 1|1, 0x79},
+    */
+    {0x03 << 1, 0x79},
 
 
     /* 0x4 Analogue Audio Path Control -
@@ -105,7 +105,7 @@ static reg_t i2c_data[] =
        bit 5 = 0 : SIDETONE     - 0 = Disable Side Tone Attenuation
        bit 6 = 0 : SIDEATT[1:0] - Ignored
     */
-    {0x04 << 1, 0x12},
+    {0x04 << 1, 0xD0},
 
     /* 0x5 Digital Audio Path Control -
        bit 0   = 0  : ADCHPD     - 0 = Enable High Pass Filter
@@ -113,7 +113,7 @@ static reg_t i2c_data[] =
        bit 3   = 0  : DACMU      - 0 = Disable Soft Mute
        bit 4   = 0  : HPOR       - 0 = Clear Offset
     */
-    {0x05 << 1, 0x14},
+    {0x05 << 1, 0x06},
 
     /* 0x6 Power Down Control -
        bit 0 = 1 : LINEINPD - 1 = Enable Power Down
@@ -125,7 +125,7 @@ static reg_t i2c_data[] =
        bit 6 = 1 : CLKOUTPD - 1 = Enable Power Down
        bit 7 = 0 : POWEROFF - 0 = Disable POWEROFF
     */
-    {0x06 << 1, 0x47},
+    {0x06 << 1, 0},
 
     /* 0x7 Digital Audio Interface Format -
        bit 1:0 = 10 : FORMAT[1:0] - 10 = I2S
@@ -148,7 +148,7 @@ static reg_t i2c_data[] =
        bit 6   = 0    : CLKIDIV2   - 0 = Not applicable
        bit 7   = 0    : CLKODIV2   - 0 = CLOCKOUT is Core
     */
-    {0x08 << 1, 0x20},
+    {0x08 << 1, 0x0},
 
     /* 0x9 Active Control -
        bit 0 = 1 : ACTIVE - 1 = Active
@@ -176,16 +176,16 @@ static void speaker_config(int samplingRate)
         if (i2c_data[i].addr == 0x08 << 1) {
             switch (samplingRate) {
                 case SAMPLING_RATE_44100HZ:
-                    i2c_data[i].data = 0x20;
+                    i2c_data[i].data = 0x22;
                     break;
                 case SAMPLING_RATE_48KHZ:
-                    i2c_data[i].data = 0x0;
+                    i2c_data[i].data = 0x2;
                     break;
                 case SAMPLING_RATE_32KHZ:
                     i2c_data[i].data = 0x18;
                     break;
                 case SAMPLING_RATE_8KHZ:
-                    i2c_data[i].data = 0xC;
+                    i2c_data[i].data = 0x8;
                     break;
                 default:
                     // use existing value
@@ -221,7 +221,7 @@ static void speaker_initi2s(int samplingRate)
         i2s_init(i2s_mode_master,
                  i2s_length_16,
                  i2s_format_i2s,
-                 i2s_padding_16,
+                 i2s_padding_0,
                  i2s_master_input_clk_22mhz,
                  i2s_bclk_div_8,
                  i2s_mclk_div_2,
