@@ -276,7 +276,7 @@ void vTaskAlexa(void *pvParameters)
             DEBUG_PRINTF(".");
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
-        DEBUG_PRINTF("\r\n");
+        DEBUG_PRINTF("\r\n\r\n");
     }
 
     avsFree();

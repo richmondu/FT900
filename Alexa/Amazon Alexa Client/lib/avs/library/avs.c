@@ -74,7 +74,7 @@ static char* g_pcAudioBuffer = NULL;
 void avsInit()
 {
     // Initialize speaker
-    speaker_setup(NULL, AVS_SAMPLING_RATE);
+    speaker_setup(NULL, AVS_CONFIG_SAMPLING_RATE);
     DEBUG_PRINTF("Speaker initialize.\r\n\r\n");
 
     // Initialize SD card
@@ -82,8 +82,8 @@ void avsInit()
     DEBUG_PRINTF("SDCard initialize.\r\n\r\n");
 
     // Pre-allocate the buffers now for faster communication
-    g_pcTxRxBuffer = pvPortMalloc(AVS_RXTX_BUFFER_SIZE);
-    g_pcAudioBuffer = pvPortMalloc(AVS_AUDIO_BUFFER_SIZE);
+    g_pcTxRxBuffer = pvPortMalloc(AVS_CONFIG_RXTX_BUFFER_SIZE);
+    g_pcAudioBuffer = pvPortMalloc(AVS_CONFIG_AUDIO_BUFFER_SIZE);
     if (!g_pcTxRxBuffer || !g_pcAudioBuffer) {
         DEBUG_PRINTF("pvPortMalloc failed %p %p\n", g_pcTxRxBuffer, g_pcAudioBuffer);
         return;
@@ -111,13 +111,13 @@ void avsFree()
 
 int avsGetServerPort()
 {
-    return AVS_SERVER_PORT;
+    return AVS_CONFIG_SERVER_PORT;
 }
 
 const ip_addr_t* avsGetServerAddress()
 {
     static struct sockaddr_in tServer;
-    tServer.sin_addr.s_addr = AVS_SERVER_ADDR;
+    tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
     return (ip_addr_t*)&tServer.sin_addr;
 }
 
@@ -130,8 +130,8 @@ int avsConnect()
 
     // Set server info
     tServer.sin_family = AF_INET;
-    tServer.sin_port = htons(AVS_SERVER_PORT);
-    tServer.sin_addr.s_addr = AVS_SERVER_ADDR;
+    tServer.sin_port = htons(AVS_CONFIG_SERVER_PORT);
+    tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
 
     // Create a TCP socket
     if ((lSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -165,7 +165,7 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
     uint32_t ulBytesToTransfer = 0;
-    uint32_t ulBytesToProcess = AVS_RXTX_BUFFER_SIZE/2;
+    uint32_t ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
     uint32_t ulBytesSent = 0;
     struct timeval tTimeout = {10, 0}; // 10 second timeout
 
@@ -186,6 +186,7 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesToTransfer);
     ulBytesToTransfer /= 2;
 
+
     // Set a 10-second timeout for the operation
     setsockopt(lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
@@ -196,11 +197,22 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
         sdcard_close(&fHandle);
         return 0;
     }
+
+    // Send the flag for configurations
+    // Currently the flag is only for specifying the sampling rate of the response
+    uint32_t ulFlag = AVS_CONFIG_SAMPLING_RATE;
+    iRet = send(lSocket, (char*)&ulFlag, sizeof(ulFlag), 0);
+    if (iRet != sizeof(ulFlag)) {
+        DEBUG_PRINTF("avsSendAlexaRequest send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
+        sdcard_close(&fHandle);
+        return 0;
+    }
+
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
 
 
     // Send the total bytes in segments of buffer size
-    ulBytesToProcess = AVS_RXTX_BUFFER_SIZE/2;
+    ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
     ulBytesSent = 0;
     while (ulBytesSent != ulBytesToTransfer) {
         // Compute the transfer size
@@ -248,7 +260,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
     FIL fHandle;
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
-    char acTemp[AVS_RXTX_BUFFER_SIZE/2];
+    char acTemp[AVS_CONFIG_RXTX_BUFFER_SIZE/2];
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
     uint32_t ulBytesToProcess = sizeof(acTemp);
@@ -335,7 +347,7 @@ int avsPlayAlexaResponse(const char* pcFileName)
     uint32_t ulReadSize = 0;
     uint32_t ulTransferSize = 0;
     char* pcData = g_pcAudioBuffer;
-    char acTemp[AVS_AUDIO_BUFFER_SIZE/2];
+    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE/2];
 
 
     // Open file given complete file path in SD card
@@ -396,11 +408,11 @@ int avsPlayAlexaResponse(const char* pcFileName)
                 // Play buffer to speaker
                 speaker_play(pcData, ulTransferSize*2);
 
-                // Clear interrupt flag
-                i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
-
                 // Increment offset
                 ulFileOffset += ulTransferSize;
+
+                // Clear interrupt flag
+                i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
             }
         }
     } while (ulFileOffset != ulFileSize);
