@@ -71,6 +71,24 @@ static char* g_pcAudioBuffer = NULL;
 
 
 
+static const char* getConfigSamplingRateStr()
+{
+    if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_44100HZ) {
+        return "44.1KHz";
+    }
+    else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_48KHZ) {
+        return "48KHz";
+    }
+    else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_32KHZ) {
+        return "32KHz";
+    }
+    else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_8KHZ) {
+        return "8KHz";
+    }
+
+    return "Unknown";
+}
+
 void avsInit()
 {
     // Initialize speaker
@@ -363,7 +381,7 @@ int avsPlayAlexaResponse(const char* pcFileName)
         sdcard_close(&fHandle);
         return 0;
     }
-    DEBUG_PRINTF(">> %s %d bytes (16-bit, 44.1KHz, mono)\r\n", pcFileName, (int)ulFileSize);
+    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n", pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
 
     do {
         // Process transfer if the speaker FIFO is empty
