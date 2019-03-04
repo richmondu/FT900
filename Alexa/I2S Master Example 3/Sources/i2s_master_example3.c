@@ -62,7 +62,7 @@
 // Raw audio file to use
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define USE_SAMPLING_RATE SAMPLING_RATE_44100HZ
+#define USE_SAMPLING_RATE SAMPLING_RATE_8KHZ
 
 #if (USE_SAMPLING_RATE == SAMPLING_RATE_44100HZ)
 extern __flash__ uint8_t raw_audio[]        asm("response_44100_raw");

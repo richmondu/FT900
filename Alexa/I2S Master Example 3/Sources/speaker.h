@@ -9,6 +9,9 @@
 
 void speaker_setup(void (*speaker_isr)(void), int samplingRate);
 void speaker_play(char* data, int size);
+void speaker_begin();
+void speaker_end();
+int  speaker_ready();
 
 
 #endif // SPEAKER_H
