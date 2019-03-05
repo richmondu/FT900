@@ -106,10 +106,11 @@ extern __flash__ uint8_t raw_audio_end[]    asm("response_8k_raw_end");
 // Global variables
 ////////////////////////////////////////////////////////////////////////////////////////
 
-int g_len = 0;
-char* g_data = NULL;
-int g_offset = 0;
-int g_start = 0;
+static int g_len = 0;
+static char* g_data = NULL;
+static int g_offset = 0;
+static int g_start = 0;
+
 
 
 /** tfp_printf putc
