@@ -1,5 +1,5 @@
 /**
-  @file speaker.c
+  @file audio.c
   @brief
   Speaker module
 
@@ -302,7 +302,7 @@ void audio_setup(void (*audio_isr)(void), int samplingRate)
         i2s_clear_int_flag(0xFFFF);
         interrupt_attach(interrupt_i2s, (uint8_t)interrupt_i2s, audio_isr);
         i2s_enable_int(MASK_I2S_IE_FIFO_TX_EMPTY | MASK_I2S_IE_FIFO_TX_HALF_FULL);
-        i2s_enable_int(MASK_I2S_IE_FIFO_RX_EMPTY | MASK_I2S_IE_FIFO_RX_HALF_FULL);
+        i2s_enable_int(MASK_I2S_IE_FIFO_RX_FULL | MASK_I2S_IE_FIFO_RX_HALF_FULL);
 
         /* Start streaming audio */
         i2s_start_tx();
@@ -310,6 +310,7 @@ void audio_setup(void (*audio_isr)(void), int samplingRate)
         interrupt_enable_globally();
     }
 }
+
 
 
 void audio_speaker_begin()
@@ -330,14 +331,12 @@ int audio_speaker_ready()
 
 void audio_speaker_clear()
 {
-	i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
+    i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
 }
 
 void audio_play(char* data, int size)
 {
-    if (size) {
-        i2s_write((uint8_t*)data, size);
-    }
+    i2s_write((uint8_t*)data, size);
 }
 
 
@@ -355,7 +354,12 @@ void audio_mic_end()
 int audio_mic_ready()
 {
     uint16_t uwFlag = i2s_get_status();
-    return uwFlag & MASK_I2S_PEND_FIFO_RX_EMPTY;
+    return uwFlag & MASK_I2S_PEND_FIFO_RX_FULL;
+}
+
+void audio_mic_clear()
+{
+    i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_FULL);
 }
 
 void audio_record(char* data, int size)

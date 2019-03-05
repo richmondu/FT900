@@ -21,6 +21,7 @@ void audio_play(char* data, int size);
 void audio_mic_begin();
 void audio_mic_end();
 int  audio_mic_ready();
+void audio_mic_clear();
 void audio_record(char* data, int size);
 
 
