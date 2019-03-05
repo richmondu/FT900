@@ -8,6 +8,7 @@ void avsFree();
 int  avsConnect();
 void avsDisconnect(int lSocket);
 
+int  avsRecordAlexaRequest(const char* pcFileName);
 int  avsSendAlexaRequest(int lSocket, const char* pcFileName);
 int  avsRecvAlexaResponse(int lSocket, const char* pcFileName);
 int  avsPlayAlexaResponse(const char* fileName);

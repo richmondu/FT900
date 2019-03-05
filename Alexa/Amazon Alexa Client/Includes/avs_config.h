@@ -16,7 +16,7 @@
 //   SAMPLING_RATE_32KHZ
 //   SAMPLING_RATE_8KHZ
 ///////////////////////////////////////////////////////////////////////////////////
-#define AVS_CONFIG_SAMPLING_RATE    SAMPLING_RATE_8KHZ
+#define AVS_CONFIG_SAMPLING_RATE    SAMPLING_RATE_32KHZ
 
 
 

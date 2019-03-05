@@ -51,7 +51,7 @@
 
 #include "avs/avs.h"       // AVS library
 #include "avs_config.h"    // AVS configuration
-#include "utils/speaker.h" // Speaker utility
+#include "utils/audio.h"   // Audio utility
 #include "utils/sdcard.h"  // SD card utility
 #include "utils/ulaw.h"    // Audio compression/expansion utility
 
@@ -92,7 +92,7 @@ static const char* getConfigSamplingRateStr()
 void avsInit()
 {
     // Initialize speaker
-    speaker_setup(NULL, AVS_CONFIG_SAMPLING_RATE);
+    audio_setup(NULL, AVS_CONFIG_SAMPLING_RATE);
     DEBUG_PRINTF("Speaker initialize.\r\n\r\n");
 
     // Initialize SD card
@@ -107,14 +107,16 @@ void avsInit()
         return;
     }
 
-    // Start the I2S audio data streaming
-    speaker_begin();
+    // Start speaker and microphone
+    audio_speaker_begin();
+    audio_mic_begin();
 }
 
 void avsFree()
 {
-    // Stop the I2S audio data streaming
-    speaker_end();
+    // Stop speaker and microphone
+    audio_mic_end();
+	audio_speaker_end();
 
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
@@ -385,7 +387,7 @@ int avsPlayAlexaResponse(const char* pcFileName)
 
     do {
         // Process transfer if the speaker FIFO is empty
-        if (speaker_ready()) {
+        if (audio_speaker_ready()) {
 
             // Compute size to transfer
             ulTransferSize = sizeof(acTemp);
@@ -424,13 +426,13 @@ int avsPlayAlexaResponse(const char* pcFileName)
                 }
 
                 // Play buffer to speaker
-                speaker_play(pcData, ulTransferSize*2);
+                audio_play(pcData, ulTransferSize*2);
 
                 // Increment offset
                 ulFileOffset += ulTransferSize;
 
                 // Clear interrupt flag
-                i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
+                audio_speaker_clear();
             }
         }
     } while (ulFileOffset != ulFileSize);
@@ -443,5 +445,13 @@ int avsPlayAlexaResponse(const char* pcFileName)
     return 1;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Record audio file from microphone and save to SD card given the complete file path
+/////////////////////////////////////////////////////////////////////////////////////////////
+int avsRecordAlexaRequest(const char* pcFileName)
+{
+    return 1;
+}
 
 
