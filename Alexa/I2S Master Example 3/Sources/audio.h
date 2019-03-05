@@ -10,7 +10,7 @@
 #define AUDIO_FIFO_SIZE       (2048) // I2SM TX FIFO can hold up to a max of 2048 bytes
 
 
-void audio_setup(void (*speaker_isr)(void), int samplingRate);
+void audio_setup(void (*audio_isr)(void), int sampling_rate);
 
 void audio_speaker_begin();
 void audio_speaker_end();
@@ -21,6 +21,7 @@ void audio_play(char* data, int size);
 void audio_mic_begin();
 void audio_mic_end();
 int  audio_mic_ready();
+void audio_record(char* data, int size);
 
 
 #endif // AUDIO_H
