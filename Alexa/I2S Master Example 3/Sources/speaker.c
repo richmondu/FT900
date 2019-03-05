@@ -315,7 +315,7 @@ void speaker_begin()
 
 void speaker_end()
 {
-	i2s_stop_tx();
+    i2s_stop_tx();
 }
 
 int speaker_ready()

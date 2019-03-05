@@ -114,7 +114,7 @@ void avsInit()
 void avsFree()
 {
     // Stop the I2S audio data streaming
-	speaker_end();
+    speaker_end();
 
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
