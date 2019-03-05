@@ -362,6 +362,17 @@ void audio_mic_clear()
     i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_FULL);
 }
 
+int audio_mic_ready2()
+{
+    uint16_t uwFlag = i2s_get_status();
+    return uwFlag & MASK_I2S_PEND_FIFO_RX_HALF_FULL;
+}
+
+void audio_mic_clear2()
+{
+    i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_HALF_FULL);
+}
+
 void audio_record(char* data, int size)
 {
     i2s_read((uint8_t*)data, size);

@@ -449,8 +449,115 @@ int avsPlayAlexaResponse(const char* pcFileName)
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Record audio file from microphone and save to SD card given the complete file path
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avsRecordAlexaRequest(const char* pcFileName)
+
+#define CONVERT_STEREO_TO_MONO 0
+
+int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void))
 {
+    FIL fHandle;
+    uint32_t ulRecordSize = 0;
+    char* pcData = g_pcAudioBuffer;
+#if CONVERT_STEREO_TO_MONO
+    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE/2];
+#endif // CONVERT_STEREO_TO_MONO
+
+
+    // Open file given complete file path in SD card
+    if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
+        DEBUG_PRINTF("avsRecordAlexaRequest sdcard_open failed!\r\n");
+        return 0;
+    }
+
+    // Record microphone input to SD card while callback function returns true
+    // Microphone input is 16-bit stereo
+    do {
+        // Process transfer if the mic is full
+        if (audio_mic_ready()) {
+
+            ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE;
+
+            // copy data from microphone
+            audio_record(pcData, ulRecordSize);
+
+#if CONVERT_STEREO_TO_MONO
+            // convert stereo to mono
+            for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
+                acTemp[i] = pcData[j];
+                acTemp[i+1] = pcData[j+1];
+                // ignore pcData[j+2];
+                // ignore pcData[j+3];
+            }
+            ulRecordSize /= 2;
+
+            // write mic data to SD card
+            uint32_t ulWriteSize = 0;
+            sdcard_write(&fHandle, acTemp, ulRecordSize, (UINT*)&ulWriteSize);
+            if (ulRecordSize != ulWriteSize) {
+                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
+                audio_mic_clear();
+                break;
+            }
+#else // CONVERT_STEREO_TO_MONO
+            // write mic data to SD card
+            uint32_t ulWriteSize = 0;
+            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
+            if (ulRecordSize != ulWriteSize) {
+                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
+                audio_mic_clear();
+                break;
+            }
+#endif // CONVERT_STEREO_TO_MONO
+
+            // Clear interrupt flag
+            audio_mic_clear();
+        }
+
+        // Process transfer if the mic is half full
+        else if (audio_mic_ready2()) {
+
+            ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE/2;
+
+            // copy data from microphone
+            audio_record(pcData, ulRecordSize);
+
+#if CONVERT_STEREO_TO_MONO
+            // convert stereo to mono
+            for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
+                acTemp[i] = pcData[j];
+                acTemp[i+1] = pcData[j+1];
+                // ignore pcData[j+2];
+                // ignore pcData[j+3];
+            }
+            ulRecordSize /= 2;
+
+            // write mic data to SD card
+            uint32_t ulWriteSize = 0;
+            sdcard_write(&fHandle, acTemp, ulRecordSize, (UINT*)&ulWriteSize);
+            if (ulRecordSize != ulWriteSize) {
+                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
+                audio_mic_clear2();
+                break;
+            }
+#else // CONVERT_STEREO_TO_MONO
+            // write mic data to SD card
+            uint32_t ulWriteSize = 0;
+            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
+            if (ulRecordSize != ulWriteSize) {
+                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed2! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
+                audio_mic_clear2();
+                break;
+            }
+#endif // CONVERT_STEREO_TO_MONO
+
+            // Clear interrupt flag
+            audio_mic_clear2();
+        }
+    } while ((*fxnCallbackRecord)());
+
+
+    // Close the file
+    sdcard_close(&fHandle);
+
     return 1;
 }
 
