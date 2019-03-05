@@ -47,7 +47,8 @@
 #include <stdint.h>
 #include <ft900.h>
 #include "tinyprintf.h"
-#include "speaker.h"
+
+#include "audio.h"
 
 
 
@@ -168,7 +169,7 @@ static const char* I2C_statusbits[] = {
 };
 
 
-static void speaker_config(int samplingRate)
+static void audio_config(int samplingRate)
 {
     /* Set up the WM8731 ... */
     for (int i = 0; i < (sizeof(i2c_data)/sizeof(reg_t)); ++i) {
@@ -213,10 +214,9 @@ static void speaker_config(int samplingRate)
     delayms(100);
 }
 
-static void speaker_initi2s(int samplingRate)
+static void audio_initi2s(int samplingRate)
 {
     /* Refer to Table 15.1 and 15.2 for FT900 User Manual  */
-    // Only the 44100Hz sounds acceptable
     if (samplingRate == SAMPLING_RATE_44100HZ) {
         i2s_init(i2s_mode_master,
                  i2s_length_16,
@@ -258,12 +258,12 @@ static void speaker_initi2s(int samplingRate)
                  i2s_master_input_clk_24mhz,
                  i2s_bclk_div_48,
                  i2s_mclk_div_12,
-                 i2s_bclk_per_channel_32
+                 i2s_bclk_per_channel_32 // must be 16 for microphone
                  );
     }
 }
 
-void speaker_setup(void (*speaker_isr)(void), int samplingRate)
+void audio_setup(void (*audio_isr)(void), int samplingRate)
 {
     /* EVM: Bring the output amplifiers out of Power Down ... */
     gpio_dir(65, pad_dir_output);
@@ -280,7 +280,7 @@ void speaker_setup(void (*speaker_isr)(void), int samplingRate)
     gpio_function(66, pad_i2s_clk24); gpio_pull(66, pad_pull_none); /* I2S CLK24 */
 
     /* Initialize I2S master  */
-    speaker_initi2s(samplingRate);
+    audio_initi2s(samplingRate);
 
     /* Set up the I2C peripheral ... */
     sys_enable(sys_device_i2c_master);
@@ -294,39 +294,72 @@ void speaker_setup(void (*speaker_isr)(void), int samplingRate)
     i2cm_init(I2CM_NORMAL_SPEED, 100000);
 
     /* Set up the WM8731 ... */
-    speaker_config(samplingRate);
+    audio_config(samplingRate);
 
-    if (speaker_isr) {
+    if (audio_isr) {
+
         /* Set up the ISR for the I2S device... */
         i2s_clear_int_flag(0xFFFF);
-        interrupt_attach(interrupt_i2s, (uint8_t)interrupt_i2s, speaker_isr);
+        interrupt_attach(interrupt_i2s, (uint8_t)interrupt_i2s, audio_isr);
         i2s_enable_int(MASK_I2S_IE_FIFO_TX_EMPTY | MASK_I2S_IE_FIFO_TX_HALF_FULL);
+        i2s_enable_int(MASK_I2S_IE_FIFO_RX_EMPTY | MASK_I2S_IE_FIFO_RX_HALF_FULL);
 
         /* Start streaming audio */
         i2s_start_tx();
+        i2s_start_rx();
         interrupt_enable_globally();
     }
 }
 
-void speaker_begin()
+
+void audio_speaker_begin()
 {
     i2s_start_tx();
 }
 
-void speaker_end()
+void audio_speaker_end()
 {
     i2s_stop_tx();
 }
 
-int speaker_ready()
+int audio_speaker_ready()
 {
     uint16_t uwFlag = i2s_get_status();
     return uwFlag & MASK_I2S_PEND_FIFO_TX_EMPTY;
 }
 
-void speaker_play(char* data, int size)
+void audio_speaker_clear()
+{
+	i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
+}
+
+void audio_play(char* data, int size)
 {
     if (size) {
         i2s_write((uint8_t*)data, size);
     }
 }
+
+
+
+void audio_mic_begin()
+{
+    i2s_start_rx();
+}
+
+void audio_mic_end()
+{
+    i2s_stop_rx();
+}
+
+int audio_mic_ready()
+{
+    uint16_t uwFlag = i2s_get_status();
+    return uwFlag & MASK_I2S_PEND_FIFO_RX_EMPTY;
+}
+
+void audio_record(char* data, int size)
+{
+    i2s_read((uint8_t*)data, size);
+}
+

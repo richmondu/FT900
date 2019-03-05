@@ -53,8 +53,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Speaker Headers. */
-#include "speaker.h"
+/* Audio Headers. */
+#include "audio.h"
 
 
 
@@ -96,8 +96,6 @@ extern __flash__ uint8_t raw_audio_end[]    asm("response_8k_raw_end");
 ////////////////////////////////////////////////////////////////////////////////////////
 // Macro definitions
 ////////////////////////////////////////////////////////////////////////////////////////
-
-#define SPEAKER_FIFO_SIZE        (2048)          // I2SM TX FIFO can hold up to a max of 2048 bytes
 
 #define TASK_STACK_SIZE          (500)           //Task Stack Size
 #define TASK_PRIORITY            (1)             //Task Priority
@@ -174,12 +172,12 @@ void play_audio_isr(void)
     }
 
     if (g_offset < 0) {
-        if (i2s_is_interrupted(MASK_I2S_PEND_FIFO_TX_EMPTY)) {
+        if (audio_speaker_ready()) {
             // Silence mode
-            char temp[SPEAKER_FIFO_SIZE] = {0};
-            speaker_play(temp, SPEAKER_FIFO_SIZE);
+            char temp[AUDIO_FIFO_SIZE] = {0};
+            audio_play(temp, AUDIO_FIFO_SIZE);
             g_offset++;
-            i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
+            audio_speaker_clear();
         }
         return;
     }
@@ -187,16 +185,16 @@ void play_audio_isr(void)
     //DEBUG_PRINTF("play_audio %d\r\n", g_offset);
 
     /* If the FIFO is empty... */
-    if (i2s_is_interrupted(MASK_I2S_PEND_FIFO_TX_EMPTY))
+    if (audio_speaker_ready())
     {
         // Compute size to transfer
-        int size = SPEAKER_FIFO_SIZE/2;
+        int size = AUDIO_FIFO_SIZE/2;
         if (g_len - g_offset < size) {
             size = g_len - g_offset;
         }
 
         // Copy audio data to buffer
-        char temp[SPEAKER_FIFO_SIZE/2];
+        char temp[AUDIO_FIFO_SIZE/2];
         memcpy_pm2dat(temp, raw_audio + g_offset, size);
 
         // Duplicate short for stereo 2 channel
@@ -208,45 +206,13 @@ void play_audio_isr(void)
         }
 
         // Play buffer to speaker
-        speaker_play(g_data, size*2);
+        audio_play(g_data, size*2);
 
         // Increment offset
         g_offset += size;
 
-        i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
+        audio_speaker_clear();
     }
-
-#if 0
-    /* If the FIFO is half full ... */
-    else if (i2s_is_interrupted(MASK_I2S_PEND_FIFO_TX_HALF_FULL))
-    {
-        // Compute size to transfer
-        int size = SPEAKER_FIFO_SIZE/4;
-        if (g_len - g_offset < size) {
-            size = g_len - g_offset;
-        }
-
-        // Copy audio data to buffer
-        char temp[SPEAKER_FIFO_SIZE/4];
-        memcpy_pm2dat(temp, raw_audio + g_offset, size);
-
-        // Duplicate short for stereo 2 channel
-        for (int i=0, j=0; i<size; i+=2, j+=4) {
-            g_data[j]   = temp[i];
-            g_data[j+1] = temp[i+1];
-            g_data[j+2] = temp[i];
-            g_data[j+3] = temp[i+1];
-        }
-
-        // Play buffer to speaker
-        speaker_play(g_data, size*2);
-
-        // Increment offset
-        g_offset += size;
-
-        i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY);
-    }
-#endif
 
     // Restart counter if last segment of file
     if (g_offset == g_len) {
@@ -262,12 +228,12 @@ void play_audio_isr(void)
 
 void play_audio_task(void *pvParameters)
 {
-    // Setup speaker
-    speaker_setup(&play_audio_isr, USE_SAMPLING_RATE);
+    // Setup audio
+    audio_setup(&play_audio_isr, USE_SAMPLING_RATE);
 
     // Setup buffer and size
     g_len = (raw_audio_end - raw_audio) - 1;
-    g_data = (char*)pvPortMalloc(SPEAKER_FIFO_SIZE);
+    g_data = (char*)pvPortMalloc(AUDIO_FIFO_SIZE);
     if (!g_data) {
         DEBUG_PRINTF("vTask pvPortMalloc failed!\r\n");
         return;
