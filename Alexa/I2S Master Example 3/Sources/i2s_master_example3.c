@@ -62,17 +62,17 @@
 // Raw audio file to use
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define USE_SAMPLING_RATE SAMPLING_RATE_8KHZ
+#define USE_SAMPLING_RATE SAMPLING_RATE_32KHZ
 
 #if (USE_SAMPLING_RATE == SAMPLING_RATE_44100HZ)
 extern __flash__ uint8_t raw_audio[]        asm("response_44100_raw");
 extern __flash__ uint8_t raw_audio_end[]    asm("response_44100_raw_end");
 #elif (USE_SAMPLING_RATE == SAMPLING_RATE_48KHZ)
-extern __flash__ uint8_t raw_audio[]        asm("response_32k_raw");
-extern __flash__ uint8_t raw_audio_end[]    asm("response_32k_raw_end");
-#elif (USE_SAMPLING_RATE == SAMPLING_RATE_32KHZ)
 extern __flash__ uint8_t raw_audio[]        asm("response_48k_raw");
 extern __flash__ uint8_t raw_audio_end[]    asm("response_48k_raw_end");
+#elif (USE_SAMPLING_RATE == SAMPLING_RATE_32KHZ)
+extern __flash__ uint8_t raw_audio[]        asm("response_32k_raw");
+extern __flash__ uint8_t raw_audio_end[]    asm("response_32k_raw_end");
 #elif (USE_SAMPLING_RATE == SAMPLING_RATE_8KHZ)
 extern __flash__ uint8_t raw_audio[]        asm("response_8k_raw");
 extern __flash__ uint8_t raw_audio_end[]    asm("response_8k_raw_end");

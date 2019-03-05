@@ -105,7 +105,7 @@ static reg_t i2c_data[] =
        bit 5 = 0 : SIDETONE     - 0 = Disable Side Tone Attenuation
        bit 6 = 0 : SIDEATT[1:0] - Ignored
     */
-    {0x04 << 1, 0xD0},
+    {0x04 << 1, 0x15},
 
     /* 0x5 Digital Audio Path Control -
        bit 0   = 0  : ADCHPD     - 0 = Enable High Pass Filter
@@ -125,7 +125,7 @@ static reg_t i2c_data[] =
        bit 6 = 1 : CLKOUTPD - 1 = Enable Power Down
        bit 7 = 0 : POWEROFF - 0 = Disable POWEROFF
     */
-    {0x06 << 1, 0},
+    {0x06 << 1, 0x00},
 
     /* 0x7 Digital Audio Interface Format -
        bit 1:0 = 10 : FORMAT[1:0] - 10 = I2S
@@ -148,7 +148,7 @@ static reg_t i2c_data[] =
        bit 6   = 0    : CLKIDIV2   - 0 = Not applicable
        bit 7   = 0    : CLKODIV2   - 0 = CLOCKOUT is Core
     */
-    {0x08 << 1, 0x0},
+    {0x08 << 1, 0x00},
 
     /* 0x9 Active Control -
        bit 0 = 1 : ACTIVE - 1 = Active
@@ -179,13 +179,13 @@ static void speaker_config(int samplingRate)
                     i2c_data[i].data = 0x22;
                     break;
                 case SAMPLING_RATE_48KHZ:
-                    i2c_data[i].data = 0x2;
+                    i2c_data[i].data = 0x00;
                     break;
                 case SAMPLING_RATE_32KHZ:
                     i2c_data[i].data = 0x18;
                     break;
                 case SAMPLING_RATE_8KHZ:
-                    i2c_data[i].data = 0x8;
+                    i2c_data[i].data = 0x08;
                     break;
                 default:
                     // use existing value
@@ -223,9 +223,9 @@ static void speaker_initi2s(int samplingRate)
                  i2s_format_i2s,
                  i2s_padding_0,
                  i2s_master_input_clk_22mhz,
-                 i2s_bclk_div_8,
+                 i2s_bclk_div_16,
                  i2s_mclk_div_2,
-                 i2s_bclk_per_channel_32
+                 i2s_bclk_per_channel_16
                  );
     }
     else if (samplingRate == SAMPLING_RATE_48KHZ) {
@@ -234,9 +234,9 @@ static void speaker_initi2s(int samplingRate)
                  i2s_format_i2s,
                  i2s_padding_0,
                  i2s_master_input_clk_24mhz,
-                 i2s_bclk_div_8,
+                 i2s_bclk_div_16,
                  i2s_mclk_div_2,
-                 i2s_bclk_per_channel_32
+                 i2s_bclk_per_channel_16
                  );
     }
     else if (samplingRate == SAMPLING_RATE_32KHZ) {
@@ -245,9 +245,9 @@ static void speaker_initi2s(int samplingRate)
                  i2s_format_i2s,
                  i2s_padding_0,
                  i2s_master_input_clk_24mhz,
-                 i2s_bclk_div_12,
+                 i2s_bclk_div_24,
                  i2s_mclk_div_3,
-                 i2s_bclk_per_channel_32
+                 i2s_bclk_per_channel_16
                  );
     }
     else if (samplingRate == SAMPLING_RATE_8KHZ) {
