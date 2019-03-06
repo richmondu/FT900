@@ -107,19 +107,11 @@ int avsInit()
         return 0;
     }
 
-    // Start speaker and microphone
-    audio_speaker_begin();
-    audio_mic_begin();
-
     return 1;
 }
 
 void avsFree()
 {
-    // Stop speaker and microphone
-    audio_mic_end();
-	audio_speaker_end();
-
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
         g_pcTxRxBuffer = NULL;
@@ -286,7 +278,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
     uint32_t ulBytesToProcess = sizeof(acTemp);
-    struct timeval tTimeout = {30, 0}; // 30 second timeout
+    struct timeval tTimeout = {15, 0}; // 15 second timeout
 
 
     // Open file given complete file path in SD card
@@ -295,7 +287,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
         return 0;
     }
 
-    // Set a 10-second timeout for the operation
+    // Set a 15-second timeout for the operation
     setsockopt(lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
 
@@ -372,9 +364,12 @@ int avsPlayAlexaResponse(const char* pcFileName)
     char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE/2];
 
 
+    audio_speaker_begin();
+
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
         DEBUG_PRINTF("avsPlayAlexaResponse sdcard_open failed!\r\n");
+        audio_speaker_end();
         return 0;
     }
 
@@ -383,6 +378,7 @@ int avsPlayAlexaResponse(const char* pcFileName)
     if (!ulFileSize) {
         DEBUG_PRINTF("avsPlayAlexaResponse sdcard_size failed!\r\n");
         sdcard_close(&fHandle);
+        audio_speaker_end();
         return 0;
     }
     DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n", pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
@@ -433,6 +429,9 @@ int avsPlayAlexaResponse(const char* pcFileName)
                 // Increment offset
                 ulFileOffset += ulTransferSize;
             }
+            else {
+                DEBUG_PRINTF(">> avsPlayAlexaResponse ulTransferSize is 0\r\n");
+            }
 
             // Clear interrupt flag
             audio_speaker_clear();
@@ -442,6 +441,8 @@ int avsPlayAlexaResponse(const char* pcFileName)
 
     // Close the file
     sdcard_close(&fHandle);
+
+    audio_speaker_end();
 
     DEBUG_PRINTF(">> Total bytes played %d\r\n", (int)ulFileSize);
     return 1;
@@ -462,9 +463,12 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
     char* pcData = g_pcAudioBuffer;
 
 
+    audio_mic_begin();
+
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
         DEBUG_PRINTF("avsRecordAlexaRequest sdcard_open failed!\r\n");
+        audio_mic_end();
         return 0;
     }
 
@@ -479,7 +483,6 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
             // copy data from microphone
             audio_record(pcData, ulRecordSize);
 
-#if CONVERT_STEREO_TO_MONO
             // convert stereo to mono in-place
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
             	pcData[i] = pcData[j];
@@ -497,16 +500,6 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
                 audio_mic_clear();
                 break;
             }
-#else // CONVERT_STEREO_TO_MONO
-            // write mic data to SD card
-            uint32_t ulWriteSize = 0;
-            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
-            if (ulRecordSize != ulWriteSize) {
-                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
-                audio_mic_clear();
-                break;
-            }
-#endif // CONVERT_STEREO_TO_MONO
 
             // Clear interrupt flag
             audio_mic_clear();
@@ -514,58 +507,17 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
             ulBytesWritten += ulWriteSize;
             //DEBUG_PRINTF("avsRecordAlexaRequest ulBytesWritten %d\r\n", (int)ulWriteSize);
         }
-#if 0
-        // Process transfer if the mic is half full
-        else if (audio_mic_ready2()) {
-
-            ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE/2;
-
-            // copy data from microphone
-            audio_record(pcData, ulRecordSize);
-
-#if CONVERT_STEREO_TO_MONO
-            // convert stereo to mono in-place
-            for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
-            	pcData[i] = pcData[j];
-            	pcData[i+1] = pcData[j+1];
-                // ignore pcData[j+2];
-                // ignore pcData[j+3];
-            }
-            ulRecordSize /= 2;
-
-            // write mic data to SD card
-            uint32_t ulWriteSize = 0;
-            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
-            if (ulRecordSize != ulWriteSize) {
-                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
-                audio_mic_clear2();
-                break;
-            }
-#else // CONVERT_STEREO_TO_MONO
-            // write mic data to SD card
-            uint32_t ulWriteSize = 0;
-            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
-            if (ulRecordSize != ulWriteSize) {
-                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed2! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
-                audio_mic_clear2();
-                break;
-            }
-#endif // CONVERT_STEREO_TO_MONO
-            ulBytesWritten += ulWriteSize;
-
-            // Clear interrupt flag
-            audio_mic_clear2();
-        }
-#endif
-        //else {
-        //    DEBUG_PRINTF("avsRecordAlexaRequest mic not ready %d\r\n", i2s_get_status());
-        //}
     } while ((*fxnCallbackRecord)());
 
 
     // Close the file
     sdcard_close(&fHandle);
     DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n", pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
+
+    DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
+    sdcard_dir("");
+
+    audio_mic_end();
 
     return 1;
 }

@@ -75,13 +75,13 @@ static reg_t i2c_data[] =
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x00 << 1, 0x70},
+    {0x00 << 1, 0x79},
 
     /* 0x0 Right Line In -
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x01 << 1, 0x70},
+    {0x01 << 1, 0x79},
 
 
     /* 0x2 Left Headphone Out -
