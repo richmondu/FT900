@@ -2,7 +2,7 @@
 #define AVS_H
 
 
-void avsInit();
+int avsInit();
 void avsFree();
 
 int  avsConnect();
