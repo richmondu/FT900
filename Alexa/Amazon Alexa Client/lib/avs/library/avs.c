@@ -393,23 +393,10 @@ int avsPlayAlexaResponse(const char* pcFileName)
                 ulTransferSize = ulFileSize - ulFileOffset;
             }
 
-#if 1
             // Read data from SD card to buffer
             ulReadSize = 0;
             sdcard_read(&fHandle, acTemp, ulTransferSize, (UINT*)&ulReadSize);
             ulTransferSize = ulReadSize;
-#else
-            // Read data from SD card to buffer
-            ulTotalReadSize = 0;
-            do
-            {
-                ulReadSize = 0;
-                f_read(fHandle, &acTemp[ulTotalReadSize], 128, &ulReadSize);
-                ulTotalReadSize += ulReadSize;
-                ulFileOffset += ulReadSize;
-            }
-            while (ulTotalReadSize < ulTransferSize);
-#endif
             //DEBUG_PRINTF(">> avsPlayAlexaResponse fileOffset %d totalReadSize %d\r\n", fileOffset, totalReadSize);
 
             if (ulTransferSize) {
@@ -452,9 +439,6 @@ int avsPlayAlexaResponse(const char* pcFileName)
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Record audio file from microphone and save to SD card given the complete file path
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-#define CONVERT_STEREO_TO_MONO 1
-
 int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void))
 {
     FIL fHandle;
