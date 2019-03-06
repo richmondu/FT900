@@ -54,7 +54,6 @@
 
 #define WM8731_WR_ADDR (0x34)
 #define WM8731_RD_ADDR (0x35)
-#define BITS 16
 
 typedef struct
 {
@@ -149,7 +148,7 @@ static reg_t i2c_data[] =
        bit 6   = 0    : CLKIDIV2   - 0 = Not applicable
        bit 7   = 0    : CLKODIV2   - 0 = CLOCKOUT is Core
     */
-    {0x08 << 1, 0x00},
+    {0x08 << 1, 0x00}, // 0 works for 44.1, 48, 32, 16, 8 KHz
 
     /* 0x9 Active Control -
        bit 0 = 1 : ACTIVE - 1 = Active
@@ -173,6 +172,7 @@ static void audio_config(int sampling_rate)
 {
     /* Set up the WM8731 ... */
     for (int i = 0; i < (sizeof(i2c_data)/sizeof(reg_t)); ++i) {
+#if 0
         // update based on samplingRate
         if (i2c_data[i].addr == 0x08 << 1) {
             switch (sampling_rate) {
@@ -185,6 +185,9 @@ static void audio_config(int sampling_rate)
                 case SAMPLING_RATE_32KHZ:
                     i2c_data[i].data = 0x18;
                     break;
+                case SAMPLING_RATE_16KHZ:
+                    i2c_data[i].data = 0x18;
+                    break;
                 case SAMPLING_RATE_8KHZ:
                     i2c_data[i].data = 0x08;
                     break;
@@ -193,6 +196,7 @@ static void audio_config(int sampling_rate)
                     break;
             }
         }
+#endif
 
         int8_t retval = 0;
         //tfp_printf("I2C Write: addr 0x%02x, reg 0x%02x, data 0x%02x\r\n",
@@ -250,6 +254,18 @@ static void audio_initi2s(int sampling_rate)
                      i2s_master_input_clk_24mhz,
                      i2s_bclk_div_24,
                      i2s_mclk_div_3,
+                     i2s_bclk_per_channel_16
+                     );
+            break;
+        }
+        case SAMPLING_RATE_16KHZ: {
+            i2s_init(i2s_mode_master,
+                     i2s_length_16,
+                     i2s_format_i2s,
+                     i2s_padding_0,
+                     i2s_master_input_clk_24mhz,
+                     i2s_bclk_div_48,
+                     i2s_mclk_div_6,
                      i2s_bclk_per_channel_16
                      );
             break;
