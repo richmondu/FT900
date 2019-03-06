@@ -7,12 +7,14 @@ CRT_SRCS += \
 response_44100.raw\
 response_48k.raw\
 response_32k.raw\
+response_16k.raw\
 response_8.raw
 
 CRT_S += \
 $(OUTDIR)/response_44100.S\
 $(OUTDIR)/response_48k.S\
 $(OUTDIR)/response_32k.S\
+$(OUTDIR)/response_16k.S\
 $(OUTDIR)/response_8k.S
 
 
