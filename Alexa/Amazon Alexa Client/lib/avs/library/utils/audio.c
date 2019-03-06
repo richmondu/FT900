@@ -75,13 +75,13 @@ static reg_t i2c_data[] =
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x00 << 1, 0x79},
+    {0x00 << 1, 0x70},
 
     /* 0x0 Right Line In -
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x01 << 1, 0x79},
+    {0x01 << 1, 0x70},
 
 
     /* 0x2 Left Headphone Out -
@@ -169,13 +169,13 @@ static const char* I2C_statusbits[] = {
 };
 
 
-static void audio_config(int samplingRate)
+static void audio_config(int sampling_rate)
 {
     /* Set up the WM8731 ... */
     for (int i = 0; i < (sizeof(i2c_data)/sizeof(reg_t)); ++i) {
         // update based on samplingRate
         if (i2c_data[i].addr == 0x08 << 1) {
-            switch (samplingRate) {
+            switch (sampling_rate) {
                 case SAMPLING_RATE_44100HZ:
                     i2c_data[i].data = 0x22;
                     break;
@@ -214,56 +214,62 @@ static void audio_config(int samplingRate)
     delayms(100);
 }
 
-static void audio_initi2s(int samplingRate)
+static void audio_initi2s(int sampling_rate)
 {
     /* Refer to Table 15.1 and 15.2 for FT900 User Manual  */
-    if (samplingRate == SAMPLING_RATE_44100HZ) {
-        i2s_init(i2s_mode_master,
-                 i2s_length_16,
-                 i2s_format_i2s,
-                 i2s_padding_0,
-                 i2s_master_input_clk_22mhz,
-                 i2s_bclk_div_16,
-                 i2s_mclk_div_2,
-                 i2s_bclk_per_channel_16
-                 );
-    }
-    else if (samplingRate == SAMPLING_RATE_48KHZ) {
-        i2s_init(i2s_mode_master,
-                 i2s_length_16,
-                 i2s_format_i2s,
-                 i2s_padding_0,
-                 i2s_master_input_clk_24mhz,
-                 i2s_bclk_div_16,
-                 i2s_mclk_div_2,
-                 i2s_bclk_per_channel_16
-                 );
-    }
-    else if (samplingRate == SAMPLING_RATE_32KHZ) {
-        i2s_init(i2s_mode_master,
-                 i2s_length_16,
-                 i2s_format_i2s,
-                 i2s_padding_0,
-                 i2s_master_input_clk_24mhz,
-                 i2s_bclk_div_24,
-                 i2s_mclk_div_3,
-                 i2s_bclk_per_channel_16
-                 );
-    }
-    else if (samplingRate == SAMPLING_RATE_8KHZ) {
-        i2s_init(i2s_mode_master,
-                 i2s_length_16,
-                 i2s_format_i2s,
-                 i2s_padding_0,
-                 i2s_master_input_clk_24mhz,
-                 i2s_bclk_div_48,
-                 i2s_mclk_div_12,
-                 i2s_bclk_per_channel_32 // must be 16 for microphone
-                 );
+    switch (sampling_rate) {
+        case SAMPLING_RATE_44100HZ: {
+            i2s_init(i2s_mode_master,
+                     i2s_length_16,
+                     i2s_format_i2s,
+                     i2s_padding_0,
+                     i2s_master_input_clk_22mhz,
+                     i2s_bclk_div_16,
+                     i2s_mclk_div_2,
+                     i2s_bclk_per_channel_16
+                     );
+            break;
+        }
+        case SAMPLING_RATE_48KHZ: {
+            i2s_init(i2s_mode_master,
+                     i2s_length_16,
+                     i2s_format_i2s,
+                     i2s_padding_0,
+                     i2s_master_input_clk_24mhz,
+                     i2s_bclk_div_16,
+                     i2s_mclk_div_2,
+                     i2s_bclk_per_channel_16
+                     );
+            break;
+        }
+        case SAMPLING_RATE_32KHZ: {
+            i2s_init(i2s_mode_master,
+                     i2s_length_16,
+                     i2s_format_i2s,
+                     i2s_padding_0,
+                     i2s_master_input_clk_24mhz,
+                     i2s_bclk_div_24,
+                     i2s_mclk_div_3,
+                     i2s_bclk_per_channel_16
+                     );
+            break;
+        }
+        case SAMPLING_RATE_8KHZ: {
+            i2s_init(i2s_mode_master,
+                     i2s_length_16,
+                     i2s_format_i2s,
+                     i2s_padding_0,
+                     i2s_master_input_clk_24mhz,
+                     i2s_bclk_div_48,
+                     i2s_mclk_div_12,
+                     i2s_bclk_per_channel_32 // must be 16 for microphone
+                     );
+            break;
+        }
     }
 }
 
-void audio_setup(void (*audio_isr)(void), int samplingRate)
+void audio_setup(void (*audio_isr)(void), int sampling_rate)
 {
     /* EVM: Bring the output amplifiers out of Power Down ... */
     gpio_dir(65, pad_dir_output);
@@ -280,7 +286,7 @@ void audio_setup(void (*audio_isr)(void), int samplingRate)
     gpio_function(66, pad_i2s_clk24); gpio_pull(66, pad_pull_none); /* I2S CLK24 */
 
     /* Initialize I2S master  */
-    audio_initi2s(samplingRate);
+    audio_initi2s(sampling_rate);
 
     /* Set up the I2C peripheral ... */
     sys_enable(sys_device_i2c_master);
@@ -294,15 +300,17 @@ void audio_setup(void (*audio_isr)(void), int samplingRate)
     i2cm_init(I2CM_NORMAL_SPEED, 100000);
 
     /* Set up the WM8731 ... */
-    audio_config(samplingRate);
+    audio_config(sampling_rate);
 
     if (audio_isr) {
 
         /* Set up the ISR for the I2S device... */
         i2s_clear_int_flag(0xFFFF);
         interrupt_attach(interrupt_i2s, (uint8_t)interrupt_i2s, audio_isr);
-        i2s_enable_int(MASK_I2S_IE_FIFO_TX_EMPTY | MASK_I2S_IE_FIFO_TX_HALF_FULL);
-        i2s_enable_int(MASK_I2S_IE_FIFO_RX_FULL | MASK_I2S_IE_FIFO_RX_HALF_FULL);
+        i2s_enable_int(MASK_I2S_IE_FIFO_TX_EMPTY |
+                       MASK_I2S_IE_FIFO_TX_HALF_FULL);
+        i2s_enable_int(MASK_I2S_IE_FIFO_RX_FULL |
+                       MASK_I2S_IE_FIFO_RX_HALF_FULL);
 
         /* Start streaming audio */
         i2s_start_tx();
@@ -354,12 +362,13 @@ void audio_mic_end()
 int audio_mic_ready()
 {
     uint16_t uwFlag = i2s_get_status();
-    return uwFlag & MASK_I2S_PEND_FIFO_RX_FULL;
+    return uwFlag & (MASK_I2S_PEND_FIFO_RX_FULL | MASK_I2S_PEND_FIFO_RX_OVER);
 }
 
 void audio_mic_clear()
 {
     i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_FULL);
+    i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_OVER);
 }
 
 int audio_mic_ready2()
