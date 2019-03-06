@@ -14,9 +14,10 @@
 //   SAMPLING_RATE_44100HZ
 //   SAMPLING_RATE_48KHZ
 //   SAMPLING_RATE_32KHZ
+//   SAMPLING_RATE_16KHZ
 //   SAMPLING_RATE_8KHZ
 ///////////////////////////////////////////////////////////////////////////////////
-#define AVS_CONFIG_SAMPLING_RATE    SAMPLING_RATE_32KHZ
+#define AVS_CONFIG_SAMPLING_RATE    SAMPLING_RATE_16KHZ
 
 
 

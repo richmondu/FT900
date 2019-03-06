@@ -5,7 +5,8 @@
 #define SAMPLING_RATE_44100HZ 1
 #define SAMPLING_RATE_48KHZ   2
 #define SAMPLING_RATE_32KHZ   3
-#define SAMPLING_RATE_8KHZ    4
+#define SAMPLING_RATE_16KHZ   4
+#define SAMPLING_RATE_8KHZ    5
 
 #define AUDIO_FIFO_SIZE       (2048) // I2SM TX FIFO can hold up to a max of 2048 bytes
 
