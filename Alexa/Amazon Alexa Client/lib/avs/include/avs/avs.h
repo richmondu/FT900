@@ -2,19 +2,19 @@
 #define AVS_H
 
 
-int avsInit();
-void avsFree();
+int  avs_init();
+void avs_free();
 
-int  avsConnect();
-void avsDisconnect(int lSocket);
+int  avs_connect();
+void avs_disconnect(int lSocket);
 
-int  avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void));
-int  avsSendAlexaRequest(int lSocket, const char* pcFileName);
-int  avsRecvAlexaResponse(int lSocket, const char* pcFileName);
-int  avsPlayAlexaResponse(const char* fileName);
+int  avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void));
+int  avs_send_request(int lSocket, const char* pcFileName);
+int  avs_recv_response(int lSocket, const char* pcFileName);
+int  avs_play_response(const char* fileName);
 
-const ip_addr_t* avsGetServerAddress();
-int  avsGetServerPort();
+const ip_addr_t* avs_get_server_addr();
+int  avs_get_server_port();
 
 
 #endif // AVS_H

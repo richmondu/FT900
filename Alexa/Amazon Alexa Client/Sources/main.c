@@ -263,7 +263,7 @@ void vTaskAlexa(void *pvParameters)
     }
 
     DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
-    avsInit();
+    avs_init();
     vTaskDelay(pdMS_TO_TICKS(3000));
 
     DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
@@ -276,7 +276,7 @@ void vTaskAlexa(void *pvParameters)
             pcFileNameRequest = "test_request.raw";
             g_lProcessAudio = 1;
 #else
-            if (avsRecordAlexaRequest(pcFileNameRequest, record_audio)) {
+            if (avs_record_request(pcFileNameRequest, record_audio)) {
                 DEBUG_PRINTF("\r\nRecording audio completed!\r\n");
                 g_lProcessAudio = 1;
             }
@@ -287,26 +287,26 @@ void vTaskAlexa(void *pvParameters)
     	// Process the recorded audio in SD card
         if (g_lProcessAudio) {
             DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
-                ipaddr_ntoa(avsGetServerAddress()), avsGetServerPort());
-            if ((lSocket = avsConnect()) < 0) {
+                ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
+            if ((lSocket = avs_connect()) < 0) {
                 vTaskDelay(pdMS_TO_TICKS(1000));
                 continue;
             }
             vTaskDelay(pdMS_TO_TICKS(3000));
 
             DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
-            if (avsSendAlexaRequest(lSocket, pcFileNameRequest)) {
+            if (avs_send_request(lSocket, pcFileNameRequest)) {
 
                 DEBUG_PRINTF("\r\nReceiving Alexa response...\r\n");
-                if (avsRecvAlexaResponse(lSocket, pcFileNameResponse)) {
+                if (avs_recv_response(lSocket, pcFileNameResponse)) {
 
                     DEBUG_PRINTF("\r\nPlaying Alexa response...\r\n");
-                    avsPlayAlexaResponse(pcFileNameResponse);
+                    avs_play_response(pcFileNameResponse);
                 }
             }
 
             //DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
-            avsDisconnect(lSocket);
+            avs_disconnect(lSocket);
 
 #if 0
             DEBUG_PRINTF("\r\nRestarting in 15 seconds...");
@@ -323,7 +323,7 @@ void vTaskAlexa(void *pvParameters)
         }
     }
 
-    avsFree();
+    avs_free();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -89,7 +89,7 @@ static const char* getConfigSamplingRateStr()
     return "Unknown";
 }
 
-int avsInit()
+int avs_init()
 {
     // Initialize audio
     audio_setup(NULL, AVS_CONFIG_SAMPLING_RATE);
@@ -103,14 +103,16 @@ int avsInit()
     g_pcTxRxBuffer = pvPortMalloc(AVS_CONFIG_RXTX_BUFFER_SIZE);
     g_pcAudioBuffer = pvPortMalloc(AVS_CONFIG_AUDIO_BUFFER_SIZE);
     if (!g_pcTxRxBuffer || !g_pcAudioBuffer) {
-        DEBUG_PRINTF("pvPortMalloc failed %p %p\n", g_pcTxRxBuffer, g_pcAudioBuffer);
+        DEBUG_PRINTF("avs_init(): pvPortMalloc failed %p %p\n",
+            g_pcTxRxBuffer, g_pcAudioBuffer);
         return 0;
     }
+    DEBUG_PRINTF("Memory initialize.\r\n");
 
     return 1;
 }
 
-void avsFree()
+void avs_free()
 {
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
@@ -123,19 +125,23 @@ void avsFree()
     }
 }
 
-int avsGetServerPort()
+int avs_get_server_port()
 {
     return AVS_CONFIG_SERVER_PORT;
 }
 
-const ip_addr_t* avsGetServerAddress()
+const ip_addr_t* avs_get_server_addr()
 {
     static struct sockaddr_in tServer;
     tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
     return (ip_addr_t*)&tServer.sin_addr;
 }
 
-int avsConnect()
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Establishes connection to the RPI Alexa Gateway using configurations in avs_config.h configuration file.
+/////////////////////////////////////////////////////////////////////////////////////////////
+int avs_connect()
 {
     int lSocket = 0;
     int iRet = 0;
@@ -149,7 +155,7 @@ int avsConnect()
 
     // Create a TCP socket
     if ((lSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        DEBUG_PRINTF("avsConnect socket failed!\r\n");
+        DEBUG_PRINTF("avs_connect(): socket failed!\r\n");
         chip_reboot();
         return lSocket;
     }
@@ -163,7 +169,11 @@ int avsConnect()
     return lSocket;
 }
 
-void avsDisconnect(int lSocket)
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Closes connection with RPI Alexa Gateway.
+/////////////////////////////////////////////////////////////////////////////////////////////
+void avs_disconnect(int lSocket)
 {
     close(lSocket);
     shutdown(lSocket, SHUT_RDWR);
@@ -171,9 +181,10 @@ void avsDisconnect(int lSocket)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-// Send Alexa request using file stored in SD card
+// Sends the voice request to the RPI Alexa Gateway provided the filename of the voice recording in the SD card.
+// Audio sent: 8-bit u-law, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avsSendAlexaRequest(int lSocket, const char* pcFileName)
+int avs_send_request(int lSocket, const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
@@ -186,14 +197,14 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
-        DEBUG_PRINTF("avsSendAlexaRequest sdcard_open failed!\r\n");
+        DEBUG_PRINTF("avs_send_request(): sdcard_open failed!\r\n");
         return 0;
     }
 
     // Get file size
     ulBytesToTransfer = sdcard_size(&fHandle);
     if (!ulBytesToTransfer) {
-        DEBUG_PRINTF("avsSendAlexaRequest sdcard_size failed!\r\n");
+        DEBUG_PRINTF("avs_send_request(): sdcard_size failed!\r\n");
         sdcard_close(&fHandle);
         return 0;
     }
@@ -207,7 +218,7 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
     // Negotiate the bytes to transfer
     iRet = send(lSocket, (char*)&ulBytesToTransfer, sizeof(ulBytesToTransfer), 0);
     if (iRet != sizeof(ulBytesToTransfer)) {
-        DEBUG_PRINTF("avsSendAlexaRequest send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
+        DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
         sdcard_close(&fHandle);
         return 0;
     }
@@ -217,7 +228,7 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
     uint32_t ulFlag = AVS_CONFIG_SAMPLING_RATE;
     iRet = send(lSocket, (char*)&ulFlag, sizeof(ulFlag), 0);
     if (iRet != sizeof(ulFlag)) {
-        DEBUG_PRINTF("avsSendAlexaRequest send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
+        DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
         sdcard_close(&fHandle);
         return 0;
     }
@@ -245,7 +256,7 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
         // Send the converted bytes
         iRet = send(lSocket, pcData, ulBytesToProcess, 0);
         if (iRet <= 0) {
-            DEBUG_PRINTF("avsSendAlexaRequest send failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
             return 0;
         }
         //DEBUG_PRINTF(">> Sent %d bytes\r\n", size_tx);
@@ -268,8 +279,10 @@ int avsSendAlexaRequest(int lSocket, const char* pcFileName)
 // - Uses a pre-allocated buffer for faster transfer
 // - Receives 1460 bytes from RPI then uncompresses it from 8-bit to 16-bit using ulaw algorithm
 //   then saves the converted audio data stream of size 1460*2 bytes to SD card
+// Audio received: 8-bit u-law, 16KHZ, mono (1-channel)
+// Audio saved:   16-bit PCM, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
+int avs_recv_response(int lSocket, const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
@@ -283,7 +296,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
-        DEBUG_PRINTF("avsRecvAlexaResponse sd_open failed!\r\n");
+        DEBUG_PRINTF("avs_recv_response(): sd_open failed!\r\n");
         return 0;
     }
 
@@ -294,7 +307,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
     // Negotiate the bytes to transfer
     iRet = recv(lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
     if (iRet < sizeof(ulBytesToReceive)) {
-        DEBUG_PRINTF("avsRecvAlexaResponse recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
+        DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
         sdcard_close(&fHandle);
         return 0;
     }
@@ -311,7 +324,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
         // Receive the bytes of transfer size
         iRet = recv(lSocket, acTemp, ulBytesToProcess, 0);
         if (iRet <= 0) {
-            DEBUG_PRINTF("avsRecvAlexaResponse recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
             sdcard_close(&fHandle);
             return 0;
         }
@@ -327,7 +340,7 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
         uint32_t ulWriteSize = 0;
         sdcard_write(&fHandle, pcData, iRet*2, (UINT*)&ulWriteSize);
         if (iRet*2 != ulWriteSize) {
-            DEBUG_PRINTF("avsRecvAlexaResponse sdcard_write failed! %d %d\r\n\r\n", iRet*2, (int)ulWriteSize);
+            DEBUG_PRINTF("avs_recv_response(): sdcard_write failed! %d %d\r\n\r\n", iRet*2, (int)ulWriteSize);
             sdcard_close(&fHandle);
             return 0;
         }
@@ -352,8 +365,9 @@ int avsRecvAlexaResponse(int lSocket, const char* pcFileName)
 // - Uses a pre-allocated buffer for faster transfer
 // - Reads 1KB segment from file then converts it to stereo (2-channel) audio
 //   by duplicating each short then transfers the 2KB segment to I2S Master
+// Audio played: 16-bit PCM, 16KHZ, stereo (2-channels)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avsPlayAlexaResponse(const char* pcFileName)
+int avs_play_response(const char* pcFileName)
 {
     FIL fHandle;
     uint32_t ulFileSize = 0;
@@ -368,7 +382,7 @@ int avsPlayAlexaResponse(const char* pcFileName)
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
-        DEBUG_PRINTF("avsPlayAlexaResponse sdcard_open failed!\r\n");
+        DEBUG_PRINTF("avs_play_response(): sdcard_open failed!\r\n");
         audio_speaker_end();
         return 0;
     }
@@ -376,12 +390,13 @@ int avsPlayAlexaResponse(const char* pcFileName)
     // Get file size
     ulFileSize = sdcard_size(&fHandle);
     if (!ulFileSize) {
-        DEBUG_PRINTF("avsPlayAlexaResponse sdcard_size failed!\r\n");
+        DEBUG_PRINTF("avs_play_response(): sdcard_size failed!\r\n");
         sdcard_close(&fHandle);
         audio_speaker_end();
         return 0;
     }
-    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n", pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
+    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
+        pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
 
     do {
         // Process transfer if the speaker FIFO is empty
@@ -438,8 +453,10 @@ int avsPlayAlexaResponse(const char* pcFileName)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Record audio file from microphone and save to SD card given the complete file path
+// Audio recorded: 16-bit PCM, 16KHZ, stereo (2-channels)
+// Audio saved:    16-bit PCM, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void))
+int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
 {
     FIL fHandle;
     uint32_t ulRecordSize = 0;
@@ -451,7 +468,7 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
-        DEBUG_PRINTF("avsRecordAlexaRequest sdcard_open failed!\r\n");
+        DEBUG_PRINTF("avs_record_request(): sdcard_open failed!\r\n");
         audio_mic_end();
         return 0;
     }
@@ -480,7 +497,8 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
             uint32_t ulWriteSize = 0;
             sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
             if (ulRecordSize != ulWriteSize) {
-                DEBUG_PRINTF("avsRecordAlexaRequest sdcard_write failed! %d %d\r\n\r\n", (int)ulRecordSize, (int)ulWriteSize);
+                DEBUG_PRINTF("avs_record_request(): sdcard_write failed! %d %d\r\n\r\n",
+                    (int)ulRecordSize, (int)ulWriteSize);
                 audio_mic_clear();
                 break;
             }
@@ -496,7 +514,8 @@ int avsRecordAlexaRequest(const char* pcFileName, int (*fxnCallbackRecord)(void)
 
     // Close the file
     sdcard_close(&fHandle);
-    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n", pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
+    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
+        pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
 
     DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
     sdcard_dir("");
