@@ -5,6 +5,8 @@ This PoC application demonstrates using FT900 microcontroller as an Amazon Echo 
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/system_diagram.jpg)
 
+This demo is targeted for FTDI/Bridgetek’s smart home devices, PanL Hub and PanL Display. Having Alexa built-in to PanL products allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. PanL Hub, which runs on RPI, will act as the Alexa gateway while the PanL Display, which runs on FT900 microcontroller, will act as the Alexa client. Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
+
 ### FT900-side (Alexa Client)
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg)
