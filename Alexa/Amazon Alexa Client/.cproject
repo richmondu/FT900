@@ -158,6 +158,28 @@
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.844553108" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.2144201437"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.934136349.992830595" name="/" resourcePath="lib/lwip/src/apps/sntp">
+						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.366293037" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846.1071828439.452249536" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846.1071828439"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904.1588456955.1630980565" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904.1588456955"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022.1711948086.363412826" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022.1711948086"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1202624128" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.514363159" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize" value="true" valueType="boolean"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<tool id="com.ftdichip.compiler.ft900.debug.base.692076665" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.base.156863243">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1257730349" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1539548529" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1699311350"/>
+							<tool id="com.ftdichip.linker.ft900.debug.base.472377483" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.debug.base.348030956"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.182806138" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1206100235"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1887382019" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.867123892"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.299515930" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1413172709">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.157179048" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1480691026" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.608769292"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.665761030" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.844553108"/>
+						</toolChain>
+					</folderInfo>
 					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.934136349.1445803583" name="/" resourcePath="lib/liblwip/src/include/ipv6">
 						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.1152470440" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
 							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846.809505473" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846"/>

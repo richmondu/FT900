@@ -7,7 +7,7 @@
 #endif
 
 #ifndef AVS_CONFIG_SERVER_PORT
-#define AVS_CONFIG_SERVER_PORT          11234
+#define AVS_CONFIG_SERVER_PORT          (11234)
 #endif
 
 #ifndef AVS_CONFIG_SAMPLING_RATE
@@ -20,6 +20,18 @@
 
 #ifndef AVS_CONFIG_AUDIO_BUFFER_SIZE
 #define AVS_CONFIG_AUDIO_BUFFER_SIZE    (2048)
+#endif
+
+#ifndef AVS_CONFIG_RX_TIMEOUT
+#define AVS_CONFIG_RX_TIMEOUT           (20)
+#endif
+
+#ifndef AVS_CONFIG_TX_TIMEOUT
+#define AVS_CONFIG_TX_TIMEOUT           (15)
+#endif
+
+#ifndef AVS_CONFIG_MAX_RECORD_SIZE
+#define AVS_CONFIG_MAX_RECORD_SIZE      (4096000)
 #endif
 
 

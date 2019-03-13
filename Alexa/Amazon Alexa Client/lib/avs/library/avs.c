@@ -47,6 +47,7 @@
 #include "ft900.h"
 #include "tinyprintf.h"    // tinyprintf 3rd-party library
 #include "FreeRTOS.h"      // FreeRTOS 3rd-party library
+#include "task.h"          // FreeRTOS 3rd-party library
 #include "lwip/sockets.h"  // lwIP 3rd-party library
 
 #include "avs/avs.h"       // AVS library
@@ -66,6 +67,7 @@
 
 
 
+static int   g_lSocket = -1;
 static char* g_pcTxRxBuffer  = NULL;
 static char* g_pcAudioBuffer = NULL;
 
@@ -81,6 +83,9 @@ static const char* getConfigSamplingRateStr()
     }
     else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_32KHZ) {
         return "32KHz";
+    }
+    else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_16KHZ) {
+        return "16KHz";
     }
     else if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_8KHZ) {
         return "8KHz";
@@ -114,6 +119,7 @@ int avs_init()
 
 void avs_free()
 {
+
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
         g_pcTxRxBuffer = NULL;
@@ -143,7 +149,6 @@ const ip_addr_t* avs_get_server_addr()
 /////////////////////////////////////////////////////////////////////////////////////////////
 int avs_connect()
 {
-    int lSocket = 0;
     int iRet = 0;
     struct sockaddr_in tServer = {0};
 
@@ -154,29 +159,32 @@ int avs_connect()
     tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
 
     // Create a TCP socket
-    if ((lSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((g_lSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         DEBUG_PRINTF("avs_connect(): socket failed!\r\n");
         chip_reboot();
-        return lSocket;
+        return 0;
     }
 
     // Connect to server
-    if ((iRet = connect(lSocket, (struct sockaddr *) &tServer, sizeof(tServer))) < 0) {
-        close(lSocket);
-        return -1;
+    if ((iRet = connect(g_lSocket, (struct sockaddr *) &tServer, sizeof(tServer))) < 0) {
+        avs_disconnect();
+        return 0;
     }
 
-    return lSocket;
+    return 1;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Closes connection with RPI Alexa Gateway.
 /////////////////////////////////////////////////////////////////////////////////////////////
-void avs_disconnect(int lSocket)
+void avs_disconnect()
 {
-    close(lSocket);
-    shutdown(lSocket, SHUT_RDWR);
+    if (g_lSocket >= 0) {
+        close(g_lSocket);
+        shutdown(g_lSocket, SHUT_RDWR);
+        g_lSocket = -1;
+    }
 }
 
 
@@ -184,7 +192,7 @@ void avs_disconnect(int lSocket)
 // Sends the voice request to the RPI Alexa Gateway provided the filename of the voice recording in the SD card.
 // Audio sent: 8-bit u-law, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_send_request(int lSocket, const char* pcFileName)
+int avs_send_request(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
@@ -192,8 +200,13 @@ int avs_send_request(int lSocket, const char* pcFileName)
     uint32_t ulBytesToTransfer = 0;
     uint32_t ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
     uint32_t ulBytesSent = 0;
-    struct timeval tTimeout = {10, 0}; // 10 second timeout
+    struct timeval tTimeout = {AVS_CONFIG_TX_TIMEOUT, 0}; // x-second timeout
 
+
+#if 1
+    DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
+    sdcard_dir("");
+#endif
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
@@ -208,15 +221,16 @@ int avs_send_request(int lSocket, const char* pcFileName)
         sdcard_close(&fHandle);
         return 0;
     }
+    sdcard_lseek(&fHandle, 0);
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesToTransfer);
     ulBytesToTransfer /= 2;
 
 
-    // Set a 10-second timeout for the operation
-    setsockopt(lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+    // Set a X-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Negotiate the bytes to transfer
-    iRet = send(lSocket, (char*)&ulBytesToTransfer, sizeof(ulBytesToTransfer), 0);
+    iRet = send(g_lSocket, (char*)&ulBytesToTransfer, sizeof(ulBytesToTransfer), 0);
     if (iRet != sizeof(ulBytesToTransfer)) {
         DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
         sdcard_close(&fHandle);
@@ -226,7 +240,7 @@ int avs_send_request(int lSocket, const char* pcFileName)
     // Send the flag for configurations
     // Currently the flag is only for specifying the sampling rate of the response
     uint32_t ulFlag = AVS_CONFIG_SAMPLING_RATE;
-    iRet = send(lSocket, (char*)&ulFlag, sizeof(ulFlag), 0);
+    iRet = send(g_lSocket, (char*)&ulFlag, sizeof(ulFlag), 0);
     if (iRet != sizeof(ulFlag)) {
         DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
         sdcard_close(&fHandle);
@@ -235,10 +249,13 @@ int avs_send_request(int lSocket, const char* pcFileName)
 
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
 
-
     // Send the total bytes in segments of buffer size
     ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
     ulBytesSent = 0;
+
+    // Set a X-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
     while (ulBytesSent != ulBytesToTransfer) {
         // Compute the transfer size
         if (ulBytesToTransfer-ulBytesSent < ulBytesToProcess) {
@@ -247,22 +264,33 @@ int avs_send_request(int lSocket, const char* pcFileName)
 
         // Read from SD card
         uint32_t ulReadSize = 0;
-        sdcard_read(&fHandle, pcData, ulBytesToProcess*2, (UINT*)&ulReadSize);
+        iRet = sdcard_read(&fHandle, pcData, ulBytesToProcess*2, (UINT*)&ulReadSize);
         ulBytesToProcess = ulReadSize/2;
-
-        // Convert in-place from 16-bit to 8-bit
-        pcm16_to_ulaw(ulBytesToProcess*2, pcData, pcData);
-
-        // Send the converted bytes
-        iRet = send(lSocket, pcData, ulBytesToProcess, 0);
-        if (iRet <= 0) {
-            DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+        if (iRet != 0) {
+            DEBUG_PRINTF(">> avs_send_request(): iRet = %d\r\n", iRet);
+            sdcard_close(&fHandle);
             return 0;
         }
-        //DEBUG_PRINTF(">> Sent %d bytes\r\n", size_tx);
 
-        // Compute the total bytes sent
-        ulBytesSent += iRet;
+        if (ulBytesToProcess) {
+            // Convert in-place from 16-bit to 8-bit
+            pcm16_to_ulaw(ulBytesToProcess*2, pcData, pcData);
+
+            // Send the converted bytes
+            iRet = send(g_lSocket, pcData, ulBytesToProcess, 0);
+            if (iRet <= 0) {
+                DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+                sdcard_close(&fHandle);
+                return 0;
+            }
+            //DEBUG_PRINTF(">> Sent %d bytes\r\n", size_tx);
+
+            // Compute the total bytes sent
+            ulBytesSent += iRet;
+        }
+        else {
+            DEBUG_PRINTF(">> avs_send_request(): sdcard_read is 0\r\n");
+        }
     }
 
 
@@ -282,7 +310,7 @@ int avs_send_request(int lSocket, const char* pcFileName)
 // Audio received: 8-bit u-law, 16KHZ, mono (1-channel)
 // Audio saved:   16-bit PCM, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_recv_response(int lSocket, const char* pcFileName)
+int avs_recv_response(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
@@ -291,7 +319,7 @@ int avs_recv_response(int lSocket, const char* pcFileName)
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
     uint32_t ulBytesToProcess = sizeof(acTemp);
-    struct timeval tTimeout = {15, 0}; // 15 second timeout
+    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0}; // x-second timeout
 
 
     // Open file given complete file path in SD card
@@ -301,11 +329,11 @@ int avs_recv_response(int lSocket, const char* pcFileName)
     }
 
     // Set a 15-second timeout for the operation
-    setsockopt(lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
 
     // Negotiate the bytes to transfer
-    iRet = recv(lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
+    iRet = recv(g_lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
     if (iRet < sizeof(ulBytesToReceive)) {
         DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
         sdcard_close(&fHandle);
@@ -322,7 +350,7 @@ int avs_recv_response(int lSocket, const char* pcFileName)
         }
 
         // Receive the bytes of transfer size
-        iRet = recv(lSocket, acTemp, ulBytesToProcess, 0);
+        iRet = recv(g_lSocket, acTemp, ulBytesToProcess, 0);
         if (iRet <= 0) {
             DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
             sdcard_close(&fHandle);
@@ -352,9 +380,11 @@ int avs_recv_response(int lSocket, const char* pcFileName)
     sdcard_close(&fHandle);
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesReceived*2);
 
+#if 1
     // f_read fails when sd_dir() is not called for some reason
     DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
     sdcard_dir("");
+#endif
 
     return ulBytesReceived*2;
 }
@@ -432,7 +462,7 @@ int avs_play_response(const char* pcFileName)
                 ulFileOffset += ulTransferSize;
             }
             else {
-                DEBUG_PRINTF(">> avsPlayAlexaResponse ulTransferSize is 0\r\n");
+                DEBUG_PRINTF(">> avs_play_response sdcard_read is 0\r\n");
             }
 
             // Clear interrupt flag
@@ -486,8 +516,8 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
 
             // convert stereo to mono in-place
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
-            	pcData[i] = pcData[j];
-            	pcData[i+1] = pcData[j+1];
+                pcData[i] = pcData[j];
+                pcData[i+1] = pcData[j+1];
                 // ignore pcData[j+2];
                 // ignore pcData[j+3];
             }
@@ -509,16 +539,13 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
             ulBytesWritten += ulWriteSize;
             //DEBUG_PRINTF("avsRecordAlexaRequest ulBytesWritten %d\r\n", (int)ulWriteSize);
         }
-    } while ((*fxnCallbackRecord)());
+    } while ((*fxnCallbackRecord)() && ulBytesWritten < AVS_CONFIG_MAX_RECORD_SIZE);
 
 
     // Close the file
     sdcard_close(&fHandle);
     DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
         pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
-
-    DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
-    sdcard_dir("");
 
     audio_mic_end();
 

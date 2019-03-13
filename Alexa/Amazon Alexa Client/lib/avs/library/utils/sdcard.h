@@ -11,5 +11,7 @@ void sdcard_dir(char* path);
 #define sdcard_write f_write
 #define sdcard_close f_close
 #define sdcard_size  f_size
+#define sdcard_lseek f_lseek
+
 
 #endif // SDCARD_H
