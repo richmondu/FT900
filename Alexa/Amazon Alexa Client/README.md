@@ -14,4 +14,6 @@ This PoC application demonstrates using FT900 microcontroller as an Amazon Echo 
 
 ### RPI-side
 
+![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg)
+
 
