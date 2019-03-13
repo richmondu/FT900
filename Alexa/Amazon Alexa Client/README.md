@@ -11,6 +11,8 @@ This PoC application demonstrates using FT900 microcontroller as an Amazon Echo 
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg)
 
+Below is a description of how the audio is processed on FT900.
+
 avs_record_request()
 - Audio recorded (from mic): 16-bit PCM, 16KHZ, stereo (2-channels)
 - Audio saved (to SD card): 16-bit PCM, 16KHZ, mono (1-channel)
@@ -31,6 +33,8 @@ avs_play_response()
 ### RPI-side (Alexa Gateway)
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg)
+
+Below is a description of how the audio is processed on RPI.
 
 avs_request()
 - Audio received (from FT900): 8-bit u-law, 16KHZ, mono (1-channel)
