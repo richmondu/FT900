@@ -62,7 +62,7 @@ avs_response()
 
 ### Action items
 
-Below are the action items for both the Alexa Demo.
+Below are the action items for the Alexa Demo.
 1. Support for wake-word detection
 2. Use 8KHz instead of 16KHz to reduce audio file size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
 3. Performance/speed optimization
