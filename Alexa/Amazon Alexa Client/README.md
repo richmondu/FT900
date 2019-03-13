@@ -12,6 +12,9 @@ This demo is targeted for FTDI/Bridgetek’s smart home devices, PanL Hub and Pa
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg)
 
+
+Below is a sequence diagram showing the basic interaction of components of the FT900 application.
+
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg)
 
 
@@ -38,6 +41,11 @@ avs_play_response()
 ### RPI-side (Alexa Gateway)
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg)
+
+
+Below is a sequence diagram showing the basic interaction of components of the RPI application.
+
+![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg)
 
 
 Below is a description of how the audio is processed on RPI.
