@@ -102,13 +102,18 @@ Below are the action items for the Alexa Demo.
 # References
 
 Below are the important links used for the development of this FT900 Alexa Demo.
-1. [Getting Started with the AVS Device SDK](https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be)
+1. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
 
-      <a href="https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be"
+      <a href="https://www.youtube.com/watch?v=oTaFX3ZQlnA"
+       target="_blank"><img src="https://img.youtube.com/vi/oTaFX3ZQlnA/0.jpg" 
+       alt="Alexa Voice Service" width="480" height="360" border="100" /></a>
+
+2. [Getting Started with the AVS Device SDK](https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be)
+
+      <a href="https://www.youtube.com/watch?v=F5DixCPJYo8"
        target="_blank"><img src="https://img.youtube.com/vi/F5DixCPJYo8/0.jpg" 
        alt="Getting Started with the AVS Device SDK" width="480" height="360" border="100" /></a>
        
-2. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
 3. [Amazon's Official AVS Device SDK (written in C++)](https://github.com/alexa/avs-device-sdk)
 4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
 5. [SOX Sound Exchange Utility (used for MP3 audio decoding)](http://sox.sourceforge.net)
