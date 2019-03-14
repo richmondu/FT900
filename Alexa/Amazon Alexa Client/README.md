@@ -10,6 +10,8 @@ This demo is targeted for FTDI/Bridgetek’s smart home devices, PanL Hub and Pa
 
 # FT900-side (Alexa Client)
 
+Below is a block diagram showing the implemented components of the FT900 application.
+
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg)
 
 
