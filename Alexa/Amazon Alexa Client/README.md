@@ -87,7 +87,7 @@ Notes
 # Action items
 
 Below are the action items for the Alexa Demo.
-1. Support for <b>wake-word detection</b>
+1. Support for <b>wake-word detection</b> in FT900. Currently, user has to press down a button to start voice recording.
 2. Use <b>8KHz instead of 16KHz</b> in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
 3. Performance/speed optimization
 4. Support for <b>alarms or notification-based messages</b>. (Currently, only responses triggered by requests are supported.)
