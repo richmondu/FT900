@@ -19,7 +19,16 @@ Below is a block diagram showing the implemented components of the FT900 applica
 Below is a sequence diagram showing the basic interaction of components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="620"/>
 
-The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include avs_connect(), avs_record_request(), avs_send_request(), avs_receive_response(), avs_play_response() and avs_disconnect().
+
+### FT900 Alexa AVS library
+
+The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include 
+- avs_connect()
+- avs_record_request()
+- avs_send_request()
+- avs_receive_response()
+- avs_play_response()
+- avs_disconnect()
 
 
 ### Wakeword Detection
