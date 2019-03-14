@@ -74,6 +74,9 @@ Below is a block diagram showing the implemented components of the RPI applicati
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg" width="620"/>
 
+
+### RPI Alexa AVS SDK modifications
+
 The primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
 - <b>PortAudioMicrophoneWrapper</b>: PortAudioCallback() contains the data stream for Alexa request
 - <b>SpeechSynthesizer</b>: startPlaying() contains the data stream for Alexa response
