@@ -8,7 +8,7 @@ This PoC application demonstrates using FT900 microcontroller as an Amazon Echo 
 This demo is targeted for FTDI/Bridgetek’s smart home devices, PanL Hub and PanL Display. Having Alexa built-in to PanL products allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. PanL Hub, which runs on RPI, acts as the Alexa Gateway while the PanL Display, which runs on FT900 microcontroller, acts as the Alexa Client. Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
 
 
-### FT900-side (Alexa Client)
+# FT900-side (Alexa Client)
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg)
 
@@ -17,6 +17,8 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg)
 
+
+### Audio Processing 
 
 Below is a description of how the audio is processed on FT900.
 
@@ -37,8 +39,18 @@ avs_play_response()
 - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)
 
 
+### Notes
 
-### RPI-side (Alexa Gateway)
+- G711 u-law companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
+- Converting stereo data stream to mono data stream is a matter of removing alternating 16-bit WORD.
+
+
+# RPI-side (Alexa Gateway)
+
+Amazon provides an official Alexa Voice Service (AVS) SDK, (written in C++) https://github.com/alexa/avs-device-sdk. The version I am using is AVS SDK is v1.11.0, (12-19-2018). Instructions to install the AVS SDK on RPI can also be found on the github link.
+
+
+Below is a block diagram showing the implemented and modified components of the RPI application.
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg)
 
@@ -47,6 +59,15 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg)
 
+
+### Modifications to AVS SDK 
+
+The primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
+- PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
+- SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
+
+
+### Audio Processing 
 
 Below is a description of how the audio is processed on RPI.
 
@@ -59,8 +80,13 @@ avs_response()
 - Audio sent (to FT900): 8-bit u-law, 16KHZ, mono (1-channel)
 
 
+### Notes
 
-### Action items
+- G711 u-law companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
+- SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
+
+
+# Action items
 
 Below are the action items for the Alexa Demo.
 1. Support for wake-word detection
