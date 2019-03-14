@@ -50,7 +50,7 @@ Notes
 Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am using is AVS SDK is v1.11.0, (12-19-2018). Instructions to install the AVS SDK on RPI can also be found on the github link.
 
 
-Below is a block diagram showing the implemented and modified components of the RPI application.
+Below is a block diagram showing the implemented components of the RPI application.
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg)
 
