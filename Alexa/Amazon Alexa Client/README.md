@@ -23,12 +23,12 @@ Below is a sequence diagram showing the basic interaction of components of the F
 ### FT900 Alexa AVS library
 
 The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include 
-- avs_connect()
-- avs_record_request()
-- avs_send_request()
-- avs_receive_response()
-- avs_play_response()
-- avs_disconnect()
+- avs_connect() - Establish connection with RPI
+- avs_record_request() - Record voice request from microphone and save to SD card
+- avs_send_request() - Read voice request from SD card and send to RPI
+- avs_receive_response() - Receive voice response from RPI and save to SD card
+- avs_play_response() - Play voice response from SD card
+- avs_disconnect() - Closes connection with RPI
 
 
 ### Wakeword Detection
