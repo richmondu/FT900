@@ -41,7 +41,7 @@ avs_play_response()
 - Audio played (to speaker): <b>16-bit PCM, 16KHZ, stereo (2-channels)</b>
 
 Notes
-- <b>G711 u-law</b> companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
+- <b>G711 u-law</b> lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 - Converting stereo data stream to mono data stream is a matter of removing alternating 16-bit WORD.
 
 
@@ -58,9 +58,6 @@ Below is a block diagram showing the implemented components of the RPI applicati
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 
 ![](https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg)
-
-
-### Modifications to AVS SDK 
 
 The primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
 - <b>PortAudioMicrophoneWrapper</b>: PortAudioCallback() contains the data stream for Alexa request
@@ -80,7 +77,7 @@ avs_response()
 - Audio sent (to FT900): <b>8-bit u-law, 16KHZ, mono (1-channel)</b>
 
 Notes
-- <b>G711 u-law</b> companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
+- <b>G711 u-law</b> lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 - <b>SOX</b> utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
@@ -96,4 +93,15 @@ Below are the action items for the Alexa Demo.
 7. RPI should not play response on its speaker when the request is from FT900.
 8. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
 9. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
+
+
+# References
+
+Below are the important links used for the development of the FT900 Alexa Demo.
+1. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
+2. [Getting Started with the AVS Device SDK](https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be)
+3. [AVS SDK](https://github.com/alexa/avs-device-sdk)
+4. [AVS SDK Installation Guide on RPI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
+5. [SOX Sound Exchange Utility](http://sox.sourceforge.net)
+6. [G711 Audio Companding (Compression/Expanding) Algorithms](https://en.wikipedia.org/wiki/G.711)
 
