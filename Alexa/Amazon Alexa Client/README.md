@@ -100,8 +100,8 @@ Below are the action items for the Alexa Demo.
 Below are the important links used for the development of the FT900 Alexa Demo.
 1. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
 2. [Getting Started with the AVS Device SDK](https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be)
-3. [AVS SDK](https://github.com/alexa/avs-device-sdk)
-4. [AVS SDK Installation Guide on RPI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
-5. [SOX Sound Exchange Utility](http://sox.sourceforge.net)
-6. [G711 Audio Companding (Compression/Expanding) Algorithms](https://en.wikipedia.org/wiki/G.711)
+3. [Amazon's Official AVS Device SDK (written in C++)](https://github.com/alexa/avs-device-sdk)
+4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
+5. [SOX Sound Exchange Utility (used for MP3 decoding)](http://sox.sourceforge.net)
+6. [G711 Audio Companding (u-law/a-law Compression/Expanding) Algorithms](https://en.wikipedia.org/wiki/G.711)
 
