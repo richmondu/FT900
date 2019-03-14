@@ -111,7 +111,7 @@ Below are the important links used for the development of this FT900 Alexa Demo.
 
       <a href="https://www.youtube.com/watch?v=F5DixCPJYo8&feature=youtu.be"
        target="_blank"><img src="https://img.youtube.com/vi/F5DixCPJYo8/0.jpg" 
-       alt="Getting Started with the AVS Device SDK" width="320" height="240" border="100" /></a>
+       alt="Getting Started with the AVS Device SDK" width="480" height="360" border="100" /></a>
        
 2. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
 3. [Amazon's Official AVS Device SDK (written in C++)](https://github.com/alexa/avs-device-sdk)
