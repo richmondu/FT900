@@ -40,9 +40,7 @@ avs_play_response()
 - Audio read (from SD card): 16-bit PCM, 16KHZ, mono (1-channel)
 - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)
 
-
-### Notes
-
+Notes
 - G711 u-law companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
 - Converting stereo data stream to mono data stream is a matter of removing alternating 16-bit WORD.
 
@@ -81,9 +79,7 @@ avs_response()
 - Audio received (from Alexa cloud): MP3
 - Audio sent (to FT900): 8-bit u-law, 16KHZ, mono (1-channel)
 
-
-### Notes
-
+Notes
 - G711 u-law companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth by half.
 - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
 
