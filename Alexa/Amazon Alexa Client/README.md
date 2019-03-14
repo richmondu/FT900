@@ -33,9 +33,10 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
 
 ### Wakeword Detection
 
-The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button.
-This works similar to the remote control for Amazon's Firestick TV.
-To support Wakeword detection feature on FT900, external MCUs can be integrated such as [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) with Cortex M4 processor with 384KB of RAM and 1MB of Flash storage.
+The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
+
+To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
+[SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
 
 ### Audio Processing 
