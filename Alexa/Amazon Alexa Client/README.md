@@ -23,7 +23,7 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button.
 This works similar to the remote control for Amazon's Firestick TV.
-To integrate Wakeword detection on FT900, external MCUs such as [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) with Cortex M4 processor with 384KB of RAM and 1MB of Flash storage.
+To support Wakeword detection feature on FT900, external MCUs can be integrated such as [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) with Cortex M4 processor with 384KB of RAM and 1MB of Flash storage.
 
 
 ### Audio Processing 
