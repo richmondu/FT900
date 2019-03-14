@@ -101,7 +101,7 @@ Below are the action items for the Alexa Demo.
 
 # References
 
-Below are the important links used for the development of this FT900 Alexa Demo.
+Below are the essential links to familiarize with Alexa and audio terminologies needed for FT900 Alexa Demo.
 1. [Alexa Voice Service (AVS)](https://developer.amazon.com/alexa-voice-service)
 
       <a href="https://www.youtube.com/watch?v=oTaFX3ZQlnA"
