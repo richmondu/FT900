@@ -61,7 +61,7 @@ avs_play_response()
 
 Notes
 - <b>G711 u-law</b> lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
-- Converting stereo data stream to mono data stream is a matter of removing alternating 16-bit WORD.
+- Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
 # RPI-side (Alexa Gateway)
