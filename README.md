@@ -22,6 +22,6 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 - This will be presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
 
 #### FT900 Alexa Demo
-- This demonstrates using FT900 microcontroller as an Amazon Echo Dot device, where users can talk to Amazon Alexa.
+- This demonstrates using FT900 microcontroller as an Amazon Echo Dot device, where users can directly talk to Alexa.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client
