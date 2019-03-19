@@ -132,7 +132,8 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
 
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
-      1. Download the latest [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway) code.
+      1. Download the latest RPI Alexa Gateway code
+         https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
          This contains the modified AVS SDK.
       2. Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
       3. Compile and run.
