@@ -22,14 +22,14 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 ### FT900 Alexa AVS library
 
-The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include 
-- <b>avs_connect()</b> - Establish connection with RPI
-- <b>avs_record_request()</b> - Record voice request from microphone and save to SD card
-- <b>avs_send_request()</b> - Read voice request from SD card and send to RPI
-- <b>avs_receive_response()</b> - Receive voice response from RPI and save to SD card
-- <b>avs_play_response()</b> - Play voice response from SD card
-- <b>avs_disconnect()</b> - Closes connection with RPI
+The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include:
 
+      - avs_connect() - Establish connection with RPI
+      - avs_record_request() - Record voice request from microphone and save to SD card
+      - avs_send_request() - Read voice request from SD card and send to RPI
+      - avs_receive_response() - Receive voice response from RPI and save to SD card
+      - avs_play_response() - Play voice response from SD card
+      - avs_disconnect() - Closes connection with RPI
 
 ### Wakeword Detection
 
@@ -43,25 +43,25 @@ To support Wakeword detection feature on FT900, external MCUs can be integrated 
 
 Below is a description of how the audio is processed on FT900.
 
-avs_record_request()
-- Audio recorded (from mic): <b>16-bit PCM, 16KHZ, stereo (2-channels)</b>
-- Audio saved (to SD card): <b>16-bit PCM, 16KHZ, mono (1-channel)</b>
+      avs_record_request()
+      - Audio recorded (from mic): 16-bit PCM, 16KHZ, stereo (2-channels)
+      - Audio saved (to SD card): 16-bit PCM, 16KHZ, mono (1-channel)
 
-avs_send_request()
-- Audio read (from SD card): <b>16-bit PCM, 16KHZ, mono (1-channel)</b>
-- Audio sent (to RPI): <b>8-bit u-law, 16KHZ, mono (1-channel)</b>
+      avs_send_request()
+      - Audio read (from SD card): 16-bit PCM, 16KHZ, mono (1-channel)
+      - Audio sent (to RPI): 8-bit u-law, 16KHZ, mono (1-channel)
 
-avs_recv_response()
-- Audio received (from RPI): <b>8-bit u-law, 16KHZ, mono (1-channel)</b>
-- Audio saved (to SD card): <b>16-bit PCM, 16KHZ, mono (1-channel)</b>
+      avs_recv_response()
+      - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
+      - Audio saved (to SD card): 16-bit PCM, 16KHZ, mono (1-channel)
 
-avs_play_response()
-- Audio read (from SD card): <b>16-bit PCM, 16KHZ, mono (1-channel)</b>
-- Audio played (to speaker): <b>16-bit PCM, 16KHZ, stereo (2-channels)</b>
+      avs_play_response()
+      - Audio read (from SD card): 16-bit PCM, 16KHZ, mono (1-channel)
+      - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)
 
-Notes
-- <b>G711 u-law</b> lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
-- Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
+      Notes
+      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
+      - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
 # RPI-side (Alexa Gateway)
@@ -79,25 +79,26 @@ Below is a sequence diagram showing the basic interaction of components of the R
 ### RPI Alexa AVS SDK modifications
 
 The primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
-- <b>PortAudioMicrophoneWrapper</b>: PortAudioCallback() contains the data stream for Alexa request
-- <b>SpeechSynthesizer</b>: startPlaying() contains the data stream for Alexa response
+ 
+      - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
+      - SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
 
 
 ### Audio Processing 
 
 Below is a description of how the audio is processed on RPI.
 
-avs_request()
-- Audio received (from FT900): <b>8-bit u-law, 16KHZ, mono (1-channel)</b>
-- Audio sent (to Alexa cloud): <b>16-bit PCM, 16KHZ, mono (1-channel)</b>
+      avs_request()
+      - Audio received (from FT900): 8-bit u-law, 16KHZ, mono (1-channel)
+      - Audio sent (to Alexa cloud): 16-bit PCM, 16KHZ, mono (1-channel)
 
-avs_response()
-- Audio received (from Alexa cloud): <b>MP3</b>
-- Audio sent (to FT900): <b>8-bit u-law, 16KHZ, mono (1-channel)</b>
+      avs_response()
+      - Audio received (from Alexa cloud): MP3
+      - Audio sent (to FT900): 8-bit u-law, 16KHZ, mono (1-channel)
 
-Notes
-- <b>G711 u-law</b> lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
-- <b>SOX</b> utility is used to convert MP3 data stream to raw PCM16 data stream.
+      Notes
+      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
+      - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
 # Setup guide
