@@ -165,7 +165,7 @@ B. Normal Mode (User presses a key or button to trigger voice recording)
       4. Compile and run.
       5. For UART mode, Press 't' to start recording voice command.
          For GPIO mode, press the button.
-      6. For UART mode, press 't' to stop recording voice command.
+      6. For UART mode, press 't' again to stop recording voice command.
          For GPIO mode, release the button.
       7. After stopping the recording, FT900 will send the voice request to RPI.
 
