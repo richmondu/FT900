@@ -35,6 +35,11 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
 
 The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
 
+The demo provides two ways to trigger voice recording:
+
+      - UART Mode: Press 't' key on UART terminal
+      - GPIO Mode: Press hardware button connected to GPIO 31
+
 To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
 [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
