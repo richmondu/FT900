@@ -503,6 +503,7 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
         return 0;
     }
 
+
     // Record microphone input to SD card while callback function returns true
     // Microphone input is 16-bit stereo
     do {
@@ -516,10 +517,18 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
 
             // convert stereo to mono in-place
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
+#if 1
+                // get average of left and right 16-bit word
+                uint16_t uwLeft = *((uint16_t*)(pcData+j));
+                uint16_t uwRight = *((uint16_t*)(pcData+j+2));
+                *((uint16_t*)(pcData+i)) = (uwLeft+uwRight)/2;
+#else
+                // copy the first 16-bit word, skip the next one
                 pcData[i] = pcData[j];
                 pcData[i+1] = pcData[j+1];
                 // ignore pcData[j+2];
                 // ignore pcData[j+3];
+#endif
             }
             ulRecordSize /= 2;
 

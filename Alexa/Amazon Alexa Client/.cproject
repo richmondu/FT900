@@ -220,8 +220,43 @@
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.641339838" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.2144201437"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.934136349.1718273434" name="/" resourcePath="docs">
+						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.1143740948" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846.1352469902" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904.1968842781" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022.1813974648" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<tool id="com.ftdichip.compiler.ft900.debug.base.1604049525" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.base.1227203840">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.996811118" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.876553612" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1501973703"/>
+							<tool id="com.ftdichip.linker.ft900.debug.base.851417100" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.debug.base.960978232"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1704739476" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.413226720"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1141128727" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.2069482963"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.84447337" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1947390851">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1957551220" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.560512185" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.2073629462"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.692383103" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.2144201437"/>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900debug.base.934136349.763258316" name="/" resourcePath="test">
+						<toolChain id="com.ftdichip.toolchain.ft900.debug.base.911434004" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.debug.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846.2049299446" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.1612168846"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904.2015279022" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.1807522904"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022.2049519381" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1173984022"/>
+							<tool id="com.ftdichip.compiler.ft900.debug.base.148094767" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.debug.base.1227203840"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.654313526" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1501973703"/>
+							<tool id="com.ftdichip.linker.ft900.debug.base.1953147535" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.debug.base.960978232"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1608523539" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.413226720"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1100366004" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.2069482963"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.39201856" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.1947390851"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1067195913" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.2073629462"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.1622969976" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.2144201437"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lib/lwip/src/arch/ethernet.c|lib/lwip/src/core/ipv6|lib/lwip/src/netif/ppp|lib/lwip/src/apps|lib/mbedtls/visualc|lib/mbedtls/tests|lib/mbedtls/scripts|lib/mbedtls/doxygen|lib/mbedtls/configs|lib/mbedtls/programs|lib/lwip/apps/netbiosns|lib/lwip/apps/mdns|lib/liblwip/src/include/ipv6|Sources/ethernet_hal.c|lib/liblwip/src/netif/slipif.c|lib/liblwip/src/netif/ethernetif.c|lib/liblwip/test|lib/lwip/apps/httpd/makefsdata|lib/liblwip/src/core/snmp|lib/lwip/apps/snmp|Sources/ethernet-2.5.c|lib/lwip/apps/httpd|lib/liblwip/src/include/posix|lib/lwip/apps/tftp|lib/liblwip/src/core/ipv6|lib/liblwip/src/netif/ppp|lib/lwip-2.0.3|lib/lwip/apps/lwiperf|lib/lwip/apps/httpd/fsdata.c|lib/lwip/apps/sntp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="test|docs|lib/lwip/src/arch/ethernet.c|lib/lwip/src/core/ipv6|lib/lwip/src/netif/ppp|lib/lwip/src/apps|lib/mbedtls/visualc|lib/mbedtls/tests|lib/mbedtls/scripts|lib/mbedtls/doxygen|lib/mbedtls/configs|lib/mbedtls/programs|lib/lwip/apps/netbiosns|lib/lwip/apps/mdns|lib/liblwip/src/include/ipv6|Sources/ethernet_hal.c|lib/liblwip/src/netif/slipif.c|lib/liblwip/src/netif/ethernetif.c|lib/liblwip/test|lib/lwip/apps/httpd/makefsdata|lib/liblwip/src/core/snmp|lib/lwip/apps/snmp|Sources/ethernet-2.5.c|lib/lwip/apps/httpd|lib/liblwip/src/include/posix|lib/lwip/apps/tftp|lib/liblwip/src/core/ipv6|lib/liblwip/src/netif/ppp|lib/lwip-2.0.3|lib/lwip/apps/lwiperf|lib/lwip/apps/httpd/fsdata.c|lib/lwip/apps/sntp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -402,8 +437,43 @@
 							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.513084091" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.315795513"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900release.base.549004705.92574509" name="/" resourcePath="docs">
+						<toolChain id="com.ftdichip.toolchain.ft900.release.base.1185153168" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.release.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.234929302.86298028" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.234929302"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.886615635.1932131661" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.886615635"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1196635454.792727007" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1196635454"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x" isAbstract="false" osList="all" superClass="com.ftdichip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<tool id="com.ftdichip.compiler.ft900.release.base.694192532" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.release.base.1004524887">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.207250867" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1496415945" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.699804884"/>
+							<tool id="com.ftdichip.linker.ft900.release.base.515741737" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.release.base.1930541065"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.731596034" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1125244054"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1910566261" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1270277930"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.938469582" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.851549533">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.915168242" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.415493627" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1384030615"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.287835884" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.315795513"/>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="com.ftdichip.managedbuild.config.gnu.cross.ft900release.base.549004705.1910772430" name="/" resourcePath="test">
+						<toolChain id="com.ftdichip.toolchain.ft900.release.base.1336156936" name="Bridgetek FT9xx GCC" superClass="com.ftdichip.toolchain.ft900.release.base" unusedChildren="">
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.234929302.458285037" name="Create Flash Image" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.createflash.234929302"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.886615635.206737367" name="Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.printsize.886615635"/>
+							<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1196635454.121882684" name="Toolchain Path" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.option.path.1196635454"/>
+							<tool id="com.ftdichip.compiler.ft900.release.base.715746906" name="FT9xx GCC Compiler" superClass="com.ftdichip.compiler.ft900.release.base.1004524887"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1187534574" name="FT9xx G++ Compiler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.699804884"/>
+							<tool id="com.ftdichip.linker.ft900.release.base.694401644" name="FT9xx GCC Linker" superClass="com.ftdichip.linker.ft900.release.base.1930541065"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1213451519" name="FT9xx G++ Linker" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1125244054"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.305022749" name="FT9xx GCC Archiver" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.archiver.1270277930"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.867208169" name="FT9xx GCC Assembler" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.assembler.851549533"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.122820855" name="FT9xx Flash File Generator" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.createflash.1384030615"/>
+							<tool id="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.2007713390" name="FT9xx Display Image Size" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.tool.printsize.315795513"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lib/lwip/src/core/ipv6|lib/lwip/src/apps|lib/lwip/src/netif/ppp|lib/mbedtls/visualc|lib/mbedtls/tests|lib/mbedtls/scripts|lib/mbedtls/doxygen|lib/mbedtls/configs|lib/mbedtls/programs|lib/lwip/apps/netbiosns|lib/lwip/apps/mdns|lib/liblwip/src/netif/slipif.c|lib/liblwip/test|lib/lwip/apps/httpd/makefsdata|lib/liblwip/src/core/snmp|lib/lwip/apps/snmp|Sources/ethernet-2.5.c|lib/lwip/apps/httpd|lib/liblwip/src/include/posix|lib/lwip/apps/tftp|lib/liblwip/src/core/ipv6|lib/lwip-2.0.3|lib/lwip/apps/lwiperf|lib/lwip/apps/httpd/fsdata.c|lib/lwip/apps/sntp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="test|docs|lib/lwip/src/core/ipv6|lib/lwip/src/apps|lib/lwip/src/netif/ppp|lib/mbedtls/visualc|lib/mbedtls/tests|lib/mbedtls/scripts|lib/mbedtls/doxygen|lib/mbedtls/configs|lib/mbedtls/programs|lib/lwip/apps/netbiosns|lib/lwip/apps/mdns|lib/liblwip/src/netif/slipif.c|lib/liblwip/test|lib/lwip/apps/httpd/makefsdata|lib/liblwip/src/core/snmp|lib/lwip/apps/snmp|Sources/ethernet-2.5.c|lib/lwip/apps/httpd|lib/liblwip/src/include/posix|lib/lwip/apps/tftp|lib/liblwip/src/core/ipv6|lib/lwip-2.0.3|lib/lwip/apps/lwiperf|lib/lwip/apps/httpd/fsdata.c|lib/lwip/apps/sntp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
