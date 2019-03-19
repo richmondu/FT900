@@ -122,14 +122,14 @@ Note you can issue voice commands to either RPI or FT900.
 
 ### RPI setup:
 
-A. Install AVS SDK 
+A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
 
       1. Install the original AVS SDK on RPI using the official installation guide on RPI.
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
       2. Run and verify everything is working as expected.
          Note: press 't' key to issue voice command to Alexa.
 
-B. Integrate AVS SDK modifications
+B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
       1. Download the latest [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway) code.
          This contains the modified AVS SDK.
