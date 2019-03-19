@@ -83,6 +83,8 @@ The primary modifications for the AVS SDK application are contained in PortAudio
       - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
       - SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
 
+After modifications, the total size of the binary executable is 16.2MB.
+
 
 ### Audio Processing 
 
