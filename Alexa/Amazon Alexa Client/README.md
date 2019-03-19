@@ -122,18 +122,18 @@ Below is a description of how the audio is processed on RPI.
 
 ### Prerequisites:
 
-A. FT900
+A. RPI
+
+      1. RPI 3B+ 
+      2. Headphone or speaker
+      3. USB microphone https://circuit.rocks/usb-mini-microphone.html
+
+B. FT900
 
       1. FT900 Rev C board
       2. SD card (<= 32gb)
       3. Headphone or speaker
-      4. (Optional) [Button](https://circuit.rocks/button-digital) (for GPIO mode)
-
-B. RPI
-
-      1. RPI 3B+ 
-      2. Headphone or speaker
-      3. [USB microphone](https://circuit.rocks/usb-mini-microphone.html)
+      4. (Optional) Button https://circuit.rocks/button-digital (for GPIO mode)
 
 Note you can issue voice commands to either RPI or FT900.
 
