@@ -83,6 +83,16 @@ The primary modifications for the AVS SDK application are contained in PortAudio
       - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
       - SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
 
+Below is a list of files modified:
+
+      - SampleApplication.cpp: To initialize FT900ConnectionHandler in separate thread.
+      - PortAudioMicrophoneWrapper.cpp: To feed in request data to microphone datastream.
+      - SpeechSynthesizer.cpp: To call the callback function when response is received.
+      - UserInputManager.cpp: To test pre-recorded audio requests.
+      - MediaPlayer.cpp: To fix audiosink issue.
+      - DefaultClient.h: To provide access to Speech Synthesizer handle.
+
+
 After modifications, the total size of the binary executable is 16.2MB.
 
 
