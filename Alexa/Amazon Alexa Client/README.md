@@ -100,18 +100,88 @@ Notes
 - <b>SOX</b> utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
+# Setup guide
+
+### Prerequisites:
+
+A. FT900
+
+      1. FT900 Rev C board
+      2. SD card (<= 32gb)
+      3. Headphone or speaker
+      4. (Optional) [Button](https://circuit.rocks/button-digital) (for GPIO mode)
+
+B. RPI
+
+      1. RPI 3B+ 
+      2. Headphone or speaker
+      3. [USB microphone](https://circuit.rocks/usb-mini-microphone.html)
+
+Note you can issue voice commands to either RPI or FT900.
+
+
+### RPI setup:
+
+A. Install AVS SDK 
+
+      1. Install the original AVS SDK on RPI using the official installation guide on RPI.
+         https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
+      2. Run and verify everything is working as expected.
+         Note: press 't' key to issue voice command to Alexa.
+
+B. Integrate AVS SDK modifications
+
+      1. Download the latest [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway) code.
+         This contains the modified AVS SDK.
+      2. Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
+      3. Compile and run.
+         Note: You should see logs containing 'FT900'.
+      4. Setup and run FT900.
+
+
+### FT900 setup:
+
+Download the latest [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) code.
+
+A. Test Mode (Use a pre-recorded request contained in SD card)
+
+      1. Change AVS_CONFIG_SERVER_ADDR in avs_config.h.
+         This should contain the IP address of the RPI
+      2. Copy test/request.raw to SD card.
+         request.raw is an audio recording of "What time is it?"
+      3. Compile and run.
+         This automatically sends the pre-recorded audio, request.raw, to RPI.
+
+B. Normal Mode (User presses a key or button to trigger voice recording)
+
+      1. Change AVS_CONFIG_SERVER_ADDR to avs_config.h.
+         This should contain the IP address of the RPI
+      2. Change TEST_MODE to 0 in main.
+      3. (Optional) Change USE_GPIO to 1 in button.c.
+         (Optional) Connect button to GPIO 31, 5V and GND.
+         (Optional) Default is UART instead of GPIO.
+      4. Compile and run.
+      5. For UART mode, Press 't' to start recording voice command.
+         For GPIO mode, press the button.
+      6. For UART mode, press 't' to stop recording voice command.
+         For GPIO mode, release the button.
+      7. After stopping the recording, FT900 will send the voice request to RPI.
+
+
+
 # Action items
 
 Below are the action items for the Alexa Demo.
-1. Support for <b>wake-word detection</b> in FT900. Currently, user has to press down a button to start voice recording.
-2. Use <b>8KHz instead of 16KHz</b> in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
-3. Performance/speed optimization
-4. Support for <b>alarms or notification-based messages</b>. (Currently, only responses triggered by requests are supported.)
-5. Support for <b>very long Alexa responses</b>. (Need to test requests that have very long responses.)
-6. Support for <b>queuing Alexa requests from multiple FT900 clients</b>. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-7. RPI should not play response on its speaker when the request is from FT900.
-8. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
-9. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
+
+      1. Support for <b>wake-word detection</b> in FT900. Currently, user has to press down a button to start voice recording.
+      2. Use <b>8KHz instead of 16KHz</b> in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
+      3. Performance/speed optimization
+      4. Support for <b>alarms or notification-based messages</b>. (Currently, only responses triggered by requests are supported.)
+      5. Support for <b>very long Alexa responses</b>. (Need to test requests that have very long responses.)
+      6. Support for <b>queuing Alexa requests from multiple FT900 clients</b>. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
+      7. RPI should not play response on its speaker when the request is from FT900.
+      8. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
+      9. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
 
 
 # References
