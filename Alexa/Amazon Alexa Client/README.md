@@ -137,10 +137,10 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
-      2. Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
-      3. Compile and run.
+         Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
+      2. Compile and run.
          Note: You should see logs containing 'FT900'.
-      4. Setup and run FT900.
+      3. Setup and run FT900.
 
 
 ### FT900 setup:
