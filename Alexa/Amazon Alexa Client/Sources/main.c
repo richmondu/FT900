@@ -285,7 +285,7 @@ void vTaskAlexa(void *pvParameters)
                 }
                 continue;
             }
-            vTaskDelay(pdMS_TO_TICKS(3000));
+            //vTaskDelay(pdMS_TO_TICKS(3000));
             break;
         } while (1);
 
@@ -371,7 +371,7 @@ void vTaskAlexa(void *pvParameters)
                 vTaskDelay(pdMS_TO_TICKS(1000));
                 continue;
             }
-            vTaskDelay(pdMS_TO_TICKS(3000));
+            //vTaskDelay(pdMS_TO_TICKS(3000));
 
             DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
             if (avs_send_request(acFileNameRequest)) {
