@@ -82,6 +82,15 @@ Below is a block diagram showing the implemented components of the RPI applicati
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg" width="623"/>
 
+      1. A ConnectionHandler thread is initialized in the main function of the AVS SDK SampleApplication.
+      2. The ConnectionHandler thread waits for an FT900 connection.
+      3. Once an FT900 connected, it initializes two threads, FT900RequestHandler and FT900ResponseHandler.
+      4. FT900RequestHandler handles the processing of Alexa requests from FT900.
+      5. FT900ResponseHandler handles the processing of Alexa responses to FT900.
+      6. Only 1 FT900 can connect at a time.
+      7. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      8. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+
 
 ### RPI Alexa AVS SDK modifications
 
