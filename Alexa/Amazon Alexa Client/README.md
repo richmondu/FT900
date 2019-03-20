@@ -130,6 +130,8 @@ This measures the time RPI accepts FT900 connection until it closes the connecti
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/rpi_logs.png" width="623"/>
 
+Note that the logs correspond to the sequence diagram above.
+
 
 # Setup guide
 
