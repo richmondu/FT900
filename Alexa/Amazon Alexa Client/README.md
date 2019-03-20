@@ -128,6 +128,8 @@ One roundabout of Alexa request and Alexa response on the RPI side is about 3.2 
 This is for a simple command, "What time is it?". 
 This measures the time RPI accepts FT900 connection until it closes the connection.
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/rpi_logs.png" width="623"/>
+
 
 # Setup guide
 
