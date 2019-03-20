@@ -198,7 +198,7 @@ int avs_send_request(const char* pcFileName)
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
     uint32_t ulBytesToTransfer = 0;
-    uint32_t ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
+    uint32_t ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE >> 1;
     uint32_t ulBytesSent = 0;
     struct timeval tTimeout = {AVS_CONFIG_TX_TIMEOUT, 0}; // x-second timeout
 
@@ -250,7 +250,7 @@ int avs_send_request(const char* pcFileName)
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
 
     // Send the total bytes in segments of buffer size
-    ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE/2;
+    ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE >> 1;
     ulBytesSent = 0;
 
     // Set a X-second timeout for the operation
@@ -264,8 +264,8 @@ int avs_send_request(const char* pcFileName)
 
         // Read from SD card
         uint32_t ulReadSize = 0;
-        iRet = sdcard_read(&fHandle, pcData, ulBytesToProcess*2, (UINT*)&ulReadSize);
-        ulBytesToProcess = ulReadSize/2;
+        iRet = sdcard_read(&fHandle, pcData, ulBytesToProcess<<1, (UINT*)&ulReadSize);
+        ulBytesToProcess = ulReadSize >> 1;
         if (iRet != 0) {
             DEBUG_PRINTF(">> avs_send_request(): iRet = %d\r\n", iRet);
             sdcard_close(&fHandle);
@@ -274,7 +274,7 @@ int avs_send_request(const char* pcFileName)
 
         if (ulBytesToProcess) {
             // Convert in-place from 16-bit to 8-bit
-            pcm16_to_ulaw(ulBytesToProcess*2, pcData, pcData);
+            pcm16_to_ulaw(ulBytesToProcess<<1, pcData, pcData);
 
             // Send the converted bytes
             iRet = send(g_lSocket, pcData, ulBytesToProcess, 0);
@@ -315,7 +315,7 @@ int avs_recv_response(const char* pcFileName)
     FIL fHandle;
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
-    char acTemp[AVS_CONFIG_RXTX_BUFFER_SIZE/2];
+    char acTemp[AVS_CONFIG_RXTX_BUFFER_SIZE >> 1];
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
     uint32_t ulBytesToProcess = sizeof(acTemp);
@@ -366,9 +366,10 @@ int avs_recv_response(const char* pcFileName)
 
         // Save to 16-bit decoded data to SD card
         uint32_t ulWriteSize = 0;
-        sdcard_write(&fHandle, pcData, iRet*2, (UINT*)&ulWriteSize);
-        if (iRet*2 != ulWriteSize) {
-            DEBUG_PRINTF("avs_recv_response(): sdcard_write failed! %d %d\r\n\r\n", iRet*2, (int)ulWriteSize);
+        iRet = iRet<<1;
+        sdcard_write(&fHandle, pcData, iRet, (UINT*)&ulWriteSize);
+        if (iRet != ulWriteSize) {
+            DEBUG_PRINTF("avs_recv_response(): sdcard_write failed! %d %d\r\n\r\n", iRet, (int)ulWriteSize);
             sdcard_close(&fHandle);
             return 0;
         }
@@ -378,7 +379,7 @@ int avs_recv_response(const char* pcFileName)
 
     // Close the file
     sdcard_close(&fHandle);
-    DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesReceived*2);
+    DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesReceived<<1);
 
 #if 1
     // f_read fails when sd_dir() is not called for some reason
@@ -386,7 +387,7 @@ int avs_recv_response(const char* pcFileName)
     sdcard_dir("");
 #endif
 
-    return ulBytesReceived*2;
+    return ulBytesReceived<<1;
 }
 
 
@@ -405,7 +406,7 @@ int avs_play_response(const char* pcFileName)
     uint32_t ulReadSize = 0;
     uint32_t ulTransferSize = 0;
     char* pcData = g_pcAudioBuffer;
-    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE/2];
+    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE >> 1];
 
 
     audio_speaker_begin();
@@ -456,7 +457,7 @@ int avs_play_response(const char* pcFileName)
                 }
 
                 // Play buffer to speaker
-                audio_play(pcData, ulTransferSize*2);
+                audio_play(pcData, ulTransferSize<<1);
 
                 // Increment offset
                 ulFileOffset += ulTransferSize;
@@ -521,7 +522,7 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
                 // get average of left and right 16-bit word
                 uint16_t uwLeft = *((uint16_t*)(pcData+j));
                 uint16_t uwRight = *((uint16_t*)(pcData+j+2));
-                *((uint16_t*)(pcData+i)) = (uwLeft+uwRight)/2;
+                *((uint16_t*)(pcData+i)) = (uwLeft+uwRight) >> 1;
 #else
                 // copy the first 16-bit word, skip the next one
                 pcData[i] = pcData[j];
@@ -530,7 +531,7 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
                 // ignore pcData[j+3];
 #endif
             }
-            ulRecordSize /= 2;
+            ulRecordSize = ulRecordSize >> 1;
 
             // write mic data to SD card
             uint32_t ulWriteSize = 0;
