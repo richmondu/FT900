@@ -88,8 +88,16 @@ Below is a sequence diagram showing the basic interaction of components of the R
       4. FT900RequestHandler handles the processing of Alexa requests from FT900.
       5. FT900ResponseHandler handles the processing of Alexa responses to FT900.
       6. Only 1 FT900 can connect at a time.
-      7. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
-      8. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+      7. FT900RequestHandler receives Alexa request (8-bit compressed using ulaw algorithm) from FT900.
+      8. FT900RequestHandler decompresses/expands the Alexa request from 8-bit to 16-bit.
+      9. FT900RequestHandler copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
+      10. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
+      11. SpeechSynthesizer copies the data stream to an MP3 file.
+      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format.
+      13. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
+      14. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
+      14. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      15. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
 ### RPI Alexa AVS SDK modifications
