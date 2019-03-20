@@ -120,6 +120,15 @@ Below is a description of how the audio is processed on RPI.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
+# Performance
+
+A. RPI
+
+One roundabout of Alexa request and Alexa response on the RPI side is about 3.2 seconds.
+This is for a simple command, "What time is it?". 
+This measures the time RPI accepts FT900 connection until it closes the connection.
+
+
 # Setup guide
 
 ### Prerequisites:
