@@ -102,7 +102,8 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 ### RPI Alexa AVS SDK modifications
 
-The primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
+In addition to the new modules implemented described in the block diagram and sequence diagram, 
+the primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
  
       - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
       - SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
@@ -116,6 +117,17 @@ Below is a list of files modified:
       - MediaPlayer.cpp: To fix audiosink issue.
       - DefaultClient.h: To provide access to Speech Synthesizer handle.
 
+Below is a list of files created:
+
+      - FT900ConnectionHandler.cpp
+      - FT900RequestHandler.cpp
+      - FT900RequestHook.cpp
+      - FT900ResponseHandler.cpp
+      - FT900ResponseHook.cpp
+      - FT900AudioCompression.cpp
+      - FT900AudioCompressionHelper.cpp
+      - FT900AudioDecoding.cpp
+      - FT900AudioRateConversion.cpp
 
 After modifications, the total size of the binary executable is 16.2MB.
 
@@ -133,7 +145,7 @@ Below is a description of how the audio is processed on RPI.
       - Audio sent (to FT900): 8-bit u-law, 16KHZ, mono (1-channel)
 
       Notes
-      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
+      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
