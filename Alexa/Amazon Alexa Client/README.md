@@ -172,6 +172,8 @@ B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
          sudo apt-get install sox libsox-fmt-mp3
       3. Compile and run.
          Note: You should see logs containing 'FT900'.
+         Note: Verify everything is working as expected.
+         Note: press 't' key to issue voice command to Alexa.
       4. Setup and run FT900.
 
 
