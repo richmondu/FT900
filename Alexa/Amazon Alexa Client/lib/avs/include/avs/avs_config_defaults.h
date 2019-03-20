@@ -23,11 +23,11 @@
 #endif
 
 #ifndef AVS_CONFIG_RX_TIMEOUT
-#define AVS_CONFIG_RX_TIMEOUT           (20)
+#define AVS_CONFIG_RX_TIMEOUT           (10)
 #endif
 
 #ifndef AVS_CONFIG_TX_TIMEOUT
-#define AVS_CONFIG_TX_TIMEOUT           (15)
+#define AVS_CONFIG_TX_TIMEOUT           (10)
 #endif
 
 #ifndef AVS_CONFIG_MAX_RECORD_SIZE
