@@ -177,7 +177,7 @@ It takes 5.0 seconds to wait and receive the Alexa response. On RPI side, this i
 
 
 
-# Audio Quality
+# Audio quality analysis
 
 ### A. FT900 Speaker playback
 
