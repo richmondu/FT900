@@ -191,7 +191,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
       1. Install the original AVS SDK on RPI using the official installation guide on RPI.
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
       2. Run and verify everything is working as expected.
-         Note: press 't' key to issue voice command to Alexa.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
 
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
@@ -202,7 +202,7 @@ B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
       3. Compile and run.
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
-         Note: press 't' key to issue voice command to Alexa.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
       4. Setup and run FT900.
 
 
