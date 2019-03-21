@@ -129,6 +129,8 @@ Below is a list of files created:
       - FT900AudioDecoding.cpp
       - FT900AudioRateConversion.cpp
 
+All of new files starts with FT900 to easily distinguish it from original AVS SDK files. 
+
 After modifications, the total size of the binary executable is 16.2MB.
 
 
