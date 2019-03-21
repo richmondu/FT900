@@ -60,6 +60,7 @@
 
 #define USE_TEST_MODE 1
 #define USE_MEASURE_PERFORMANCE 1
+#define BUTTON_GPIO  (31)
 
 
 
@@ -72,16 +73,12 @@
 
 
 
-#define BUTTON_GPIO  (31)
-
 /* Task Configurations. */
-#define TASK_STATS_STACK_SIZE           (500)           //Task Stack Size
+#define TASK_STATS_STACK_SIZE           (1024)          //Task Stack Size
 #define TASK_STATS_PRIORITY             (1)             //Task Priority
-#define TASK_STATS_PERIOD_MS            (5000)
 
-#define TASK_CLIENT_STACK_SIZE          (5000)          //Task Stack Size
+#define TASK_CLIENT_STACK_SIZE          (6144)          //Task Stack Size
 #define TASK_CLIENT_PRIORITY            (1)             //Task Priority
-#define TASK_CLIENT_PERIOD_MS           (100)
 
 #define TASK_NOTIFY_NETIF_UP            0x01
 #define TASK_NOTIFY_LINK_UP             0x02
