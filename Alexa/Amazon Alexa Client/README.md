@@ -129,6 +129,8 @@ Below is a list of files created:
       - FT900AudioDecoding.cpp
       - FT900AudioRateConversion.cpp
 
+All of new files starts with FT900 to easily distinguish it from original AVS SDK files. 
+
 After modifications, the total size of the binary executable is 16.2MB.
 
 
@@ -153,7 +155,7 @@ Below is a description of how the audio is processed on RPI.
 
 A. RPI
 
-One roundabout of Alexa request and Alexa response on the RPI side is about 3.2 seconds.
+One roundabout of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds.
 This is for a simple command, "What time is it?". 
 This measures the time RPI accepts FT900 connection until it closes the connection.
 
@@ -191,7 +193,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
       1. Install the original AVS SDK on RPI using the official installation guide on RPI.
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
       2. Run and verify everything is working as expected.
-         Note: press 't' key to issue voice command to Alexa.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
 
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
@@ -202,7 +204,7 @@ B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
       3. Compile and run.
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
-         Note: press 't' key to issue voice command to Alexa.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
       4. Setup and run FT900.
 
 
