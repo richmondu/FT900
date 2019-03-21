@@ -153,7 +153,7 @@ Below is a description of how the audio is processed on RPI.
 
 # Performance
 
-A. RPI
+### A. RPI
 
 One roundabout of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds.
 This is for a simple command, "What time is it?". 
@@ -164,7 +164,7 @@ This measures the time RPI accepts FT900 connection until it closes the connecti
 Note that the logs correspond to the sequence diagram above.
 
 
-B. FT900
+### B. FT900
 
 One roundabout of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 6-7 seconds.
 This is for a simple command, "What time is it?". 
