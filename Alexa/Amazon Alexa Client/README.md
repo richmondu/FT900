@@ -164,6 +164,15 @@ This measures the time RPI accepts FT900 connection until it closes the connecti
 Note that the logs correspond to the sequence diagram above.
 
 
+B. FT900
+
+One roundabout of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 6-7 seconds.
+This is for a simple command, "What time is it?". 
+This measures the time FT900 sends the Alexa request until it plays the Alexa response.
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs.png" width="623"/>
+
+
 # Setup guide
 
 ### Prerequisites:
