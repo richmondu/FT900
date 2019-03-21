@@ -58,7 +58,7 @@
 
 
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
 #else
@@ -67,12 +67,16 @@
 
 
 
+#define USE_DO_DIR 0
+
+
 static int   g_lSocket = -1;
 static char* g_pcTxRxBuffer  = NULL;
 static char* g_pcAudioBuffer = NULL;
 
 
 
+#ifdef DEBUG
 static const char* getConfigSamplingRateStr()
 {
     if (AVS_CONFIG_SAMPLING_RATE == SAMPLING_RATE_44100HZ) {
@@ -93,6 +97,7 @@ static const char* getConfigSamplingRateStr()
 
     return "Unknown";
 }
+#endif
 
 int avs_init()
 {
@@ -203,10 +208,10 @@ int avs_send_request(const char* pcFileName)
     struct timeval tTimeout = {AVS_CONFIG_TX_TIMEOUT, 0}; // x-second timeout
 
 
-#if 1
+#if USE_DO_DIR
     DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
     sdcard_dir("");
-#endif
+#endif // USE_DO_DIR
 
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
@@ -328,9 +333,9 @@ int avs_recv_response(const char* pcFileName)
         return 0;
     }
 
+
     // Set a 15-second timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
-
 
     // Negotiate the bytes to transfer
     iRet = recv(g_lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
@@ -341,6 +346,9 @@ int avs_recv_response(const char* pcFileName)
     }
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
+
+    // Set a 15-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Receive the total bytes in segments of buffer size
     while (ulBytesReceived < ulBytesToReceive) {
@@ -381,11 +389,11 @@ int avs_recv_response(const char* pcFileName)
     sdcard_close(&fHandle);
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesReceived<<1);
 
-#if 1
+#if USE_DO_DIR
     // f_read fails when sd_dir() is not called for some reason
     DEBUG_PRINTF("\r\nChecking SD card directory...\r\n");
     sdcard_dir("");
-#endif
+#endif // USE_DO_DIR
 
     return ulBytesReceived<<1;
 }
