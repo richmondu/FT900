@@ -102,7 +102,20 @@ unsigned char linear2ulaw(short pcm_val)
    }
 }
 
-static void pcm16_to_xlaw(unsigned char *linear_to_xlaw, int src_length, const char *src_samples, char *dst_samples)
+short ulaw2linear(unsigned char	u_val)
+{
+   u_val = ~u_val;
+   short t = ((u_val & QUANT_MASK) << 3) + BIAS;
+   t <<= ((unsigned)u_val & SEG_MASK) >> SEG_SHIFT;
+   return ((u_val & SIGN_BIT) ? (BIAS - t) : (t - BIAS));
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+void pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
 {
     int i;
     const unsigned short *s_samples;
@@ -113,18 +126,7 @@ static void pcm16_to_xlaw(unsigned char *linear_to_xlaw, int src_length, const c
     }
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-short ulaw2linear(unsigned char	u_val)
-{
-   u_val = ~u_val;
-   short t = ((u_val & QUANT_MASK) << 3) + BIAS;
-   t <<= ((unsigned)u_val & SEG_MASK) >> SEG_SHIFT;
-   return ((u_val & SIGN_BIT) ? (BIAS - t) : (t - BIAS));
-}
-
-static void xlaw_to_pcm16(unsigned short *xlaw_to_linear, int src_length, const char *src_samples, char *dst_samples)
+void ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
 {
     int i;
     unsigned char *s_samples;
@@ -136,20 +138,6 @@ static void xlaw_to_pcm16(unsigned short *xlaw_to_linear, int src_length, const 
     for (i=0; i < src_length; i++) {
         d_samples[i] = ulaw2linear(s_samples[i]);
     }
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-void pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
-{
-    pcm16_to_xlaw(NULL, src_length, src_samples, dst_samples);
-}
-
-void ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
-{
-    xlaw_to_pcm16(NULL, src_length, src_samples, dst_samples);
 }
 
 
