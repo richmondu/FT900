@@ -47,16 +47,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "ft900.h"
 #include "tinyprintf.h"
 #include "net.h"
 #include "task.h"
 #include "avs/avs.h"
 #include "button.h"
+#include "time_duration.h"
 
 
 
-#define TEST_MODE 1
+#define USE_TEST_MODE 1
+#define USE_MEASURE_PERFORMANCE 1
 
 
 
@@ -130,7 +133,13 @@ int main(void)
     /* Use sys_i2c_swop(1) to activate. */
     gpio_function(46, pad_i2c1_scl); /* I2C1_SCL */
     gpio_function(47, pad_i2c1_sda); /* I2C1_SDA */
-#endif
+#endif // NET_USE_EEPROM
+
+
+#if USE_MEASURE_PERFORMANCE
+    time_duration_setup();
+#endif // USE_MEASURE_PERFORMANCE
+
 
     /* Print out a welcome message... */
     uart_puts(UART0,
@@ -246,8 +255,7 @@ static void set_filenames(char *pcRequest, int lRequestSize, char *pcResponse, i
 }
 
 
-
-#if TEST_MODE
+#if USE_TEST_MODE
 ////////////////////////////////////////////////////////////////////////////////////////
 // Alexa task
 // FYI: Modify avs_config.h for IP address, audio sampling rate, etc.
@@ -289,6 +297,31 @@ void vTaskAlexa(void *pvParameters)
             break;
         } while (1);
 
+
+#if USE_MEASURE_PERFORMANCE
+        struct tm time0 = {0};
+        struct tm time1 = {0};
+        struct tm time2 = {0};
+        struct tm timeX = {0};
+        time_duration_get_time(&time0);
+
+        DEBUG_PRINTF("\r\nSending Alexa query...");
+        if (avs_send_request(acFileNameRequest)) {
+            time_duration_get_time(&time1);
+
+            DEBUG_PRINTF("[%d seconds]\r\nReceiving Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_response(acFileNameResponse)) {
+                time_duration_get_time(&time2);
+
+                DEBUG_PRINTF("[%d seconds]\r\nPlaying Alexa response...", (int)time_duration_get(&time2, &time1));
+                avs_play_response(acFileNameResponse);
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time2));
+            }
+        }
+
+        DEBUG_PRINTF("Performance: %d seconds\r\n", (int)time_duration_get(&timeX, &time0));
+#else // USE_MEASURE_PERFORMANCE
         DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
         if (avs_send_request(acFileNameRequest)) {
 
@@ -299,6 +332,8 @@ void vTaskAlexa(void *pvParameters)
                 avs_play_response(acFileNameResponse);
             }
         }
+#endif // USE_MEASURE_PERFORMANCE
+
 
         DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
         avs_disconnect();
@@ -314,7 +349,7 @@ void vTaskAlexa(void *pvParameters)
 
     avs_free();
 }
-#else // TEST_MODE
+#else // USE_TEST_MODE
 
 static int g_lRecordAudio = 0;
 static int g_lProcessAudio = 0;
@@ -373,16 +408,43 @@ void vTaskAlexa(void *pvParameters)
             }
             //vTaskDelay(pdMS_TO_TICKS(3000));
 
-            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
-            if (avs_send_request(acFileNameRequest)) {
 
-                DEBUG_PRINTF("\r\nReceiving Alexa response...\r\n");
-                if (avs_recv_response(acFileNameResponse)) {
+#if USE_MEASURE_PERFORMANCE
+        struct tm time0 = {0};
+        struct tm time1 = {0};
+        struct tm time2 = {0};
+        struct tm timeX = {0};
+        time_duration_get_time(&time0);
 
-                    DEBUG_PRINTF("\r\nPlaying Alexa response...\r\n");
-                    avs_play_response(acFileNameResponse);
-                }
+        DEBUG_PRINTF("\r\nSending Alexa query...");
+        if (avs_send_request(acFileNameRequest)) {
+            time_duration_get_time(&time1);
+
+            DEBUG_PRINTF("[%d seconds]\r\nReceiving Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_response(acFileNameResponse)) {
+                time_duration_get_time(&time2);
+
+                DEBUG_PRINTF("[%d seconds]\r\nPlaying Alexa response...", (int)time_duration_get(&time2, &time1));
+                avs_play_response(acFileNameResponse);
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time2));
             }
+        }
+
+        DEBUG_PRINTF("Performance: %d seconds\r\n", (int)time_duration_get(&timeX, &time0));
+#else // USE_MEASURE_PERFORMANCE
+        DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+        if (avs_send_request(acFileNameRequest)) {
+
+            DEBUG_PRINTF("\r\nReceiving Alexa response...\r\n");
+            if (avs_recv_response(acFileNameResponse)) {
+
+                DEBUG_PRINTF("\r\nPlaying Alexa response...\r\n");
+                avs_play_response(acFileNameResponse);
+            }
+        }
+#endif // USE_MEASURE_PERFORMANCE
+
 
             DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
             avs_disconnect();
@@ -419,6 +481,6 @@ int record_audio(void)
 {
     return g_lRecordAudio;
 }
-#endif // TEST_MODE
+#endif // USE_TEST_MODE
 
 
