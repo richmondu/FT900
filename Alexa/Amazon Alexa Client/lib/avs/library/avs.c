@@ -70,9 +70,9 @@
 #define USE_DO_DIR 0
 
 
-static int   g_lSocket = -1;
-static char* g_pcTxRxBuffer  = NULL;
-static char* g_pcAudioBuffer = NULL;
+static int   g_lSocket        = -1;
+static char* g_pcTxRxBuffer   = NULL;
+static char* g_pcAudioBuffer  = NULL;
 
 
 
@@ -124,7 +124,6 @@ int avs_init()
 
 void avs_free()
 {
-
     if (g_pcTxRxBuffer) {
         vPortFree(g_pcTxRxBuffer);
         g_pcTxRxBuffer = NULL;
@@ -203,7 +202,7 @@ int avs_send_request(const char* pcFileName)
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
     uint32_t ulBytesToTransfer = 0;
-    uint32_t ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE >> 1;
+    uint32_t ulBytesToProcess = AVS_CONFIG_TX_SIZE;
     uint32_t ulBytesSent = 0;
     struct timeval tTimeout = {AVS_CONFIG_TX_TIMEOUT, 0}; // x-second timeout
 
@@ -242,6 +241,10 @@ int avs_send_request(const char* pcFileName)
         return 0;
     }
 
+
+    // Set a X-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
     // Send the flag for configurations
     // Currently the flag is only for specifying the sampling rate of the response
     uint32_t ulFlag = AVS_CONFIG_SAMPLING_RATE;
@@ -254,9 +257,6 @@ int avs_send_request(const char* pcFileName)
 
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
 
-    // Send the total bytes in segments of buffer size
-    ulBytesToProcess = AVS_CONFIG_RXTX_BUFFER_SIZE >> 1;
-    ulBytesSent = 0;
 
     // Set a X-second timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
@@ -320,7 +320,7 @@ int avs_recv_response(const char* pcFileName)
     FIL fHandle;
     int iRet = 0;
     char* pcData = g_pcTxRxBuffer;
-    char acTemp[AVS_CONFIG_RXTX_BUFFER_SIZE >> 1];
+    char acTemp[AVS_CONFIG_RX_SIZE];
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
     uint32_t ulBytesToProcess = sizeof(acTemp);
@@ -414,7 +414,6 @@ int avs_play_response(const char* pcFileName)
     uint32_t ulReadSize = 0;
     uint32_t ulTransferSize = 0;
     char* pcData = g_pcAudioBuffer;
-    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE >> 1];
 
 
     audio_speaker_begin();
@@ -437,6 +436,61 @@ int avs_play_response(const char* pcFileName)
     DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
         pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
 
+
+#if 1
+    // This code maximizes FIFO sizes of SD CARD (4KB) and SPEAKER (2KB)
+    // As a result, audio quality is very good
+    char* pcSDCard = g_pcTxRxBuffer;
+    uint32_t ulPlayed = 0;
+
+    do {
+        // Compute size to transfer
+        ulTransferSize = AVS_CONFIG_SDCARD_BUFFER_SIZE;
+        if (ulFileSize - ulFileOffset < ulTransferSize) {
+            ulTransferSize = ulFileSize - ulFileOffset;
+        }
+
+        // Read 4KB data from SD card to buffer
+        // SD Card FIFO size is 4KB so this is the efficient read size
+        ulReadSize = 0;
+        sdcard_read(&fHandle, pcSDCard, ulTransferSize, (UINT*)&ulReadSize);
+        ulFileOffset += ulReadSize;
+        //DEBUG_PRINTF(">> avsPlayAlexaResponse fileOffset %d totalReadSize %d\r\n", fileOffset, totalReadSize);
+
+        // Write the 4KB data to speaker
+        // Speaker FIFO size is 2KB only
+        // Data is MONO so must be converted to STEREO
+        // So write 4KB in 1KB chunks (==2KB for STEREO mode)
+        ulPlayed = 0;
+        ulTransferSize = 1024;
+        while (ulPlayed < ulReadSize) {
+            // Process transfer if the speaker FIFO is empty
+            if (audio_speaker_ready()) {
+                if (ulReadSize - ulPlayed < ulTransferSize) {
+                    ulTransferSize = ulReadSize - ulPlayed;
+                }
+
+                // Duplicate short for stereo 2 channel
+                // Input is mono 1 channel audio data stream
+                // I2S requires stereo 2 channel audio data stream
+                for (int i=0, j=0; i<ulTransferSize; i+=2, j+=4) {
+                    *((uint16_t*)&pcData[j]) = *((uint16_t*)&pcSDCard[ulPlayed+i]);
+                    *((uint16_t*)&pcData[j+2]) = *((uint16_t*)&pcData[j]);
+                }
+
+                // Play buffer to speaker
+                audio_play((uint8_t *)pcData, ulTransferSize<<1);
+
+                // Clear interrupt flag
+                audio_speaker_clear();
+
+                // Increment offset
+                ulPlayed += ulTransferSize;
+            }
+        }
+    } while (ulFileOffset != ulFileSize);
+#else
+    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE >> 1];
     do {
         // Process transfer if the speaker FIFO is empty
         if (audio_speaker_ready()) {
@@ -465,7 +519,7 @@ int avs_play_response(const char* pcFileName)
                 }
 
                 // Play buffer to speaker
-                audio_play(pcData, ulTransferSize<<1);
+                audio_play((uint8_t*)pcData, ulTransferSize<<1);
 
                 // Increment offset
                 ulFileOffset += ulTransferSize;
@@ -478,6 +532,7 @@ int avs_play_response(const char* pcFileName)
             audio_speaker_clear();
         }
     } while (ulFileOffset != ulFileSize);
+#endif
 
 
     // Close the file
@@ -522,22 +577,15 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
             ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE;
 
             // copy data from microphone
-            audio_record(pcData, ulRecordSize);
+            audio_record((uint8_t*)pcData, ulRecordSize);
 
             // convert stereo to mono in-place
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
-#if 1
                 // get average of left and right 16-bit word
+                // previously, this was just copying the first 16-bit word, skip the next one
                 uint16_t uwLeft = *((uint16_t*)(pcData+j));
                 uint16_t uwRight = *((uint16_t*)(pcData+j+2));
                 *((uint16_t*)(pcData+i)) = (uwLeft+uwRight) >> 1;
-#else
-                // copy the first 16-bit word, skip the next one
-                pcData[i] = pcData[j];
-                pcData[i+1] = pcData[j+1];
-                // ignore pcData[j+2];
-                // ignore pcData[j+3];
-#endif
             }
             ulRecordSize = ulRecordSize >> 1;
 
