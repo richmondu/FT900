@@ -192,6 +192,10 @@ Each 1KB data is converted from mono (1-channel) to stereo (2-channels).
 This results to 2KB stereo data which is then written to I2S Master speaker. 
 The process is repeated until the recorded audio file is completely processed.
 
+When streaming the Alexa response directly to the speaker without saving to SD card,
+512 bytes is received from RPI, then expanded from 8-bit to 16-bit (1KB), then converted mono to stereo (2KB).
+This is an efficient transfer because I2S Master FIFO size is only 2KB.
+
 
 ### B. FT900 Microphone recording
 
