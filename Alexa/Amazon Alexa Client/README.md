@@ -18,6 +18,8 @@ PanL Hub, which runs on RPI, acts as the <b>Alexa Gateway</b> while the PanL Dis
 Below is a block diagram showing the implemented components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg" width="623"/>
 
+RTC library is used to measure time elapsed for performance measurement.
+
 Below is a sequence diagram showing the basic interaction of components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
 
@@ -31,6 +33,7 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_send_request() - Read voice request from SD card and send to RPI
       - avs_receive_response() - Receive voice response from RPI and save to SD card
       - avs_play_response() - Play voice response from SD card
+      - avs_receive_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
       - avs_disconnect() - Closes connection with RPI
 
 ### Wakeword Detection
@@ -66,6 +69,10 @@ Below is a description of how the audio is processed on FT900.
       - Audio read (from SD card): 16-bit PCM, 16KHZ, mono (1-channel)
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)
 
+      avs_recv_and_play_response()
+      - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
+      - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels) 
+      
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
