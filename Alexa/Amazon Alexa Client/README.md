@@ -175,7 +175,7 @@ It takes 4.0 seconds to wait and receive the Alexa response. On RPI side, this i
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs.png" width="623"/>
 
-Since the delay is in the processing of Alexa response, one alternative solution is to play the audio stream directly to the speaker without saving it to the SD card. By doing this, performance on the FT900 side (FT900-RPI-AVS-RPI-FT900) has been optimized to 4 seconds. This is a major performance improvement. Audio quality is actually very good.
+Since the delay is in the processing of Alexa response, one alternative solution is to play the audio stream directly to the speaker without saving it to the SD card. By doing this, performance on the FT900 side (FT900-RPI-AVS-RPI-FT900) has been optimized to 4-5 seconds. This is a major performance improvement. And audio quality is actually very good. Audio quality did not degrade or cause jittering.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs2.png" width="623"/>
 
