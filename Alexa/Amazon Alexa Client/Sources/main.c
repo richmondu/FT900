@@ -58,10 +58,10 @@
 
 
 
-#define USE_TEST_MODE 1
-#define USE_MEASURE_PERFORMANCE  1
-#define USE_PLAY_RECORDED_AUDIO  0
-
+#define USE_TEST_MODE                   1
+#define USE_MEASURE_PERFORMANCE         1
+#define USE_PLAY_RECORDED_AUDIO         0
+#define USE_RECVPLAY_RESPONSE           1
 #define BUTTON_GPIO  (31)
 
 
@@ -76,11 +76,11 @@
 
 
 /* Task Configurations. */
-#define TASK_STATS_STACK_SIZE           (1024)          //Task Stack Size
-#define TASK_STATS_PRIORITY             (1)             //Task Priority
+#define TASK_ALEXA_STACK_SIZE           (5120)
+#define TASK_ALEXA_PRIORITY             (1)
 
-#define TASK_CLIENT_STACK_SIZE          (6144)          //Task Stack Size
-#define TASK_CLIENT_PRIORITY            (1)             //Task Priority
+#define TASK_CONNECT_STACK_SIZE         (1024)
+#define TASK_CONNECT_PRIORITY           (2)
 
 #define TASK_NOTIFY_NETIF_UP            0x01
 #define TASK_NOTIFY_LINK_UP             0x02
@@ -153,9 +153,9 @@ int main(void)
 
     if (xTaskCreate(vTaskAlexa,
         "Alexa",
-        TASK_CLIENT_STACK_SIZE,
+        TASK_ALEXA_STACK_SIZE,
         NULL,
-        TASK_CLIENT_PRIORITY,
+        TASK_ALEXA_PRIORITY,
         &gx_Task_Handle) != pdTRUE) {
         DEBUG_PRINTF("Client failed\r\n");
     }
@@ -229,9 +229,9 @@ static inline void initialize_network()
 
     if (xTaskCreate(vTaskConnect,
             "Connect",
-            TASK_STATS_STACK_SIZE,
+            TASK_CONNECT_STACK_SIZE,
             NULL,
-            TASK_STATS_PRIORITY,
+            TASK_CONNECT_PRIORITY,
             NULL) != pdTRUE) {
         DEBUG_PRINTF("Connect Monitor failed\n");
     }
@@ -245,13 +245,9 @@ static inline void initialize_network()
 ////////////////////////////////////////////////////////////////////////////////////////
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
-#define STR_REQUEST  "REQUEST"
-#define STR_RESPONSE "RESPONSE"
-static void set_filenames(char *pcRequest, int lRequestSize, char *pcResponse, int lResponseSize, int lCounter)
-{
-    tfp_snprintf( pcRequest,  lRequestSize,  "%s.raw", STR_REQUEST);
-    tfp_snprintf( pcResponse, lResponseSize, "%s.raw", STR_RESPONSE);
-}
+#define STR_REQUEST  "REQUEST.raw"
+#define STR_RESPONSE "RESPONSE.raw"
+
 
 
 #if USE_TEST_MODE
@@ -262,9 +258,8 @@ static void set_filenames(char *pcRequest, int lRequestSize, char *pcResponse, i
 void vTaskAlexa(void *pvParameters)
 {
     (void) pvParameters;
-    int lCounter = 0;
-    char acFileNameRequest[32] = {0};
-    char acFileNameResponse[32] = {0};
+    char* acFileNameRequest = STR_REQUEST;
+    char* acFileNameResponse = STR_RESPONSE;
 
 
     DEBUG_PRINTF("\r\nInitializing network...\r\n");
@@ -273,7 +268,6 @@ void vTaskAlexa(void *pvParameters)
 
     DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
     avs_init();
-    set_filenames(acFileNameRequest, sizeof(acFileNameRequest), acFileNameResponse, sizeof(acFileNameResponse), ++lCounter);
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     for (;;)
@@ -310,6 +304,17 @@ void vTaskAlexa(void *pvParameters)
         if (avs_send_request(acFileNameRequest)) {
             time_duration_get_time(&time1);
 
+#if USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("[%d seconds]\r\nStreaming Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_and_play_response()) {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+            else {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+#else // USE_RECVPLAY_RESPONSE
             DEBUG_PRINTF("[%d seconds]\r\nReceiving Alexa response...", (int)time_duration_get(&time1, &time0));
             if (avs_recv_response(acFileNameResponse)) {
                 time_duration_get_time(&time2);
@@ -320,10 +325,10 @@ void vTaskAlexa(void *pvParameters)
                 DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time2));
             }
             else {
-                time_duration_get_time(&time2);
                 time_duration_get_time(&timeX);
-                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&time2, &time1));
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
             }
+#endif // USE_RECVPLAY_RESPONSE
         }
 
         DEBUG_PRINTF("Performance: %d seconds\r\n", (int)time_duration_get(&timeX, &time0));
@@ -357,8 +362,8 @@ void vTaskAlexa(void *pvParameters)
 }
 #else // USE_TEST_MODE
 
-static int g_lRecordAudio = 0;
-static int g_lProcessAudio = 0;
+static uint8_t g_lRecordAudio = 0;
+static uint8_t g_lProcessAudio = 0;
 int record_audio(void);
 void vIsrAlexaButton(void);
 
@@ -369,9 +374,10 @@ void vIsrAlexaButton(void);
 void vTaskAlexa(void *pvParameters)
 {
     (void) pvParameters;
-    int lCounter = 0;
-    char acFileNameRequest[32] = {0};
-    char acFileNameResponse[32] = {0};
+    const char* acFileNameRequest = STR_REQUEST;
+#if !USE_RECVPLAY_RESPONSE
+    const char* acFileNameResponse = STR_RESPONSE;
+#endif // USE_RECVPLAY_RESPONSE
 
 
     DEBUG_PRINTF("\r\nInitializing network...\r\n");
@@ -392,8 +398,6 @@ void vTaskAlexa(void *pvParameters)
         // Record audio from microphone and save to SD card
         if (g_lRecordAudio) {
             DEBUG_PRINTF("\r\nRecording audio from microphone to SD card...\r\n");
-
-            set_filenames(acFileNameRequest, sizeof(acFileNameRequest), acFileNameResponse, sizeof(acFileNameResponse), ++lCounter);
 
             // Record audio from microphone and save to SD card
             if (avs_record_request(acFileNameRequest, record_audio)) {
@@ -418,7 +422,14 @@ void vTaskAlexa(void *pvParameters)
                 continue;
             }
 
+#if USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+            if (avs_send_request(acFileNameRequest)) {
 
+                DEBUG_PRINTF("Streaming Alexa response...\r\n");
+                avs_recv_and_play_response();
+            }
+#else // USE_RECVPLAY_RESPONSE
             DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
             if (avs_send_request(acFileNameRequest)) {
 
@@ -429,7 +440,7 @@ void vTaskAlexa(void *pvParameters)
                     avs_play_response(acFileNameResponse);
                 }
             }
-
+#endif // USE_RECVPLAY_RESPONSE
 
             DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
             avs_disconnect();
@@ -464,7 +475,7 @@ void vIsrAlexaButton(void)
 
 int record_audio(void)
 {
-    return g_lRecordAudio;
+    return (int)g_lRecordAudio;
 }
 #endif // USE_TEST_MODE
 

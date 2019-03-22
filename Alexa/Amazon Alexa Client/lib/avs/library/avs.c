@@ -229,7 +229,7 @@ int avs_send_request(const char* pcFileName)
     }
     sdcard_lseek(&fHandle, 0);
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesToTransfer);
-    ulBytesToTransfer /= 2;
+    ulBytesToTransfer = (ulBytesToTransfer >> 1);
 
 
     // Set a X-second timeout for the operation
@@ -366,7 +366,7 @@ int avs_recv_response(const char* pcFileName)
             sdcard_close(&fHandle);
             return 0;
         }
-        //DEBUG_PRINTF(">> Recv  %d bytes\r\n", size_rx);
+        //DEBUG_PRINTF(">> Recv  %d bytes\r\n", iRet);
 
         // Compute the total bytes received
         ulBytesReceived += iRet;
@@ -383,7 +383,7 @@ int avs_recv_response(const char* pcFileName)
             sdcard_close(&fHandle);
             return 0;
         }
-        //DEBUG_PRINTF(">> Wrote %d bytes to SD card\r\n", size_written);
+        //DEBUG_PRINTF(">> Wrote %d bytes to SD card\r\n", ulWriteSize);
     }
 
 
@@ -448,7 +448,7 @@ int avs_play_response(const char* pcFileName)
 
     do {
         // Compute size to transfer
-        ulTransferSize = AVS_CONFIG_SDCARD_BUFFER_SIZE;
+        ulTransferSize = AVS_CONFIG_AUDIO_BUFFER_SIZE<<1;
         if (ulFileSize - ulFileOffset < ulTransferSize) {
             ulTransferSize = ulFileSize - ulFileOffset;
         }
@@ -472,9 +472,11 @@ int avs_play_response(const char* pcFileName)
                 // Duplicate short for stereo 2 channel
                 // Input is mono 1 channel audio data stream
                 // I2S requires stereo 2 channel audio data stream
-                for (int i=0, j=0; i<ulTransferSize; i+=2, j+=4) {
-                    *((uint16_t*)&pcData[j]) = *((uint16_t*)&pcSDCard[ulPlayed+i]);
-                    *((uint16_t*)&pcData[j+2]) = *((uint16_t*)&pcData[j]);
+                char* pDst = pcData;
+                char* pSrc = pcSDCard + ulPlayed;
+                for (int i=0; i<ulTransferSize; i+=2, pDst+=4, pSrc+=2) {
+                    *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+                    *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
                 }
 
                 // Play buffer to speaker
@@ -549,6 +551,92 @@ int avs_play_response(const char* pcFileName)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+// Recv and play Alexa response without saving to SD card
+// - Recv 512 bytes from RPI
+// - Convert 8-bit to 16-bit (1KB)
+// - Convert mono to stereo (2KB)
+/////////////////////////////////////////////////////////////////////////////////////////////
+int avs_recv_and_play_response()
+{
+    int iRet = 0;
+    char* pcData = g_pcTxRxBuffer;
+    char acRecv[512];
+    char acExpanded[1024];
+    uint32_t ulBytesToReceive = 0;
+    uint32_t ulBytesReceived = 0;
+    uint32_t ulBytesToProcess = sizeof(acRecv);
+    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0}; // x-second timeout
+
+
+    audio_speaker_begin();
+
+    // Set a 15-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
+    // Negotiate the bytes to transfer
+    iRet = recv(g_lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
+    if (iRet < sizeof(ulBytesToReceive)) {
+        DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
+        audio_speaker_end();
+        return 0;
+    }
+    DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
+
+
+    // Set a 15-second timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
+    // Receive the total bytes in segments of buffer size
+    while (ulBytesReceived < ulBytesToReceive) {
+        // Compute the transfer size
+        if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {
+            ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
+        }
+
+        // Receive the bytes of transfer size
+        iRet = recv(g_lSocket, acRecv, ulBytesToProcess, 0);
+        if (iRet <= 0) {
+            DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            audio_speaker_end();
+            return 0;
+        }
+        DEBUG_PRINTF(">> Recv  %d bytes\r\n", iRet);
+
+        // Compute the total bytes received
+        ulBytesReceived += iRet;
+
+        // Convert 8-bit data to 16-bit data before saving
+        ulaw_to_pcm16(iRet, acRecv, acExpanded);
+        iRet = iRet<<1;
+
+        do {
+            if (audio_speaker_ready()) {
+                // Duplicate short for stereo 2 channel
+                // Input is mono 1 channel audio data stream
+                // I2S requires stereo 2 channel audio data stream
+                char* pDst = pcData;
+                char* pSrc = acExpanded;
+                for (int i=0; i<iRet; i+=2, pDst+=4, pSrc+=2) {
+                    *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+                    *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
+                }
+
+                // Play buffer to speaker
+                audio_play((uint8_t *)pcData, iRet<<1);
+
+                // Clear interrupt flag
+                audio_speaker_clear();
+                break;
+            }
+        } while (1);
+    }
+
+    audio_speaker_end();
+    return 1;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 // Record audio file from microphone and save to SD card given the complete file path
 // Audio recorded: 16-bit PCM, 16KHZ, stereo (2-channels)
 // Audio saved:    16-bit PCM, 16KHZ, mono (1-channel)
@@ -583,16 +671,11 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
             audio_record((uint8_t*)pcData, ulRecordSize);
 
             // convert stereo to mono in-place
-            for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
-#if USE_STEREO_TO_MONO_AVERAGE
-                // get average of left and right 16-bit word
-                uint16_t uwLeft = *((uint16_t*)(pcData+j));
-                uint16_t uwRight = *((uint16_t*)(pcData+j+2));
-                *((uint16_t*)(pcData+i)) = (uwLeft+uwRight) >> 1;
-#else // USE_STEREO_TO_MONO_AVERAGE
+            char* pDst = pcData;
+            char* pSrc = pcData;
+            for (int i=0; i<ulRecordSize; i+=2, pDst+=2, pSrc+=4) {
                 // copy the first 16-bit word, skip the next one
-                *((uint16_t*)(pcData+i)) = *((uint16_t*)(pcData+j));
-#endif // USE_STEREO_TO_MONO_AVERAGE
+                *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
             }
             ulRecordSize = ulRecordSize >> 1;
 
