@@ -59,13 +59,8 @@
 
 
 #define USE_TEST_MODE 1
-
-#if USE_TEST_MODE
 #define USE_MEASURE_PERFORMANCE  1
-#else // USE_TEST_MODE
-#define USE_PLAY_RECORDED_AUDIO  1
-#define USE_DO_NOT_SEND_TO_ALEXA 0
-#endif // USE_TEST_MODE
+#define USE_PLAY_RECORDED_AUDIO  0
 
 #define BUTTON_GPIO  (31)
 
@@ -402,9 +397,7 @@ void vTaskAlexa(void *pvParameters)
 
             // Record audio from microphone and save to SD card
             if (avs_record_request(acFileNameRequest, record_audio)) {
-#if !USE_DO_NOT_SEND_TO_ALEXA
                 g_lProcessAudio = 1;
-#endif // USE_DO_NOT_SEND_TO_ALEXA
                 DEBUG_PRINTF("\r\nRecording audio completed!\r\n");
 
 #if USE_PLAY_RECORDED_AUDIO
