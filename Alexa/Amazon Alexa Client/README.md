@@ -192,6 +192,8 @@ The process is repeated until the recorded audio file is completely processed.
 
 ### B. FT900 Microphone recording
 
+Recording of Alexa request on FT900 microphone is good. Background noise can be heard but voice pops out when user speaks very near to microphone.
+
 
 
 # Setup guide
