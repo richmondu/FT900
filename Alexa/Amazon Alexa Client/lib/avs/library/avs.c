@@ -404,6 +404,7 @@ int avs_recv_response(const char* pcFileName)
 // - Uses a pre-allocated buffer for faster transfer
 // - Reads 1KB segment from file then converts it to stereo (2-channel) audio
 //   by duplicating each short then transfers the 2KB segment to I2S Master
+// Audio read:   16-bit PCM, 16KHZ, mono (1-channel)
 // Audio played: 16-bit PCM, 16KHZ, stereo (2-channels)
 /////////////////////////////////////////////////////////////////////////////////////////////
 int avs_play_response(const char* pcFileName)
@@ -466,10 +467,6 @@ int avs_play_response(const char* pcFileName)
         while (ulPlayed < ulReadSize) {
             // Process transfer if the speaker FIFO is empty
             if (audio_speaker_ready()) {
-                if (ulReadSize - ulPlayed < ulTransferSize) {
-                    ulTransferSize = ulReadSize - ulPlayed;
-                }
-
                 // Duplicate short for stereo 2 channel
                 // Input is mono 1 channel audio data stream
                 // I2S requires stereo 2 channel audio data stream
@@ -486,6 +483,10 @@ int avs_play_response(const char* pcFileName)
 
                 // Increment offset
                 ulPlayed += ulTransferSize;
+
+                if (ulReadSize - ulPlayed < ulTransferSize) {
+                    ulTransferSize = ulReadSize - ulPlayed;
+                }
             }
         }
     } while (ulFileOffset != ulFileSize);
@@ -583,9 +584,13 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
                 // get average of left and right 16-bit word
                 // previously, this was just copying the first 16-bit word, skip the next one
+#if 1
                 uint16_t uwLeft = *((uint16_t*)(pcData+j));
                 uint16_t uwRight = *((uint16_t*)(pcData+j+2));
                 *((uint16_t*)(pcData+i)) = (uwLeft+uwRight) >> 1;
+#else
+                *((uint16_t*)(pcData+i)) = uwLeft;
+#endif
             }
             ulRecordSize = ulRecordSize >> 1;
 
