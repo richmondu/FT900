@@ -1,5 +1,6 @@
 #ifndef AUDIO_H
 #define AUDIO_H
+#include <ft900.h>
 
 
 #define SAMPLING_RATE_44100HZ 1
@@ -13,17 +14,17 @@
 
 void audio_setup(void (*audio_isr)(void), int sampling_rate);
 
-void audio_speaker_begin();
-void audio_speaker_end();
-int  audio_speaker_ready();
-void audio_speaker_clear();
-void audio_play(char* data, int size);
+#define audio_speaker_begin     i2s_start_tx
+#define audio_speaker_end       i2s_stop_tx
+#define audio_play              i2s_write
+#define audio_speaker_clear()   { i2s_clear_int_flag(MASK_I2S_PEND_FIFO_TX_EMPTY); }
+#define audio_speaker_ready()   (i2s_get_status() & MASK_I2S_PEND_FIFO_TX_EMPTY)
 
-void audio_mic_begin();
-void audio_mic_end();
-int  audio_mic_ready();
-void audio_mic_clear();
-void audio_record(char* data, int size);
+#define audio_mic_begin         i2s_start_rx
+#define audio_mic_end           i2s_stop_rx
+#define audio_record            i2s_read
+#define audio_mic_clear()       { i2s_clear_int_flag(MASK_I2S_PEND_FIFO_RX_FULL | MASK_I2S_PEND_FIFO_RX_OVER); }
+#define audio_mic_ready()       (i2s_get_status() & (MASK_I2S_PEND_FIFO_RX_FULL | MASK_I2S_PEND_FIFO_RX_OVER))
 
 
 #endif // AUDIO_H

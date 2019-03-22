@@ -122,8 +122,8 @@ void i2s_ISR(void)
     /* If the FIFO is empty... */
     if (audio_speaker_ready())
     {
-        audio_record(g_buffer, AUDIO_FIFO_SIZE);
-        audio_play(g_buffer, AUDIO_FIFO_SIZE);
+        audio_record((uint8_t*)g_buffer, AUDIO_FIFO_SIZE);
+        audio_play((uint8_t*)g_buffer, AUDIO_FIFO_SIZE);
 
         audio_speaker_clear();
     }
