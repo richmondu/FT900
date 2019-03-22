@@ -181,6 +181,14 @@ It takes 5.0 seconds to wait and receive the Alexa response. On RPI side, this i
 
 ### A. FT900 Speaker playback
 
+Playback of Alexa response on connected speaker is very very good. There is no noise or jittering. It is very smooth.
+
+This was made possible by maximizing the FIFO buffer sizes for both SD Host (4KB) and I2S Master (2KB).
+4KB data is read from SD card then segmented into 4 1KBs. 
+Each 1KB data is converted from mono (1-channel) to stereo (2-channels).
+This results to 2KB stereo data which is then written to I2S Master speaker. 
+The process is repeated until the recorded audio file is completely processed.
+
 
 ### B. FT900 Microphone recording
 
