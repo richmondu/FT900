@@ -18,7 +18,7 @@ PanL Hub, which runs on RPI, acts as the <b>Alexa Gateway</b> while the PanL Dis
 Below is a block diagram showing the implemented components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg" width="623"/>
 
-RTC library is used to measure time elapsed for performance measurement.
+      - RTC library is used to measure time elapsed for performance measurement.
 
 Below is a sequence diagram showing the basic interaction of components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
