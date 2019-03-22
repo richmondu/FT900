@@ -76,7 +76,7 @@
 
 
 /* Task Configurations. */
-#define TASK_ALEXA_STACK_SIZE           (5120)
+#define TASK_ALEXA_STACK_SIZE           (6144)
 #define TASK_ALEXA_PRIORITY             (1)
 
 #define TASK_CONNECT_STACK_SIZE         (1024)
