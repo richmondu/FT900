@@ -68,6 +68,8 @@
 
 
 #define USE_DO_DIR 0
+#define USE_STEREO_TO_MONO_AVERAGE 0 // Using discard instead of average is better audio quality.
+
 
 
 static int   g_lSocket        = -1;
@@ -582,15 +584,15 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
 
             // convert stereo to mono in-place
             for (int i=0, j=0; i<ulRecordSize; i+=2, j+=4) {
+#if USE_STEREO_TO_MONO_AVERAGE
                 // get average of left and right 16-bit word
-                // previously, this was just copying the first 16-bit word, skip the next one
-#if 1
                 uint16_t uwLeft = *((uint16_t*)(pcData+j));
                 uint16_t uwRight = *((uint16_t*)(pcData+j+2));
                 *((uint16_t*)(pcData+i)) = (uwLeft+uwRight) >> 1;
-#else
-                *((uint16_t*)(pcData+i)) = uwLeft;
-#endif
+#else // USE_STEREO_TO_MONO_AVERAGE
+                // copy the first 16-bit word, skip the next one
+                *((uint16_t*)(pcData+i)) = *((uint16_t*)(pcData+j));
+#endif // USE_STEREO_TO_MONO_AVERAGE
             }
             ulRecordSize = ulRecordSize >> 1;
 
