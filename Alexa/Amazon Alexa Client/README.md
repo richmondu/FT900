@@ -167,13 +167,14 @@ Note that the logs correspond to the sequence diagram above.
 
 ### B. FT900
 
-One round trip of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 6-7 seconds.
-This is for a simple command, "What time is it?". 
-This measures the time FT900 sends the Alexa request to RPI until it plays the Alexa response.
+One round trip of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 5-6 seconds.
+This has been optimized from 6-7 seconds.
+This measurement is for a simple command, "What time is it?". 
+This measures the time FT900 sends the Alexa request to RPI until it finishes playing Alexa response.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs.png" width="623"/>
 
-It takes 5.0 seconds to wait and receive the Alexa response. On RPI side, this is 3.2 seconds so it means FT900 consumes 1.2 seconds processing overhead. This should be optimized to bring the total time from 6-7 down to 5-6.
+It takes 4.0 seconds to wait and receive the Alexa response. On RPI side, this is 3.2 seconds so it means FT900 consumes 0.8 second processing overhead.
 
 
 
