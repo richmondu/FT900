@@ -45,7 +45,7 @@
 #endif
 
 #ifndef AVS_CONFIG_MAX_RECORD_SIZE
-#define AVS_CONFIG_MAX_RECORD_SIZE      (4096000)
+#define AVS_CONFIG_MAX_RECORD_SIZE      (1024000)
 #endif
 
 
