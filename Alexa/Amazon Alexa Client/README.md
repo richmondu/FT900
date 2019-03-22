@@ -290,13 +290,12 @@ Below are the action items for the Alexa Demo.
 
       1. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
       2. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
-      3. Performance/speed optimization
-      4. Support for alarms or notification-based messages. (Currently, only responses triggered by requests are supported.)
-      5. Support for very long Alexa responses. (Need to test requests that have very long responses.)
-      6. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-      7. RPI should not play response on its speaker when the request is from FT900.
-      8. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
-      9. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
+      3. Support for alarms or notification-based messages. (Currently, only responses triggered by requests are supported.)
+      4. Support for very long Alexa responses. (Need to test requests that have very long responses.)
+      5. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
+      6. RPI should not play response on its speaker when the request is from FT900.
+      7. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
+      8. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
 
 
 # References
