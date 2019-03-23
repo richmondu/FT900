@@ -172,7 +172,7 @@ Below are the major performance optimization efforts implemented for the demo.
 - sample i2s master applications only support 44.1khz and 48khz. size of 48khz is 3 times as much as 16khz.
 
 3. receive and play Alexa response without saving to SD card
-- maximize FIFO size of i2s master 
+- audio quality did not degrade because FIFO size of i2s master is maximized
 
 
 ### B. RPI
