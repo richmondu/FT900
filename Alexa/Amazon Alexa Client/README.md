@@ -159,9 +159,23 @@ Below is a description of how the audio is processed on RPI.
 
 
 
-# Performance analysis
+# Performance analysis/optimization
 
-### A. RPI
+### A. Optimization efforts
+
+Below are the major performance optimization efforts implemented for the demo.
+
+1. 8-bit ulaw audio compression
+- audio is compressed from 16-bit to 8-bit before transmitting to FT900 or RPI.
+
+2. 16khz audio sampling rate
+- sample i2s master applications only support 44.1khz and 48khz. size of 48khz is 3 times as much as 16khz.
+
+3. receive and play Alexa response without saving to SD card
+- maximize FIFO size of i2s master 
+
+
+### B. RPI
 
 One round trip of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds.
 This is for a simple command, "What time is it?". 
@@ -172,7 +186,7 @@ This measures the time RPI accepts FT900 connection until it closes the connecti
 Note that the logs correspond to the sequence diagram above.
 
 
-### B. FT900
+### C. FT900
 
 One round trip of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 5-6 seconds.
 This has been optimized from 6-7 seconds.
