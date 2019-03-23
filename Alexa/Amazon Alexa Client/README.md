@@ -165,15 +165,15 @@ Below is a description of how the audio is processed on RPI.
 
 Below are the major performance optimization efforts implemented for the demo.
 
-1. 8-bit ulaw audio compression
-- audio is compressed from 16-bit to 8-bit before transmitting to FT900 or RPI.
+      1. 8-bit ulaw audio compression
+      - audio is compressed from 16-bit to 8-bit before transmitting to FT900 or RPI.
 
-2. 16khz audio sampling rate
-- sample i2s master applications only support 44.1khz and 48khz. size of 48khz is 3 times as much as 16khz.
+      2. 16khz audio sampling rate
+      - sample i2s master applications only support 44.1khz and 48khz. size of 48khz is 3 times as much as 16khz.
 
-3. receive and play Alexa response without saving to SD card
-- this improved FT900-RPI-AVS-RPI-FT900 round trip from 6-7 seconds to 4 seconds.
-- audio quality did not degrade because FIFO size of i2s master is maximized
+      3. receive and play Alexa response without saving to SD card
+      - this improved FT900-RPI-AVS-RPI-FT900 round trip from 6-7 seconds to 4 seconds.
+      - audio quality did not degrade because FIFO size of i2s master is maximized
 
 
 ### B. RPI
