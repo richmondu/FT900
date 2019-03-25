@@ -253,6 +253,13 @@ If we use SD card to save response, then RS485 is not a even problem.
 Note that the demo solution provides both options to save or not to save response to SD card. (Saving response to SD card is 1-2 seconds slower than NOT saving response to SD card.)
 
 
+### B. CPU usage issue
+
+Another concern is the CPU usage consumed by the application on RPI. 
+
+Based on observation, the CPU usage jumps to 20-30% for a split second when processing a request. This is OK. Note that no AI is done on the RPI. The Alexa SDK only forwards the request on the cloud where the AI-generated response is created. So the Alexa application on RPI does NOT and can NOT hog the CPU.   
+
+
 
 # Setup guide
 
