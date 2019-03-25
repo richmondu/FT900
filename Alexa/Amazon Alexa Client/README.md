@@ -295,7 +295,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
       1. Install the original AVS SDK on RPI using the official installation guide on RPI.
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
       2. Run and verify everything is working as expected.
-         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
 
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
