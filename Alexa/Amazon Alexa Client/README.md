@@ -167,7 +167,7 @@ Below is a description of how the audio is processed on RPI.
 Below are the major performance optimization efforts implemented for the demo.
 
       1. 8-bit ulaw audio compression
-      - audio is compressed from 16-bit to 8-bit before transmitting to FT900 or RPI.
+      - audio is compressed from 16-bit to 8-bit using G711 ulaw lossless algorithm before transmitting to FT900 or RPI.
 
       2. 16khz audio sampling rate
       - sample i2s master applications only support 44.1khz and 48khz. size of 48khz is 3 times as much as 16khz.
