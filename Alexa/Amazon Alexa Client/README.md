@@ -175,6 +175,9 @@ Below are the major performance optimization efforts implemented for the demo.
       3. receive and play Alexa response without saving to SD card
       - this improved FT900-RPI-AVS-RPI-FT900 round trip from 6-7 seconds to 4 seconds.
       - audio quality did not degrade because FIFO size of i2s master is maximized
+      
+      4. disable playback of response on RPI when request is from FT900
+      - RPI should only play response when the request is from RPI microphone.
 
 
 ### B. RPI
