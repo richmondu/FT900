@@ -79,12 +79,10 @@
 #define TASK_ALEXA_STACK_SIZE           (6144)
 #define TASK_ALEXA_PRIORITY             (1)
 
-#define TASK_CONNECT_STACK_SIZE         (1024)
+#define TASK_CONNECT_STACK_SIZE         (512)
 #define TASK_CONNECT_PRIORITY           (2)
 
-#define TASK_NOTIFY_NETIF_UP            0x01
-#define TASK_NOTIFY_LINK_UP             0x02
-#define TASK_NOTIFY_LINK_DOWN           0x03
+
 
 static TaskHandle_t gx_Task_Handle;
 void vTaskConnect(void *pvParameters);
@@ -196,6 +194,11 @@ void vTaskConnect(void *pvParameters)
 ////////////////////////////////////////////////////////////////////////////////////////
 // Network init callback
 ////////////////////////////////////////////////////////////////////////////////////////
+
+#define TASK_NOTIFY_NETIF_UP            0x01
+#define TASK_NOTIFY_LINK_UP             0x02
+#define TASK_NOTIFY_LINK_DOWN           0x03
+
 static void net_init_callback(int netif_up, int link_up, int packet_available)
 {
     if (netif_up) {
@@ -259,7 +262,9 @@ void vTaskAlexa(void *pvParameters)
 {
     (void) pvParameters;
     char* acFileNameRequest = STR_REQUEST;
+#if !USE_RECVPLAY_RESPONSE
     char* acFileNameResponse = STR_RESPONSE;
+#endif
 
 
     DEBUG_PRINTF("\r\nInitializing network...\r\n");
@@ -296,7 +301,9 @@ void vTaskAlexa(void *pvParameters)
 #if USE_MEASURE_PERFORMANCE
         struct tm time0 = {0};
         struct tm time1 = {0};
+#if !USE_RECVPLAY_RESPONSE
         struct tm time2 = {0};
+#endif
         struct tm timeX = {0};
         time_duration_get_time(&time0);
 

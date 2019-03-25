@@ -81,9 +81,7 @@
  *
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
-#ifdef __TFP_PRINTF__
 #include "tinyprintf.h"
-#endif
 
 #define DPrintf	tfp_printf
 /* Tick timer configuration. */
@@ -95,17 +93,36 @@
 
 /* These are used in porting code (Source\portable). */
 #define configTICK_RATE_HZ                          ((TickType_t)1000)
+/* To calculate the absolute maximum size of configTOTAL_HEAP_SIZE:
+ * - Undefine the macro configSTATIC_STORAGE and compile project.
+ * - Examine compiler output. Typical output will be as follows:
+ *         ft32-elf-size --format=berkeley -x "project.elf"
+           text    data   bss     dec     hex   filename
+           0xTTTTT 0xDDDD 0xBBBB  dddddd  hhhhh AzureTest.elf
+ * - Fill in values for "data" and "bss" in the definition of configSTATIC_STORAGE.
+ *   FT900: #define configSTATIC_STORAGE ((size_t)(0xDDDD + 0xBBBB))
+ * - Define configSTATIC_STORAGE and recompile project.
+ * This will need to be redone should any changes be made to the global or
+ * static variables in the project.
+ */
+//#define configSTATIC_STORAGE                        ((size_t)(0xDDDD + 0xBBBB))
+#if !defined(configSTATIC_STORAGE)
 #if defined(__FT900__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(48 * 1024))
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))
 #endif
+#elif defined(__FT900__)
+#define configTOTAL_HEAP_SIZE                       ((size_t)(0x10000 - 0x10 - configSTATIC_STORAGE))
+#elif defined(__FT930__)
+#define configTOTAL_HEAP_SIZE                       ((size_t)(0x8000 - 0x10 - configSTATIC_STORAGE))
+#endif
 #define configUSE_MALLOC_FAILED_HOOK                1
 
 /* These are defined in FreeRTOS.h, mandatory. */
 #define configMINIMAL_STACK_SIZE                    ((unsigned short)2*128)
-#define configMAX_PRIORITIES                        10
-#define configUSE_PREEMPTION                        1
+#define configMAX_PRIORITIES                        5
+#define configUSE_PREEMPTION                        0
 #define configUSE_IDLE_HOOK                         0
 #define configUSE_TICK_HOOK                         0
 #define configUSE_16_BIT_TICKS                      0
@@ -119,11 +136,11 @@
 #define configUSE_ALTERNATIVE_API                   0
 #define configUSE_TIMERS                            1
 #define configQUEUE_REGISTRY_SIZE                   0U
-#define configCHECK_FOR_STACK_OVERFLOW              2       //0, 1, or 2
+#define configCHECK_FOR_STACK_OVERFLOW              0       //0, 1, or 2
 #define configUSE_QUEUE_SETS                        0
 #define configUSE_NEWLIB_REENTRANT                  0
 #define portTICK_TYPE_IS_ATOMIC                     0
-#define portCRITICAL_NESTING_IN_TCB					1
+#define portCRITICAL_NESTING_IN_TCB					0
 
 /* These are defined in FreeRTOS.h, default 0 when !defined. For debug use. */
 #define configGENERATE_RUN_TIME_STATS               0
@@ -136,14 +153,14 @@
 /* These are defined in FreeRTOS.h, default non-zero when !defined. */
 #define configMAX_TASK_NAME_LEN                     (16)    //Default 16
 #define configIDLE_SHOULD_YIELD                     0       //Default 1
-#define configUSE_TIME_SLICING                      1       //Default 1
+#define configUSE_TIME_SLICING                      0       //Default 1
 #define configUSE_TASK_NOTIFICATIONS                1       //Default 1
 #define configENABLE_BACKWARD_COMPATIBILITY         0       //Default 1
 
 /* These must be defined when configUSE_TIMERS==1. */
-#if 1 //(configUSE_TIMERS == 1)
+#if (configUSE_TIMERS == 1)
 #define configTIMER_TASK_PRIORITY                   (configMAX_PRIORITIES)
-#define configTIMER_QUEUE_LENGTH                    (10)
+#define configTIMER_QUEUE_LENGTH                    (3)
 #define configTIMER_TASK_STACK_DEPTH                (256)
 #endif
 
@@ -155,30 +172,30 @@
         }                                                               \
     }
 #else
-#define configASSERT(x...) (void)(x)
+//#define configASSERT(x...) (void)(x)
 #endif
 
 
 /* Set the following definitions to 1 to include the API function, or zero to exclude the API function. */
 /* Mandatory. */
-#define INCLUDE_vTaskPrioritySet                    1
-#define INCLUDE_uxTaskPriorityGet                   1
-#define INCLUDE_vTaskDelete                         1
-#define INCLUDE_vTaskSuspend                        1
-#define INCLUDE_vTaskDelayUntil                     1
+#define INCLUDE_vTaskPrioritySet                    0
+#define INCLUDE_uxTaskPriorityGet                   0
+#define INCLUDE_vTaskDelete                         0
+#define INCLUDE_vTaskSuspend                        0
+#define INCLUDE_vTaskDelayUntil                     0
 #define INCLUDE_vTaskDelay                          1
 
 /* Optional, default to 0 when !defined. */
-#define INCLUDE_xTaskGetIdleTaskHandle              1
-#define INCLUDE_xTimerGetTimerDaemonTaskHandle      1
+#define INCLUDE_xTaskGetIdleTaskHandle              0
+#define INCLUDE_xTimerGetTimerDaemonTaskHandle      0
 #define INCLUDE_xQueueGetMutexHolder                0
 #define INCLUDE_xSemaphoreGetMutexHolder            0
-#define INCLUDE_pcTaskGetTaskName                   1
-#define INCLUDE_uxTaskGetStackHighWaterMark         1
-#define INCLUDE_eTaskGetState                       1
-#define INCLUDE_xTaskResumeFromISR                  1
-#define INCLUDE_xEventGroupSetBitFromISR            1
-#define INCLUDE_xTimerPendFunctionCall              1
+#define INCLUDE_pcTaskGetTaskName                   0
+#define INCLUDE_uxTaskGetStackHighWaterMark         0
+#define INCLUDE_eTaskGetState                       0
+#define INCLUDE_xTaskResumeFromISR                  0
+#define INCLUDE_xEventGroupSetBitFromISR            0
+#define INCLUDE_xTimerPendFunctionCall              0
 #define INCLUDE_xTaskGetSchedulerState              0
 #define INCLUDE_xTaskGetCurrentTaskHandle           0
 #define INCLUDE_vTaskCleanUpResources               0
@@ -193,7 +210,7 @@
 
 //#define traceTASK_SWITCHED_IN()                     portTASK_SWITCHED('I')
 //#define traceTASK_SWITCHED_OUT()                    portTASK_SWITCHED('O')
-#define traceTASK_CREATE                            portTASK_CREATE
+//#define traceTASK_CREATE                            portTASK_CREATE
 //#define traceTASK_CREATE_FAILED                     portTASK_CREATE_FAILED
 //#define traceTASK_DELAY                             portTASK_DELAY
 

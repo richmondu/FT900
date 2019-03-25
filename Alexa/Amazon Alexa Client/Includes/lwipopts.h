@@ -67,7 +67,7 @@
 #define MEM_LIBC_MALLOC                 1
 #define mem_clib_free vPortFree
 #define mem_clib_malloc pvPortMalloc
-#define mem_clib_calloc my_mem_calloc
+#define mem_clib_calloc sys_mem_calloc
 #else
 #define MEM_LIBC_MALLOC                 1
 #endif
@@ -78,6 +78,17 @@
 * speed and usage from interrupts!
 */
 #define MEMP_MEM_MALLOC             1
+
+/**
+ * MEMP_OVERFLOW_CHECK: memp overflow protection reserves a configurable
+ * amount of bytes before and after each memp element in every pool and fills
+ * it with a prominent default value.
+ *    MEMP_OVERFLOW_CHECK == 0 no checking
+ *    MEMP_OVERFLOW_CHECK == 1 checks each element when it is freed
+ *    MEMP_OVERFLOW_CHECK >= 2 checks each element in every pool every time
+ *      memp_malloc() or memp_free() is called (useful but slow!)
+ */
+#define MEMP_OVERFLOW_CHECK             0
 
 /* NO_SYS_NO_TIMERS
  * Still use timers provided by interrupt sources in the application.
@@ -101,13 +112,13 @@
  * Enable Internet Group Management Protocol
  * IP multicast support is used in this application.
  */
-#define LWIP_IGMP                  1
+#define LWIP_IGMP                  0
 
 /* LWIP_ICMP
  * Enable Internet Control Message Protocol
  * Allow support for ICMP which includes ping.
  */
-#define LWIP_ICMP                  1
+#define LWIP_ICMP                  0
 
 /* LWIP_SNMP
  * Disable Simple Network Management Protocol
@@ -137,12 +148,18 @@
  */
 #define LWIP_HAVE_LOOPIF           0
 #define LWIP_NETIF_LOOPBACK        0
-#define LWIP_LOOPBACK_MAX_PBUFS    5
+#define LWIP_LOOPBACK_MAX_PBUFS    0
 
 #define TCP_LISTEN_BACKLOG         (NO_SYS)
 
 #define LWIP_COMPAT_SOCKETS        (NO_SYS==0)
-#define LWIP_PROVIDE_ERRNO         1
+
+
+#define LWIP_ALTCP                 1
+#define LWIP_ALTCP_TLS             1
+#define LWIP_ALTCP_TLS_MBEDTLS     1
+
+#define LWIP_PROVIDE_ERRNO         0
 #define LWIP_SO_SNDTIMEO           1
 #define LWIP_SO_RCVTIMEO           1
 #define LWIP_SO_RCVBUF             0
@@ -159,13 +176,15 @@
  */
 #define LWIP_NETIF_STATUS_CALLBACK 1
 
-#define LWIP_DEBUG
+/* Turn off debug statements. Once library has been tested. */
+//#define LWIP_DEBUG
 #define LWIP_NOASSERT
 
 #ifdef LWIP_DEBUG
-//#define LWIP_DBG_TRACE
+#define LWIP_DBG_TRACE
 
 #define LWIP_DBG_MIN_LEVEL         0
+#define MQTT_DEBUG                 LWIP_DBG_OFF
 #define SYS_DEBUG                  LWIP_DBG_OFF
 #define TIMERS_DEBUG               LWIP_DBG_OFF
 #define PPP_DEBUG                  LWIP_DBG_OFF
@@ -213,8 +232,8 @@
 #define MEM_ALIGNMENT                   4
 
 /**
- * MEM_SIZE: the size of the heap memory. If the application will send
- * a lot of data that needs to be copied, this should be set high.
+ * MEM_SIZE: the size of the heap memory available to lwIP. This
+ * is used by ALTCP as a sanity check on parameters to tls_malloc.
  * Ignored when MEM_LIBC_MALLOC==1
  */
 #define MEM_SIZE                        (10 * 1024)
@@ -296,7 +315,7 @@
  *
  * Default 2.
  */
-#define MEMP_NUM_NETBUF                 2
+#define MEMP_NUM_NETBUF                 0
 
 /**
  * MEMP_NUM_IGMP_GROUP: The number of multicast groups whose network interfaces
@@ -306,7 +325,7 @@
  *
  * Default 8.
  */
-#define MEMP_NUM_IGMP_GROUP             8
+#define MEMP_NUM_IGMP_GROUP             0
 
 /**
  * MEMP_NUM_NETCONN: the number of struct netconns.
@@ -323,7 +342,7 @@
  *
  * Default 8.
  */
-#define MEMP_NUM_TCPIP_MSG_API          8
+#define MEMP_NUM_TCPIP_MSG_API          4
 
 /**
  * MEMP_NUM_TCPIP_MSG_INPKT: the number of struct tcpip_msg, which are used
@@ -332,7 +351,7 @@
  *
  * Default 8.
  */
-#define MEMP_NUM_TCPIP_MSG_INPKT        8
+#define MEMP_NUM_TCPIP_MSG_INPKT        4
 
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
@@ -409,7 +428,7 @@
 #define ARP_QUEUEING                    0
 
 /* LWIP_BROADCAST_PING==1: respond to broadcast pings (default is unicast only) */
-#define LWIP_BROADCAST_PING     1
+#define LWIP_BROADCAST_PING     0
 
 /* LWIP_MULTICAST_PING==1: respond to multicast pings (default is unicast only) */
 #define LWIP_MULTICAST_PING     0
@@ -444,13 +463,13 @@
 
 /* 1 if you want to want DHCP to wait for link to be up
    before starting. */
-#define LWIP_DHCP_CHECK_LINK_UP 1
+#define LWIP_DHCP_CHECK_LINK_UP LWIP_DHCP
 /* 1 if you want to do an ARP check on the offered address
    (recommended). */
-#define DHCP_DOES_ARP_CHECK		1
+#define DHCP_DOES_ARP_CHECK     LWIP_DHCP
 /* 1 if you want to send a hostname to the DHCP server.
    (recommended). */
-#define LWIP_NETIF_HOSTNAME     1
+#define LWIP_NETIF_HOSTNAME     0
 
 /* ---------- AUTOIP options ------- */
 #define LWIP_AUTOIP             0
@@ -494,17 +513,17 @@
 /* CHECKSUM_GEN_ICMP==1: Generate checksums in software for outgoing ICMP packets. */
 #define CHECKSUM_GEN_ICMP       1
 /* CHECKSUM_CHECK_IP==1: Check checksums in software for incoming IP packets. */
-#define CHECKSUM_CHECK_IP       1
+#define CHECKSUM_CHECK_IP       0
 /* CHECKSUM_CHECK_UDP==1: Check checksums in software for incoming UDP packets. */
-#define CHECKSUM_CHECK_UDP      1
+#define CHECKSUM_CHECK_UDP      0
 /* CHECKSUM_CHECK_TCP==1: Check checksums in software for incoming TCP packets. */
-#define CHECKSUM_CHECK_TCP      1
+#define CHECKSUM_CHECK_TCP      0
 /* LWIP_CHECKSUM_ON_COPY==1: Calculate checksum when copying data from
  * application buffers to pbufs. */
 #define LWIP_CHECKSUM_ON_COPY   0
 
 /* ---------- mDNS options ---------- */
-#define LWIP_NUM_NETIF_CLIENT_DATA  1
+#define LWIP_NUM_NETIF_CLIENT_DATA  0
 
 #if (NO_SYS==0)
 /**
@@ -531,7 +550,7 @@
  * The queue size value itself is platform-dependent, but is passed to
  * sys_mbox_new() when tcpip_init is called.
  */
-#define TCPIP_MBOX_SIZE                 32      //Queue Size (4byte/slot)
+#define TCPIP_MBOX_SIZE                 4 //32      //Queue Size (4byte/slot)
 
 /**
  * DEFAULT_RAW_RECVMBOX_SIZE: The mailbox size for the incoming packets on a
@@ -560,6 +579,14 @@
  * sys_mbox_new() when the acceptmbox is created.
  */
 #define DEFAULT_ACCEPTMBOX_SIZE         32      //Queue Size (4byte/slot)
+
+#define ALTCP_MBEDTLS_ENTROPY_PTR       "MQTT-TLS-Demo-OK"
+#define ALTCP_MBEDTLS_ENTROPY_LEN       16
+
+#define SNTP_SET_SYSTEM_TIME(sec)       iot_sntp_set_system_time(sec)
+
+#define MQTT_OUTPUT_RINGBUF_SIZE        768
+#define MQTT_CONNECT_TIMOUT             5000
 
 #endif /* NO_SYS */
 
