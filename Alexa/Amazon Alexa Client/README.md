@@ -237,7 +237,7 @@ Below is an analysis that answers this concern.
 The size of an 8-bit 16khz response for a simple question "What time is it?" is less than 32kb. This is sent in 2ms.
 30720bytes *1000/2ms=15360000 (14.6 MBps)
 
-To simulate RS485 slowness, I added delay between each send (note that 32kb is sent in chunks as it is decoded in chunks).
+To simulate RS485 slowness, I added delay between each send (note that 32kb is sent in chunks as it is compressed in chunks).
 Results:
 1) 20ms delay => response is sent in about 1sec instead of 2ms. (32k bytes/sec) *causes stutter
 2) 13ms delay => response is sent in about 660ms instead of 2ms. (48k bytes/sec)
@@ -250,14 +250,18 @@ Meaning, using SD card to save response is necessary when sender rate is around 
 But since the acceptable computed rate for RS485 is 64KBps (70% of 92KBps), then not using SD card to save response is still OK.
 If we use SD card to save response, then RS485 is not a even problem. 
 
-Note that the demo solution provides both options to save or not to save response to SD card. (Saving response to SD card is 1-2 seconds slower than NOT saving response to SD card.)
+Note that the demo solution provides both options to save or not to save response to SD card. 
+(Saving response to SD card is 1-2 seconds slower than NOT saving response to SD card.)
 
 
 ### B. CPU usage issue
 
 Another concern is the CPU usage consumed by the application on RPI. 
 
-Based on observation, the CPU usage jumps to 20-30% for a split second when processing a request. This is OK. Note that no AI is done on the RPI. The Alexa SDK only forwards the request on the cloud where the AI-generated response is created. So the Alexa application on RPI does NOT and can NOT hog the CPU.   
+Based on observation, the CPU usage jumps to 20-30% for a split second when processing a request. This is OK. 
+Note that no AI is done on the RPI. 
+The Alexa SDK only forwards the request on the cloud where the AI-generated response is created. 
+So the Alexa application on RPI does NOT and can NOT hog the CPU.   
 
 
 
