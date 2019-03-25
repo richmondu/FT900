@@ -225,6 +225,28 @@ Recording of Alexa request on FT900 microphone is good. Background noise can be 
 
 
 
+# RS485 vs Ethernet
+
+The demo currently uses Ethernet for communication between RPI and FT900. For PanL, where communication medium is RS485, bandwidth is smaller, about 92KBps only. 
+
+The size of an 8-bit 16khz response for a simple question "What time is it?" is less than 32kb. This is sent in 2ms.
+30720bytes *1000/2ms=15360000 (14.6 MBps)
+
+To simulate RS485 slowness, I added delay between each send (note that 32kb is sent in chunks as it is decoded in chunks).
+Results:
+1) 20ms delay => response is sent in about 1sec instead of 2ms. (32k bytes/sec) *causes stutter
+2) 13ms delay => response is sent in about 660ms instead of 2ms. (48k bytes/sec)
+3) 10ms delay => response is sent in about 500ms instead of 2ms. (64k bytes/sec)
+4)  6ms delay => response is sent in about 330ms instead of 2ms. (96k bytes/sec)
+
+The 20ms added delay sometimes causes a stutter for recv_and_play_no_sdcard option as sender becomes slow.
+Meaning, using SD card to save response is necessary when sender rate is around 32KBps only.
+
+But since the acceptable computed rate for RS485 is 64KBps (70% of 92KBps), then not using SD card to save response is still OK.
+If we use SD card to save response, then RS485 is not a even problem.
+
+
+
 # Setup guide
 
 ### Prerequisites:
