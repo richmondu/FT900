@@ -58,35 +58,42 @@
 
 
 
+///////////////////////////////////////////////////////////////////////////////////
+/* Default network configuration. */
+#define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
+static ip_addr_t ip      = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
+static ip_addr_t gateway = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
+static ip_addr_t mask    = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
+static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
+///////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////////
+/* Configurables */
 #define USE_TEST_MODE                   1
+#define USE_RECVPLAY_RESPONSE           1
 #define USE_MEASURE_PERFORMANCE         1
 #define USE_PLAY_RECORDED_AUDIO         0
-#define USE_RECVPLAY_RESPONSE           1
-#define BUTTON_GPIO  (31)
+#define BUTTON_GPIO                     (31)
+///////////////////////////////////////////////////////////////////////////////////
 
 
-
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
-#else
-#define DEBUG_PRINTF(...)
-#endif
-
-
-
+///////////////////////////////////////////////////////////////////////////////////
 /* Task Configurations. */
 #define TASK_ALEXA_STACK_SIZE           (6144)
 #define TASK_ALEXA_PRIORITY             (1)
-
-#define TASK_CONNECT_STACK_SIZE         (512)
-#define TASK_CONNECT_PRIORITY           (2)
+///////////////////////////////////////////////////////////////////////////////////
 
 
-
-static TaskHandle_t gx_Task_Handle;
-void vTaskConnect(void *pvParameters);
-void vTaskAlexa(void *pvParameters);
+///////////////////////////////////////////////////////////////////////////////////
+/* Debug logs */
+#define DEBUG
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+#else // DEBUG
+#define DEBUG_PRINTF(...)
+#endif // DEBUG
+///////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -95,43 +102,38 @@ void myputc(void* p, char c)
     uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
 }
 
+static inline void uart_setup()
+{
+    /* enable uart */
+    sys_enable( sys_device_uart0 );
+    gpio_function( 48, pad_func_3 );
+    gpio_function( 49, pad_func_3 );
+
+    uart_open(
+        UART0, 1,
+        UART_DIVIDER_9600_BAUD,
+        uart_data_bits_8,
+        uart_parity_none,
+        uart_stop_bits_1
+        );
+
+    /* Enable tfp_printf() functionality... */
+    init_printf( UART0, myputc );
+}
+
+static inline void ethernet_setup()
+{
+    net_setup();
+}
+
+void vTaskAlexa(void *pvParameters);
+
 int main(void)
 {
     sys_reset_all();
     interrupt_disable_globally();
-
-    /* enable uart */
-    sys_enable(sys_device_uart0);
-    gpio_function(48, pad_func_3);
-    gpio_function(49, pad_func_3);
-
-    uart_open(UART0, 1,
-        UART_DIVIDER_9600_BAUD,
-        uart_data_bits_8,
-        uart_parity_none,
-        uart_stop_bits_1);
-
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, myputc);
-
-    /* Set up Ethernet */
-    sys_enable(sys_device_ethernet);
-
-#ifdef NET_USE_EEPROM
-    /* Set up I2C */
-    sys_enable(sys_device_i2c_master);
-
-    /* Setup I2C channel 0 pins */
-    /* Use sys_i2c_swop(0) to activate. */
-    gpio_function(44, pad_i2c0_scl); /* I2C0_SCL */
-    gpio_function(45, pad_i2c0_sda); /* I2C0_SDA */
-
-    /* Setup I2C channel 1 pins for EEPROM */
-    /* Use sys_i2c_swop(1) to activate. */
-    gpio_function(46, pad_i2c1_scl); /* I2C1_SCL */
-    gpio_function(47, pad_i2c1_sda); /* I2C1_SDA */
-#endif // NET_USE_EEPROM
-
+    uart_setup();
+    ethernet_setup();
 
 #if USE_MEASURE_PERFORMANCE
     time_duration_setup();
@@ -154,7 +156,7 @@ int main(void)
         TASK_ALEXA_STACK_SIZE,
         NULL,
         TASK_ALEXA_PRIORITY,
-        &gx_Task_Handle) != pdTRUE) {
+        NULL) != pdTRUE) {
         DEBUG_PRINTF("Client failed\r\n");
     }
 
@@ -165,93 +167,58 @@ int main(void)
         ;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Network task
-////////////////////////////////////////////////////////////////////////////////////////
-void vTaskConnect(void *pvParameters)
+static inline void display_network_info()
 {
-    while (1) {
-        // Check for ethernet disconnection.
-        if (net_is_link_up()) {
-            if (!ethernet_is_link_up()) {
-                net_set_link_down();
-                DEBUG_PRINTF("Ethernet disconnected.\r\n");
-            }
-        }
-        else {
-            if (ethernet_is_link_up()) {
-                DEBUG_PRINTF("Ethernet connected.\r\n");
-                net_set_link_up();
-            }
-        }
-        for (int i = 0; i < 10; i++) {
-            net_tick();/* 10 ms delay */
-            vTaskDelay(1 * portTICK_PERIOD_MS);
-        }
-    }
+    uint8_t* mac = net_get_mac();
+    DEBUG_PRINTF( "MAC=%02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
+
+    ip_addr_t addr = net_get_ip();
+    DEBUG_PRINTF( "IP=%s\r\n", inet_ntoa(addr) );
+    addr = net_get_gateway();
+    DEBUG_PRINTF( "GW=%s\r\n", inet_ntoa(addr) );
+    addr = net_get_netmask();
+    DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
+    vTaskDelay( pdMS_TO_TICKS(1000) );
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Network init callback
-////////////////////////////////////////////////////////////////////////////////////////
-
-#define TASK_NOTIFY_NETIF_UP            0x01
-#define TASK_NOTIFY_LINK_UP             0x02
-#define TASK_NOTIFY_LINK_DOWN           0x03
-
-static void net_init_callback(int netif_up, int link_up, int packet_available)
-{
-    if (netif_up) {
-        xTaskNotify(gx_Task_Handle,TASK_NOTIFY_NETIF_UP,eSetBits);
-    }
-    if (link_up) {
-        xTaskNotify(gx_Task_Handle,TASK_NOTIFY_LINK_UP,eSetBits);
-    }
-    else {
-        xTaskNotify(gx_Task_Handle,TASK_NOTIFY_LINK_DOWN,eSetBits);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Network initialization
-////////////////////////////////////////////////////////////////////////////////////////
 static inline void initialize_network()
 {
-    uint32_t ulNotifiedValue;
-    ip_addr_t ip_addr = {0};
-    ip_addr_t gw_addr = {0};
-    ip_addr_t net_mask = {0};
+    int lRet = 0;
 
-
-    net_init(ip_addr, gw_addr, net_mask, 1, "FT90x_Alexa", net_init_callback);
-
-    while (xTaskNotifyWait( pdFALSE,    /* Don't clear bits on entry. */
-            TASK_NOTIFY_NETIF_UP, /* Clear all bits on exit. */
-            &ulNotifiedValue, /* Stores the notified value. */
-            portMAX_DELAY ) == false);
-
-    if (xTaskCreate(vTaskConnect,
-            "Connect",
-            TASK_CONNECT_STACK_SIZE,
-            NULL,
-            TASK_CONNECT_PRIORITY,
-            NULL) != pdTRUE) {
-        DEBUG_PRINTF("Connect Monitor failed\n");
+    net_init( ip, gateway, mask, USE_DHCP, dns, NULL, NULL );
+    while ( !net_is_ready() ) {
+        vTaskDelay( pdMS_TO_TICKS(1000) );
+        DEBUG_PRINTF( "." );
+        if (lRet++ > 30) {
+            DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+            chip_reboot();
+        }
     }
-
-    while (xTaskNotifyWait( pdTRUE,    /* Don't clear bits on entry. */
-            TASK_NOTIFY_LINK_UP, /* Clear all bits on exit. */
-            &ulNotifiedValue, /* Stores the notified value. */
-            portMAX_DELAY ) == false);
+    vTaskDelay( pdMS_TO_TICKS(1000) );
+    DEBUG_PRINTF( "\r\n" );
+    display_network_info();
 }
+
+#if !NET_USE_EEPROM
+void net_supply_mac(uint8_t *mac)
+{
+    mac[0] = 0x44;
+    mac[1] = 0x6D;
+    mac[2] = 0x57;
+    mac[3] = 0xAA;
+    mac[4] = 0xBB;
+    mac[5] = 0xCC;
+}
+#endif // NET_USE_EEPROM
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
 #define STR_REQUEST  "REQUEST.raw"
 #define STR_RESPONSE "RESPONSE.raw"
-
-
 
 #if USE_TEST_MODE
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -265,35 +232,56 @@ void vTaskAlexa(void *pvParameters)
 #if !USE_RECVPLAY_RESPONSE
     char* acFileNameResponse = STR_RESPONSE;
 #endif
+    int lRet = 0;
 
 
-    DEBUG_PRINTF("\r\nInitializing network...\r\n");
+    DEBUG_PRINTF("\r\nInitializing network...");
     initialize_network();
-    DEBUG_PRINTF("Network connected.\r\n");
 
     DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
     avs_init();
     vTaskDelay(pdMS_TO_TICKS(1000));
 
+
     for (;;)
     {
+loop:
+        lRet = 0;
+        if ( !net_is_ready() ) {
+            DEBUG_PRINTF( "Waiting for network configuration..." );
+            do {
+                vTaskDelay( pdMS_TO_TICKS(1000) );
+                DEBUG_PRINTF( "." );
+                if (lRet++ > 30) {
+                    DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+                    chip_reboot();
+                }
+            }
+            while (!net_is_ready());
+            DEBUG_PRINTF( "\r\n" );
+            display_network_info();
+        }
+
+
 #if USE_PLAY_RECORDED_AUDIO
         //DEBUG_PRINTF("\r\nPlaying Alexa request...\r\n");
         //avs_play_response(acFileNameRequest);
 #endif // USE_PLAY_RECORDED_AUDIO
 
-        int lTrials = 0;
+        lRet = 0;
         do {
             DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
                 ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
             if (!avs_connect()) {
+                if (avs_err()) {
+                    goto loop;
+                }
                 vTaskDelay(pdMS_TO_TICKS(2000));
-                if (++lTrials == 30) {
+                if (++lRet == 30) {
                     chip_reboot();
                 }
                 continue;
             }
-            //vTaskDelay(pdMS_TO_TICKS(3000));
             break;
         } while (1);
 
@@ -303,7 +291,7 @@ void vTaskAlexa(void *pvParameters)
         struct tm time1 = {0};
 #if !USE_RECVPLAY_RESPONSE
         struct tm time2 = {0};
-#endif
+#endif // USE_RECVPLAY_RESPONSE
         struct tm timeX = {0};
         time_duration_get_time(&time0);
 
@@ -356,9 +344,9 @@ void vTaskAlexa(void *pvParameters)
         DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
         avs_disconnect();
 
-        int lRestart = 10;
-        DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRestart);
-        for (int i=0; i<lRestart; i++) {
+        lRet = 10;
+        DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRet);
+        for (int i=0; i<lRet; i++) {
             DEBUG_PRINTF(".");
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
@@ -385,11 +373,11 @@ void vTaskAlexa(void *pvParameters)
 #if !USE_RECVPLAY_RESPONSE
     const char* acFileNameResponse = STR_RESPONSE;
 #endif // USE_RECVPLAY_RESPONSE
+    int lRet = 0;
 
 
-    DEBUG_PRINTF("\r\nInitializing network...\r\n");
+    DEBUG_PRINTF("\r\nInitializing network...");
     initialize_network();
-    DEBUG_PRINTF("Network connected.\r\n");
 
     DEBUG_PRINTF("\r\nInitializing button...\r\n");
     if (!button_setup(vIsrAlexaButton, BUTTON_GPIO)) {
@@ -422,6 +410,22 @@ void vTaskAlexa(void *pvParameters)
 
         // Process the recorded audio in SD card
         if (g_lProcessAudio) {
+            lRet = 0;
+            if ( !net_is_ready() ) {
+                DEBUG_PRINTF("\r\nWaiting for network configuration...");
+                do {
+                    vTaskDelay( pdMS_TO_TICKS(1000) );
+                    DEBUG_PRINTF( "." );
+                    if (lRet++ > 30) {
+                        DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+                        chip_reboot();
+                    }
+                }
+                while (!net_is_ready());
+                DEBUG_PRINTF("\r\n");
+                display_network_info();
+            }
+
             DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
                 ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
             if (!avs_connect()) {

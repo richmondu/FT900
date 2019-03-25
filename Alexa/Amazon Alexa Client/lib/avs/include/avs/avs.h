@@ -16,6 +16,7 @@ int  avs_recv_and_play_response();
 
 const ip_addr_t* avs_get_server_addr();
 int  avs_get_server_port();
+int  avs_err();
 
 
 #endif // AVS_H

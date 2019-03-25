@@ -46,17 +46,6 @@
 
 /* ---------- Memory options ---------- */
 
-/**
- * MEMP_OVERFLOW_CHECK: memp overflow protection reserves a configurable
- * amount of bytes before and after each memp element in every pool and fills
- * it with a prominent default value.
- *    MEMP_OVERFLOW_CHECK == 0 no checking
- *    MEMP_OVERFLOW_CHECK == 1 checks each element when it is freed
- *    MEMP_OVERFLOW_CHECK >= 2 checks each element in every pool every time
- *      memp_malloc() or memp_free() is called (useful but slow!)
- */
-#define MEMP_OVERFLOW_CHECK             1
-
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */

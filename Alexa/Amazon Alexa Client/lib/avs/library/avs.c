@@ -75,7 +75,7 @@
 static int   g_lSocket        = -1;
 static char* g_pcTxRxBuffer   = NULL;
 static char* g_pcAudioBuffer  = NULL;
-
+static int   g_lErr           = 0;
 
 
 #ifdef DEBUG
@@ -149,6 +149,11 @@ const ip_addr_t* avs_get_server_addr()
     return (ip_addr_t*)&tServer.sin_addr;
 }
 
+int avs_err()
+{
+    return g_lErr;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Establishes connection to the RPI Alexa Gateway using configurations in avs_config.h configuration file.
@@ -165,9 +170,10 @@ int avs_connect()
     tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
 
     // Create a TCP socket
+    g_lErr = 0;
     if ((g_lSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         DEBUG_PRINTF("avs_connect(): socket failed!\r\n");
-        chip_reboot();
+        g_lErr = 1;
         return 0;
     }
 

@@ -52,8 +52,12 @@
 #include <ft900_asm.h>
 #endif // defined(__FT32__)
 
-//#define CC_DEBUG
-#ifdef CC_DEBUG
+#ifndef CC_DEBUG
+// Disabled by default due to issue in asm_memcpy8
+//#define CC_DEBUG 1
+#endif
+
+#if CC_DEBUG
 #undef TINYPRINTF_OVERRIDE_LIBC
 #define TINYPRINTF_OVERRIDE_LIBC 0
 #include "tinyprintf.h"
@@ -99,12 +103,23 @@ typedef uintptr_t   mem_ptr_t;
 //#define PACK_STRUCT_END
 
 // Diagnostic output
-#ifdef CC_DEBUG
+#if CC_DEBUG
 #define LWIP_PLATFORM_DIAG(x) tfp_printf x
 #define LWIP_PLATFORM_ASSERT(x) do { tfp_printf("Assertion Failed %s:%d:%s\n",__FILE__,__LINE__,x); for(;;); } while(0)
 #endif
 
 #define LWIP_RAND() ((u32_t)rand())
+
+#define MEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
+#define SMEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
 
 #else
 #define PACK_STRUCT_FIELD(x)  x

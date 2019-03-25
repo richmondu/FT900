@@ -588,6 +588,8 @@
 #define MQTT_OUTPUT_RINGBUF_SIZE        768
 #define MQTT_CONNECT_TIMOUT             5000
 
+#define NET_USE_EEPROM                  0
+
 #endif /* NO_SYS */
 
 #endif /* LOCAL_LWIPOPTS_H_ */

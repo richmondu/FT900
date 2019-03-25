@@ -67,13 +67,14 @@ typedef SemaphoreHandle_t * sys_mutex_t;
 typedef TaskHandle_t * sys_thread_t;
 typedef char sys_prot_t;
 
-void *my_mem_calloc(mem_size_t count, mem_size_t size);
+void *sys_mem_calloc(mem_size_t count, mem_size_t size);
 
 #else
 
 #define SYS_MBOX_NULL (NULL)
 #define SYS_SEM_NULL (NULL)
 
+// Disable due to compile warnings
 //typedef void * sys_sem_t;
 //typedef void * sys_mbox_t;
 typedef void * sys_thread_t;
