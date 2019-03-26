@@ -134,7 +134,7 @@
 #define configUSE_MUTEXES                           1
 #define configUSE_COUNTING_SEMAPHORES               0
 #define configUSE_ALTERNATIVE_API                   0
-#define configUSE_TIMERS                            1
+#define configUSE_TIMERS                            0
 #define configQUEUE_REGISTRY_SIZE                   0U
 #define configCHECK_FOR_STACK_OVERFLOW              0       //0, 1, or 2
 #define configUSE_QUEUE_SETS                        0
@@ -153,7 +153,7 @@
 /* These are defined in FreeRTOS.h, default non-zero when !defined. */
 #define configMAX_TASK_NAME_LEN                     (16)    //Default 16
 #define configIDLE_SHOULD_YIELD                     0       //Default 1
-#define configUSE_TIME_SLICING                      0       //Default 1
+#define configUSE_TIME_SLICING                      1       //Default 1
 #define configUSE_TASK_NOTIFICATIONS                1       //Default 1
 #define configENABLE_BACKWARD_COMPATIBILITY         0       //Default 1
 

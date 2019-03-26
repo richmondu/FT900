@@ -14,22 +14,12 @@
 #define AVS_CONFIG_SAMPLING_RATE        SAMPLING_RATE_16KHZ
 #endif
 
-// Ethernet RX FIFO is 4kb so 2kb is fine
-#ifndef AVS_CONFIG_RX_SIZE
-#define AVS_CONFIG_RX_SIZE              (1460*2)
-#endif
-
-// Ethernet TX FIFO is 2kb so just 1 packet
-#ifndef AVS_CONFIG_TX_SIZE
-#define AVS_CONFIG_TX_SIZE              (1460)
-#endif
-
-#ifndef AVS_CONFIG_RXTX_BUFFER_SIZE
-#define AVS_CONFIG_RXTX_BUFFER_SIZE     (6144)
-#endif
-
 #ifndef AVS_CONFIG_AUDIO_BUFFER_SIZE
 #define AVS_CONFIG_AUDIO_BUFFER_SIZE    (2048)
+#endif
+
+#ifndef AVS_CONFIG_SDCARD_BUFFER_SIZE
+#define AVS_CONFIG_SDCARD_BUFFER_SIZE   (4096)
 #endif
 
 #ifndef AVS_CONFIG_RX_TIMEOUT

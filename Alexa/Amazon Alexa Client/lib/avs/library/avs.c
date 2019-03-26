@@ -48,6 +48,7 @@
 #include "tinyprintf.h"    // tinyprintf 3rd-party library
 #include "FreeRTOS.h"      // FreeRTOS 3rd-party library
 #include "task.h"          // FreeRTOS 3rd-party library
+#include "semphr.h"        // FreeRTOS 3rd-party library
 #include "lwip/sockets.h"  // lwIP 3rd-party library
 
 #include "avs/avs.h"       // AVS library
@@ -72,10 +73,25 @@
 
 
 
+typedef struct _ThreadPlayerContext {
+
+    TaskHandle_t m_xTask;
+    SemaphoreHandle_t m_xMutexFile;
+    SemaphoreHandle_t m_xMutexRun;
+    FIL m_fHandle;
+    uint32_t m_ulWriteSize;
+    uint32_t m_ulReadSize;
+    uint32_t m_ulRecvSize;
+
+} ThreadPlayerContext;
+
 static int   g_lSocket        = -1;
-static char* g_pcTxRxBuffer   = NULL;
-static char* g_pcAudioBuffer  = NULL;
 static int   g_lErr           = 0;
+static char* g_pcAudioBuffer  = NULL;
+static char* g_pcSDCardBuffer = NULL;
+static ThreadPlayerContext g_hContext;
+static void vPlayerTask(void *pvParameters);
+
 
 
 #ifdef DEBUG
@@ -99,9 +115,25 @@ static const char* getConfigSamplingRateStr()
 
     return "Unknown";
 }
-#endif
+#endif // DEBUG
 
-int avs_init()
+static inline void mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize)
+{
+    for (int i=0; i<ulSize; i+=2, pDst+=4, pSrc+=2) {
+        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+        *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
+    }
+}
+
+static inline void stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize)
+{
+    for (int i=0; i<ulSize; i+=2, pDst+=2, pSrc+=4) {
+        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+    }
+}
+
+
+int avs_init(void)
 {
     // Initialize audio
     audio_setup(NULL, AVS_CONFIG_SAMPLING_RATE);
@@ -112,44 +144,72 @@ int avs_init()
     DEBUG_PRINTF("SDCard initialize.\r\n");
 
     // Pre-allocate the buffers now for faster communication
-    g_pcTxRxBuffer = pvPortMalloc(AVS_CONFIG_RXTX_BUFFER_SIZE);
+    g_pcSDCardBuffer = pvPortMalloc(AVS_CONFIG_SDCARD_BUFFER_SIZE);
     g_pcAudioBuffer = pvPortMalloc(AVS_CONFIG_AUDIO_BUFFER_SIZE);
-    if (!g_pcTxRxBuffer || !g_pcAudioBuffer) {
+    if (!g_pcAudioBuffer || !g_pcSDCardBuffer) {
         DEBUG_PRINTF("avs_init(): pvPortMalloc failed %p %p\n",
-            g_pcTxRxBuffer, g_pcAudioBuffer);
+            g_pcAudioBuffer, g_pcSDCardBuffer);
         return 0;
     }
     DEBUG_PRINTF("Memory initialize.\r\n");
 
+    // Initialize mutex
+    g_hContext.m_xMutexFile = xSemaphoreCreateMutex();
+    g_hContext.m_xMutexRun = xSemaphoreCreateMutex();
+    if (!g_hContext.m_xMutexRun || !g_hContext.m_xMutexFile) {
+        DEBUG_PRINTF("avs_init(): xSemaphoreCreateMutex failed\n");
+        avs_free();
+        return 0;
+    }
+    xSemaphoreTake(g_hContext.m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
+
+    // Initialize task
+    g_hContext.m_xTask = NULL;
+    if (xTaskCreate(vPlayerTask, "Player", 1024, &g_hContext, 1, &g_hContext.m_xTask) != pdTRUE) {
+        DEBUG_PRINTF("avs_init(): xTaskCreate failed\n");
+        avs_free();
+        return 0;
+    }
+
     return 1;
 }
 
-void avs_free()
+void avs_free(void)
 {
-    if (g_pcTxRxBuffer) {
-        vPortFree(g_pcTxRxBuffer);
-        g_pcTxRxBuffer = NULL;
-    }
-
     if (g_pcAudioBuffer) {
         vPortFree(g_pcAudioBuffer);
         g_pcAudioBuffer = NULL;
     }
+
+    if (g_pcSDCardBuffer) {
+        vPortFree(g_pcSDCardBuffer);
+        g_pcSDCardBuffer = NULL;
+    }
+
+    if (g_hContext.m_xMutexFile) {
+        vSemaphoreDelete(g_hContext.m_xMutexFile);
+        g_hContext.m_xMutexFile = NULL;
+    }
+
+    if (g_hContext.m_xMutexRun) {
+        vSemaphoreDelete(g_hContext.m_xMutexRun);
+        g_hContext.m_xMutexRun = NULL;
+    }
 }
 
-int avs_get_server_port()
+int avs_get_server_port(void)
 {
     return AVS_CONFIG_SERVER_PORT;
 }
 
-const ip_addr_t* avs_get_server_addr()
+const ip_addr_t* avs_get_server_addr(void)
 {
     static struct sockaddr_in tServer;
     tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
     return (ip_addr_t*)&tServer.sin_addr;
 }
 
-int avs_err()
+int avs_err(void)
 {
     return g_lErr;
 }
@@ -158,7 +218,7 @@ int avs_err()
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Establishes connection to the RPI Alexa Gateway using configurations in avs_config.h configuration file.
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_connect()
+int avs_connect(void)
 {
     int iRet = 0;
     struct sockaddr_in tServer = {0};
@@ -190,7 +250,7 @@ int avs_connect()
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Closes connection with RPI Alexa Gateway.
 /////////////////////////////////////////////////////////////////////////////////////////////
-void avs_disconnect()
+void avs_disconnect(void)
 {
     if (g_lSocket >= 0) {
         close(g_lSocket);
@@ -200,17 +260,93 @@ void avs_disconnect()
 }
 
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Record audio file from microphone and save to SD card given the complete file path
+// - Read 2KB from microphone
+// - Convert 2KB stereo to 1KB mono
+// - Save 1KB to SD card
+// Audio recorded: 16-bit PCM, 16KHZ, stereo (2-channels)
+// Audio saved:    16-bit PCM, 16KHZ, mono (1-channel)
+/////////////////////////////////////////////////////////////////////////////////////////////
+int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
+{
+    FIL fHandle;
+    uint32_t ulRecordSize = 0;
+    uint32_t ulBytesWritten = 0;
+    char* pcMicrophone = g_pcAudioBuffer;
+
+
+    audio_mic_begin();
+
+    // Open file given complete file path in SD card
+    if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
+        DEBUG_PRINTF("avs_record_request(): sdcard_open failed!\r\n");
+        audio_mic_end();
+        return 0;
+    }
+
+
+    // Record microphone input to SD card while callback function returns true
+    // Microphone input is 16-bit stereo
+    do {
+        // Process transfer if the mic is full
+        if (audio_mic_ready()) {
+
+            ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE;
+
+            // copy data from microphone
+            audio_record((uint8_t*)pcMicrophone, ulRecordSize);
+
+            // convert stereo to mono in-place
+            stereo_to_mono(pcMicrophone, pcMicrophone, ulRecordSize);
+            ulRecordSize = ulRecordSize >> 1;
+
+            // write mic data to SD card
+            uint32_t ulWriteSize = 0;
+            sdcard_write(&fHandle, pcMicrophone, ulRecordSize, (UINT*)&ulWriteSize);
+            if (ulRecordSize != ulWriteSize) {
+                DEBUG_PRINTF("avs_record_request(): sdcard_write failed! %d %d\r\n\r\n",
+                    (int)ulRecordSize, (int)ulWriteSize);
+                audio_mic_clear();
+                break;
+            }
+
+            // Clear interrupt flag
+            audio_mic_clear();
+
+            ulBytesWritten += ulWriteSize;
+            //DEBUG_PRINTF("avs_record_request ulBytesWritten %d\r\n", (int)ulWriteSize);
+        }
+    } while ((*fxnCallbackRecord)() && ulBytesWritten < AVS_CONFIG_MAX_RECORD_SIZE);
+
+
+    // Close the file
+    sdcard_close(&fHandle);
+    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
+        pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
+
+    audio_mic_end();
+
+    return 1;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Sends the voice request to the RPI Alexa Gateway provided the filename of the voice recording in the SD card.
+// - Read 4KB from SD card
+// - Convert 4KB 16-bit to 2KB 8-bit
+// - Send 2KB to RPI
 // Audio sent: 8-bit u-law, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
 int avs_send_request(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
-    char* pcData = g_pcTxRxBuffer;
+    char* pcSDCard = g_pcSDCardBuffer;
+    uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE>>1;
     uint32_t ulBytesToTransfer = 0;
-    uint32_t ulBytesToProcess = AVS_CONFIG_TX_SIZE;
     uint32_t ulBytesSent = 0;
     struct timeval tTimeout = {AVS_CONFIG_TX_TIMEOUT, 0}; // x-second timeout
 
@@ -238,7 +374,7 @@ int avs_send_request(const char* pcFileName)
     ulBytesToTransfer = (ulBytesToTransfer >> 1);
 
 
-    // Set a X-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Negotiate the bytes to transfer
@@ -250,7 +386,7 @@ int avs_send_request(const char* pcFileName)
     }
 
 
-    // Set a X-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Send the flag for configurations
@@ -266,7 +402,7 @@ int avs_send_request(const char* pcFileName)
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
 
 
-    // Set a X-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     while (ulBytesSent != ulBytesToTransfer) {
@@ -277,22 +413,21 @@ int avs_send_request(const char* pcFileName)
 
         // Read from SD card
         uint32_t ulReadSize = 0;
-        iRet = sdcard_read(&fHandle, pcData, ulBytesToProcess<<1, (UINT*)&ulReadSize);
-        ulBytesToProcess = ulReadSize >> 1;
+        iRet = sdcard_read(&fHandle, pcSDCard, ulBytesToProcess<<1, (UINT*)&ulReadSize);
         if (iRet != 0) {
             DEBUG_PRINTF(">> avs_send_request(): iRet = %d\r\n", iRet);
             sdcard_close(&fHandle);
             return 0;
         }
 
-        if (ulBytesToProcess) {
+        if (ulReadSize) {
             // Convert in-place from 16-bit to 8-bit
-            pcm16_to_ulaw(ulBytesToProcess<<1, pcData, pcData);
+            pcm16_to_ulaw(ulReadSize, pcSDCard, pcSDCard);
 
             // Send the converted bytes
-            iRet = send(g_lSocket, pcData, ulBytesToProcess, 0);
+            iRet = send(g_lSocket, pcSDCard, ulReadSize>>1, 0);
             if (iRet <= 0) {
-                DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+                DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulReadSize>>1, iRet);
                 sdcard_close(&fHandle);
                 return 0;
             }
@@ -317,9 +452,9 @@ int avs_send_request(const char* pcFileName)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Receives Alexa response and save the uncompressed file to SD card
-// - Uses a pre-allocated buffer for faster transfer
-// - Receives 1460 bytes from RPI then uncompresses it from 8-bit to 16-bit using ulaw algorithm
-//   then saves the converted audio data stream of size 1460*2 bytes to SD card
+// - Recv 2KB from RPI
+// - Convert 8-bit to 16-bit
+// - Save 4KB to SD card
 // Audio received: 8-bit u-law, 16KHZ, mono (1-channel)
 // Audio saved:   16-bit PCM, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,12 +462,13 @@ int avs_recv_response(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
-    char* pcData = g_pcTxRxBuffer;
-    char acTemp[AVS_CONFIG_RX_SIZE];
+    char* pcSDCard = g_pcSDCardBuffer;
+    char* pcRecv = g_pcAudioBuffer;
+    uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE >> 1;
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
-    uint32_t ulBytesToProcess = sizeof(acTemp);
-    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0}; // x-second timeout
+    uint32_t ulWriteSize = 0;
+    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0};
 
 
     // Open file given complete file path in SD card
@@ -342,7 +478,7 @@ int avs_recv_response(const char* pcFileName)
     }
 
 
-    // Set a 15-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Negotiate the bytes to transfer
@@ -355,18 +491,18 @@ int avs_recv_response(const char* pcFileName)
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
 
-    // Set a 15-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Receive the total bytes in segments of buffer size
-    while (ulBytesReceived < ulBytesToReceive) {
+    do {
         // Compute the transfer size
         if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {
             ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
         }
 
         // Receive the bytes of transfer size
-        iRet = recv(g_lSocket, acTemp, ulBytesToProcess, 0);
+        iRet = recv(g_lSocket, pcRecv, ulBytesToProcess, 0);
         if (iRet <= 0) {
             DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
             sdcard_close(&fHandle);
@@ -378,12 +514,12 @@ int avs_recv_response(const char* pcFileName)
         ulBytesReceived += iRet;
 
         // Convert 8-bit data to 16-bit data before saving
-        ulaw_to_pcm16(iRet, acTemp, pcData);
+        ulaw_to_pcm16(iRet, pcRecv, pcSDCard);
 
         // Save to 16-bit decoded data to SD card
-        uint32_t ulWriteSize = 0;
+        ulWriteSize = 0;
         iRet = iRet<<1;
-        sdcard_write(&fHandle, pcData, iRet, (UINT*)&ulWriteSize);
+        sdcard_write(&fHandle, pcSDCard, iRet, (UINT*)&ulWriteSize);
         if (iRet != ulWriteSize) {
             DEBUG_PRINTF("avs_recv_response(): sdcard_write failed! %d %d\r\n\r\n", iRet, (int)ulWriteSize);
             sdcard_close(&fHandle);
@@ -391,6 +527,7 @@ int avs_recv_response(const char* pcFileName)
         }
         //DEBUG_PRINTF(">> Wrote %d bytes to SD card\r\n", ulWriteSize);
     }
+    while (ulBytesReceived < ulBytesToReceive);
 
 
     // Close the file
@@ -403,15 +540,15 @@ int avs_recv_response(const char* pcFileName)
     sdcard_dir("");
 #endif // USE_DO_DIR
 
-    return ulBytesReceived<<1;
+    return 1;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Play audio file from SD card given the complete file path
-// - Uses a pre-allocated buffer for faster transfer
-// - Reads 1KB segment from file then converts it to stereo (2-channel) audio
-//   by duplicating each short then transfers the 2KB segment to I2S Master
+// - Read 4KB from SD card
+// - For each 1KB, convert from mono (1KB) to stereo (2KB)
+// - Play 2KB on speaker
 // Audio read:   16-bit PCM, 16KHZ, mono (1-channel)
 // Audio played: 16-bit PCM, 16KHZ, stereo (2-channels)
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -421,8 +558,10 @@ int avs_play_response(const char* pcFileName)
     uint32_t ulFileSize = 0;
     uint32_t ulFileOffset = 0;
     uint32_t ulReadSize = 0;
-    uint32_t ulTransferSize = 0;
-    char* pcData = g_pcAudioBuffer;
+    char* pcSpeaker = g_pcAudioBuffer;
+    char* pcSDCard = g_pcSDCardBuffer;
+    uint32_t ulPlayed = 0;
+    uint32_t ulTransferSize = AVS_CONFIG_AUDIO_BUFFER_SIZE<<1;
 
 
     audio_speaker_begin();
@@ -446,104 +585,45 @@ int avs_play_response(const char* pcFileName)
         pcFileName, (int)ulFileSize, getConfigSamplingRateStr());
 
 
-#if 1
     // This code maximizes FIFO sizes of SD CARD (4KB) and SPEAKER (2KB)
-    // As a result, audio quality is very good
-    char* pcSDCard = g_pcTxRxBuffer;
-    uint32_t ulPlayed = 0;
-
+    // As a result, transfers are efficient and audio quality is very good
     do {
-        // Compute size to transfer
-        ulTransferSize = AVS_CONFIG_AUDIO_BUFFER_SIZE<<1;
-        if (ulFileSize - ulFileOffset < ulTransferSize) {
-            ulTransferSize = ulFileSize - ulFileOffset;
-        }
-
         // Read 4KB data from SD card to buffer
-        // SD Card FIFO size is 4KB so this is the efficient read size
         ulReadSize = 0;
         sdcard_read(&fHandle, pcSDCard, ulTransferSize, (UINT*)&ulReadSize);
         ulFileOffset += ulReadSize;
-        //DEBUG_PRINTF(">> avsPlayAlexaResponse fileOffset %d totalReadSize %d\r\n", fileOffset, totalReadSize);
 
-        // Write the 4KB data to speaker
-        // Speaker FIFO size is 2KB only
-        // Data is MONO so must be converted to STEREO
-        // So write 4KB in 1KB chunks (==2KB for STEREO mode)
+        // Write 4KB in 1KB (MONO) chunks (==2KB for STEREO)
         ulPlayed = 0;
-        ulTransferSize = 1024;
-        while (ulPlayed < ulReadSize) {
+        uint32_t ulPlaySize = 1024;
+        do {
             // Process transfer if the speaker FIFO is empty
             if (audio_speaker_ready()) {
-                // Duplicate short for stereo 2 channel
-                // Input is mono 1 channel audio data stream
-                // I2S requires stereo 2 channel audio data stream
-                char* pDst = pcData;
-                char* pSrc = pcSDCard + ulPlayed;
-                for (int i=0; i<ulTransferSize; i+=2, pDst+=4, pSrc+=2) {
-                    *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-                    *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
+                if (ulReadSize - ulPlayed < ulPlaySize) {
+                    ulPlaySize = ulReadSize - ulPlayed;
                 }
 
+                // Input is mono 1 channel; speaker requires stereo 2 channels
+                mono_to_stereo(pcSpeaker, pcSDCard + ulPlayed, ulPlaySize);
+
                 // Play buffer to speaker
-                audio_play((uint8_t *)pcData, ulTransferSize<<1);
+                audio_play((uint8_t *)pcSpeaker, ulPlaySize<<1);
 
                 // Clear interrupt flag
                 audio_speaker_clear();
 
                 // Increment offset
-                ulPlayed += ulTransferSize;
-
-                if (ulReadSize - ulPlayed < ulTransferSize) {
-                    ulTransferSize = ulReadSize - ulPlayed;
-                }
+                ulPlayed += ulPlaySize;
             }
         }
-    } while (ulFileOffset != ulFileSize);
-#else
-    char acTemp[AVS_CONFIG_AUDIO_BUFFER_SIZE >> 1];
-    do {
-        // Process transfer if the speaker FIFO is empty
-        if (audio_speaker_ready()) {
+        while (ulPlayed < ulReadSize);
 
-            // Compute size to transfer
-            ulTransferSize = sizeof(acTemp);
-            if (ulFileSize - ulFileOffset < ulTransferSize) {
-                ulTransferSize = ulFileSize - ulFileOffset;
-            }
-
-            // Read data from SD card to buffer
-            ulReadSize = 0;
-            sdcard_read(&fHandle, acTemp, ulTransferSize, (UINT*)&ulReadSize);
-            ulTransferSize = ulReadSize;
-            //DEBUG_PRINTF(">> avsPlayAlexaResponse fileOffset %d totalReadSize %d\r\n", fileOffset, totalReadSize);
-
-            if (ulTransferSize) {
-                // Duplicate short for stereo 2 channel
-                // Input is mono 1 channel audio data stream
-                // I2S requires stereo 2 channel audio data stream
-                for (int i=0, j=0; i<ulTransferSize; i+=2, j+=4) {
-                    pcData[j]   = acTemp[i];
-                    pcData[j+1] = acTemp[i+1];
-                    pcData[j+2] = acTemp[i];
-                    pcData[j+3] = acTemp[i+1];
-                }
-
-                // Play buffer to speaker
-                audio_play((uint8_t*)pcData, ulTransferSize<<1);
-
-                // Increment offset
-                ulFileOffset += ulTransferSize;
-            }
-            else {
-                DEBUG_PRINTF(">> avs_play_response sdcard_read is 0\r\n");
-            }
-
-            // Clear interrupt flag
-            audio_speaker_clear();
+        // Compute size to transfer
+        if (ulFileSize - ulFileOffset < ulTransferSize) {
+            ulTransferSize = ulFileSize - ulFileOffset;
         }
+
     } while (ulFileOffset != ulFileSize);
-#endif
 
 
     // Close the file
@@ -559,50 +639,45 @@ int avs_play_response(const char* pcFileName)
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Recv and play Alexa response without saving to SD card
 // - Recv 512 bytes from RPI
-// - Convert 8-bit to 16-bit (1KB)
-// - Convert mono to stereo (2KB)
+// - Convert 8-bit mono (512) to 16-bit stereo (2KB)
+// - Play 2KB on speaker
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_recv_and_play_response()
+int avs_recv_and_play_response(void)
 {
     int iRet = 0;
-    char* pcData = g_pcTxRxBuffer;
-    char acRecv[512];
-    char acExpanded[1024];
+    char* pcRecv = g_pcSDCardBuffer;
+    char* pcSpeaker = g_pcAudioBuffer;
+    uint32_t ulBytesToProcess = AVS_CONFIG_AUDIO_BUFFER_SIZE>>2;
     uint32_t ulBytesToReceive = 0;
     uint32_t ulBytesReceived = 0;
-    uint32_t ulBytesToProcess = sizeof(acRecv);
-    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0}; // x-second timeout
+    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0};
 
 
     audio_speaker_begin();
 
-    // Set a 15-second timeout for the operation
+
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Negotiate the bytes to transfer
     iRet = recv(g_lSocket, (char*)&ulBytesToReceive, sizeof(ulBytesToReceive), 0);
     if (iRet < sizeof(ulBytesToReceive)) {
-        DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
+        DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
         audio_speaker_end();
         return 0;
     }
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
 
-    // Set a 15-second timeout for the operation
+    // Set a timeout for the operation
     setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
 
     // Receive the total bytes in segments of buffer size
-    while (ulBytesReceived < ulBytesToReceive) {
-        // Compute the transfer size
-        if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {
-            ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
-        }
-
+    do {
         // Receive the bytes of transfer size
-        iRet = recv(g_lSocket, acRecv, ulBytesToProcess, 0);
+        iRet = recv(g_lSocket, pcRecv, ulBytesToProcess, 0);
         if (iRet <= 0) {
-            DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
             audio_speaker_end();
             return 0;
         }
@@ -611,107 +686,257 @@ int avs_recv_and_play_response()
         // Compute the total bytes received
         ulBytesReceived += iRet;
 
-        // Convert 8-bit data to 16-bit data before saving
-        ulaw_to_pcm16(iRet, acRecv, acExpanded);
-        iRet = iRet<<1;
+        // Convert 8-bit mono data to 16-bit stereo data before saving
+        ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
 
+        // Play on speaker
         do {
             if (audio_speaker_ready()) {
-                // Duplicate short for stereo 2 channel
-                // Input is mono 1 channel audio data stream
-                // I2S requires stereo 2 channel audio data stream
-                char* pDst = pcData;
-                char* pSrc = acExpanded;
-                for (int i=0; i<iRet; i+=2, pDst+=4, pSrc+=2) {
-                    *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-                    *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
-                }
-
-                // Play buffer to speaker
-                audio_play((uint8_t *)pcData, iRet<<1);
-
-                // Clear interrupt flag
+                audio_play((uint8_t *)pcSpeaker, iRet<<2);
                 audio_speaker_clear();
                 break;
             }
         } while (1);
+        
+        // Compute the transfer size
+        if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {
+            ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
+        }
     }
+    while (ulBytesReceived < ulBytesToReceive);
+
 
     audio_speaker_end();
     return 1;
 }
 
 
+#if 1
 /////////////////////////////////////////////////////////////////////////////////////////////
-// Record audio file from microphone and save to SD card given the complete file path
-// Audio recorded: 16-bit PCM, 16KHZ, stereo (2-channels)
-// Audio saved:    16-bit PCM, 16KHZ, mono (1-channel)
+// Recv and play Alexa response in separate threads
+// - Recv 2KB from RPI
+// - Convert 8-bit to 16-bit (1KB)
+// - Save 4KB to SD card
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
+int avs_recv_and_play_response_threaded(const char* pcFileName)
 {
-    FIL fHandle;
-    uint32_t ulRecordSize = 0;
-    uint32_t ulBytesWritten = 0;
-    char* pcData = g_pcAudioBuffer;
+    int iRet = 0;
+    int iSignalled = 0;
+    char acSDCard[AVS_CONFIG_SDCARD_BUFFER_SIZE];
+    char acRecv[AVS_CONFIG_SDCARD_BUFFER_SIZE>>1];
+    uint32_t ulBytesToProcess = sizeof(acRecv);
+    uint32_t ulBytesReceived = 0;
+    struct timeval tTimeout = {AVS_CONFIG_RX_TIMEOUT, 0};
 
 
-    audio_mic_begin();
+    // Initialize structure
+    g_hContext.m_ulWriteSize = 0;
+    g_hContext.m_ulReadSize = 0;
+    g_hContext.m_ulRecvSize = 0;
 
     // Open file given complete file path in SD card
-    if (sdcard_open(&fHandle, pcFileName, 1, 0)) {
-        DEBUG_PRINTF("avs_record_request(): sdcard_open failed!\r\n");
-        audio_mic_end();
+    if (sdcard_open(&g_hContext.m_fHandle, pcFileName, 1, 1)) {
+        DEBUG_PRINTF("avs_recv_and_play_response_threaded(): sd_open failed!\r\n");
         return 0;
     }
 
 
-    // Record microphone input to SD card while callback function returns true
-    // Microphone input is 16-bit stereo
+    // Set a timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
+    // Negotiate the bytes to transfer
+    iRet = recv(g_lSocket, (char*)&g_hContext.m_ulRecvSize, sizeof(g_hContext.m_ulRecvSize), 0);
+    if (iRet < sizeof(g_hContext.m_ulRecvSize)) {
+        DEBUG_PRINTF("avs_recv_and_play_response_threaded(): recv failed! %d %d\r\n\r\n", iRet, sizeof(g_hContext.m_ulRecvSize));
+        sdcard_close(&g_hContext.m_fHandle);
+        return 0;
+    }
+    DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)g_hContext.m_ulRecvSize);
+
+
+    // Set a timeout for the operation
+    setsockopt(g_lSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tTimeout, sizeof(tTimeout));
+
+    // Receive the total bytes in segments of buffer size
     do {
-        // Process transfer if the mic is full
-        if (audio_mic_ready()) {
-
-            ulRecordSize = AVS_CONFIG_AUDIO_BUFFER_SIZE;
-
-            // copy data from microphone
-            audio_record((uint8_t*)pcData, ulRecordSize);
-
-            // convert stereo to mono in-place
-            char* pDst = pcData;
-            char* pSrc = pcData;
-            for (int i=0; i<ulRecordSize; i+=2, pDst+=2, pSrc+=4) {
-                // copy the first 16-bit word, skip the next one
-                *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-            }
-            ulRecordSize = ulRecordSize >> 1;
-
-            // write mic data to SD card
-            uint32_t ulWriteSize = 0;
-            sdcard_write(&fHandle, pcData, ulRecordSize, (UINT*)&ulWriteSize);
-            if (ulRecordSize != ulWriteSize) {
-                DEBUG_PRINTF("avs_record_request(): sdcard_write failed! %d %d\r\n\r\n",
-                    (int)ulRecordSize, (int)ulWriteSize);
-                audio_mic_clear();
-                break;
-            }
-
-            // Clear interrupt flag
-            audio_mic_clear();
-
-            ulBytesWritten += ulWriteSize;
-            //DEBUG_PRINTF("avsRecordAlexaRequest ulBytesWritten %d\r\n", (int)ulWriteSize);
+        // Compute the transfer size
+        ulBytesToProcess = sizeof(acRecv);
+        if (g_hContext.m_ulRecvSize - ulBytesReceived < ulBytesToProcess) {
+            ulBytesToProcess = g_hContext.m_ulRecvSize - ulBytesReceived;
         }
-    } while ((*fxnCallbackRecord)() && ulBytesWritten < AVS_CONFIG_MAX_RECORD_SIZE);
 
+        // Save to 16-bit decoded data to SD card
+        // Take the semaphore
+        if (xSemaphoreTake(g_hContext.m_xMutexFile, pdMS_TO_TICKS(1000)) == pdTRUE) {
+
+            // Receive the bytes of transfer size
+            iRet = recv(g_lSocket, acRecv, ulBytesToProcess, 0);
+            if (iRet <= 0) {
+                DEBUG_PRINTF("avs_recv_and_play_response_threaded(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+                if (ulBytesReceived) {
+                    xSemaphoreTake(g_hContext.m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
+                }
+                sdcard_close(&g_hContext.m_fHandle);
+                return 0;
+            }
+            //tfp_printf(">> Recv  %d bytes %d\r\n", iRet, g_hContext.m_ulWriteSize);
+
+            // Convert 8-bit data to 16-bit data before saving
+            ulaw_to_pcm16(iRet, acRecv, acSDCard);
+
+            
+            /* Get write position */
+            sdcard_lseek(&g_hContext.m_fHandle, g_hContext.m_ulWriteSize);
+            
+            /* Write data to specified position */
+            uint32_t ulWriteSize = 0;
+            int lSizeToWrite = iRet<<1;
+            sdcard_write(&g_hContext.m_fHandle, acSDCard, lSizeToWrite, (UINT*)&ulWriteSize);
+            if (lSizeToWrite != ulWriteSize) {
+                DEBUG_PRINTF("avs_recv_and_play_response_threaded(): sdcard_write failed! %d %d\r\n\r\n", lSizeToWrite, (int)ulWriteSize);
+                xSemaphoreGive(g_hContext.m_xMutexFile);
+                if (ulBytesReceived) {
+                    xSemaphoreTake(g_hContext.m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
+                }
+                sdcard_close(&g_hContext.m_fHandle);
+                return 0;
+            }
+
+            g_hContext.m_ulWriteSize += ulWriteSize;
+
+            /* Release semaphone */
+            xSemaphoreGive(g_hContext.m_xMutexFile);
+            vTaskDelay(pdMS_TO_TICKS(1)); // Allow context switch
+        }
+        else {
+            DEBUG_PRINTF("avs_recv_and_play_response_threaded(): xSemaphoreTake failed!\r\n\r\n");
+        }
+
+        // Compute the total bytes received
+        ulBytesReceived += iRet;
+
+        // Signal other thread to start
+        if (g_hContext.m_ulWriteSize>=4096 && !iSignalled) {
+            xSemaphoreGive(g_hContext.m_xMutexRun);
+            iSignalled = 1;
+        }
+    }
+    while (ulBytesReceived < g_hContext.m_ulRecvSize);
+
+    DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesReceived<<1);
+
+ 
+    xSemaphoreTake(g_hContext.m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
+    // Wait for semaphore before closing it
+    while (g_hContext.m_ulReadSize != g_hContext.m_ulWriteSize) {
+        vTaskDelay( pdMS_TO_TICKS(1) );
+    }
 
     // Close the file
-    sdcard_close(&fHandle);
-    DEBUG_PRINTF(">> %s %d bytes (16-bit, %s, mono)\r\n",
-        pcFileName, (int)ulBytesWritten, getConfigSamplingRateStr());
-
-    audio_mic_end();
+    sdcard_close(&g_hContext.m_fHandle);
 
     return 1;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Helper for avs_recv_and_play_response_threaded
+// - Read 4KB from SD card
+// - For each 1KB, convert from mono (1KB) to stereo (2KB)
+// - Play 2KB on speaker
+/////////////////////////////////////////////////////////////////////////////////////////////
+static void vPlayerTask(void *pvParameters)
+{
+    ThreadPlayerContext* pContext = (ThreadPlayerContext*)pvParameters;
+    char* pcSDCard = g_pcSDCardBuffer;
+    char* pcSpeaker = g_pcAudioBuffer;
+    uint32_t ulTransferSize = 0;
+    uint32_t ulReadSize = 0;
 
+
+    while (1) {
+
+        // wait for signal
+        xSemaphoreTake(pContext->m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
+
+        audio_speaker_begin();
+
+        while (1) {
+
+            // Take the semaphore
+            if (xSemaphoreTake(pContext->m_xMutexFile, pdMS_TO_TICKS(1000)) == pdTRUE) {
+
+                // Check if new written bytes are available for reading
+                if (pContext->m_ulWriteSize == 0 ||
+                    (pContext->m_ulWriteSize - pContext->m_ulReadSize < 4096 &&
+                     pContext->m_ulWriteSize < (pContext->m_ulRecvSize << 1) ) ) {
+                    xSemaphoreGive(pContext->m_xMutexFile);
+                    vTaskDelay(pdMS_TO_TICKS(1)); // Allow context switch
+                    continue;
+                }
+
+                // Compute size to transfer
+                ulTransferSize = AVS_CONFIG_SDCARD_BUFFER_SIZE;
+                if (pContext->m_ulWriteSize - pContext->m_ulReadSize < ulTransferSize) {
+                    ulTransferSize = pContext->m_ulWriteSize - pContext->m_ulReadSize;
+                }
+
+                // Get read position
+                sdcard_lseek(&pContext->m_fHandle, pContext->m_ulReadSize);
+
+                // Read data from SD card to buffer
+                ulReadSize = 0;
+                sdcard_read(&pContext->m_fHandle, pcSDCard, ulTransferSize, (UINT*)&ulReadSize);
+                //tfp_printf(">> Read  %d bytes %d\r\n", (int)ulReadSize, (int)g_hContext.m_ulReadSize);
+
+                // Increment bytes read
+                pContext->m_ulReadSize += ulReadSize;
+
+
+
+                // Write 4KB in 1KB (MONO) chunks (==2KB for STEREO)
+                uint32_t ulPlayed = 0;
+                uint32_t ulPlaySize = 1024;
+                do {
+                    // Process transfer if the speaker FIFO is empty
+                    if (audio_speaker_ready()) {
+                        if (ulReadSize - ulPlayed < ulPlaySize) {
+                            ulPlaySize = ulReadSize - ulPlayed;
+                        }
+
+                        // Input is mono 1 channel; speaker requires stereo 2 channels
+                        mono_to_stereo(pcSpeaker, pcSDCard + ulPlayed, ulPlaySize);
+
+                        // Play buffer to speaker
+                        audio_play((uint8_t *)pcSpeaker, ulPlaySize<<1);
+                        // Increment offset
+                        ulPlayed += ulPlaySize;
+
+                        audio_speaker_clear();
+                    }
+                }
+                while (ulPlayed < ulReadSize);
+
+                // Release semaphone
+                xSemaphoreGive(pContext->m_xMutexFile);
+                vTaskDelay(pdMS_TO_TICKS(1)); // Allow context switch
+
+
+                // Check if all bytes are read
+                if ((pContext->m_ulRecvSize << 1) <= pContext->m_ulReadSize) {
+                    break;
+                }
+            }
+            else {
+                DEBUG_PRINTF("avs_recv_and_play_response_threaded(): xSemaphoreTake failed!\r\n\r\n");
+            }
+        }
+        
+        // Release semaphone
+        xSemaphoreGive(pContext->m_xMutexRun);
+
+        audio_speaker_end();
+
+        vTaskDelay( pdMS_TO_TICKS(1000) ); // Allow context switch
+    }
+}
+#endif

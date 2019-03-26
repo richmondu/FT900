@@ -71,6 +71,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 ///////////////////////////////////////////////////////////////////////////////////
 /* Configurables */
 #define USE_TEST_MODE                   1
+#define USE_RECVPLAYTHREADED_RESPONSE   0
 #define USE_RECVPLAY_RESPONSE           1
 #define USE_MEASURE_PERFORMANCE         1
 #define USE_PLAY_RECORDED_AUDIO         0
@@ -163,8 +164,7 @@ int main(void)
     DEBUG_PRINTF("Starting Scheduler.. \r\n");
     vTaskStartScheduler();
     DEBUG_PRINTF("Should never reach here!\r\n");
-    for (;;)
-        ;
+    for (;;) ;
 }
 
 static inline void display_network_info()
@@ -179,7 +179,6 @@ static inline void display_network_info()
     DEBUG_PRINTF( "GW=%s\r\n", inet_ntoa(addr) );
     addr = net_get_netmask();
     DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
-    vTaskDelay( pdMS_TO_TICKS(1000) );
 }
 
 static inline void initialize_network()
@@ -195,7 +194,6 @@ static inline void initialize_network()
             chip_reboot();
         }
     }
-    vTaskDelay( pdMS_TO_TICKS(1000) );
     DEBUG_PRINTF( "\r\n" );
     display_network_info();
 }
@@ -229,9 +227,9 @@ void vTaskAlexa(void *pvParameters)
 {
     (void) pvParameters;
     char* acFileNameRequest = STR_REQUEST;
-#if !USE_RECVPLAY_RESPONSE
+#if !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
     char* acFileNameResponse = STR_RESPONSE;
-#endif
+#endif // !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
     int lRet = 0;
 
 
@@ -299,7 +297,17 @@ loop:
         if (avs_send_request(acFileNameRequest)) {
             time_duration_get_time(&time1);
 
-#if USE_RECVPLAY_RESPONSE
+#if USE_RECVPLAYTHREADED_RESPONSE
+            DEBUG_PRINTF("[%d seconds]\r\nStreamingx Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_and_play_response_threaded(acFileNameResponse)) {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+            else {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+#elif USE_RECVPLAY_RESPONSE
             DEBUG_PRINTF("[%d seconds]\r\nStreaming Alexa response...", (int)time_duration_get(&time1, &time0));
             if (avs_recv_and_play_response()) {
                 time_duration_get_time(&timeX);
@@ -370,7 +378,7 @@ void vTaskAlexa(void *pvParameters)
 {
     (void) pvParameters;
     const char* acFileNameRequest = STR_REQUEST;
-#if !USE_RECVPLAY_RESPONSE
+#if !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
     const char* acFileNameResponse = STR_RESPONSE;
 #endif // USE_RECVPLAY_RESPONSE
     int lRet = 0;
@@ -433,7 +441,14 @@ void vTaskAlexa(void *pvParameters)
                 continue;
             }
 
-#if USE_RECVPLAY_RESPONSE
+#if USE_RECVPLAYTHREADED_RESPONSE
+            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+            if (avs_send_request(acFileNameRequest)) {
+
+                DEBUG_PRINTF("Streamingx Alexa response...\r\n");
+                avs_recv_and_play_response_threaded(acFileNameResponse);
+            }
+#elif USE_RECVPLAY_RESPONSE
             DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
             if (avs_send_request(acFileNameRequest)) {
 

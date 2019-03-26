@@ -117,26 +117,31 @@ short ulaw2linear(unsigned char	u_val)
 
 void pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
 {
-    int i;
-    const unsigned short *s_samples;
+    const unsigned short *s_samples = (const unsigned short *)src_samples;
 
-    s_samples = (const unsigned short *)src_samples;
-    for (i=0; i < src_length / 2; i++) {
+    for (int i=0; i < src_length / 2; i++) {
         dst_samples[i] = linear2ulaw((short) s_samples[i]);
     }
 }
 
 void ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
 {
-    int i;
-    unsigned char *s_samples;
-    unsigned short *d_samples;
+    unsigned char *s_samples = (unsigned char *) src_samples;
+    unsigned short *d_samples = (unsigned short *)dst_samples;
 
-    s_samples = (unsigned char *) src_samples;
-    d_samples = (unsigned short *)dst_samples;
-
-    for (i=0; i < src_length; i++) {
+    for (int i=0; i < src_length; i++) {
         d_samples[i] = ulaw2linear(s_samples[i]);
+    }
+}
+
+void ulaw_to_pcm16_stereo(int src_length, const char *src_samples, char *dst_samples)
+{
+    unsigned char *s_samples = (unsigned char *) src_samples;
+    unsigned short *d_samples = (unsigned short *)dst_samples;
+
+    for (int i=0, j=0; i < src_length; i++, j+=2) {
+        d_samples[j] = ulaw2linear(s_samples[i]);
+        d_samples[j+1] = d_samples[j];
     }
 }
 
