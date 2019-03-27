@@ -76,7 +76,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        2. MQTT ClientId: DEVICE_ID
        3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
        4. MQTT Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
-       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
+       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/release_2018_06_08/certs/ms.der
        6. TLS Certificate: NULL
        7. TLS PrivateKey: NULL
        8. MQTT PublishTopic: devices/DEVICE_ID/messages/events/
@@ -89,7 +89,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        2. MQTT ClientId: DEVICE_ID
        3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
        4. MQTT Password: NULL
-       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/ms.der
+       5. TLS CA: https://github.com/Azure/azure-iot-sdk-c/blob/release_2018_06_08/certs/ms.der
        6. TLS Certificate: REQUIRED
        7. TLS PrivateKey: REQUIRED
        8. MQTT PublishTopic: devices/DEVICE_ID/messages/events/
