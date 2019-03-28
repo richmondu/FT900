@@ -84,7 +84,7 @@ Below is a description of how the audio is processed on FT900.
 
 # RPI-side (Alexa Gateway)
 
-Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am using is AVS SDK is v1.11.0, (12-19-2018). Instructions to install the AVS SDK on RPI can also be found on the github link.
+Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am now using is version v1.12.0 AVS SDK. Instructions to install the AVS SDK on RPI can also be found on the github link.
 
 
 Below is a block diagram showing the implemented components of the RPI application.
@@ -305,7 +305,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
          First run requires authorization. Go to https://amazon.com/us/code and type the code displayed in  the logs.
          
-B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
+B. Integrate AVS SDK modifications (latest version is AVS SDK 1.12.0 [02-28-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
@@ -359,7 +359,7 @@ Below are the action items for the Alexa Demo.
       5. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
       6. RPI should not play response on its speaker when the request is from FT900.
       7. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
-      8. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
+
 
 
 # References
