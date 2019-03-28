@@ -299,7 +299,8 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
       2. Run and verify everything is working as expected.
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
-
+         First run requires authorization. Go to https://amazon.com/us/code and type the code displayed in  the logs.
+         
 B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
