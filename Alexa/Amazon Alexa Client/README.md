@@ -104,11 +104,12 @@ Below is a sequence diagram showing the basic interaction of components of the R
       9. FT900RequestHandler copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
       10. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
       11. SpeechSynthesizer copies the data stream to an MP3 file.
-      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format.
-      13. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
-      14. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
-      14. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
-      15. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
+      13. SpeechSynthesizer does not play the response since the request is from FT900.
+      14. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
+      15. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
+      16. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      17. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
 ### RPI Alexa AVS SDK modifications
@@ -357,8 +358,7 @@ Below are the action items for the Alexa Demo.
       3. Support for alarms or notification-based messages. (Currently, only responses triggered by requests are supported.)
       4. Support for very long Alexa responses. (Need to test requests that have very long responses.)
       5. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-      6. RPI should not play response on its speaker when the request is from FT900.
-      7. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
+      6. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
 
 
 
