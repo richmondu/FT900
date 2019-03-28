@@ -33,7 +33,8 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_send_request() - Read voice request from SD card and send to RPI
       - avs_receive_response() - Receive voice response from RPI and save to SD card
       - avs_play_response() - Play voice response from SD card
-      - avs_receive_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
       - avs_disconnect() - Closes connection with RPI
 
 ### Wakeword Detection
