@@ -73,6 +73,10 @@ Below is a description of how the audio is processed on FT900.
       - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels) 
       
+      avs_recv_and_play_response_threaded()
+      - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
+      - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)  
+      
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
