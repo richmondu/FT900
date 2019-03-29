@@ -307,7 +307,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
          First run requires authorization. Go to https://amazon.com/us/code and type the code displayed in  the logs.
          
-B. Integrate AVS SDK modifications (latest version is AVS SDK 1.12.0 [02-28-2019])
+B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
