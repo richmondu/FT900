@@ -316,7 +316,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
       3. Compile and run.
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
-         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key to trigger recording.
+         Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
       4. Setup and run FT900.
 
 
