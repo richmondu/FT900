@@ -33,7 +33,8 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_send_request() - Read voice request from SD card and send to RPI
       - avs_receive_response() - Receive voice response from RPI and save to SD card
       - avs_play_response() - Play voice response from SD card
-      - avs_receive_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
       - avs_disconnect() - Closes connection with RPI
 
 ### Wakeword Detection
@@ -73,6 +74,10 @@ Below is a description of how the audio is processed on FT900.
       - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels) 
       
+      avs_recv_and_play_response_threaded()
+      - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
+      - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)  
+      
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
@@ -80,7 +85,7 @@ Below is a description of how the audio is processed on FT900.
 
 # RPI-side (Alexa Gateway)
 
-Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am using is AVS SDK is v1.11.0, (12-19-2018). Instructions to install the AVS SDK on RPI can also be found on the github link.
+Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am now using is version v1.12.0 AVS SDK. Instructions to install the AVS SDK on RPI can also be found on the github link.
 
 
 Below is a block diagram showing the implemented components of the RPI application.
@@ -100,11 +105,12 @@ Below is a sequence diagram showing the basic interaction of components of the R
       9. FT900RequestHandler copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
       10. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
       11. SpeechSynthesizer copies the data stream to an MP3 file.
-      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format.
-      13. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
-      14. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
-      14. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
-      15. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
+      13. SpeechSynthesizer does not play the response since the request is from FT900.
+      14. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
+      15. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
+      16. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      17. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
 ### RPI Alexa AVS SDK modifications
@@ -301,7 +307,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
          First run requires authorization. Go to https://amazon.com/us/code and type the code displayed in  the logs.
          
-B. Integrate AVS SDK modifications (AVS SDK 1.11.0, [12-19-2018])
+B. Integrate AVS SDK modifications (latest version is AVS SDK 1.12.0 [02-28-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
@@ -353,9 +359,8 @@ Below are the action items for the Alexa Demo.
       3. Support for alarms or notification-based messages. (Currently, only responses triggered by requests are supported.)
       4. Support for very long Alexa responses. (Need to test requests that have very long responses.)
       5. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-      6. RPI should not play response on its speaker when the request is from FT900.
-      7. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
-      8. Upgrade to latest AVS SDK version. Currently using AVS SDK 1.11.0, (12-19-2018). As of today, the latest version is AVS SDK 1.12.0 (02-28-2019).
+      6. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
+
 
 
 # References
