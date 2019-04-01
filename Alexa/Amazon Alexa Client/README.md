@@ -325,7 +325,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
       2. Install SOX utility
-         sudo apt-get install sox libsox-fmt-mp3
+         sudo apt-get install sox libsox-fmt-mp3 libsox-dev
       3. Compile and run.
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
