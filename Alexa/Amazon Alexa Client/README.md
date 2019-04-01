@@ -211,6 +211,18 @@ Since the delay is in the processing of Alexa response, one alternative solution
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs2.png" width="623"/>
 
+      1. recv and play by saving response to sd card before playing
+      - good. (performance 7seconds)
+      #define USE_RECVPLAY_RESPONSE 0
+
+      2. recv and play without saving to SD card
+      - good and faster. default (performance 4seconds)
+      #define USE_RECVPLAY_RESPONSE 1
+
+      3. recv and play in separate threads
+      - new; not so good (performance 5-6seconds)
+      #define USE_RECVPLAYTHREADED_RESPONSE 1
+
 
 # Audio quality analysis
 
@@ -249,10 +261,11 @@ The size of an 8-bit 16khz response for a simple question "What time is it?" is 
 
 To simulate RS485 slowness, I added delay between each send (note that 32kb is sent in chunks as it is compressed in chunks).
 Results:
-1) 20ms delay => response is sent in about 1sec instead of 2ms. (32k bytes/sec) *causes stutter
-2) 13ms delay => response is sent in about 660ms instead of 2ms. (48k bytes/sec)
-3) 10ms delay => response is sent in about 500ms instead of 2ms. (64k bytes/sec)
-4)  6ms delay => response is sent in about 330ms instead of 2ms. (96k bytes/sec)
+
+      1) 20ms delay => response is sent in about 1sec instead of 2ms. (32k bytes/sec) *causes stutter
+      2) 13ms delay => response is sent in about 660ms instead of 2ms. (48k bytes/sec)
+      3) 10ms delay => response is sent in about 500ms instead of 2ms. (64k bytes/sec)
+      4)  6ms delay => response is sent in about 330ms instead of 2ms. (96k bytes/sec)
 
 The 20ms added delay sometimes causes a stutter for recv_and_play_no_sdcard option as sender becomes slow.
 Meaning, using SD card to save response is necessary when sender rate is around 32KBps only.
