@@ -27,7 +27,7 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 ### FT900 Alexa AVS library
 
-The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). The main functions include:
+The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). SD Card should be replaced with SPI Flash or I2C EEPROM. The main functions include:
 
       - avs_connect() - Establish connection with RPI
       - avs_record_request() - Record voice request from microphone and save to SD card
