@@ -301,7 +301,7 @@ A. RPI
 B. FT900
 
       1. FT900 Rev C board
-      2. SD card (<= 32gb)
+      2. SD card (class-10, ush-1, <= 32gb) https://www.lazada.com.ph/-i7948043-s10125616.html?urlFlag=true&mp=1
       3. Headphone or speaker
       4. (Optional) Button https://circuit.rocks/button-digital (for GPIO mode)
 
@@ -327,11 +327,14 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
       2. Install SOX utility
          sudo apt-get install sox libsox-fmt-mp3 libsox-dev
       3. Compile and run.
+         cd /home/..../alexa/build/SampleApp/src
+         sudo ./SampleApp "/home/.../alexa/build/Integration/AlexaClientSDKConfig.json" "/home/.../alexa/third-party/alexa-rpi/models" INFO
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
-      4. Setup and run FT900.
          Note: RPI application will fail if microphone is removed. So don't remove it.
+      4. Setup and run FT900.
+
 
 ### FT900 setup:
 
