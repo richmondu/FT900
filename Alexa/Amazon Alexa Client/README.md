@@ -318,7 +318,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
          Note: Verify everything is working as expected.
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
       4. Setup and run FT900.
-
+         Note: RPI application will fail if microphone is removed. So don't remove it.
 
 ### FT900 setup:
 
