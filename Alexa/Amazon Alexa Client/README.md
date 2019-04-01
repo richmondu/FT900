@@ -300,7 +300,7 @@ A. RPI
 
 B. FT900
 
-      1. FT900 Rev C board
+      1. FT900 Rev C board (mm900ev1b)
       2. SD card (class-10, ush-1, <= 32gb) https://www.lazada.com.ph/-i7948043-s10125616.html?urlFlag=true&mp=1
       3. Headphone or speaker
       4. (Optional) Button https://circuit.rocks/button-digital (for GPIO mode)
