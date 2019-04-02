@@ -1,7 +1,7 @@
 /**
-  @file ulaw.c
+  @file audio_compression.c
   @brief
-  ulaw companding module
+  audio ulaw compression module
 
  */
 /*
@@ -115,31 +115,31 @@ short ulaw2linear(unsigned char	u_val)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-void audio_pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
+void audio_pcm16_to_ulaw(int lSrcLen, const char *pcSrc, char *pcDst)
 {
-    const unsigned short *s_samples = (const unsigned short *)src_samples;
+    const unsigned short *s_samples = (const unsigned short *)pcSrc;
 
-    for (int i=0; i < src_length / 2; i++) {
-        dst_samples[i] = linear2ulaw((short) s_samples[i]);
+    for (int i=0; i < lSrcLen / 2; i++) {
+    	pcDst[i] = linear2ulaw((short) s_samples[i]);
     }
 }
 
-void audio_ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
+void audio_ulaw_to_pcm16(int lSrcLen, const char *pcSrc, char *pcDst)
 {
-    unsigned char *s_samples = (unsigned char *) src_samples;
-    unsigned short *d_samples = (unsigned short *)dst_samples;
+    unsigned char *s_samples = (unsigned char *) pcSrc;
+    unsigned short *d_samples = (unsigned short *)pcDst;
 
-    for (int i=0; i < src_length; i++) {
+    for (int i=0; i < lSrcLen; i++) {
         d_samples[i] = ulaw2linear(s_samples[i]);
     }
 }
 
-void audio_ulaw_to_pcm16_stereo(int src_length, const char *src_samples, char *dst_samples)
+void audio_ulaw_to_pcm16_stereo(int lSrcLen, const char *pcSrc, char *pcDst)
 {
-    unsigned char *s_samples = (unsigned char *) src_samples;
-    unsigned short *d_samples = (unsigned short *)dst_samples;
+    unsigned char *s_samples = (unsigned char *) pcSrc;
+    unsigned short *d_samples = (unsigned short *)pcDst;
 
-    for (int i=0, j=0; i < src_length; i++, j+=2) {
+    for (int i=0, j=0; i < lSrcLen; i++, j+=2) {
         d_samples[j] = ulaw2linear(s_samples[i]);
         d_samples[j+1] = d_samples[j];
     }

@@ -33,25 +33,15 @@ void audio_setup(void (*audio_isr)(void), int sampling_rate);
 
 
 // Audio ulaw 8-bit compression
-void audio_pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples);
-void audio_ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples);
-void audio_ulaw_to_pcm16_stereo(int src_length, const char *src_samples, char *dst_samples);
+void audio_pcm16_to_ulaw(int lSrcLen, const char *pcSrc, char *pcDst);
+void audio_ulaw_to_pcm16(int lSrcLen, const char *pcSrc, char *pcDst);
+void audio_ulaw_to_pcm16_stereo(int lSrcLen, const char *pcSrc, char *pcDst);
 
 
 // Audio mono/stereo conversion
-inline void audio_mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize)
-{
-    for (int i=0; i<ulSize; i+=2, pDst+=4, pSrc+=2) {
-        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-        *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
-    }
-}
-inline void audio_stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize)
-{
-    for (int i=0; i<ulSize; i+=2, pDst+=2, pSrc+=4) {
-        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-    }
-}
+void audio_mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize);
+void audio_stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize);
+
 
 
 #endif // AUDIO_H
