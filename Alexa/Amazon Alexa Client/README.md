@@ -131,6 +131,17 @@ Below is a sequence diagram showing the basic interaction of components of the R
       17. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
+### Alexa Capabilities
+
+AVS SDK supports 3 major capabilities: 
+
+      1. SpeechSynthesizer
+      2. AudioPlayer
+      3. AlertTimer
+
+Currently, only SpeechSynthesizer audio data stream is hooked. To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
+
+
 ### RPI Alexa AVS SDK modifications
 
 In addition to the new modules implemented described in the block diagram and sequence diagram, 
@@ -181,17 +192,6 @@ Below is a description of how the audio is processed on RPI.
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
-
-
-### Alexa Capabilities
-
-AVS SDK supports 3 major capabilities: 
-
-      1. SpeechSynthesizer
-      2. AudioPlayer
-      3. AlertTimer
-
-Currently, only SpeechSynthesizer audio data stream is hooked. To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
 
 
 # Performance analysis/optimization
