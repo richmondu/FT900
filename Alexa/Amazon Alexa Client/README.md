@@ -84,6 +84,14 @@ Below is a description of how the audio is processed on FT900.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
+### Test Mode
+
+Using test mode, the application automatically sends pre-recorded requests (saved in SD card) to RPI Alexa Gateway every 10 seconds. 
+
+      - It allows easy testing and troubleshooting of the demo.
+      - It allows easy reproduction of issues. 
+
+
 ### Test Simulator
 
 A Python script application named FT900 Alexa Simulator is provided to simulate the behavior of FT900.
