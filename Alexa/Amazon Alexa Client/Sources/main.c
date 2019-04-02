@@ -387,13 +387,13 @@ void vTaskAlexa(void *pvParameters)
     DEBUG_PRINTF("\r\nInitializing network...");
     initialize_network();
 
+    DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
+    avs_init();
+
     DEBUG_PRINTF("\r\nInitializing button...\r\n");
     if (!button_setup(vIsrAlexaButton, BUTTON_GPIO)) {
         DEBUG_PRINTF("Error! Connect GPIO%d to GND!\r\n", BUTTON_GPIO);
     }
-
-    DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
-    avs_init();
 
     DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
     for (;;)
@@ -414,6 +414,9 @@ void vTaskAlexa(void *pvParameters)
             }
 
             g_lRecordAudio = 0;
+        }
+        else {
+            vTaskDelay( pdMS_TO_TICKS(100) );
         }
 
         // Process the recorded audio in SD card
@@ -474,6 +477,9 @@ void vTaskAlexa(void *pvParameters)
             vTaskDelay(pdMS_TO_TICKS(3000));
             g_lProcessAudio = 0;
             DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
+        }
+        else {
+            vTaskDelay( pdMS_TO_TICKS(100) );
         }
     }
 
