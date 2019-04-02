@@ -27,4 +27,19 @@ void audio_setup(void (*audio_isr)(void), int sampling_rate);
 #define audio_mic_ready()       (i2s_get_status() & (MASK_I2S_PEND_FIFO_RX_FULL | MASK_I2S_PEND_FIFO_RX_OVER))
 
 
+inline void audio_mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize)
+{
+    for (int i=0; i<ulSize; i+=2, pDst+=4, pSrc+=2) {
+        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+        *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
+    }
+}
+
+inline void audio_stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize)
+{
+    for (int i=0; i<ulSize; i+=2, pDst+=2, pSrc+=4) {
+        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
+    }
+}
+
 #endif // AUDIO_H

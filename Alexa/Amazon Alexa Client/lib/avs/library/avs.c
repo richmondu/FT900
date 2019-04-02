@@ -117,20 +117,6 @@ static const char* getConfigSamplingRateStr()
 }
 #endif // DEBUG
 
-static inline void mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize)
-{
-    for (int i=0; i<ulSize; i+=2, pDst+=4, pSrc+=2) {
-        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-        *((uint16_t*)&pDst[2]) = *((uint16_t*)&pDst[0]);
-    }
-}
-
-static inline void stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize)
-{
-    for (int i=0; i<ulSize; i+=2, pDst+=2, pSrc+=4) {
-        *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
-    }
-}
 
 
 int avs_init(void)
@@ -300,7 +286,7 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
             audio_record((uint8_t*)pcMicrophone, ulRecordSize);
 
             // convert stereo to mono in-place
-            stereo_to_mono(pcMicrophone, pcMicrophone, ulRecordSize);
+            audio_stereo_to_mono(pcMicrophone, pcMicrophone, ulRecordSize);
             ulRecordSize = ulRecordSize >> 1;
 
             // write mic data to SD card
@@ -904,7 +890,7 @@ static void vPlayerTask(void *pvParameters)
                         }
 
                         // Input is mono 1 channel; speaker requires stereo 2 channels
-                        mono_to_stereo(pcSpeaker, pcSDCard + ulPlayed, ulPlaySize);
+                        audio_mono_to_stereo(pcSpeaker, pcSDCard + ulPlayed, ulPlaySize);
 
                         // Play buffer to speaker
                         audio_play((uint8_t *)pcSpeaker, ulPlaySize<<1);
