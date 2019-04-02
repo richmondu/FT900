@@ -47,6 +47,7 @@
 
 #include <ft900.h>
 #include "avs_config.h"    // AVS configuration
+#include "lwip/sockets.h"  // lwIP 3rd-party library
 #include "comm_wrapper.h"
 
 

@@ -1,6 +1,5 @@
-#ifndef COMM_H
-#define COMM_H
-#include "lwip/sockets.h"  // lwIP 3rd-party library
+#ifndef COMM_WRAPPER_H
+#define COMM_WRAPPER_H
 
 
 int  comm_get_server_port(void);
@@ -16,4 +15,4 @@ int  comm_send(void *pvBuffer, int lSize);
 int  comm_recv(void *pvBuffer, int lSize);
 
 
-#endif // COMM_H
+#endif // COMM_WRAPPER_H
