@@ -206,7 +206,7 @@ Below are the major performance optimization efforts implemented for the demo.
 
 ### B. RPI
 
-One round trip of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds.
+One round trip of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds (now optimized to 2.6 seconds).
 This is for a simple command, "What time is it?". 
 This measures the time RPI accepts FT900 connection until it closes the connection.
 
@@ -229,11 +229,13 @@ Since the delay is in the processing of Alexa response, one alternative solution
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_logs2.png" width="623"/>
 
-      1. recv and play by saving response to sd card before playing
+Below are the three modes supported for processing Alexa responses.
+
+      1. recv and play by completely saving response to sd card before playing
       - good. (performance 7seconds)
       #define USE_RECVPLAY_RESPONSE 0
 
-      2. recv and play without saving to SD card
+      2. recv and play directly without saving to SD card
       - good and faster. default (performance 4seconds)
       #define USE_RECVPLAY_RESPONSE 1
 
