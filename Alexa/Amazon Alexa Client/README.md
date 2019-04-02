@@ -105,6 +105,8 @@ A Python script application named FT900 Alexa Simulator is provided to simulate 
 
 Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am now using is version v1.12.0 AVS SDK. Instructions to install the AVS SDK on RPI can also be found on the github link.
 
+Below is a system diagram of AVS SDK.
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/system_diagram_avs.jpg" width="623"/>
 
 Below is a block diagram showing the implemented components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg" width="623"/>
