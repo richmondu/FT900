@@ -1,7 +1,7 @@
 /**
-  @file audio_compression.c
+  @file audio_conversion.c
   @brief
-  audio ulaw compression module
+  audio mono/stereo conversion module
 
  */
 /*
