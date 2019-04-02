@@ -135,11 +135,12 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 AVS SDK supports 3 major capabilities: 
 
-      1. SpeechSynthesizer
-      2. AudioPlayer
-      3. AlertTimer
+      1. SpeechSynthesizer for dialog/speech/user-interaction directives
+      2. Alerts for timer directives
+      3. AudioPlayer for content/music/play directives
 
-Currently, only SpeechSynthesizer audio data stream is hooked. To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
+Currently, only SpeechSynthesizer audio data stream is hooked. 
+To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
 
 
 ### RPI Alexa AVS SDK modifications
