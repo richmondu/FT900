@@ -54,7 +54,6 @@
 #include "avs_config.h"         // AVS configuration
 #include "utils/audio.h"        // Audio utility
 #include "utils/sdcard.h"       // SD card utility
-#include "utils/ulaw.h"         // Audio compression/expansion utility
 #include "utils/comm_wrapper.h" // Communication wrapper
 
 
@@ -375,7 +374,7 @@ int avs_send_request(const char* pcFileName)
 
         if (ulReadSize) {
             // Convert in-place from 16-bit to 8-bit
-            pcm16_to_ulaw(ulReadSize, pcSDCard, pcSDCard);
+            audio_pcm16_to_ulaw(ulReadSize, pcSDCard, pcSDCard);
 
             // Send the converted bytes
             iRet = comm_send(pcSDCard, ulReadSize>>1);
@@ -466,7 +465,7 @@ int avs_recv_response(const char* pcFileName)
         ulBytesReceived += iRet;
 
         // Convert 8-bit data to 16-bit data before saving
-        ulaw_to_pcm16(iRet, pcRecv, pcSDCard);
+        audio_ulaw_to_pcm16(iRet, pcRecv, pcSDCard);
 
         // Save to 16-bit decoded data to SD card
         ulWriteSize = 0;
@@ -638,7 +637,7 @@ int avs_recv_and_play_response(void)
         ulBytesReceived += iRet;
 
         // Convert 8-bit mono data to 16-bit stereo data before saving
-        ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
+        audio_ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
 
         // Play on speaker
         do {
@@ -732,7 +731,7 @@ int avs_recv_and_play_response_threaded(const char* pcFileName)
             //tfp_printf(">> Recv  %d bytes %d\r\n", iRet, g_hContext.m_ulWriteSize);
 
             // Convert 8-bit data to 16-bit data before saving
-            ulaw_to_pcm16(iRet, acRecv, acSDCard);
+            audio_ulaw_to_pcm16(iRet, acRecv, acSDCard);
 
             /* Get write position */
             sdcard_lseek(&g_hContext.m_fHandle, g_hContext.m_ulWriteSize);

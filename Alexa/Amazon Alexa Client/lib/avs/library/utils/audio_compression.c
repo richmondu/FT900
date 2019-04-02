@@ -115,7 +115,7 @@ short ulaw2linear(unsigned char	u_val)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-void pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
+void audio_pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
 {
     const unsigned short *s_samples = (const unsigned short *)src_samples;
 
@@ -124,7 +124,7 @@ void pcm16_to_ulaw(int src_length, const char *src_samples, char *dst_samples)
     }
 }
 
-void ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
+void audio_ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
 {
     unsigned char *s_samples = (unsigned char *) src_samples;
     unsigned short *d_samples = (unsigned short *)dst_samples;
@@ -134,7 +134,7 @@ void ulaw_to_pcm16(int src_length, const char *src_samples, char *dst_samples)
     }
 }
 
-void ulaw_to_pcm16_stereo(int src_length, const char *src_samples, char *dst_samples)
+void audio_ulaw_to_pcm16_stereo(int src_length, const char *src_samples, char *dst_samples)
 {
     unsigned char *s_samples = (unsigned char *) src_samples;
     unsigned short *d_samples = (unsigned short *)dst_samples;
