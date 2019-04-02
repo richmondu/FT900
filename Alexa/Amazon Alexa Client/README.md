@@ -183,6 +183,16 @@ Below is a description of how the audio is processed on RPI.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
 
 
+### Alexa Capabilities
+
+AVS SDK supports 3 major capabilities: 
+
+      1. SpeechSynthesizer
+      2. AudioPlayer
+      3. AlertTimer
+
+Currently, only SpeechSynthesizer audio data stream is hooked. To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
+
 
 # Performance analysis/optimization
 
