@@ -42,7 +42,7 @@ int  avs_recv_and_play_response(void);
 //   Play 2KB on speaker
 int  avs_recv_and_play_response_threaded(const char* pcFileName);
 
-const ip_addr_t* avs_get_server_addr(void);
+const void* avs_get_server_addr(void);
 int  avs_get_server_port(void);
 int  avs_err(void);
 
