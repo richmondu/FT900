@@ -84,6 +84,15 @@ Below is a description of how the audio is processed on FT900.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
+### Test Simulator
+
+A Python script application named FT900 Alexa Simulator is provided to simulate the behavior of FT900.
+
+      - It can be run on Windows and Linux machine.
+      - It can assist in automated testing and stress testing of RPI Alexa Gateway.
+
+
+
 # RPI-side (Alexa Gateway)
 
 Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am now using is version v1.12.0 AVS SDK. Instructions to install the AVS SDK on RPI can also be found on the github link.
