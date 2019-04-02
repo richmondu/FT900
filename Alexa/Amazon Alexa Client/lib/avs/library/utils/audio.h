@@ -3,13 +3,13 @@
 #include <ft900.h>
 
 
-#define SAMPLING_RATE_44100HZ 1
-#define SAMPLING_RATE_48KHZ   2
-#define SAMPLING_RATE_32KHZ   3
-#define SAMPLING_RATE_16KHZ   4
-#define SAMPLING_RATE_8KHZ    5
+#define SAMPLING_RATE_44100HZ   1
+#define SAMPLING_RATE_48KHZ     2
+#define SAMPLING_RATE_32KHZ     3
+#define SAMPLING_RATE_16KHZ     4
+#define SAMPLING_RATE_8KHZ      5
 
-#define AUDIO_FIFO_SIZE       (2048) // I2SM TX FIFO can hold up to a max of 2048 bytes
+#define AUDIO_FIFO_SIZE         (2048) // I2SM TX FIFO can hold up to a max of 2048 bytes
 
 
 void audio_setup(void (*audio_isr)(void), int sampling_rate);
@@ -41,5 +41,6 @@ inline void audio_stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize)
         *((uint16_t*)&pDst[0]) = *((uint16_t*)&pSrc[0]);
     }
 }
+
 
 #endif // AUDIO_H
