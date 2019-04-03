@@ -137,12 +137,22 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 AVS SDK supports 3 major capabilities: 
 
-      1. SpeechSynthesizer for dialog/speech/user-interaction directives
-      2. Alerts for timer directives
-      3. AudioPlayer for content/music/play directives
+      1. Dialogs - for dialog/speech/user-interaction directives (SpeechSynthesizer)
+      2. Alerts - for timer/alarm directives (Alerts)
+      3. Contents - for content/music directives (AudioPlayer)
 
-Currently, only SpeechSynthesizer audio data stream is hooked. 
-To support AudioPlayer and AlertsTimer, more modifications will be necessary, including persistent connection, MPEG decoding, etc. 
+Currently, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class.
+
+Right now, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
+
+To support #2 and #3 on FT900, need to hook into Alerts and AudioPlayer classes. 
+Supporting Alerts and Contents should be done in 2 different communication channels. 
+So that there will be 3 total channels. FT900 will have 3 ports opened with RPI. 
+This is needed so that we can support foreground priorities in FT900 - where dialogs are prioritized over alerts and content. 
+This is how it is done in AVS SDK based on the documentation. So FT900 should do the same.
+
+That means if a music is playing in FT900 and then some alerts arrive or user speaks in microphone, 
+then music will be paused to give way for those 2.
 
 
 ### RPI Alexa AVS SDK modifications
