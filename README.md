@@ -1,4 +1,4 @@
-# FT900 IoT/SmartHome Demo applications
+# FT900 IoT/Smart Home
 
 This contains the IoT framework including IoT demo applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers.
 
