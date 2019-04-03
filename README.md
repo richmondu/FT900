@@ -19,12 +19,12 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
   https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls
 
 #### FT900 IoT Cloud Demo (AWS/GCP/Azure)
-- This demonstrates secure MQTT connectivity to IoT cloud services: Amazon AWS IoT Core (and Amazon AWS Greengrass), Google Cloud IoT Core and Microsoft Azure IoT Hub.
-- This will be presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
+- This demonstrates secure MQTT connectivity to IoT cloud services: Amazon AWS IoT Core, Google Cloud IoT Core and Microsoft Azure IoT Hub using the newly created IoT library running over open-source third party libraries LWIP's MQTT and mbedTLS.
+- This was presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
   
 #### FT900 Alexa Demo
-- This demonstrates using FT900 microcontroller as an Amazon Echo Dot device, where users can directly talk to Alexa.
+- This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can directly talk to Alexa.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
