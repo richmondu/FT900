@@ -149,7 +149,22 @@ AVS SDK supports 3 major capabilities:
 
 Previously, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class. That is, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
 
-To support #2 and #3 on FT900, I hooked into other classes in RPI. So now, if music is playing in FT900 and then some alerts arrive or user speaks in microphone, then music will be paused to give way for those 2. Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and music.
+To support #2 and #3 on FT900, I hooked into other classes in RPI. So now, if music is playing in FT900 and then some alerts arrive or user speaks in microphone, then music will be paused to give way for those 2. 
+
+      Three main differences on the new approach:
+      1. I'm now hooking on the lower stack of AVS SDK.
+         By doing this, I'm able to hook all - Dialogs, Alerts and Contents.
+         Previously, I was hooking into Speech Synthesizer which is up in the stack.
+
+      2. I'm now decoding MP3 to RAW chunk by chunk.
+         Previously for Dialogs, I save dialog responses completely before decoding as a file.
+         This method is not possible with Alerts and Contents, which are streamed, so size cannot be pre-determined.
+
+      3. Connection to RPI is now persistent.
+         Previously, connection to RPI was only established when requests are sent.
+         This method is no longer possible as Alerts are not active and Contents are long.
+   
+Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and music.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator_logs.png" width="623"/>
 
