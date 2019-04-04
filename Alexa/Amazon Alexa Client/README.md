@@ -479,4 +479,4 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
 5. [SOX Sound Exchange Utility (used for MP3 audio decoding)](http://sox.sourceforge.net)
 6. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
-
+7. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
