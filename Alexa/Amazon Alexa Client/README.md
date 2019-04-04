@@ -147,18 +147,35 @@ AVS SDK supports 3 major capabilities:
       2. Alerts - for timer/alarm directives (Alerts)
       3. Contents - for content/music directives (AudioPlayer)
 
-Currently, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class.
+Previously, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class. That is, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
 
-Right now, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
+To support #2 and #3 on FT900, I hooked into other classes in RPI. So now, if music is playing in FT900 and then some alerts arrive or user speaks in microphone, then music will be paused to give way for those 2. Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and music.
 
-To support #2 and #3 on FT900, need to hook into Alerts and AudioPlayer classes. 
-Supporting Alerts and Contents should be done in 2 different communication channels. 
-So that there will be 3 total channels. FT900 will have 3 ports opened with RPI. 
-This is needed so that we can support foreground priorities in FT900 - where dialogs are prioritized over alerts and content. 
-This is how it is done in AVS SDK based on the documentation. So FT900 should do the same.
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator_logs.png" width="623"/>
 
-That means if a music is playing in FT900 and then some alerts arrive or user speaks in microphone, 
-then music will be paused to give way for those 2.
+      1. REQUEST_play_music.raw
+         I asked Alexa to play music on TuneIn Radio. Music plays.
+
+      2. REQUEST_what_time_is_it.raw
+         While music is playing, I asked Alexa what time is it? 
+         Music turned off. Alexa replies. Music turned back on.
+
+      3. REQUEST_set_alarm.raw
+         While music is playing, I asked Alexa to set alarm in 10 seconds.
+         Music turned off. Alexa replies. Music turned back on.
+         After 10 seconds, music turned off. Alarms starts running.
+
+      4. REQUEST_what_time_is_it.raw
+         While alarm is running, I asked Alexa what time is it?
+         Alarm turned off. Alexa replies. Alarm turned back on.
+
+      5. REQUEST_stop.raw
+         While alarm is running, I asked Alexa to stop alarm.
+         Alarm turned off. Music turned back on.
+
+      6. REQUEST_stop.raw
+         While music is playing, I asked Alexa to stop music.
+         Music turned off.
 
 
 ### RPI Alexa AVS SDK modifications
