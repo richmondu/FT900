@@ -60,7 +60,10 @@ def avs_connect():
     
     g_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        g_socket.connect((CONF_SERVER_ADDR, CONF_SERVER_PORT_CH))
+        err = g_socket.connect_ex((CONF_SERVER_ADDR, CONF_SERVER_PORT_CH))
+        if err != 0:
+            g_socket.close()
+            return 0
     except:
         g_socket.close()
         return 0
@@ -230,7 +233,6 @@ def avs_recv_and_play_response():
                 print(e.args[0])
             #sleep(0.05)
     else:
-        print("not val")
         g_quit = True
         
     stream.stop_stream()
@@ -353,12 +355,11 @@ class thread_fxn_streamer(threading.Thread):
 ############################################################################################
 class thread_fxn_commander(threading.Thread):
 
-    def __init__(self, threadID, name, file_request, force=False):
+    def __init__(self, threadID, name, file_request):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.file_request = file_request
-        self.force = force
 
     def run(self):
         global g_quit
@@ -368,7 +369,7 @@ class thread_fxn_commander(threading.Thread):
             print("[COMMANDER] Not connected...")
             return
 
-        if g_quit is False or self.force is True:
+        if g_quit is False:
             print("[COMMANDER] Sending Alexa query [{}]...".format(self.file_request), end='', flush=True)
             start = time()
             avs_send_request(self.file_request)
@@ -383,7 +384,7 @@ def usage():
 
     print("===============================================================")
     print("[MAIN] Usage:")
-    print("[MAIN]   Press 'q' key to quit session...")
+    print("[MAIN]   Press 'q' key to quit (will send stop b4 quitting)...")
     print("[MAIN]   Press 'e' key to exit application...")
     print("[MAIN]   Press 't' key to ask Alexa about the current time...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
@@ -424,9 +425,13 @@ def main(args, argc):
                 key = msvcrt.getch().decode('utf-8').lower()
                 print(key)
                 if key=='q':
-                    t = thread_fxn_commander (1, "commander", CONF_FILENAME_REQUEST_STOP, True)
+                    # send stop command to stop music or alarm
+                    t = thread_fxn_commander (1, "commander", CONF_FILENAME_REQUEST_STOP)
                     t.start()
+                    # wait for thread to finish
                     t.join()
+                    sleep(1)
+                    # trigger streamer thread to quit
                     g_quit = True
                     if g_connected is True:
                         g_connected = False
@@ -466,10 +471,10 @@ def main(args, argc):
         if g_exit is True:
             break
         
-        print("Retrying in 10 seconds", end='')
-        for i in range(10):
+        print("Retrying in 15 seconds", end='', flush=True)
+        for i in range(15):
             sleep(1)
-            print(".", end='')
+            print(".", end='', flush=True)
 
     return
 
