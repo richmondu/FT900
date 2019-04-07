@@ -76,6 +76,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #define USE_MEASURE_PERFORMANCE         1
 #define USE_PLAY_RECORDED_AUDIO         0
 #define BUTTON_GPIO                     (31)
+
+#define USE_AVS_REVB                    0
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -211,7 +213,93 @@ void net_supply_mac(uint8_t *mac)
 #endif // NET_USE_EEPROM
 
 
+#if USE_AVS_REVB
+////////////////////////////////////////////////////////////////////////////////////////
+// Set filenames for request and response audio files
+////////////////////////////////////////////////////////////////////////////////////////
+#define STR_REQUEST  "REQUEST.RAW"
+#define STR_RESPONSE "RESPONSE.raw"
+void vTaskAlexa(void *pvParameters)
+{
+    (void) pvParameters;
+    char* acFileNameRequest = STR_REQUEST;
+    int lRet = 0;
 
+
+    DEBUG_PRINTF("\r\nInitializing network...");
+    initialize_network();
+
+    DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
+    avs_init();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    for (;;)
+    {
+loop:
+        lRet = 0;
+        if ( !net_is_ready() ) {
+            DEBUG_PRINTF( "Waiting for network configuration..." );
+            do {
+                vTaskDelay( pdMS_TO_TICKS(1000) );
+                DEBUG_PRINTF( "." );
+                if (lRet++ > 30) {
+                    DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+                    chip_reboot();
+                }
+            }
+            while (!net_is_ready());
+            DEBUG_PRINTF( "\r\n" );
+            display_network_info();
+        }
+
+        lRet = 0;
+        do {
+            DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
+                ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
+            if (!avs_connect()) {
+                if (avs_err()) {
+                    goto loop;
+                }
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                if (++lRet == 30) {
+                    chip_reboot();
+                }
+                continue;
+            }
+            break;
+        } while (1);
+
+
+#if 1
+        DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+        if (avs_send_request(acFileNameRequest)) {
+#endif
+            while (1) {
+                if (!avs_recv_and_play_response()) {
+                    DEBUG_PRINTF("avs_recv_and_play_response failed!\r\n");
+                    break;
+                }
+                vTaskDelay(pdMS_TO_TICKS(1));
+            }
+#if 1
+        }
+#endif
+
+        DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
+        avs_disconnect();
+
+        lRet = 10;
+        DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRet);
+        for (int i=0; i<lRet; i++) {
+            DEBUG_PRINTF(".");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+        DEBUG_PRINTF("\r\n\r\n");
+    }
+
+    avs_free();
+}
+#else // USE_AVS_REVB
 ////////////////////////////////////////////////////////////////////////////////////////
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -416,7 +504,7 @@ void vTaskAlexa(void *pvParameters)
             g_lRecordAudio = 0;
         }
         else {
-            vTaskDelay( pdMS_TO_TICKS(100) );
+            vTaskDelay( pdMS_TO_TICKS(1000) );
         }
 
         // Process the recorded audio in SD card
@@ -479,7 +567,7 @@ void vTaskAlexa(void *pvParameters)
             DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
         }
         else {
-            vTaskDelay( pdMS_TO_TICKS(100) );
+            vTaskDelay( pdMS_TO_TICKS(1000) );
         }
     }
 
@@ -510,5 +598,6 @@ int record_audio(void)
     return (int)g_lRecordAudio;
 }
 #endif // USE_TEST_MODE
+#endif // USE_AVS_REVB
 
 
