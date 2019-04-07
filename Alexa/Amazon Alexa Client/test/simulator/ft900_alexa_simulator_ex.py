@@ -311,6 +311,7 @@ class thread_fxn_streamer(threading.Thread):
         self.name = name
 
     def run(self):
+        sleep(1)
         global g_quit
         global g_connected
 
@@ -364,6 +365,7 @@ class thread_fxn_commander(threading.Thread):
         global g_connected
 
         if g_connected == False:
+            print("[COMMANDER] Not connected...")
             return
 
         if g_quit is False or self.force is True:
@@ -381,7 +383,8 @@ def usage():
 
     print("===============================================================")
     print("[MAIN] Usage:")
-    print("[MAIN]   Press 'q' key to quit...")
+    print("[MAIN]   Press 'q' key to quit session...")
+    print("[MAIN]   Press 'e' key to exit application...")
     print("[MAIN]   Press 't' key to ask Alexa about the current time...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
     print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
@@ -409,11 +412,11 @@ def main(args, argc):
     
         # Initialize the streamer thread
         g_quit = False
+        g_exit = False
         threads = []
         t = thread_fxn_streamer(0, "streamer")
         t.start()
         threads.append(t)
-        usage()
 
         # Process user input
         while g_quit is False:
@@ -423,8 +426,18 @@ def main(args, argc):
                 if key=='q':
                     t = thread_fxn_commander (1, "commander", CONF_FILENAME_REQUEST_STOP, True)
                     t.start()
-                    threads.append(t)
+                    t.join()
                     g_quit = True
+                    if g_connected is True:
+                        g_connected = False
+                        avs_disconnect()
+                    break
+                elif key=='e':
+                    if g_connected is True:
+                        g_connected = False
+                        avs_disconnect()
+                    g_quit = True
+                    g_exit = True
                     break
                 elif key=='t':
                     t = thread_fxn_commander (2, "commander", CONF_FILENAME_REQUEST_TIME)
@@ -449,6 +462,14 @@ def main(args, argc):
 
         for t in threads:
             t.join()
+
+        if g_exit is True:
+            break
+        
+        print("Retrying in 10 seconds", end='')
+        for i in range(10):
+            sleep(1)
+            print(".", end='')
 
     return
 
