@@ -7,6 +7,7 @@ void avs_free(void);
 
 int  avs_connect(void);
 void avs_disconnect(void);
+int avs_isconnected(void);
 
 // - Read 2KB from microphone
 // - Convert 2KB stereo to 1KB mono

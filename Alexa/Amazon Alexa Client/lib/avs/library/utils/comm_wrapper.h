@@ -8,6 +8,7 @@ int  comm_err(void);
 
 int  comm_connect(void);
 void comm_disconnect(void);
+int  comm_isconnected(void);
 
 void comm_setsockopt(int lTimeoutSecs, int lIsSend);
 

@@ -111,6 +111,11 @@ void comm_disconnect(void)
     }
 }
 
+int comm_isconnected(void)
+{
+    return (g_lSocket>-1);
+}
+
 void comm_setsockopt(int lTimeoutSecs, int lIsSend)
 {
     struct timeval tTimeout = {lTimeoutSecs, 0};
