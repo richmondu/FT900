@@ -166,6 +166,11 @@
  */
 #define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
 
+/* Support for port 443 */
+#if (MQTT_BROKER_PORT == 443)
+#define MBEDTLS_SSL_ALPN
+#endif
+
 /*-----------------------------------------------------------*/
 
 #include "mbedtls/check_config.h"

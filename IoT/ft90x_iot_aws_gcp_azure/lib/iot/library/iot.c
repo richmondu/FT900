@@ -50,6 +50,7 @@
 /* IOT Headers. */
 #include "../include/iot/iot_utils.h"
 #include <iot_config.h>
+#include <mbedtls_config.h>
 
 
 
@@ -58,6 +59,15 @@
 #define DEBUG_PRINTF(...) do {CRITICAL_SECTION_BEGIN;tfp_printf(__VA_ARGS__);CRITICAL_SECTION_END;} while (0)
 #else
 #define DEBUG_PRINTF(...)
+#endif
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////////////////
+#if defined(MBEDTLS_SSL_ALPN) && defined(ALTCP_MBEDTLS_ALPN_ENABLE)
+// TODO: Currently supports AWS IoT. Need to support GCP IoT and Azure IoT
+static const char *g_alpn_protocols[] = { "x-amzn-mqtt-ca", NULL };
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -328,6 +338,21 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
     mqtt_info.client_id = mqtt_credentials.client_id;
     mqtt_info.client_user = mqtt_credentials.client_user;
     mqtt_info.client_pass = mqtt_credentials.client_pass;
+
+#if defined(MBEDTLS_SSL_ALPN) && defined(ALTCP_MBEDTLS_ALPN_ENABLE)
+    //
+    // Configure ALPN protocols to support MQTT over PORT 443 instead of 8883
+    //
+    if ( mqtt_credentials.server_port == 443) {
+        err = altcp_tls_conf_alpn_protocols(mqtt_info.tls_config, g_alpn_protocols);
+        if ( err != ERR_OK ) {
+            DEBUG_PRINTF( "altcp_tls_conf_alpn_protocols failed! %d\r\n", err );
+            altcp_tls_free_config( mqtt_info.tls_config );
+            vPortFree( handle );
+            return NULL;
+        }
+    }
+#endif
 
     //
     // Establish secure MQTT connection via TLS
