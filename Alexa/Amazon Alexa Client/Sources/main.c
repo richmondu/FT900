@@ -83,7 +83,12 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 
 ///////////////////////////////////////////////////////////////////////////////////
 /* Task Configurations. */
+#if USE_AVS_REVB
+#define TASK_ALEXA_STREAMER_STACK_SIZE  (1024+256)
+#define TASK_ALEXA_COMMANDER_STACK_SIZE (5120)
+#else
 #define TASK_ALEXA_STACK_SIZE           (6144)
+#endif
 #define TASK_ALEXA_PRIORITY             (1)
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -129,7 +134,14 @@ static inline void ethernet_setup()
     net_setup();
 }
 
+
+#if USE_AVS_REVB
+void vTaskAlexaStreamer(void *pvParameters);
+void vTaskAlexaCommander(void *pvParameters);
+#else
 void vTaskAlexa(void *pvParameters);
+#endif
+
 
 int main(void)
 {
@@ -154,14 +166,21 @@ int main(void)
         "Demonstrate Amazon Alexa.\r\n"
         "--------------------------------------------------------------------- \r\n");
 
-    if (xTaskCreate(vTaskAlexa,
-        "Alexa",
-        TASK_ALEXA_STACK_SIZE,
-        NULL,
-        TASK_ALEXA_PRIORITY,
-        NULL) != pdTRUE) {
-        DEBUG_PRINTF("Client failed\r\n");
+#if USE_AVS_REVB
+    if (xTaskCreate(vTaskAlexaStreamer, "Streamer", TASK_ALEXA_STREAMER_STACK_SIZE,
+        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
+        DEBUG_PRINTF("vTaskAlexaStreamer failed\r\n");
     }
+    if (xTaskCreate(vTaskAlexaCommander, "Commander", TASK_ALEXA_COMMANDER_STACK_SIZE,
+        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
+        DEBUG_PRINTF("vTaskAlexaCommander failed\r\n");
+    }
+#else
+    if (xTaskCreate(vTaskAlexa, "Alexa", TASK_ALEXA_STACK_SIZE,
+        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
+        DEBUG_PRINTF("vTaskAlexa failed\r\n");
+    }
+#endif
 
     DEBUG_PRINTF("Starting Scheduler.. \r\n");
     vTaskStartScheduler();
@@ -217,21 +236,124 @@ void net_supply_mac(uint8_t *mac)
 ////////////////////////////////////////////////////////////////////////////////////////
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
-#define STR_REQUEST  "REQUEST.RAW"
-#define STR_RESPONSE "RESPONSE.raw"
-void vTaskAlexa(void *pvParameters)
+#define REQUEST_mic_recording   "REQUEST.RAW"
+#define REQUEST_what_time_is_it "REQUEST1.RAW"
+#define REQUEST_play_music      "REQUEST2.RAW"
+#define REQUEST_play_live_news  "REQUEST3.RAW"
+#define REQUEST_set_alarm       "REQUEST4.RAW"
+#define REQUEST_stop            "REQUEST5.RAW"
+#define REQUEST_yes             "REQUEST6.RAW"
+static char* g_pcFileNameRequest = NULL;
+void vIsrAlexaButton(void);
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ISR routine for button
+////////////////////////////////////////////////////////////////////////////////////////
+void vIsrAlexaButton(void)
 {
-    (void) pvParameters;
-    char* acFileNameRequest = STR_REQUEST;
-    int lRet = 0;
+    uint8_t c = 0;
 
+    if (!g_pcFileNameRequest) {
+        //if (uart_is_interrupted(UART0, uart_interrupt_rx)) {
+            uart_read(UART0, &c);
+            switch (c) {
+                case 'r': { // mic recording
+                    DEBUG_PRINTF("record\r\n");
+                    g_pcFileNameRequest = REQUEST_mic_recording;
+                    break;
+                }
+                case 't': { // time
+                    DEBUG_PRINTF("ask time\r\n");
+                    g_pcFileNameRequest = REQUEST_what_time_is_it;
+                    break;
+                }
+                case 'm': { // music
+                    DEBUG_PRINTF("play music\r\n");
+                    g_pcFileNameRequest = REQUEST_play_music;
+                    break;
+                }
+                case 'n': { // live news
+                    DEBUG_PRINTF("play news\r\n");
+                    g_pcFileNameRequest = REQUEST_play_live_news;
+                    break;
+                }
+                case 'a': { // alarm
+                    DEBUG_PRINTF("set alarm\r\n");
+                    g_pcFileNameRequest = REQUEST_set_alarm;
+                    break;
+                }
+                case 's': { // stop
+                    DEBUG_PRINTF("stop\r\n");
+                    g_pcFileNameRequest = REQUEST_stop;
+                    break;
+                }
+                case 'y': { // yes
+                    DEBUG_PRINTF("yes\r\n");
+                    g_pcFileNameRequest = REQUEST_yes;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        //}
+    }
+}
 
+void vTaskAlexaCommander(void *pvParameters)
+{
     DEBUG_PRINTF("\r\nInitializing network...");
     initialize_network();
 
     DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
     avs_init();
     vTaskDelay(pdMS_TO_TICKS(1000));
+
+    DEBUG_PRINTF("\r\nInitializing button...\r\n");
+    if (!button_setup(vIsrAlexaButton, BUTTON_GPIO)) {
+        DEBUG_PRINTF("Error! Connect GPIO%d to GND!\r\n", BUTTON_GPIO);
+    }
+
+    DEBUG_PRINTF("\r\nInitialization completed!\r\n");
+    for (;;)
+    {
+        if (!net_is_ready()) {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            continue;
+        }
+
+        if (!g_pcFileNameRequest) {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            continue;
+        }
+
+        if (!avs_isconnected()) {
+            DEBUG_PRINTF("\r\nNot connected to Alexa provider!\r\n");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            g_pcFileNameRequest = NULL;
+            continue;
+        }
+
+        DEBUG_PRINTF("\r\nSending Alexa query...");
+        if (!avs_send_request(g_pcFileNameRequest)) {
+            DEBUG_PRINTF("FAILED!\r\n");
+        }
+        else {
+            DEBUG_PRINTF("OK\r\n");
+        }
+
+        g_pcFileNameRequest = NULL;
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+    avs_free();
+}
+
+void vTaskAlexaStreamer(void *pvParameters)
+{
+    (void) pvParameters;
+    int lRet = 0;
+
 
     for (;;)
     {
@@ -260,35 +382,36 @@ loop:
                 if (avs_err()) {
                     goto loop;
                 }
-                vTaskDelay(pdMS_TO_TICKS(2000));
                 if (++lRet == 30) {
                     chip_reboot();
                 }
+                vTaskDelay(pdMS_TO_TICKS(2000));
                 continue;
             }
             break;
         } while (1);
+        DEBUG_PRINTF("\r\nConnected to Alexa provider!\r\n");
 
-
-#if 1
-        DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
-        if (avs_send_request(acFileNameRequest)) {
-#endif
-            while (1) {
-                if (!avs_recv_and_play_response()) {
-                    DEBUG_PRINTF("avs_recv_and_play_response failed!\r\n");
+        while (1) {
+            if (!g_pcFileNameRequest) {
+                lRet = avs_recv_and_play_response();
+                DEBUG_PRINTF("recv_and_play...[%d]\r\n", lRet);
+                if (!lRet) {
                     break;
                 }
                 vTaskDelay(pdMS_TO_TICKS(1));
             }
-#if 1
+            else {
+            	DEBUG_PRINTF("sleep...\r\n");
+                vTaskDelay(pdMS_TO_TICKS(1000));
+            }
         }
-#endif
+
 
         DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
         avs_disconnect();
 
-        lRet = 10;
+        lRet = 15;
         DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRet);
         for (int i=0; i<lRet; i++) {
             DEBUG_PRINTF(".");
@@ -296,8 +419,6 @@ loop:
         }
         DEBUG_PRINTF("\r\n\r\n");
     }
-
-    avs_free();
 }
 #else // USE_AVS_REVB
 ////////////////////////////////////////////////////////////////////////////////////////
