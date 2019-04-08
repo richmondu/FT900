@@ -108,6 +108,13 @@ struct altcp_pcb *altcp_tls_alloc(void *arg, u8_t ip_type);
  */
 void *altcp_tls_context(struct altcp_pcb *conn);
 
+/** @ingroup altcp_tls
+ * Configuring Application Layer Protocol Negotiation (ALPN) TLS extension
+ */
+#if defined(ALTCP_MBEDTLS_ALPN_ENABLE)
+int altcp_tls_conf_alpn_protocols(struct altcp_tls_config *conf, const char **protos);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

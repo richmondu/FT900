@@ -747,6 +747,21 @@ altcp_tls_create_config(int is_server, int have_cert, int have_pkey, int have_ca
   return conf;
 }
 
+#if defined(ALTCP_MBEDTLS_ALPN_ENABLE)
+int altcp_tls_conf_alpn_protocols(struct altcp_tls_config *conf, const char **protos)
+{
+#if defined(MBEDTLS_SSL_ALPN)
+    int ret = mbedtls_ssl_conf_alpn_protocols(&conf->conf, protos);
+    if (ret != 0) {
+        LWIP_DEBUGF(ALTCP_MBEDTLS_DEBUG, ("mbedtls_ssl_conf_alpn_protocols failed: %d\n", ret));
+    }
+    return ret;
+#else // defined(MBEDTLS_SSL_ALPN)
+    return -1;
+#endif // defined(MBEDTLS_SSL_ALPN)
+}
+#endif // defined(ALTCP_MBEDTLS_ALPN_ENABLE)
+
 /** Create new TLS configuration
  * This is a suboptimal version that gets the encrypted private key and its password,
  * as well as the server certificate.
