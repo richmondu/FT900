@@ -212,6 +212,10 @@ void avs_disconnect(void)
 	comm_disconnect();
 }
 
+int avs_isconnected(void)
+{
+    return comm_isconnected();
+}
 
 
 
@@ -603,21 +607,19 @@ int avs_recv_and_play_response(void)
     uint32_t ulBytesReceived = 0;
 
 
-    audio_speaker_begin();
-
-
     // Set a timeout for the operation
-    comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
+    comm_setsockopt(0, 0);
 
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
     if (iRet < sizeof(ulBytesToReceive)) {
         DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
-        audio_speaker_end();
         return 0;
     }
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
+
+    audio_speaker_begin();
 
     // Set a timeout for the operation
     comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
@@ -628,8 +630,10 @@ int avs_recv_and_play_response(void)
         iRet = comm_recv(pcRecv, ulBytesToProcess);
         if (iRet <= 0) {
             DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
-            audio_speaker_end();
-            return 0;
+            break;
+        }
+        else if (iRet < ulBytesToProcess) {
+        	DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
         }
         DEBUG_PRINTF(">> Recv  %d bytes\r\n", iRet);
 
@@ -657,7 +661,7 @@ int avs_recv_and_play_response(void)
 
 
     audio_speaker_end();
-    return 1;
+    return ulBytesReceived;
 }
 
 
