@@ -87,7 +87,7 @@ Below is a description of how the audio is processed on FT900.
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)  
       
       Notes
-      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and                vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
+      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
@@ -148,9 +148,9 @@ AVS SDK supports 3 major capabilities:
       2. Alerts - for timer/alarm directives (Alerts)
       3. Contents - for content/music directives (AudioPlayer)
 
-Previously, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class. That is, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
+Previously, only #1 is working on FT900 since I've only hooked into SpeechSynthesizer class of AVS SDK. That is, if you command FT900 to set an alert or play music, the alarm and music is played on RPI, not on FT900.
 
-To support #2 and #3 on FT900, I hooked into other classes in RPI. So now, if music is playing in FT900 and then some alerts arrive or user speaks in microphone, then music will be paused to give way for those 2. 
+To support #2 and #3 on FT900, I hooked into the MediaPlayer class of AVS SDK in RPI. So now, if music is playing in FT900 and then some alerts arrive or user speaks in microphone, then music will be paused to give way for those 2. 
 
       Three main differences on the new approach:
       1. I'm now hooking on the lower stack of AVS SDK.
