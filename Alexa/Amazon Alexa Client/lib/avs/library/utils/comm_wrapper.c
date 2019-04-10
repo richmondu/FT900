@@ -137,4 +137,9 @@ int comm_recv(void *pvBuffer, int lSize)
     return recv(g_lSocket, pvBuffer, lSize, 0);
 }
 
+int comm_errno(void)
+{
+	return errno;
+}
+
 

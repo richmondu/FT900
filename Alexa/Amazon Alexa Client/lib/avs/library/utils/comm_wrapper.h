@@ -5,6 +5,7 @@
 int  comm_get_server_port(void);
 const void* comm_get_server_addr(void);
 int  comm_err(void);
+int  comm_errno(void);
 
 int  comm_connect(void);
 void comm_disconnect(void);

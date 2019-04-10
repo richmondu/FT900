@@ -69,9 +69,11 @@
 
 #define USE_DO_DIR 0
 #define USE_STEREO_TO_MONO_AVERAGE 0 // Using discard instead of average is better audio quality.
+#define USE_MULTITHREADED_RECVPLAY 0
+#define USE_SENDRECV_MUTEX 1
 
 
-
+#if USE_MULTITHREADED_RECVPLAY
 typedef struct _ThreadPlayerContext {
 
     TaskHandle_t m_xTask;
@@ -84,10 +86,13 @@ typedef struct _ThreadPlayerContext {
 
 } ThreadPlayerContext;
 
-static char* g_pcAudioBuffer  = NULL;
-static char* g_pcSDCardBuffer = NULL;
 static ThreadPlayerContext g_hContext;
 static void vPlayerTask(void *pvParameters);
+#endif
+
+static char* g_pcAudioBuffer  = NULL;
+static char* g_pcSDCardBuffer = NULL;
+static SemaphoreHandle_t m_xMutexSendRecv = NULL;
 
 
 
@@ -137,6 +142,11 @@ int avs_init(void)
     DEBUG_PRINTF("Memory initialize.\r\n");
 
     // Initialize mutex
+#if USE_SENDRECV_MUTEX
+    m_xMutexSendRecv = xSemaphoreCreateMutex();
+#endif
+
+#if USE_MULTITHREADED_RECVPLAY
     g_hContext.m_xMutexFile = xSemaphoreCreateMutex();
     g_hContext.m_xMutexRun = xSemaphoreCreateMutex();
     if (!g_hContext.m_xMutexRun || !g_hContext.m_xMutexFile) {
@@ -153,6 +163,7 @@ int avs_init(void)
         avs_free();
         return 0;
     }
+#endif
 
     return 1;
 }
@@ -169,6 +180,7 @@ void avs_free(void)
         g_pcSDCardBuffer = NULL;
     }
 
+#if USE_MULTITHREADED_RECVPLAY
     if (g_hContext.m_xMutexFile) {
         vSemaphoreDelete(g_hContext.m_xMutexFile);
         g_hContext.m_xMutexFile = NULL;
@@ -178,6 +190,14 @@ void avs_free(void)
         vSemaphoreDelete(g_hContext.m_xMutexRun);
         g_hContext.m_xMutexRun = NULL;
     }
+#endif
+
+#if USE_SENDRECV_MUTEX
+    if (m_xMutexSendRecv) {
+        vSemaphoreDelete(m_xMutexSendRecv);
+        m_xMutexSendRecv = NULL;
+    }
+#endif
 }
 
 int avs_get_server_port(void)
@@ -209,7 +229,7 @@ int avs_connect(void)
 /////////////////////////////////////////////////////////////////////////////////////////////
 void avs_disconnect(void)
 {
-	comm_disconnect();
+    comm_disconnect();
 }
 
 int avs_isconnected(void)
@@ -301,6 +321,7 @@ int avs_send_request(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
+    int iErr = 0;
     char* pcSDCard = g_pcSDCardBuffer;
     uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE>>1;
     uint32_t ulBytesToTransfer = 0;
@@ -329,6 +350,9 @@ int avs_send_request(const char* pcFileName)
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesToTransfer);
     ulBytesToTransfer = (ulBytesToTransfer >> 1);
 
+#if USE_SENDRECV_MUTEX
+    xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
+#endif
 
     // Set a timeout for the operation
     comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
@@ -337,8 +361,8 @@ int avs_send_request(const char* pcFileName)
     iRet = comm_send((char*)&ulBytesToTransfer, sizeof(ulBytesToTransfer));
     if (iRet != sizeof(ulBytesToTransfer)) {
         DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
-        sdcard_close(&fHandle);
-        return 0;
+        iRet = 0;
+        goto err;
     }
 
 
@@ -351,8 +375,8 @@ int avs_send_request(const char* pcFileName)
     iRet = comm_send((char*)&ulFlag, sizeof(ulFlag));
     if (iRet != sizeof(ulFlag)) {
         DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
-        sdcard_close(&fHandle);
-        return 0;
+        iRet = 0;
+        goto err;
     }
 
     //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
@@ -372,8 +396,8 @@ int avs_send_request(const char* pcFileName)
         iRet = sdcard_read(&fHandle, pcSDCard, ulBytesToProcess<<1, (UINT*)&ulReadSize);
         if (iRet != 0) {
             DEBUG_PRINTF(">> avs_send_request(): iRet = %d\r\n", iRet);
-            sdcard_close(&fHandle);
-            return 0;
+            iRet = 0;
+            goto err;
         }
 
         if (ulReadSize) {
@@ -384,8 +408,8 @@ int avs_send_request(const char* pcFileName)
             iRet = comm_send(pcSDCard, ulReadSize>>1);
             if (iRet <= 0) {
                 DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulReadSize>>1, iRet);
-                sdcard_close(&fHandle);
-                return 0;
+                iRet = 0;
+                goto err;
             }
             //DEBUG_PRINTF(">> Sent %d bytes\r\n", size_tx);
 
@@ -396,13 +420,19 @@ int avs_send_request(const char* pcFileName)
             DEBUG_PRINTF(">> avs_send_request(): sdcard_read is 0\r\n");
         }
     }
+    iRet = ulBytesSent;
 
 
+err:
     // Close the file
     sdcard_close(&fHandle);
 
+#if USE_SENDRECV_MUTEX
+    xSemaphoreGive(m_xMutexSendRecv);
+#endif
+
     DEBUG_PRINTF(">> Total bytes sent %d (8-bit compressed)\r\n", (int)ulBytesSent);
-    return 1;
+    return iRet;
 }
 
 
@@ -439,9 +469,13 @@ int avs_recv_response(const char* pcFileName)
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
     if (iRet < sizeof(ulBytesToReceive)) {
-        DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
+        DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
         sdcard_close(&fHandle);
         return 0;
+    }
+    else if (ulBytesToReceive == 0) {
+        // timedout
+        return -1;
     }
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
@@ -456,14 +490,26 @@ int avs_recv_response(const char* pcFileName)
             ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
         }
 
+#if USE_SENDRECV_MUTEX
+        xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
+#endif
+
         // Receive the bytes of transfer size
         iRet = comm_recv(pcRecv, ulBytesToProcess);
         if (iRet <= 0) {
-            DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            DEBUG_PRINTF("avs_recv_response(): recv failed! %d %d errno %d\r\n\r\n", (int)ulBytesToProcess, iRet, comm_errno());
             sdcard_close(&fHandle);
+#if USE_SENDRECV_MUTEX
+            xSemaphoreGive(m_xMutexSendRecv);
+#endif
             return 0;
         }
         //DEBUG_PRINTF(">> Recv  %d bytes\r\n", iRet);
+
+#if USE_SENDRECV_MUTEX
+        xSemaphoreGive(m_xMutexSendRecv);
+        vTaskDelay( pdMS_TO_TICKS(1) );
+#endif
 
         // Compute the total bytes received
         ulBytesReceived += iRet;
@@ -608,34 +654,46 @@ int avs_recv_and_play_response(void)
 
 
     // Set a timeout for the operation
-    comm_setsockopt(0, 0);
+    comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
 
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
     if (iRet < sizeof(ulBytesToReceive)) {
-        DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToReceive));
+        tfp_printf("avs_recv_and_play_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
         return 0;
+    }
+    else if (ulBytesToReceive == 0) {
+        // timedout
+        return -1;
     }
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
 
     audio_speaker_begin();
 
-    // Set a timeout for the operation
-    comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
-
     // Receive the total bytes in segments of buffer size
     do {
+#if USE_SENDRECV_MUTEX
+        xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
+#endif
+
+        // Set a timeout for the operation
+        comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
+
         // Receive the bytes of transfer size
         iRet = comm_recv(pcRecv, ulBytesToProcess);
         if (iRet <= 0) {
-            DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
+            DEBUG_PRINTF("avs_recv_and_play_response(): recv2 failed! %d %d errno %d\r\n\r\n", (int)ulBytesToProcess, iRet, comm_errno());
+            xSemaphoreGive(m_xMutexSendRecv);
+            ulBytesReceived = 0;
             break;
         }
-        else if (iRet < ulBytesToProcess) {
-        	DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d\r\n\r\n", (int)ulBytesToProcess, iRet);
-        }
         DEBUG_PRINTF(">> Recv  %d bytes\r\n", iRet);
+
+#if USE_SENDRECV_MUTEX
+        xSemaphoreGive(m_xMutexSendRecv);
+        vTaskDelay( pdMS_TO_TICKS(1) );
+#endif
 
         // Compute the total bytes received
         ulBytesReceived += iRet;
@@ -665,7 +723,7 @@ int avs_recv_and_play_response(void)
 }
 
 
-#if 1
+#if USE_MULTITHREADED_RECVPLAY
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Recv and play Alexa response in separate threads
 // - Recv 2KB from RPI
