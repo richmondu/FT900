@@ -74,14 +74,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 
 ///////////////////////////////////////////////////////////////////////////////////
 /* Configurables */
-#define USE_TEST_MODE                   1
-//#define USE_RECVPLAYTHREADED_RESPONSE   0
 #define USE_RECVPLAY_RESPONSE           1
-#define USE_MEASURE_PERFORMANCE         0
-#define USE_PLAY_RECORDED_AUDIO         0
 #define BUTTON_GPIO                     (31)
-
-#define USE_AVS_REVB                    1
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -242,6 +236,7 @@ static const char* g_pcREQUEST[] = {
     "set alarm",
     "stop",
     "yes",
+	"ask person",
     "quit"
 };
 static const char* g_pcREQUESTfile[] = {
@@ -252,6 +247,7 @@ static const char* g_pcREQUESTfile[] = {
     "REQUEST4.RAW",
     "REQUEST5.RAW",
     "REQUEST6.RAW",
+    "REQUEST7.RAW",
 };
 
 static void usage(void)
@@ -264,6 +260,7 @@ static void usage(void)
     DEBUG_PRINTF("  Press 'a' to set alarm.\r\n");
     DEBUG_PRINTF("  Press 's' to tell stop.\r\n");
     DEBUG_PRINTF("  Press 'y' to tell yes.\r\n");
+    DEBUG_PRINTF("  Press 'p' to ask who is x. (long response)\r\n");
     DEBUG_PRINTF("  Press 'q' to quit and restart.\r\n");
     DEBUG_PRINTF("\r\n");
 }
@@ -318,9 +315,14 @@ void vIsrAlexaButton(void)
                     g_cSendCommand = 6;
                     break;
                 }
+                case 'P':
+                case 'p': { // person
+                    g_cSendCommand = 7;
+                    break;
+                }
                 case 'Q':
                 case 'q': { // quit
-                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[7]);
+                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[8]);
                     g_cQuit = 1;
                     break;
                 }
