@@ -77,7 +77,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #define USE_TEST_MODE                   1
 //#define USE_RECVPLAYTHREADED_RESPONSE   0
 #define USE_RECVPLAY_RESPONSE           1
-#define USE_MEASURE_PERFORMANCE         0
+#define USE_MEASURE_PERFORMANCE         1
 #define USE_PLAY_RECORDED_AUDIO         0
 #define BUTTON_GPIO                     (31)
 
@@ -87,8 +87,12 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 
 ///////////////////////////////////////////////////////////////////////////////////
 /* Task Configurations. */
+#if USE_AVS_REVB
 #define TASK_ALEXA_STREAMER_STACK_SIZE  (512+256)
 #define TASK_ALEXA_COMMANDER_STACK_SIZE (5120+256)
+#else
+#define TASK_ALEXA_STACK_SIZE           (6144)
+#endif
 #define TASK_ALEXA_PRIORITY             (1)
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -135,8 +139,13 @@ static inline void ethernet_setup()
 }
 
 
+#if USE_AVS_REVB
 void vTaskAlexaStreamer(void *pvParameters);
 void vTaskAlexaCommander(void *pvParameters);
+#else
+void vTaskAlexa(void *pvParameters);
+#endif
+
 
 int main(void)
 {
@@ -161,6 +170,7 @@ int main(void)
         "Demonstrate Amazon Alexa.\r\n"
         "--------------------------------------------------------------------- \r\n");
 
+#if USE_AVS_REVB
     if (xTaskCreate(vTaskAlexaStreamer, "Streamer", TASK_ALEXA_STREAMER_STACK_SIZE,
         NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
         DEBUG_PRINTF("vTaskAlexaStreamer failed\r\n");
@@ -169,6 +179,12 @@ int main(void)
         NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
         DEBUG_PRINTF("vTaskAlexaCommander failed\r\n");
     }
+#else
+    if (xTaskCreate(vTaskAlexa, "Alexa", TASK_ALEXA_STACK_SIZE,
+        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
+        DEBUG_PRINTF("vTaskAlexa failed\r\n");
+    }
+#endif
 
     DEBUG_PRINTF("Starting Scheduler.. \r\n");
     vTaskStartScheduler();
@@ -220,14 +236,13 @@ void net_supply_mac(uint8_t *mac)
 #endif // NET_USE_EEPROM
 
 
-
+#if USE_AVS_REVB
 ////////////////////////////////////////////////////////////////////////////////////////
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
 //static char* g_pcFileNameRequest = NULL;
 #define SEND_COMMAND_RESET  (-1)
 #define SEND_COMMAND_RECORD (0)
-
 static char g_cSendCommand = SEND_COMMAND_RESET;
 static char g_cRecordAudio = 0;
 static char g_cQuit = 0;
@@ -510,6 +525,303 @@ void vTaskAlexaStreamer(void *pvParameters)
         }
     }
 }
+#else // USE_AVS_REVB
+////////////////////////////////////////////////////////////////////////////////////////
+// Set filenames for request and response audio files
+////////////////////////////////////////////////////////////////////////////////////////
+#define STR_REQUEST  "REQUEST.raw"
+#define STR_RESPONSE "RESPONSE.raw"
+
+#if USE_TEST_MODE
+////////////////////////////////////////////////////////////////////////////////////////
+// Alexa task
+// FYI: Modify avs_config.h for IP address, audio sampling rate, etc.
+////////////////////////////////////////////////////////////////////////////////////////
+void vTaskAlexa(void *pvParameters)
+{
+    (void) pvParameters;
+    char* acFileNameRequest = STR_REQUEST;
+#if !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
+    char* acFileNameResponse = STR_RESPONSE;
+#endif // !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
+    int lRet = 0;
+
+
+    DEBUG_PRINTF("\r\nInitializing network...");
+    initialize_network();
+
+    DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
+    avs_init();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+
+    for (;;)
+    {
+loop:
+        lRet = 0;
+        if ( !net_is_ready() ) {
+            DEBUG_PRINTF( "Waiting for network configuration..." );
+            do {
+                vTaskDelay( pdMS_TO_TICKS(1000) );
+                DEBUG_PRINTF( "." );
+                if (lRet++ > 30) {
+                    DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+                    chip_reboot();
+                }
+            }
+            while (!net_is_ready());
+            DEBUG_PRINTF( "\r\n" );
+            display_network_info();
+        }
+
+
+#if USE_PLAY_RECORDED_AUDIO
+        //DEBUG_PRINTF("\r\nPlaying Alexa request...\r\n");
+        //avs_play_response(acFileNameRequest);
+#endif // USE_PLAY_RECORDED_AUDIO
+
+        lRet = 0;
+        do {
+            DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
+                ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
+            if (!avs_connect()) {
+                if (avs_err()) {
+                    goto loop;
+                }
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                if (++lRet == 30) {
+                    chip_reboot();
+                }
+                continue;
+            }
+            break;
+        } while (1);
+
+
+#if USE_MEASURE_PERFORMANCE
+        struct tm time0 = {0};
+        struct tm time1 = {0};
+#if !USE_RECVPLAY_RESPONSE
+        struct tm time2 = {0};
+#endif // USE_RECVPLAY_RESPONSE
+        struct tm timeX = {0};
+        time_duration_get_time(&time0);
+
+        DEBUG_PRINTF("\r\nSending Alexa query...");
+        if (avs_send_request(acFileNameRequest)) {
+            time_duration_get_time(&time1);
+
+#if USE_RECVPLAYTHREADED_RESPONSE
+            DEBUG_PRINTF("[%d seconds]\r\nStreamingx Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_and_play_response_threaded(acFileNameResponse)) {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+            else {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+#elif USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("[%d seconds]\r\nStreaming Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_and_play_response()) {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+            else {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+#else // USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("[%d seconds]\r\nReceiving Alexa response...", (int)time_duration_get(&time1, &time0));
+            if (avs_recv_response(acFileNameResponse)) {
+                time_duration_get_time(&time2);
+
+                DEBUG_PRINTF("[%d seconds]\r\nPlaying Alexa response...", (int)time_duration_get(&time2, &time1));
+                avs_play_response(acFileNameResponse);
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds]\r\n", (int)time_duration_get(&timeX, &time2));
+            }
+            else {
+                time_duration_get_time(&timeX);
+                DEBUG_PRINTF("[%d seconds] TIMEDOUT\r\n", (int)time_duration_get(&timeX, &time1));
+            }
+#endif // USE_RECVPLAY_RESPONSE
+        }
+
+        DEBUG_PRINTF("Performance: %d seconds\r\n", (int)time_duration_get(&timeX, &time0));
+#else // USE_MEASURE_PERFORMANCE
+        DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+        if (avs_send_request(acFileNameRequest)) {
+
+            DEBUG_PRINTF("\r\nReceiving Alexa response...\r\n");
+            if (avs_recv_response(acFileNameResponse)) {
+
+                DEBUG_PRINTF("\r\nPlaying Alexa response...\r\n");
+                avs_play_response(acFileNameResponse);
+            }
+        }
+#endif // USE_MEASURE_PERFORMANCE
+
+
+        DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
+        avs_disconnect();
+
+        lRet = 10;
+        DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRet);
+        for (int i=0; i<lRet; i++) {
+            DEBUG_PRINTF(".");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+        DEBUG_PRINTF("\r\n\r\n");
+    }
+
+    avs_free();
+}
+#else // USE_TEST_MODE
+
+static uint8_t g_cRecordAudio = 0;
+static uint8_t g_lProcessAudio = 0;
+int record_audio(void);
+void vIsrAlexaButton(void);
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Alexa task
+// FYI: Modify avs_config.h for IP address, audio sampling rate, etc.
+////////////////////////////////////////////////////////////////////////////////////////
+void vTaskAlexa(void *pvParameters)
+{
+    (void) pvParameters;
+    const char* acFileNameRequest = STR_REQUEST;
+#if !USE_RECVPLAY_RESPONSE || USE_RECVPLAYTHREADED_RESPONSE
+    const char* acFileNameResponse = STR_RESPONSE;
+#endif // USE_RECVPLAY_RESPONSE
+    int lRet = 0;
+
+
+    DEBUG_PRINTF("\r\nInitializing network...");
+    initialize_network();
+
+    DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
+    avs_init();
+
+    DEBUG_PRINTF("\r\nInitializing button...\r\n");
+    if (!button_setup(vIsrAlexaButton, BUTTON_GPIO)) {
+        DEBUG_PRINTF("Error! Connect GPIO%d to GND!\r\n", BUTTON_GPIO);
+    }
+
+    DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
+    for (;;)
+    {
+        // Record audio from microphone and save to SD card
+        if (g_cRecordAudio) {
+            DEBUG_PRINTF("\r\nRecording audio from microphone to SD card...\r\n");
+
+            // Record audio from microphone and save to SD card
+            if (avs_record_request(acFileNameRequest, record_audio)) {
+                g_lProcessAudio = 1;
+                DEBUG_PRINTF("\r\nRecording audio completed!\r\n");
+
+#if USE_PLAY_RECORDED_AUDIO
+                DEBUG_PRINTF("\r\nPlaying Alexa request...\r\n");
+                avs_play_response(acFileNameRequest);
+#endif // USE_PLAY_RECORDED_AUDIO
+            }
+
+            g_cRecordAudio = 0;
+        }
+        else {
+            vTaskDelay( pdMS_TO_TICKS(1000) );
+        }
+
+        // Process the recorded audio in SD card
+        if (g_lProcessAudio) {
+            lRet = 0;
+            if ( !net_is_ready() ) {
+                DEBUG_PRINTF("\r\nWaiting for network configuration...");
+                do {
+                    vTaskDelay( pdMS_TO_TICKS(1000) );
+                    DEBUG_PRINTF( "." );
+                    if (lRet++ > 30) {
+                        DEBUG_PRINTF( "Could not recover. Do reboot.\r\n" );
+                        chip_reboot();
+                    }
+                }
+                while (!net_is_ready());
+                DEBUG_PRINTF("\r\n");
+                display_network_info();
+            }
+
+            DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
+                ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
+            if (!avs_connect()) {
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                continue;
+            }
+
+#if USE_RECVPLAYTHREADED_RESPONSE
+            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+            if (avs_send_request(acFileNameRequest)) {
+
+                DEBUG_PRINTF("Streamingx Alexa response...\r\n");
+                avs_recv_and_play_response_threaded(acFileNameResponse);
+            }
+#elif USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+            if (avs_send_request(acFileNameRequest)) {
+
+                DEBUG_PRINTF("Streaming Alexa response...\r\n");
+                avs_recv_and_play_response();
+            }
+#else // USE_RECVPLAY_RESPONSE
+            DEBUG_PRINTF("\r\nSending Alexa query...\r\n");
+            if (avs_send_request(acFileNameRequest)) {
+
+                DEBUG_PRINTF("Receiving Alexa response...\r\n");
+                if (avs_recv_response(acFileNameResponse)) {
+
+                    DEBUG_PRINTF("Playing Alexa response...\r\n");
+                    avs_play_response(acFileNameResponse);
+                }
+            }
+#endif // USE_RECVPLAY_RESPONSE
+
+            DEBUG_PRINTF("\r\nClosing TCP connection...\r\n");
+            avs_disconnect();
+
+            vTaskDelay(pdMS_TO_TICKS(3000));
+            g_lProcessAudio = 0;
+            DEBUG_PRINTF("\r\nWaiting for button event...\r\n");
+        }
+        else {
+            vTaskDelay( pdMS_TO_TICKS(1000) );
+        }
+    }
+
+    avs_free();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ISR routine for button
+////////////////////////////////////////////////////////////////////////////////////////
+void vIsrAlexaButton(void)
+{
+    if (!g_lProcessAudio) {
+        if (button_is_interrupted()) {
+            if (button_is_pressed()) {
+                g_cRecordAudio = 1;
+                DEBUG_PRINTF("\r\nButton is pressed!\r\n");
+            }
+            else if (button_is_released()) {
+                g_cRecordAudio = 0;
+                DEBUG_PRINTF("\r\nButton is released!\r\n");
+            }
+        }
+    }
+}
+
+
+#endif // USE_TEST_MODE
+#endif // USE_AVS_REVB
 
 char record_audio(void)
 {
