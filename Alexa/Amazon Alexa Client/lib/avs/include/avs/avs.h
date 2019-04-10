@@ -12,7 +12,7 @@ int avs_isconnected(void);
 // - Read 2KB from microphone
 // - Convert 2KB stereo to 1KB mono
 // - Save 1KB to SD card
-int  avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void));
+int  avs_record_request(const char* pcFileName, char (*fxnCallbackRecord)(void));
 
 // - Read 4KB from SD card
 // - Convert 4KB 16-bit to 2KB 8-bit

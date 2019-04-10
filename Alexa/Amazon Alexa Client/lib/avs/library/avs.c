@@ -71,6 +71,7 @@
 #define USE_STEREO_TO_MONO_AVERAGE 0 // Using discard instead of average is better audio quality.
 #define USE_MULTITHREADED_RECVPLAY 0
 #define USE_SENDRECV_MUTEX 1
+#define USE_RECORDPLAY_MUTEX 0
 
 
 #if USE_MULTITHREADED_RECVPLAY
@@ -92,7 +93,12 @@ static void vPlayerTask(void *pvParameters);
 
 static char* g_pcAudioBuffer  = NULL;
 static char* g_pcSDCardBuffer = NULL;
+#if USE_SENDRECV_MUTEX
 static SemaphoreHandle_t m_xMutexSendRecv = NULL;
+#endif
+#if USE_RECORDPLAY_MUTEX
+static SemaphoreHandle_t m_xMutexRecordPlay = NULL;
+#endif
 
 
 
@@ -144,6 +150,9 @@ int avs_init(void)
     // Initialize mutex
 #if USE_SENDRECV_MUTEX
     m_xMutexSendRecv = xSemaphoreCreateMutex();
+#endif
+#if USE_RECORDPLAY_MUTEX
+    m_xMutexRecordPlay = xSemaphoreCreateMutex();
 #endif
 
 #if USE_MULTITHREADED_RECVPLAY
@@ -198,6 +207,13 @@ void avs_free(void)
         m_xMutexSendRecv = NULL;
     }
 #endif
+
+#if USE_RECORDPLAY_MUTEX
+    if (m_xMutexRecordPlay) {
+        vSemaphoreDelete(m_xMutexRecordPlay);
+        m_xMutexRecordPlay = NULL;
+    }
+#endif
 }
 
 int avs_get_server_port(void)
@@ -247,7 +263,7 @@ int avs_isconnected(void)
 // Audio recorded: 16-bit PCM, 16KHZ, stereo (2-channels)
 // Audio saved:    16-bit PCM, 16KHZ, mono (1-channel)
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
+int avs_record_request(const char* pcFileName, char (*fxnCallbackRecord)(void))
 {
     FIL fHandle;
     uint32_t ulRecordSize = 0;
@@ -264,6 +280,9 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
         return 0;
     }
 
+#if USE_RECORDPLAY_MUTEX
+    xSemaphoreTake(m_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
+#endif
 
     // Record microphone input to SD card while callback function returns true
     // Microphone input is 16-bit stereo
@@ -298,6 +317,9 @@ int avs_record_request(const char* pcFileName, int (*fxnCallbackRecord)(void))
         }
     } while ((*fxnCallbackRecord)() && ulBytesWritten < AVS_CONFIG_MAX_RECORD_SIZE);
 
+#if USE_RECORDPLAY_MUTEX
+    xSemaphoreGive(m_xMutexRecordPlay);
+#endif
 
     // Close the file
     sdcard_close(&fHandle);
@@ -669,13 +691,17 @@ int avs_recv_and_play_response(void)
     DEBUG_PRINTF(">> Total bytes to recv %d (8-bit compressed)\r\n", (int)ulBytesToReceive);
 
 
+#if USE_RECORDPLAY_MUTEX
+    xSemaphoreTake(m_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
+#endif // USE_RECORDPLAY_MUTEX
+
     audio_speaker_begin();
 
     // Receive the total bytes in segments of buffer size
     do {
 #if USE_SENDRECV_MUTEX
         xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
-#endif
+#endif // USE_SENDRECV_MUTEX
 
         // Set a timeout for the operation
         comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
@@ -684,7 +710,9 @@ int avs_recv_and_play_response(void)
         iRet = comm_recv(pcRecv, ulBytesToProcess);
         if (iRet <= 0) {
             DEBUG_PRINTF("avs_recv_and_play_response(): recv2 failed! %d %d errno %d\r\n\r\n", (int)ulBytesToProcess, iRet, comm_errno());
+#if USE_SENDRECV_MUTEX
             xSemaphoreGive(m_xMutexSendRecv);
+#endif // USE_SENDRECV_MUTEX
             ulBytesReceived = 0;
             break;
         }
@@ -693,7 +721,8 @@ int avs_recv_and_play_response(void)
 #if USE_SENDRECV_MUTEX
         xSemaphoreGive(m_xMutexSendRecv);
         vTaskDelay( pdMS_TO_TICKS(1) );
-#endif
+#endif // USE_SENDRECV_MUTEX
+
 
         // Compute the total bytes received
         ulBytesReceived += iRet;
@@ -709,7 +738,7 @@ int avs_recv_and_play_response(void)
                 break;
             }
         } while (1);
-        
+
         // Compute the transfer size
         if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {
             ulBytesToProcess = ulBytesToReceive-ulBytesReceived;
@@ -719,6 +748,11 @@ int avs_recv_and_play_response(void)
 
 
     audio_speaker_end();
+
+#if USE_RECORDPLAY_MUTEX
+    xSemaphoreGive(m_xMutexRecordPlay);
+#endif // USE_RECORDPLAY_MUTEX
+
     return ulBytesReceived;
 }
 

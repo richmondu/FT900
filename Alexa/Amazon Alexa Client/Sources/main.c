@@ -56,6 +56,10 @@
 #include "button.h"
 #include "time_duration.h"
 
+#include "FreeRTOS.h"           // FreeRTOS 3rd-party library
+#include "task.h"               // FreeRTOS 3rd-party library
+#include "semphr.h"             // FreeRTOS 3rd-party library
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -237,11 +241,16 @@ void net_supply_mac(uint8_t *mac)
 // Set filenames for request and response audio files
 ////////////////////////////////////////////////////////////////////////////////////////
 //static char* g_pcFileNameRequest = NULL;
-#define SEND_COMMAND_RESET (-1)
+#define SEND_COMMAND_RESET  (-1)
+#define SEND_COMMAND_RECORD (0)
 static char g_cSendCommand = SEND_COMMAND_RESET;
+static char g_cRecordAudio = 0;
 static char g_cQuit = 0;
+static SemaphoreHandle_t g_xMutexRecordPlay;
+static char record_audio(void);
+
 static const char* g_pcREQUEST[] = {
-    "record",
+    "record voice",
     "ask time",
     "play music",
     "play live news",
@@ -263,7 +272,7 @@ static const char* g_pcREQUESTfile[] = {
 static void usage(void)
 {
     DEBUG_PRINTF("\r\nUsage:\r\n");
-    DEBUG_PRINTF("  Press 'r' to record voice.\r\n");
+    DEBUG_PRINTF("  Press 'r' to start/stop voice recording.\r\n");
     DEBUG_PRINTF("  Press 't' to ask current time.\r\n");
     DEBUG_PRINTF("  Press 'm' to play music.\r\n");
     DEBUG_PRINTF("  Press 'n' to play live news.\r\n");
@@ -287,7 +296,11 @@ void vIsrAlexaButton(void)
             switch (c) {
                 case 'R':
                 case 'r': { // mic recording
-                    g_cSendCommand = 0;
+                    g_cSendCommand = SEND_COMMAND_RECORD;
+                    if (g_cRecordAudio == 0) {
+                        DEBUG_PRINTF("\r\n[start %s]\r\n", g_pcREQUEST[0]);
+                        g_cRecordAudio = 1;
+                    }
                     break;
                 }
                 case 'T':
@@ -332,6 +345,25 @@ void vIsrAlexaButton(void)
             }
         //}
     }
+    else if (g_cSendCommand == SEND_COMMAND_RECORD) {
+        //if (uart_is_interrupted(UART0, uart_interrupt_rx)) {
+            uart_read(UART0, &c);
+            switch (c) {
+                case 'R':
+                case 'r': { // mic recording
+                    g_cSendCommand = SEND_COMMAND_RECORD;
+                    if (g_cRecordAudio) {
+                        DEBUG_PRINTF("\r\n[stop %s]\r\n", g_pcREQUEST[0]);
+                        g_cRecordAudio = 0;
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        //}
+    }
 }
 
 void vTaskAlexaCommander(void *pvParameters)
@@ -349,6 +381,8 @@ void vTaskAlexaCommander(void *pvParameters)
     if (!button_setup(vIsrAlexaButton, BUTTON_GPIO)) {
         DEBUG_PRINTF("Error! Connect GPIO%d to GND!\r\n", BUTTON_GPIO);
     }
+
+    g_xMutexRecordPlay = xSemaphoreCreateMutex();
 
     DEBUG_PRINTF("\r\nInitialization completed!\r\n");
     for (;;)
@@ -416,6 +450,16 @@ loop:
             vTaskDelay(pdMS_TO_TICKS(500));
             continue;
         }
+        // record audio is set
+        else if (g_cSendCommand == SEND_COMMAND_RECORD) {
+            if (g_cRecordAudio) {
+                xSemaphoreTake(g_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
+                DEBUG_PRINTF("\r\nRecording Alexa query [%s]...\r\n", g_pcREQUEST[(int)g_cSendCommand]);
+                avs_record_request(g_pcREQUESTfile[(int)g_cSendCommand], record_audio);
+                DEBUG_PRINTF("\r\nRecorded Alexa query [%s]...OK\r\n", g_pcREQUEST[(int)g_cSendCommand]);
+                xSemaphoreGive(g_xMutexRecordPlay);
+            }
+        }
 
         // Send command
         DEBUG_PRINTF("\r\nSending Alexa query [%s]...", g_pcREQUEST[(int)g_cSendCommand]);
@@ -428,6 +472,7 @@ loop:
 
         // Reset command
         g_cSendCommand = SEND_COMMAND_RESET;
+        g_cRecordAudio = 0;
         vTaskDelay(pdMS_TO_TICKS(3000));
     }
 
@@ -450,10 +495,13 @@ void vTaskAlexaStreamer(void *pvParameters)
         while (!g_cQuit) {
             if (g_cSendCommand == SEND_COMMAND_RESET) {
 #if USE_RECVPLAY_RESPONSE
+                xSemaphoreTake(g_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
                 lRet = avs_recv_and_play_response();
                 if (!lRet) {
+                    xSemaphoreGive(g_xMutexRecordPlay);
                     break;
                 }
+                xSemaphoreGive(g_xMutexRecordPlay);
 #else // USE_RECVPLAY_RESPONSE
                 // This method is not ideal for music playback
                 lRet = avs_recv_response(g_pcREQUEST[0]);
@@ -467,7 +515,7 @@ void vTaskAlexaStreamer(void *pvParameters)
                 vTaskDelay(pdMS_TO_TICKS(1));
             }
             else {
-                vTaskDelay(pdMS_TO_TICKS(1000));
+                vTaskDelay(pdMS_TO_TICKS(500));
             }
         }
 
@@ -631,7 +679,7 @@ loop:
 }
 #else // USE_TEST_MODE
 
-static uint8_t g_lRecordAudio = 0;
+static uint8_t g_cRecordAudio = 0;
 static uint8_t g_lProcessAudio = 0;
 int record_audio(void);
 void vIsrAlexaButton(void);
@@ -665,7 +713,7 @@ void vTaskAlexa(void *pvParameters)
     for (;;)
     {
         // Record audio from microphone and save to SD card
-        if (g_lRecordAudio) {
+        if (g_cRecordAudio) {
             DEBUG_PRINTF("\r\nRecording audio from microphone to SD card...\r\n");
 
             // Record audio from microphone and save to SD card
@@ -679,7 +727,7 @@ void vTaskAlexa(void *pvParameters)
 #endif // USE_PLAY_RECORDED_AUDIO
             }
 
-            g_lRecordAudio = 0;
+            g_cRecordAudio = 0;
         }
         else {
             vTaskDelay( pdMS_TO_TICKS(1000) );
@@ -760,22 +808,23 @@ void vIsrAlexaButton(void)
     if (!g_lProcessAudio) {
         if (button_is_interrupted()) {
             if (button_is_pressed()) {
-                g_lRecordAudio = 1;
+                g_cRecordAudio = 1;
                 DEBUG_PRINTF("\r\nButton is pressed!\r\n");
             }
             else if (button_is_released()) {
-                g_lRecordAudio = 0;
+                g_cRecordAudio = 0;
                 DEBUG_PRINTF("\r\nButton is released!\r\n");
             }
         }
     }
 }
 
-int record_audio(void)
-{
-    return (int)g_lRecordAudio;
-}
+
 #endif // USE_TEST_MODE
 #endif // USE_AVS_REVB
 
+char record_audio(void)
+{
+    return g_cRecordAudio;
+}
 
