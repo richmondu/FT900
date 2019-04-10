@@ -324,7 +324,6 @@ void vIsrAlexaButton(void)
                 case 'q': { // quit
                     DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[7]);
                     g_cQuit = 1;
-                    avs_disconnect();
                     break;
                 }
                 default: {
@@ -374,9 +373,7 @@ loop:
 
         // Handle quit command and disconnection
         if (g_cQuit) {
-            if (avs_isconnected()) {
-                avs_disconnect();
-            }
+            vTaskDelay(pdMS_TO_TICKS(1));
 
             lRet = 15;
             DEBUG_PRINTF("\r\nRestarting in %d seconds...", lRet);
