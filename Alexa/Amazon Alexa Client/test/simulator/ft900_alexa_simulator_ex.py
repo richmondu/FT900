@@ -20,7 +20,7 @@ import msvcrt
 ############################################################################################
 # Configurations.
 ############################################################################################
-CONF_SERVER_ADDR            = '192.168.22.5'
+CONF_SERVER_ADDR            = '192.168.100.12'
 CONF_SERVER_PORT_CH         = 11234
 CONF_FILENAME_REQUEST_TIME  = "../REQUEST_what_time_is_it.raw"
 CONF_FILENAME_REQUEST_MUSIC = "../REQUEST_play_music.raw"
