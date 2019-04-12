@@ -222,8 +222,9 @@ Below is a list of files modified:
 
       - SampleApplication.cpp: To initialize FT900ConnectionHandler in separate thread.
       - PortAudioMicrophoneWrapper.cpp: To feed in request data to microphone datastream.
-      - SpeechSynthesizer.cpp: To call the callback function when response is received.
+      - SpeechSynthesizer.cpp: To hook speech/dialogue response.
       - MediaPlayer.cpp: To fix audiosink issue.
+      - IStreamSource.cpp, AttachmentReaderSource.cpp, BaseStreamSource.cpp: to hook contents (music, live news, audio book) and alerts (alarms, timers) 
       - DefaultClient.h: To provide access to Speech Synthesizer handle.
       - UIManager.h: To access connection status and dialog state.
       - UserInputManager.cpp: To test pre-recorded audio requests.
