@@ -224,7 +224,8 @@ In addition to the new modules implemented described in the block diagram and se
 the primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
  
       - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
-      - SpeechSynthesizer: startPlaying() contains the data stream for Alexa response
+      - SpeechSynthesizer: startPlaying() contains the data stream for Dialog (speech response)
+      - MediaPlayer: contains the data stream for all audio content including Contents and Alerts
 
 Below is a list of files modified:
 
