@@ -118,6 +118,9 @@ Below is a system diagram of AVS SDK.
 Below is a block diagram showing the implemented components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg" width="623"/>
 
+Note that audio from Alexa is MP3 for dialogue responses but can be MP3/AAC or other audio formats for contents (music, live news, audio book) and alerts (alarms, timers).
+
+
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg" width="623"/>
 
