@@ -228,6 +228,19 @@ static char g_cQuit = 0;
 static SemaphoreHandle_t g_xMutexRecordPlay;
 static char record_audio(void);
 
+enum {
+    REQUEST_RECORD,
+    REQUEST_TIME,
+    REQUEST_MUSIC,
+    REQUEST_LIVENEWS,
+    REQUEST_ALARM,
+    REQUEST_STOP,
+    REQUEST_YES,
+    REQUEST_PERSON,
+    REQUEST_AUDIOBOOK,
+    REQUEST_QUIT
+};
+
 static const char* g_pcREQUEST[] = {
     "record voice",
     "ask time",
@@ -240,6 +253,7 @@ static const char* g_pcREQUEST[] = {
     "play audio book",
     "quit"
 };
+
 static const char* g_pcREQUESTfile[] = {
     "REQUEST0.RAW",
     "REQUEST1.RAW",
@@ -257,11 +271,11 @@ static void usage(void)
     DEBUG_PRINTF("\r\nUsage:\r\n");
     DEBUG_PRINTF("  Press 'r' to start/stop voice recording.\r\n");
     DEBUG_PRINTF("  Press 't' to ask current time.\r\n");
-    DEBUG_PRINTF("  Press 'p' to ask who is x. (long response)\r\n");
-    DEBUG_PRINTF("  Press 'm' to play music.\r\n");
-    DEBUG_PRINTF("  Press 'n' to play live news.\r\n");
-    DEBUG_PRINTF("  Press 'b' to play audio book.\r\n");
-    DEBUG_PRINTF("  Press 'a' to set alarm.\r\n");
+    DEBUG_PRINTF("  Press 'p' to ask who is Lebron James.\r\n");
+    DEBUG_PRINTF("  Press 'm' to play music from TuneIn radio.\r\n");
+    DEBUG_PRINTF("  Press 'n' to play live news from Fox News.\r\n");
+    DEBUG_PRINTF("  Press 'b' to play audio book from Audible.\r\n");
+    DEBUG_PRINTF("  Press 'a' to set alarm in 10 seconds.\r\n");
     DEBUG_PRINTF("  Press 's' to tell stop.\r\n");
     DEBUG_PRINTF("  Press 'y' to tell yes.\r\n");
     DEBUG_PRINTF("  Press 'q' to quit and restart.\r\n");
@@ -281,57 +295,56 @@ void vIsrAlexaButton(void)
             switch (c) {
                 case 'R':
                 case 'r': { // mic recording
-                    g_cSendCommand = SEND_COMMAND_RECORD;
+                    g_cSendCommand = (char)REQUEST_RECORD;
                     if (g_cRecordAudio == 0) {
-                        DEBUG_PRINTF("\r\n[start %s]\r\n", g_pcREQUEST[0]);
+                        DEBUG_PRINTF("\r\n[start %s]\r\n", g_pcREQUEST[(char)REQUEST_RECORD]);
                         g_cRecordAudio = 1;
                     }
                     break;
                 }
                 case 'T':
                 case 't': { // time
-                    g_cSendCommand = 1;
+                    g_cSendCommand = (char)REQUEST_TIME;
                     break;
                 }
                 case 'M':
                 case 'm': { // music
-                    g_cSendCommand = 2;
+                    g_cSendCommand = (char)REQUEST_MUSIC;
                     break;
                 }
                 case 'N':
                 case 'n': { // live news
-                    g_cSendCommand = 3;
+                    g_cSendCommand = (char)REQUEST_LIVENEWS;
                     break;
                 }
                 case 'A':
                 case 'a': { // alarm
-                    g_cSendCommand = 4;
+                    g_cSendCommand = (char)REQUEST_ALARM;
                     break;
                 }
                 case 'S':
                 case 's': { // stop
-                    g_cSendCommand = 5;
+                    g_cSendCommand = (char)REQUEST_STOP;
                     break;
                 }
                 case 'Y':
                 case 'y': { // yes
-                    g_cSendCommand = 6;
+                    g_cSendCommand = (char)REQUEST_YES;
                     break;
                 }
                 case 'P':
                 case 'p': { // person
-                    g_cSendCommand = 7;
+                    g_cSendCommand = (char)REQUEST_PERSON;
                     break;
                 }
                 case 'B':
                 case 'b': { // book
-                    g_cSendCommand = 8;
+                    g_cSendCommand = (char)REQUEST_AUDIOBOOK;
                     break;
                 }
                 case 'Q':
                 case 'q': { // quit
-                    int size = sizeof(g_pcREQUESTfile)/sizeof(g_pcREQUESTfile[0]);
-                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[size]);
+                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[(char)REQUEST_QUIT]);
                     g_cQuit = 1;
                     break;
                 }
