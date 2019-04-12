@@ -194,6 +194,22 @@ Below is an experiment that demonstrates the prioritization of Alexa on dialogue
          Music turned off.
 
 
+### Alexa Audio Content Services
+
+Various audio content services are now working on FT900 microcontroller. 
+
+      1. music radio - TuneIn:  OK
+      2. live news   - FoxNews: OK
+      3. audio book  - Audible: OK
+
+To support audio book playback, I had to replace libsox with ffmpeg as libsox does NOT support AAC audio format.
+
+Access to other audio services are restricted by Amazon on AVS-SDK. Need to request access to test Spotify, Amazon Music, etc.
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_audio_services.png" width="623"/>
+
+
+
 ### RPI Alexa AVS SDK modifications
 
 In addition to the new modules implemented described in the block diagram and sequence diagram, 
@@ -479,5 +495,6 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 3. [Amazon's Official AVS Device SDK (written in C++)](https://github.com/alexa/avs-device-sdk)
 4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
 5. [SOX Sound Exchange Utility (used for MP3 audio decoding)](http://sox.sourceforge.net)
-6. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
-7. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
+6. [FFMPEG for audio decoding (supports all audio formats)](https://ffmpeg.org)
+7. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
+8. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
