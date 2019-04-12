@@ -676,7 +676,7 @@ int avs_recv_and_play_response(void)
 
 
     // Set a timeout for the operation
-    comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
+    comm_setsockopt(3, 0);
 
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
