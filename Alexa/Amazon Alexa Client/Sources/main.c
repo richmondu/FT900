@@ -236,7 +236,8 @@ static const char* g_pcREQUEST[] = {
     "set alarm",
     "stop",
     "yes",
-	"ask person",
+    "ask person",
+    "play audio book",
     "quit"
 };
 static const char* g_pcREQUESTfile[] = {
@@ -248,6 +249,7 @@ static const char* g_pcREQUESTfile[] = {
     "REQUEST5.RAW",
     "REQUEST6.RAW",
     "REQUEST7.RAW",
+    "REQUEST8.RAW",
 };
 
 static void usage(void)
@@ -255,12 +257,13 @@ static void usage(void)
     DEBUG_PRINTF("\r\nUsage:\r\n");
     DEBUG_PRINTF("  Press 'r' to start/stop voice recording.\r\n");
     DEBUG_PRINTF("  Press 't' to ask current time.\r\n");
+    DEBUG_PRINTF("  Press 'p' to ask who is x. (long response)\r\n");
     DEBUG_PRINTF("  Press 'm' to play music.\r\n");
     DEBUG_PRINTF("  Press 'n' to play live news.\r\n");
+    DEBUG_PRINTF("  Press 'b' to play audio book.\r\n");
     DEBUG_PRINTF("  Press 'a' to set alarm.\r\n");
     DEBUG_PRINTF("  Press 's' to tell stop.\r\n");
     DEBUG_PRINTF("  Press 'y' to tell yes.\r\n");
-    DEBUG_PRINTF("  Press 'p' to ask who is x. (long response)\r\n");
     DEBUG_PRINTF("  Press 'q' to quit and restart.\r\n");
     DEBUG_PRINTF("\r\n");
 }
@@ -320,9 +323,15 @@ void vIsrAlexaButton(void)
                     g_cSendCommand = 7;
                     break;
                 }
+                case 'B':
+                case 'b': { // book
+                    g_cSendCommand = 8;
+                    break;
+                }
                 case 'Q':
                 case 'q': { // quit
-                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[8]);
+                    int size = sizeof(g_pcREQUESTfile)/sizeof(g_pcREQUESTfile[0]);
+                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[size]);
                     g_cQuit = 1;
                     break;
                 }
