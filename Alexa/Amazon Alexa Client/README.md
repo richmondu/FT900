@@ -259,7 +259,7 @@ Below is a description of how the audio is processed on RPI.
 
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
-      - SOX utility is used to convert MP3 data stream to raw PCM16 data stream.
+      - SOX utility is used to convert MP3 data stream to raw PCM16 data stream. SOX has been replaced by FFMPEG to support various audio formats, such as AAC, which is not supported by SOX.
 
 
 # Performance analysis/optimization
@@ -422,8 +422,9 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
-      2. Install SOX utility
-         sudo apt-get install sox libsox-fmt-mp3 libsox-dev ffmpeg
+      2. Install FFMPEG utility
+         new: sudo apt-get install ffmpeg
+         old: sudo apt-get install sox libsox-fmt-mp3 libsox-dev
       3. Compile and run.
          cd /home/..../alexa/build/SampleApp/src
          sudo ./SampleApp "/home/.../alexa/build/Integration/AlexaClientSDKConfig.json" "/home/.../alexa/third-party/alexa-rpi/models" INFO
