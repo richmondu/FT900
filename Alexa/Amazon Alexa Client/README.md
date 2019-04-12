@@ -118,13 +118,15 @@ Below is a system diagram of AVS SDK.
 Below is a block diagram showing the implemented components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg" width="623"/>
 
-      - Note that audio from Alexa is MP3 for dialogue responses but can be MP3/AAC or other audio formats for contents (music, live news, audio book) and alerts (alarms, timers).
+      - Note that audio from Alexa is MP3 for dialogue responses 
+      - But can be MP3/AAC or other audio formats for contents (music, live news, audio book) and alerts (alarms, timers).
 
 
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg" width="623"/>
 
-      - Note that this diagram is only applicable for Dialogue responses. For Contents (music, live news, audio book) and Alerts (alarms, timers), MediaPlayer is hooked instead of SpeechSynthesizer.
+      - Note that this diagram is only applicable for Dialogue responses. 
+      - For Contents (music, live news, audio book) and Alerts (alarms, timers), MediaPlayer is hooked instead of SpeechSynthesizer.
       
 
       1. A ConnectionHandler thread is initialized in the main function of the AVS SDK SampleApplication.
