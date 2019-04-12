@@ -194,6 +194,22 @@ Below is an experiment that demonstrates the prioritization of Alexa on dialogue
          Music turned off.
 
 
+### Alexa Audio Content Services
+
+Various audio content services are now working on FT900 microcontroller. 
+
+      1. music radio - TuneIn:  OK
+      2. live news   - FoxNews: OK
+      3. audio book  - Audible: OK
+
+To support audio book playback, I had to replace libsox with ffmpeg as libsox does NOT support AAC audio format.
+
+Access to other audio services are restricted by Amazon on AVS-SDK. Need to request access to test Spotify, Amazon Music, etc.
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_audio_services.png" width="623"/>
+
+
+
 ### RPI Alexa AVS SDK modifications
 
 In addition to the new modules implemented described in the block diagram and sequence diagram, 
@@ -407,7 +423,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
       2. Install SOX utility
-         sudo apt-get install sox libsox-fmt-mp3 libsox-dev
+         sudo apt-get install sox libsox-fmt-mp3 libsox-dev ffmpeg
       3. Compile and run.
          cd /home/..../alexa/build/SampleApp/src
          sudo ./SampleApp "/home/.../alexa/build/Integration/AlexaClientSDKConfig.json" "/home/.../alexa/third-party/alexa-rpi/models" INFO
@@ -453,11 +469,8 @@ B. Normal Mode (User presses a key or button to trigger voice recording)
 Below are the action items for the Alexa Demo.
 
       1. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
-      2. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
-      3. Support for alarms or notification-based messages. (Currently, only responses triggered by requests are supported.)
-      4. Support for very long Alexa responses. (Need to test requests that have very long responses.)
-      5. Support for queuing Alexa requests from multiple FT900 clients. (Multiple FT900 can simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-      6. Audio decoding implementation currently uses bash scripts using SOX utility. (Should be replaced with C/C++ code)
+      2. Support for multiple FT900 clients. (Multiple FT900 should be able to simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
+      3. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
 
 
 
@@ -479,5 +492,6 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 3. [Amazon's Official AVS Device SDK (written in C++)](https://github.com/alexa/avs-device-sdk)
 4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
 5. [SOX Sound Exchange Utility (used for MP3 audio decoding)](http://sox.sourceforge.net)
-6. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
-7. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
+6. [FFMPEG for audio decoding (supports all audio formats)](https://ffmpeg.org)
+7. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
+8. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
