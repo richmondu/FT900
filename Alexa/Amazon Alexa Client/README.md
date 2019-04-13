@@ -449,8 +449,36 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
 
 Download the latest [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) code.
 
-A. Test Mode (Use a pre-recorded request contained in SD card)
+NEW:
 
+      1. Change AVS_CONFIG_SERVER_ADDR in avs_config.h.
+         This should contain the IP address of the RPI
+      2. Copy request1.raw, request2.raw, ..., request8.raw from test folder to SD card.      
+            REQUEST1.RAW - ask current time.
+            REQUEST2.RAW - play music from TuneIn radio.
+            REQUEST3.RAW - play live news from Fox News
+            REQUEST4.RAW - set alarm in 10 seconds.
+            REQUEST5.RAW - tell stop.
+            REQUEST6.RAW - tell yes.
+            REQUEST7.RAW - ask who is Lebron James.
+            REQUEST8.RAW - play audio book from Audible.
+      3. Compile and run.
+      4. Type a key to trigger voice recording or sending of pre-recorded audio     
+            Usage:
+            Press 'r' to start/stop voice recording.
+            Press 't' to ask current time.
+            Press 'p' to ask who is Lebron James.
+            Press 'm' to play music from TuneIn radio.
+            Press 'n' to play live news from Fox News.
+            Press 'b' to play audio book from Audible.
+            Press 'a' to set alarm in 10 seconds.
+            Press 's' to tell stop.
+            Press 'y' to tell yes.
+            Press 'q' to quit and restart.
+
+OLD:
+
+      A. Test Mode (Use a pre-recorded request contained in SD card)
       1. Change AVS_CONFIG_SERVER_ADDR in avs_config.h.
          This should contain the IP address of the RPI
       2. Copy test/request.raw to SD card.
@@ -458,8 +486,7 @@ A. Test Mode (Use a pre-recorded request contained in SD card)
       3. Compile and run.
          This automatically sends the pre-recorded audio, request.raw, to RPI.
 
-B. Normal Mode (User presses a key or button to trigger voice recording)
-
+      B. Normal Mode (User presses a key or button to trigger voice recording)
       1. Change AVS_CONFIG_SERVER_ADDR to avs_config.h.
          This should contain the IP address of the RPI
       2. Change TEST_MODE to 0 in main.
@@ -482,7 +509,7 @@ Below are the action items for the Alexa Demo.
       1. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
       2. Support for multiple FT900 clients. (Multiple FT900 should be able to simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
       3. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
-      4. Use gstreamer instead of FFmpeg to decode data for FT900. 
+      4. Use GSTREAMER instead of FFmpeg to decode data for FT900. 
 
 
 
@@ -505,6 +532,6 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 4. [AVS SDK Installation Guide on Raspberry PI](https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script)
 5. [SOX Sound Exchange Utility (used for MP3 audio decoding)](http://sox.sourceforge.net)
 6. [FFMPEG for audio decoding (supports all audio formats)](https://ffmpeg.org)
-7. [gStreamer media framework](https://gstreamer.freedesktop.org)
+7. [GSTREAMER media framework](https://gstreamer.freedesktop.org)
 8. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
 9. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
