@@ -221,7 +221,7 @@ Access to other audio services are restricted by Amazon on AVS-SDK. Need to requ
 ### RPI Alexa AVS SDK modifications
 
 In addition to the new modules implemented described in the block diagram and sequence diagram, 
-the primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class and SpeechSynthesizer classes.
+the primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class, SpeechSynthesizer class and MediaPlayer classes.
  
       - PortAudioMicrophoneWrapper: PortAudioCallback() contains the data stream for Alexa request
       - SpeechSynthesizer: startPlaying() contains the data stream for Dialog (speech response)
