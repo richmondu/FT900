@@ -23,8 +23,10 @@ import msvcrt
 CONF_SERVER_ADDR            = '192.168.100.12'
 CONF_SERVER_PORT_CH         = 11234
 CONF_FILENAME_REQUEST_TIME  = "../REQUEST_what_time_is_it.raw"
+CONF_FILENAME_REQUEST_PERSON= "../REQUEST_who_is.raw"
 CONF_FILENAME_REQUEST_MUSIC = "../REQUEST_play_music.raw"
 CONF_FILENAME_REQUEST_NEWS  = "../REQUEST_play_live_news.raw"
+CONF_FILENAME_REQUEST_BOOK  = "../REQUEST_play_audio_book.raw"
 CONF_FILENAME_REQUEST_ALARM = "../REQUEST_set_alarm.raw"
 CONF_FILENAME_REQUEST_STOP  = "../REQUEST_stop.raw"
 CONF_FILENAME_REQUEST_YES   = "../REQUEST_yes.raw"
@@ -386,9 +388,11 @@ def usage():
     print("[MAIN] Usage:")
     print("[MAIN]   Press 'q' key to quit (will send stop b4 quitting)...")
     print("[MAIN]   Press 'e' key to exit application...")
-    print("[MAIN]   Press 't' key to ask Alexa about the current time...")
+    print("[MAIN]   Press 't' key to ask Alexa what time is it...")
+    print("[MAIN]   Press 'p' key to ask Alexa who is...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
     print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
+    print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
     print("[MAIN]   Press 'a' key to ask Alexa to set alarm...")
     print("[MAIN]   Press 's' key to tell Alexa to stop...")
     print("[MAIN]   Press 'y' key to tell Alexa yes...")
@@ -447,20 +451,26 @@ def main(args, argc):
                 elif key=='t':
                     t = thread_fxn_commander (2, "commander", CONF_FILENAME_REQUEST_TIME)
                     t.start()
+                elif key=='p':
+                    t = thread_fxn_commander (3, "commander", CONF_FILENAME_REQUEST_PERSON)
+                    t.start()
                 elif key=='m':
-                    t = thread_fxn_commander (3, "commander", CONF_FILENAME_REQUEST_MUSIC)
+                    t = thread_fxn_commander (4, "commander", CONF_FILENAME_REQUEST_MUSIC)
                     t.start()
                 elif key=='n':
-                    t = thread_fxn_commander (4, "commander", CONF_FILENAME_REQUEST_NEWS)
+                    t = thread_fxn_commander (5, "commander", CONF_FILENAME_REQUEST_NEWS)
+                    t.start()
+                elif key=='b':
+                    t = thread_fxn_commander (6, "commander", CONF_FILENAME_REQUEST_BOOK)
                     t.start()
                 elif key=='a':
-                    t = thread_fxn_commander (5, "commander", CONF_FILENAME_REQUEST_ALARM)
+                    t = thread_fxn_commander (7, "commander", CONF_FILENAME_REQUEST_ALARM)
                     t.start()
                 elif key=='s':
-                    t = thread_fxn_commander (6, "commander", CONF_FILENAME_REQUEST_STOP)
+                    t = thread_fxn_commander (8, "commander", CONF_FILENAME_REQUEST_STOP)
                     t.start()
                 elif key=='y':
-                    t = thread_fxn_commander (7, "commander", CONF_FILENAME_REQUEST_YES)
+                    t = thread_fxn_commander (9, "commander", CONF_FILENAME_REQUEST_YES)
                     t.start()
                 else:
                     sleep(1)
