@@ -482,6 +482,7 @@ Below are the action items for the Alexa Demo.
       1. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
       2. Support for multiple FT900 clients. (Multiple FT900 should be able to simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
       3. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
+      4. Use gstreamer instead of FFmpeg to decode data for FT900. 
 
 
 
