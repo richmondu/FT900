@@ -60,6 +60,9 @@ To support Wakeword detection feature on FT900, external MCUs can be integrated 
 
 ### Audio Processing 
 
+The format of audio received by FT900 from RPI is raw/PCM format.
+RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
+
 Below is a description of how the audio is processed on FT900.
 
       avs_record_request()
@@ -91,17 +94,11 @@ Below is a description of how the audio is processed on FT900.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
-### Test Mode
+### Test Mode and Test Simulator
 
-Using test mode, the application automatically sends pre-recorded requests (saved in SD card) to RPI Alexa Gateway every 10 seconds. 
+The FT900 application provides option to choose from any pre-recorded audio for testing convenience.
 
-      - It allows easy testing and troubleshooting of the demo.
-      - It allows easy reproduction of issues. 
-
-
-### Test Simulator
-
-A Python script application named FT900 Alexa Simulator is provided to simulate the behavior of FT900.
+A Python script application named FT900 Alexa Simulator is also provided to simulate the behavior of FT900 on a Windows machine.
 
       - It can be run on Windows and Linux machine.
       - It can assist in automated testing and stress testing of RPI Alexa Gateway.
