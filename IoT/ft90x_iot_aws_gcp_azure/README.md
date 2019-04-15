@@ -30,11 +30,13 @@ This new project demonstrates the FT900 IoT framework including secure IoT cloud
 Below are the MQTT settings and TLS credentials needed to connect to IoT cloud services of AWS, GCP and Azure. 
 
 #### Amazon AWS IoT Core
-    1. MQTT Endpoint: NAME.iot.REGION.amazonaws.com
+    1. MQTT Endpoint: NAME-ats.iot.REGION.amazonaws.com (Default is now an ATS-endpoint)
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
     4. MQTT Password: NONE
-    5. TLS CA: REQUIRED (https://www.amazontrust.com/repository/AmazonRootCA1.pem or https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem)
+    5. TLS CA: REQUIRED (ATS server certificate by default since default endpoint is an ATS-endpoint)
+       ATS server certificate https://www.amazontrust.com/repository/AmazonRootCA1.pem 
+       Verisign server certificate https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem)
     6. TLS Certificate: REQUIRED
     7. TLS PrivateKey: REQUIRED
     8. MQTT PublishTopic: ANY
