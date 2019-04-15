@@ -8,9 +8,9 @@ This PoC application demonstrates using <b>FT900 microcontroller</b> (MCU) as an
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_steps.jpg" width="623"/>
 
 
-This demo is targeted for <b>FTDI/Bridgetek’s</b> smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. Furthermore, customers will have access to the <b>built in capabilities of Alexa</b> (like music playback, timers and alarms, package tracking, movie listings, calendar management, and more) including access to third-party skills developed using the Alexa Skills Kit. 
+This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. Furthermore, customers will have access to the <b>built in capabilities of Alexa</b> (like music playback, timers and alarms, package tracking, movie listings, calendar management, and more) including access to third-party skills developed using the Alexa Skills Kit. 
 
-PanL Hub, which runs on RPI, acts as the <b>Alexa Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
+PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
 
 
 # FT900-side (Alexa Client)
