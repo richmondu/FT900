@@ -30,7 +30,8 @@
 
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define USE_ROOT_CA               1
-    #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
+    #define USE_MBEDTLS_MAX_SIZES     2 // if using ATS endpoint
+    //#define USE_MBEDTLS_MAX_SIZES   0 // if using non-ATS endpoint
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     // Google IoT does not need a root CA
     #define USE_ROOT_CA               0 // memory footprint optimization
@@ -104,7 +105,9 @@
 // TLS CERTIFICATES
 // Authentication with Amazon AWS, Google Cloud and Microsoft Azure
 //   Sample for Amazon AWS IoT (using TLS certificate authentication)
-//     Rootca.pem
+//     Rootca.pem - self-signed ca certificate
+//     Rootca_aws_ats.pem - server certificate if connecting to ATS endpoint
+//     Rootca_aws_ver.pem - server certificate if not connecting to ATS endpoint
 //     Ft900device1_cert.pem
 //     Ft900device1_pkey.pem
 //   Sample for Amazon AWS Greengrass (using TLS certificate authentication)

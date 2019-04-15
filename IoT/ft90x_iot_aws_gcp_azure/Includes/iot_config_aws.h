@@ -37,7 +37,15 @@
 #define MQTT_BROKER_PORT          MQTT_TLS_PORT
 
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
-    #define MQTT_BROKER           "amasgua12bmkv.iot.us-east-1.amazonaws.com"
+    #define USE_AWS_ATS           1
+    #if !USE_AWS_ATS
+        #define USE_AWS_VER       1
+    #endif
+    #if USE_AWS_ATS
+        #define MQTT_BROKER       "amasgua12bmkv-ats.iot.us-east-1.amazonaws.com"
+    #else
+        #define MQTT_BROKER       "amasgua12bmkv.iot.us-east-1.amazonaws.com"
+    #endif
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     #define MQTT_BROKER           "192.168.22.12" // local Greengrass server
 #endif
@@ -54,7 +62,9 @@
 //
 // TLS CERTIFICATES
 //   Sample for Amazon AWS IoT (using TLS certificate authentication)
-//     Rootca.pem
+//     Rootca.pem - self-signed ca certificate
+//     Rootca_aws_ats.pem - server certificate if connecting to ATS endpoint
+//     Rootca_aws_ver.pem - server certificate if not connecting to ATS endpoint
 //     Ft900device1_cert.pem
 //     Ft900device1_pkey.pem
 //   Sample for Amazon AWS Greengrass (using TLS certificate authentication)
@@ -71,9 +81,19 @@
     extern __flash__ uint8_t ca_data[]        asm("rootca_gg_pem");
     extern __flash__ uint8_t ca_data_end[]    asm("rootca_gg_pem_end");
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
+#if USE_AWS_ATS
+    // This certificate refers to rootca_aws_ats.pem
+    extern __flash__ uint8_t ca_data[]        asm("rootca_aws_ats_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_aws_ats_pem_end");
+#elif USE_AWS_VER
+    // This certificate refers to rootca_aws_ver.pem
+    extern __flash__ uint8_t ca_data[]        asm("rootca_aws_ver_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_aws_ver_pem_end");
+#else
     // This certificate refers to rootca.pem
     extern __flash__ uint8_t ca_data[]        asm("rootca_pem");
     extern __flash__ uint8_t ca_data_end[]    asm("rootca_pem_end");
+#endif // USE_ATS
 #endif
 #endif // USE_ROOT_CA
 

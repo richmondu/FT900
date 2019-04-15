@@ -142,12 +142,15 @@
 /*-----------------------------------------------------------*/
 
 // Optimization related configuration
-#if USE_MBEDTLS_MAX_SIZES
-#define MBEDTLS_SSL_MAX_CONTENT_LEN  (4096) // Increase from 3072 to support Azure IoT
-#define MBEDTLS_MPI_MAX_SIZE         (512)  // Increased from 256 to support Azure IoT
+#if (USE_MBEDTLS_MAX_SIZES==2)
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (4096+910) // Support AWS IoT ATS
+#define MBEDTLS_MPI_MAX_SIZE         (256)      // Support AWS IoT ATS
+#elif (USE_MBEDTLS_MAX_SIZES==1)
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (4096)     // Support Azure IoT
+#define MBEDTLS_MPI_MAX_SIZE         (512)      // Support Azure IoT
 #else
-#define MBEDTLS_SSL_MAX_CONTENT_LEN  (3072) // Works with AWS IoT/Greengrass and GCP IoT
-#define MBEDTLS_MPI_MAX_SIZE 256     // Works with AWS IoT/Greengrass and GCP IoT
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (3072)     // Works with AWS IoT/Greengrass and GCP IoT
+#define MBEDTLS_MPI_MAX_SIZE         (256)      // Works with AWS IoT/Greengrass and GCP IoT
 #endif
 #define MBEDTLS_AES_ROM_TABLES       // decreases code size by 896 bytes
 #define MBEDTLS_MPI_WINDOW_SIZE 1    // decreases code size by 808 bytes

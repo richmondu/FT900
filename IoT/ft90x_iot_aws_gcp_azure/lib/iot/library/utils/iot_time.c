@@ -39,14 +39,19 @@
  */
 
 #include <ft900.h>          // For rtc_xxx, sys_check_ft900_revB
-
+#include <iot_config.h>     // For USE_PAYLOAD_TIMESTAMP
 #include "tinyprintf.h"     // For tfp_printf
 #include "lwip/apps/mqtt.h" // For MQTT_TLS_PORT
 #include "FreeRTOS.h"       // For pvPortMalloc
 #include "../../include/iot/iot_utils.h"      // For USE_MQTT_BROKER
 
+
+#define SUPPORT_REVB 0
+
 #if USE_PAYLOAD_TIMESTAMP
+#if SUPPORT_REVB
 #include "ext_rtc.h"        // For ext_rtc_xxx
+#endif // SUPPORT_REVB
 #endif //USE_PAYLOAD_TIMESTAMP
 
 
@@ -61,6 +66,7 @@
 
 
 #if USE_PAYLOAD_TIMESTAMP
+#if SUPPORT_REVB
 // Uses external RTC (for Rev A and B)
 static int iot_rtc_set_time_ext(uint32_t secs)
 {
@@ -126,7 +132,7 @@ static int iot_rtc_get_time_ext(struct tm* time_tm)
 
     return 1;
 }
-
+#endif // SUPPORT_REVB
 
 // Uses internal RTC (for Rev C)
 static int iot_rtc_set_time(uint32_t secs)
@@ -179,6 +185,7 @@ int64_t iot_utils_gettimeepoch()
     int64_t time_epoch = 0;
     struct tm time_tm = {0};
 
+#if SUPPORT_REVB
     // if 90x series is NOT rev C, use external RTC
     // Otherwise if using rev C, use internal RTC
     if (sys_check_ft900_revB()) {
@@ -193,6 +200,12 @@ int64_t iot_utils_gettimeepoch()
             return time_epoch;
         }
     }
+#else
+    if (!iot_rtc_get_time(&time_tm)) {
+        DEBUG_PRINTF("iot_utils_gettimeepoch failed! iot_rtc_get_time\r\n");
+        return time_epoch;
+    }
+#endif
 
     time_epoch = mktime(&time_tm);
     DEBUG_PRINTF("time_epoch = %u\r\n", time_epoch);
@@ -204,6 +217,7 @@ const char* iot_utils_gettimeiso(int format)
     static char timeStampIso[24] = {0};
     struct tm time_tm = {0};
 
+#if SUPPORT_REVB
     // if 90x series is NOT rev C, use external RTC
     // Otherwise if using rev C, use internal RTC
     if (sys_check_ft900_revB()) {
@@ -218,6 +232,12 @@ const char* iot_utils_gettimeiso(int format)
             return NULL;
         }
     }
+#else
+    if (!iot_rtc_get_time(&time_tm)) {
+        DEBUG_PRINTF("iot_utils_gettimeiso failed! iot_rtc_get_time\r\n");
+        return NULL;
+    }
+#endif
 
     switch (format) {
     case 0: // YYYY-MM-DDTHH:mm:SS.000
@@ -287,6 +307,7 @@ void iot_sntp_set_system_time(uint32_t sec)
 {
 #if USE_PAYLOAD_TIMESTAMP
     if (g_timenow == 0) {
+#if SUPPORT_REVB
         // if 90x series is NOT rev C, use external RTC
         // Otherwise if using rev C, use internal RTC
         if (sys_check_ft900_revB()) { 
@@ -295,6 +316,9 @@ void iot_sntp_set_system_time(uint32_t sec)
         else {
             iot_rtc_set_time(sec);
         }
+#else // SUPPORT_REVB
+        iot_rtc_set_time(sec);
+#endif // SUPPORT_REVB
     }
 #endif // USE_PAYLOAD_TIMESTAMP
 

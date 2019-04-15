@@ -71,7 +71,7 @@
 // Note that enabling this increases memory footprint
 // Disable this to save some memory footprint for use of sensor
 #ifndef USE_PAYLOAD_TIMESTAMP
-#define USE_PAYLOAD_TIMESTAMP         1
+#define USE_PAYLOAD_TIMESTAMP         0
 #endif // USE_PAYLOAD_TIMESTAMP
 
 // USE_MQTT_PUBLISH, USE_MQTT_SUBSCRIBE

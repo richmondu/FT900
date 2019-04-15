@@ -81,7 +81,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #define IOT_APP_TASK_NAME                        "iot_task"
 #define IOT_APP_TASK_PRIORITY                    (2)
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT) || (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    #define IOT_APP_TASK_STACK_SIZE              (1024 + 64)
+    #define IOT_APP_TASK_STACK_SIZE              (512)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     #define IOT_APP_TASK_STACK_SIZE              (1536 + 32)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
@@ -133,7 +133,7 @@ static inline void uart_setup()
 
     uart_open(
         UART0, 1,
-        UART_DIVIDER_9600_BAUD,
+        UART_DIVIDER_19200_BAUD,
         uart_data_bits_8,
         uart_parity_none,
         uart_stop_bits_1
