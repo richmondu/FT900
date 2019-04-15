@@ -34,7 +34,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
     4. MQTT Password: NONE
-    5. TLS CA: REQUIRED (required for production, optional for testing)
+    5. TLS CA: REQUIRED (https://www.amazontrust.com/repository/AmazonRootCA1.pem or https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem)
     6. TLS Certificate: REQUIRED
     7. TLS PrivateKey: REQUIRED
     8. MQTT PublishTopic: ANY
