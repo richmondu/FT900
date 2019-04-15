@@ -431,7 +431,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
       2. Install FFMPEG utility
          new: sudo apt-get install ffmpeg
-         old: sudo apt-get install sox libsox-fmt-mp3 libsox-dev
+         old: sudo apt-get install sox libsox-fmt-mp3 libsox-fmt-all libsox-dev
       3. Compile and run.
          cd /home/..../alexa/build/SampleApp/src
          sudo ./SampleApp "/home/.../alexa/build/Integration/AlexaClientSDKConfig.json" "/home/.../alexa/third-party/alexa-rpi/models" INFO
