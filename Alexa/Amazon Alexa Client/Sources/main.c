@@ -223,10 +223,12 @@ void net_supply_mac(uint8_t *mac)
 #define SEND_COMMAND_RECORD (0)
 
 static char g_cSendCommand = SEND_COMMAND_RESET;
-static char g_cRecordAudio = 0;
+static char g_cRecordVoice = 0;
 static char g_cQuit = 0;
+static char g_cVolumeIncrease = 0;
+
 static SemaphoreHandle_t g_xMutexRecordPlay;
-static char record_audio(void);
+static char cbRecordVoice(void);
 
 enum {
     REQUEST_RECORD,
@@ -238,6 +240,9 @@ enum {
     REQUEST_YES,
     REQUEST_PERSON,
     REQUEST_AUDIOBOOK,
+
+    REQUEST_VOLUMEUP,
+    REQUEST_VOLUMEDOWN,
     REQUEST_QUIT
 };
 
@@ -251,7 +256,10 @@ static const char* g_pcREQUEST[] = {
     "yes",
     "ask person",
     "play audio book",
-    "quit"
+
+    "increase volume",
+    "decrease volume",
+    "quit",
 };
 
 static const char* g_pcREQUESTfile[] = {
@@ -278,6 +286,8 @@ static void usage(void)
     DEBUG_PRINTF("  Press 'a' to set alarm in 10 seconds.\r\n");
     DEBUG_PRINTF("  Press 's' to tell stop.\r\n");
     DEBUG_PRINTF("  Press 'y' to tell yes.\r\n");
+    DEBUG_PRINTF("  Press '+' to increase volume.\r\n");
+    DEBUG_PRINTF("  Press '-' to decrease volume.\r\n");
     DEBUG_PRINTF("  Press 'q' to quit and restart.\r\n");
     DEBUG_PRINTF("\r\n");
 }
@@ -296,9 +306,9 @@ void vIsrAlexaButton(void)
                 case 'R':
                 case 'r': { // mic recording
                     g_cSendCommand = (char)REQUEST_RECORD;
-                    if (g_cRecordAudio == 0) {
+                    if (g_cRecordVoice == 0) {
                         DEBUG_PRINTF("\r\n[start %s]\r\n", g_pcREQUEST[(char)REQUEST_RECORD]);
-                        g_cRecordAudio = 1;
+                        g_cRecordVoice = 1;
                     }
                     break;
                 }
@@ -342,6 +352,20 @@ void vIsrAlexaButton(void)
                     g_cSendCommand = (char)REQUEST_AUDIOBOOK;
                     break;
                 }
+                case '+': { // volume up
+                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[(char)REQUEST_VOLUMEUP]);
+                    if (g_cVolumeIncrease == 0) {
+                        g_cVolumeIncrease = 20;
+                    }
+                    break;
+                }
+                case '-': { // volume down
+                    DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[(char)REQUEST_VOLUMEDOWN]);
+                    if (g_cVolumeIncrease == 0) {
+                        g_cVolumeIncrease = -20;
+                    }
+                    break;
+                }
                 case 'Q':
                 case 'q': { // quit
                     DEBUG_PRINTF("\r\n[%s]\r\n", g_pcREQUEST[(char)REQUEST_QUIT]);
@@ -361,9 +385,9 @@ void vIsrAlexaButton(void)
                 case 'R':
                 case 'r': { // mic recording
                     g_cSendCommand = SEND_COMMAND_RECORD;
-                    if (g_cRecordAudio) {
+                    if (g_cRecordVoice) {
                         DEBUG_PRINTF("\r\n[stop %s]\r\n", g_pcREQUEST[0]);
-                        g_cRecordAudio = 0;
+                        g_cRecordVoice = 0;
                     }
                     break;
                 }
@@ -454,6 +478,13 @@ loop:
             usage();
         }
 
+        // Set volume
+        if (g_cVolumeIncrease) {
+            avs_set_volume(g_cVolumeIncrease);
+            g_cVolumeIncrease = 0;
+            DEBUG_PRINTF("\r\nSetting volume [%d%%]...OK\r\n", avs_get_volume());
+        }
+
         // No command is set
         if (g_cSendCommand == SEND_COMMAND_RESET) {
             vTaskDelay(pdMS_TO_TICKS(500));
@@ -461,11 +492,13 @@ loop:
         }
         // record audio is set
         else if (g_cSendCommand == SEND_COMMAND_RECORD) {
-            if (g_cRecordAudio) {
+            if (g_cRecordVoice) {
                 xSemaphoreTake(g_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
+
                 DEBUG_PRINTF("\r\nRecording Alexa query [%s]...\r\n", g_pcREQUEST[(int)g_cSendCommand]);
-                avs_record_request(g_pcREQUESTfile[(int)g_cSendCommand], record_audio);
+                avs_record_request(g_pcREQUESTfile[(int)g_cSendCommand], cbRecordVoice);
                 DEBUG_PRINTF("\r\nRecorded Alexa query [%s]...OK\r\n", g_pcREQUEST[(int)g_cSendCommand]);
+
                 xSemaphoreGive(g_xMutexRecordPlay);
             }
         }
@@ -481,7 +514,7 @@ loop:
 
         // Reset command
         g_cSendCommand = SEND_COMMAND_RESET;
-        g_cRecordAudio = 0;
+        g_cRecordVoice = 0;
         vTaskDelay(pdMS_TO_TICKS(3000));
     }
 
@@ -535,8 +568,8 @@ void vTaskAlexaStreamer(void *pvParameters)
     }
 }
 
-char record_audio(void)
+char cbRecordVoice(void)
 {
-    return g_cRecordAudio;
+    return g_cRecordVoice;
 }
 
