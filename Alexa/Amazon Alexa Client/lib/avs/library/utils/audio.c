@@ -335,5 +335,52 @@ void audio_setup(void (*audio_isr)(void), int sampling_rate)
     }
 }
 
+#define VOLUME_MIN   (0x2F)
+#define VOLUME_MAX   (0X79)
+#define VOLUME_RANGE (VOLUME_MAX-VOLUME_MIN)
+
+void audio_set_volume(int percent, uint8_t addr1, uint8_t addr2)
+{
+    if (percent > 100) {
+        percent = 100;
+    }
+
+    uint8_t value = VOLUME_MIN + (uint8_t)(VOLUME_RANGE * percent / 100);
+    //tfp_printf("write value=%d percent=%d\r\n", (int)value, percent);
+    i2cm_write(WM8731_WR_ADDR, addr1, &value, 1);
+    i2cm_write(WM8731_WR_ADDR, addr2, &value, 1);
+    //tfp_printf("write value=%d OK\r\n", value);
+    delayms(100);
+}
+
+int audio_get_volume(uint8_t addr1, uint8_t addr2)
+{
+    uint8_t value = 0;
+    i2cm_read(WM8731_RD_ADDR, addr1, &value, 1);
+    int percent = (value-VOLUME_MIN) * 100 / VOLUME_RANGE;
+    //tfp_printf("read value=%d percent=%d\r\n", (int)value, percent);
+    return percent;
+}
+
+void audio_speaker_set_volume(int percent)
+{
+    audio_set_volume(percent, 0x02<< 1, 0x03<< 1);
+}
+
+int audio_speaker_get_volume(void)
+{
+    return audio_get_volume(0x02<< 1, 0x03<< 1);
+}
+
+
+void audio_mic_set_volume(int percent)
+{
+    audio_set_volume(percent, 0x00<< 1, 0x01<< 1);
+}
+
+int audio_mic_get_volume(void)
+{
+    return audio_get_volume(0x00<< 1, 0x01<< 1);
+}
 
 

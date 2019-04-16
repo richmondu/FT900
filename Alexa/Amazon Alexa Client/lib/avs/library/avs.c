@@ -231,6 +231,22 @@ int avs_err(void)
     return comm_err();
 }
 
+static int g_lVolumePercent = 100;
+void avs_set_volume(int rate)
+{
+    if ((g_lVolumePercent == 100 && rate>=0) ||
+        (g_lVolumePercent == 0 && rate<=0) ) {
+        return;
+    }
+    audio_speaker_set_volume(g_lVolumePercent+rate);
+    g_lVolumePercent += rate;
+}
+
+int avs_get_volume(void)
+{
+    return g_lVolumePercent;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Establishes connection to the RPI Alexa Gateway using configurations in avs_config.h configuration file.

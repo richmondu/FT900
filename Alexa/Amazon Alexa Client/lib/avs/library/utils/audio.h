@@ -43,5 +43,12 @@ void audio_mono_to_stereo(char* pDst, char* pSrc, uint32_t ulSize);
 void audio_stereo_to_mono(char* pDst, char* pSrc, uint32_t ulSize);
 
 
+// Volume control
+void audio_speaker_set_volume(int percent);
+int  audio_speaker_get_volume(void);
+void audio_mic_set_volume(int percent);
+int  audio_mic_get_volume(void);
+
+
 
 #endif // AUDIO_H

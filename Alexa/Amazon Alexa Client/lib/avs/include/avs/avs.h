@@ -47,5 +47,8 @@ const void* avs_get_server_addr(void);
 int  avs_get_server_port(void);
 int  avs_err(void);
 
+void avs_set_volume(int rate);
+int  avs_get_volume(void);
+
 
 #endif // AVS_H
