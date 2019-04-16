@@ -55,6 +55,10 @@
 #define WM8731_WR_ADDR (0x34)
 #define WM8731_RD_ADDR (0x35)
 
+#define VOLUME_MIN     ((uint8_t)(0x2F))
+#define VOLUME_MAX     ((uint8_t)(0x79))
+#define VOLUME_RANGE   (VOLUME_MAX-VOLUME_MIN)
+
 typedef struct
 {
     uint8_t addr;
@@ -74,26 +78,26 @@ static reg_t i2c_data[] =
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x00 << 1, 0x79},
+    {0x00 << 1, VOLUME_MAX},
 
     /* 0x0 Right Line In -
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x01 << 1, 0x79},
+    {0x01 << 1, VOLUME_MAX},
 
 
     /* 0x2 Left Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : LZCEN       - Left Channel Zero Cross detect 1 = Enable
     */
-    {0x02 << 1, 0x79},
+    {0x02 << 1, VOLUME_MAX},
 
     /* 0x2 Right Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : RZCEN       - Right Channel Zero Cross detect 1 = Enable
     */
-    {0x03 << 1, 0x79},
+    {0x03 << 1, VOLUME_MAX},
 
 
     /* 0x4 Analogue Audio Path Control -
@@ -335,14 +339,14 @@ void audio_setup(void (*audio_isr)(void), int sampling_rate)
     }
 }
 
-#define VOLUME_MIN   (0x2F)
-#define VOLUME_MAX   (0X79)
-#define VOLUME_RANGE (VOLUME_MAX-VOLUME_MIN)
 
 void audio_set_volume(int percent, uint8_t addr1, uint8_t addr2)
 {
     if (percent > 100) {
         percent = 100;
+    }
+    else if (percent < 0) {
+        percent = 0;
     }
 
     uint8_t value = VOLUME_MIN + (uint8_t)(VOLUME_RANGE * percent / 100);

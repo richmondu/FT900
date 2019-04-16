@@ -91,6 +91,7 @@ static ThreadPlayerContext g_hContext;
 static void vPlayerTask(void *pvParameters);
 #endif
 
+static int g_lVolumePercent = 100;
 static char* g_pcAudioBuffer  = NULL;
 static char* g_pcSDCardBuffer = NULL;
 #if USE_SENDRECV_MUTEX
@@ -231,7 +232,6 @@ int avs_err(void)
     return comm_err();
 }
 
-static int g_lVolumePercent = 100;
 void avs_set_volume(int rate)
 {
     if ((g_lVolumePercent == 100 && rate>=0) ||
