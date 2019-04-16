@@ -400,8 +400,8 @@ So the Alexa application on RPI does NOT and can NOT hog the CPU.
 A. RPI
 
       1. RPI 3B+ 
-      2. Headphone or speaker
-      3. USB microphone https://circuit.rocks/usb-mini-microphone.html
+      2. (Optional) Headphone or speaker
+      3. (Optional) USB microphone https://circuit.rocks/usb-mini-microphone.html
 
 B. FT900
 
@@ -438,7 +438,6 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
          Note: You should see logs containing 'FT900'.
          Note: Verify everything is working as expected.
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
-         Note: RPI application will fail if microphone is removed. So don't remove it.
       4. Setup and run FT900.
 
 
