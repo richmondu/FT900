@@ -14,12 +14,14 @@ import pyaudio
 import audioop
 import threading
 import msvcrt
+import argparse
 
 
 
 ############################################################################################
 # Configurations.
 ############################################################################################
+CONF_DEVICE_ID              = 0x00000002
 CONF_SERVER_ADDR            = '192.168.100.12'
 CONF_SERVER_PORT_CH         = 11234
 CONF_FILENAME_REQUEST_TIME  = "../REQUEST_what_time_is_it.raw"
@@ -47,6 +49,7 @@ CONF_SAMPLING_RATE          = SAMPLING_RATE_16KHZ
 ############################################################################################
 # Global variable
 ############################################################################################
+g_deviceid = CONF_DEVICE_ID
 g_socket = None
 g_quit = False
 g_connected = False
@@ -62,10 +65,18 @@ def avs_connect():
     
     g_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
+        # Connect to server
         err = g_socket.connect_ex((CONF_SERVER_ADDR, CONF_SERVER_PORT_CH))
         if err != 0:
             g_socket.close()
             return 0
+
+        # Send device ID
+        timeval = struct.pack('ll', CONF_TIMEOUT_SEND, 0)
+        g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
+        val = struct.pack('I', g_deviceid)
+        g_socket.sendall(val)
+
     except:
         g_socket.close()
         return 0
@@ -318,11 +329,12 @@ class thread_fxn_streamer(threading.Thread):
         sleep(1)
         global g_quit
         global g_connected
-
+        global g_deviceid
+        
         g_connected = False
         counter = 0
         while g_quit is False:
-            print("\n[STREAMER] Connecting to Alexa provider... {}:{} [{}]".format(CONF_SERVER_ADDR, CONF_SERVER_PORT_CH, counter))
+            print("\n[STREAMER] Connecting to Alexa provider... {}:{} [ID:{}] [{}]".format(CONF_SERVER_ADDR, CONF_SERVER_PORT_CH, g_deviceid, counter))
             if avs_connect() == 0:
                 counter = counter + 1
                 sleep(3)
@@ -403,12 +415,16 @@ def usage():
 ############################################################################################
 def main(args, argc):
 
+    global g_deviceid
     global g_quit
     global g_connected
         
     if sys.version_info < (3, 0):
         print("Error: Tested using Python 3 only!")
         return
+
+
+    g_deviceid = int(args.deviceid, 16)
 
     while True:
         print("\n===============================================================")
@@ -489,5 +505,13 @@ def main(args, argc):
     return
 
 
+def parse_arguments(argv):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--deviceid', required=True, default=CONF_DEVICE_ID,
+        help='DeviceID to use.')
+    return parser.parse_args(argv)
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:], len(sys.argv)-1)
+    main(parse_arguments(sys.argv[1:]), len(sys.argv)-1)
+
