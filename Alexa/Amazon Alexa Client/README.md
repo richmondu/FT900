@@ -8,7 +8,8 @@ This PoC application demonstrates using <b>FT900 microcontroller</b> (MCU) as an
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_steps.jpg" width="623"/>
 
 
-This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. Furthermore, customers will have access to the <b>built in capabilities of Alexa</b> (like music playback, timers and alarms, package tracking, movie listings, calendar management, and more) including access to third-party skills developed using the Alexa Skills Kit. 
+This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. 
+Furthermore, customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including access to third-party skills to control smart home devices.
 
 PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
 
@@ -38,6 +39,9 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_play_response() - Play voice response from SD card
       - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
       - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
+      - avs_set_volume()
+      - avs_init()
+      - avs_free()
 
 As you can see, there are three ways to process Alexa response. The first is the basic implementation while the 2nd and 3rd improves user experience by reducing delay or the waiting time to hear Alexa's response.
 
