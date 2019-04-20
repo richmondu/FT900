@@ -459,8 +459,8 @@ loop:
         if (!avs_isconnected()) {
             lRet = 0;
             do {
-                DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d\r\n",
-                    ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port());
+                DEBUG_PRINTF("\r\nConnecting to Alexa provider... %s:%d [id:0x%08x]\r\n",
+                    ipaddr_ntoa(avs_get_server_addr()), avs_get_server_port(), avs_get_device_id());
                 if (!avs_connect()) {
                     if (avs_err()) {
                         goto loop;

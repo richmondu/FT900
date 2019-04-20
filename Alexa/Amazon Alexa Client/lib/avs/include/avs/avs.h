@@ -43,6 +43,9 @@ int  avs_recv_and_play_response(void);
 //   Play 2KB on speaker
 int  avs_recv_and_play_response_threaded(const char* pcFileName);
 
+
+unsigned int avs_get_device_id(void);
+
 const void* avs_get_server_addr(void);
 int  avs_get_server_port(void);
 int  avs_err(void);

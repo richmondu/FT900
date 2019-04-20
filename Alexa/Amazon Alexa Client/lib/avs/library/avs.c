@@ -217,6 +217,11 @@ void avs_free(void)
 #endif
 }
 
+unsigned int avs_get_device_id(void)
+{
+    return AVS_CONFIG_DEVICE_ID;
+}
+
 int avs_get_server_port(void)
 {
     return comm_get_server_port();
@@ -253,7 +258,22 @@ int avs_get_volume(void)
 /////////////////////////////////////////////////////////////////////////////////////////////
 int avs_connect(void)
 {
-    return comm_connect();
+    // Connect to server
+    if (!comm_connect()) {
+        return 0;
+    }
+
+    // Send device ID
+    comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
+    unsigned int ulDeviceID = AVS_CONFIG_DEVICE_ID;
+    int iRet = comm_send((char*)&ulDeviceID, sizeof(ulDeviceID));
+    if (iRet != sizeof(ulDeviceID)) {
+        DEBUG_PRINTF("avs_connect(): comm_send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
+        comm_disconnect();
+        return 0;
+    }
+
+    return 1;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,7 +379,6 @@ int avs_send_request(const char* pcFileName)
 {
     FIL fHandle;
     int iRet = 0;
-    int iErr = 0;
     char* pcSDCard = g_pcSDCardBuffer;
     uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE>>1;
     uint32_t ulBytesToTransfer = 0;
