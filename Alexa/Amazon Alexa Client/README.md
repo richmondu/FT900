@@ -16,7 +16,8 @@ Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b>
 Customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including access to third-party skills (such as control smart home devices).
 
 PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
-Customers will be able to use both PanL Hub and PanL Display to issue voice commands and operations to Alexa.
+Many PanL Displays can be connected to a PanL Hub at the same time.
+Customers will be able to use the PanL Hub and any of the connected PanL Display to issue voice commands and operations to Alexa.
 
 
 # FT900-side (Alexa Client)
