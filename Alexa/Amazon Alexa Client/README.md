@@ -17,7 +17,7 @@ Customers will have access to the <b>built in capabilities of Alexa</b> (like as
 
 PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
 Many PanL Displays can be connected to a PanL Hub at the same time.
-Customers will be able to <b>use the PanL Hub and any of the connected PanL Display as an Amazon Echo device</b>.
+Customers will be able to <b>use the PanL Hub and any of the connected PanL Display as an Amazon Echo Dot device</b>.
 
 
 # FT900-side (Alexa Client)
