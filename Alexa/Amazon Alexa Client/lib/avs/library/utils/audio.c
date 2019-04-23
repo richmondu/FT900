@@ -55,8 +55,9 @@
 #define WM8731_WR_ADDR (0x34)
 #define WM8731_RD_ADDR (0x35)
 
-#define VOLUME_MIN     ((uint8_t)(0x2F))
-#define VOLUME_MAX     ((uint8_t)(0x79))
+#define VOLUME_INIT    ((uint8_t)(0x00))
+#define VOLUME_MIN     ((uint8_t)(0xAF))
+#define VOLUME_MAX     ((uint8_t)(0xFF))
 #define VOLUME_RANGE   (VOLUME_MAX-VOLUME_MIN)
 
 typedef struct
@@ -78,26 +79,26 @@ static reg_t i2c_data[] =
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x00 << 1, VOLUME_MAX},
+    {0x00 << 1, VOLUME_INIT},
 
     /* 0x0 Right Line In -
        bit 4:0 = 10111 : LINVOL[4:0] - 10111 = Input Volume to 0dB
        bit 7   = 0     : LINMUTE     - 0 = Disable Mute
     */
-    {0x01 << 1, VOLUME_MAX},
+    {0x01 << 1, VOLUME_INIT},
 
 
     /* 0x2 Left Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : LZCEN       - Left Channel Zero Cross detect 1 = Enable
     */
-    {0x02 << 1, VOLUME_MAX},
+    {0x02 << 1, VOLUME_INIT},
 
     /* 0x2 Right Headphone Out -
        bit 6:0 = 1111001 : LHPVOL[6:0] - 1111001 = Output Volume to 0dB
        bit 7   = 1       : RZCEN       - Right Channel Zero Cross detect 1 = Enable
     */
-    {0x03 << 1, VOLUME_MAX},
+    {0x03 << 1, VOLUME_INIT},
 
 
     /* 0x4 Analogue Audio Path Control -

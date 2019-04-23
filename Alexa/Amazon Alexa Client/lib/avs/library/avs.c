@@ -91,7 +91,7 @@ static ThreadPlayerContext g_hContext;
 static void vPlayerTask(void *pvParameters);
 #endif
 
-static int g_lVolumePercent = 100;
+static int g_lVolumePercent = 0;
 static char* g_pcAudioBuffer  = NULL;
 static char* g_pcSDCardBuffer = NULL;
 #if USE_SENDRECV_MUTEX
@@ -245,6 +245,13 @@ void avs_set_volume(int rate)
     }
     audio_speaker_set_volume(g_lVolumePercent+rate);
     g_lVolumePercent += rate;
+
+    if (g_lVolumePercent < 0) {
+        g_lVolumePercent = 0;
+    }
+    else if (g_lVolumePercent > 100) {
+        g_lVolumePercent = 100;
+    }
 }
 
 int avs_get_volume(void)
@@ -262,6 +269,11 @@ int avs_connect(void)
     if (!comm_connect()) {
         return 0;
     }
+
+    // Set the volume
+    audio_speaker_set_volume(80);
+    g_lVolumePercent = 80;
+    audio_mic_set_volume(100);
 
     // Send device ID
     comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
@@ -281,6 +293,10 @@ int avs_connect(void)
 /////////////////////////////////////////////////////////////////////////////////////////////
 void avs_disconnect(void)
 {
+    audio_speaker_set_volume(0);
+    g_lVolumePercent = 0;
+    audio_mic_set_volume(0);
+
     comm_disconnect();
 }
 
