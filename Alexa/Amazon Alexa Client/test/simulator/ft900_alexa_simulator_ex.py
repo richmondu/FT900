@@ -21,7 +21,7 @@ import argparse
 ############################################################################################
 # Configurations.
 ############################################################################################
-CONF_DEVICE_ID              = 0x00000002
+CONF_DEVICE_ID              = 2
 CONF_SERVER_ADDR            = '192.168.100.12'
 CONF_SERVER_PORT_CH         = 11234
 CONF_FILENAME_REQUEST_TIME  = "../REQUEST_what_time_is_it.raw"
@@ -424,7 +424,7 @@ def main(args, argc):
         return
 
 
-    g_deviceid = int(args.deviceid, 16)
+    g_deviceid = int(args.deviceid, 10)
 
     while True:
         print("\n===============================================================")
