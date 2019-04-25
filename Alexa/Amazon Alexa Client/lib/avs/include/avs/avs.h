@@ -32,7 +32,7 @@ int  avs_play_response (const char* pcFileName);
 // - Recv 512 bytes from RPI
 // - Convert 8-bit mono (512) to 16-bit stereo (2KB)
 // - Play 2KB on speaker
-int  avs_recv_and_play_response(void);
+int  avs_recv_and_play_response(char (*fxnCallbackExit)(void));
 
 // - Recv 2KB from RPI
 // - Convert 8-bit to 16-bit (1KB)

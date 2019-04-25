@@ -50,25 +50,32 @@
 #include <time.h>
 #include "ft900.h"
 #include "tinyprintf.h"
-#include "net.h"
-#include "task.h"
+#include "avs_config.h"
 #include "avs/avs.h"
 #include "button.h"
 #include "time_duration.h"
 
-#include "FreeRTOS.h"           // FreeRTOS 3rd-party library
-#include "task.h"               // FreeRTOS 3rd-party library
-#include "semphr.h"             // FreeRTOS 3rd-party library
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+
+#if (COMMUNICATION_IO==1)   // Ethernet
+#include "net.h"
+#elif (COMMUNICATION_IO==2) // WiFi
+#include "net.h"
+#include "wifi.h"
+#endif // COMMUNICATION_IO
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-/* Default network configuration. */
-#define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-static ip_addr_t ip      = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-static ip_addr_t gateway = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-static ip_addr_t mask    = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
+/* Debug logs */
+#define DEBUG
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+#else // DEBUG
+#define DEBUG_PRINTF(...)
+#endif // DEBUG
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -84,17 +91,6 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #define TASK_ALEXA_STREAMER_STACK_SIZE  (512+256)
 #define TASK_ALEXA_COMMANDER_STACK_SIZE (5120+256)
 #define TASK_ALEXA_PRIORITY             (1)
-///////////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////////////////
-/* Debug logs */
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
-#else // DEBUG
-#define DEBUG_PRINTF(...)
-#endif // DEBUG
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -123,10 +119,23 @@ static inline void uart_setup()
     init_printf( UART0, myputc );
 }
 
-static inline void ethernet_setup()
+#if (COMMUNICATION_IO==1) // Ethernet
+static inline void ethernet_setup(void)
 {
     net_setup();
 }
+#elif (COMMUNICATION_IO==2) // WiFi
+static inline void wifi_setup(void)
+{
+    sys_enable(sys_device_uart1);
+    gpio_function(52, pad_uart1_txd); /* UART1 TXD MM900EVxA CN3 pin 9 */
+    gpio_function(53, pad_uart1_rxd); /* UART1 RXD MM900EVxA CN3 pin 7 */
+    gpio_function(54, pad_uart1_rts); /* UART1 RTS MM900EVxA CN3 pin 3 */
+    gpio_function(55, pad_uart1_cts); /* UART1 CTS MM900EVxA CN3 pin 11 */
+    interrupt_enable_globally();
+}
+#endif // COMMUNICATION_IO
+
 
 
 void vTaskAlexaStreamer(void *pvParameters);
@@ -137,7 +146,11 @@ int main(void)
     sys_reset_all();
     interrupt_disable_globally();
     uart_setup();
+#if (COMMUNICATION_IO==1)   // Ethernet
     ethernet_setup();
+#elif (COMMUNICATION_IO==2) // WiFi
+    wifi_setup();
+#endif // COMMUNICATION_IO
 
 #if USE_MEASURE_PERFORMANCE
     time_duration_setup();
@@ -155,13 +168,13 @@ int main(void)
         "Demonstrate Amazon Alexa.\r\n"
         "--------------------------------------------------------------------- \r\n");
 
-    if (xTaskCreate(vTaskAlexaStreamer, "Streamer", TASK_ALEXA_STREAMER_STACK_SIZE,
-        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
-        DEBUG_PRINTF("vTaskAlexaStreamer failed\r\n");
-    }
     if (xTaskCreate(vTaskAlexaCommander, "Commander", TASK_ALEXA_COMMANDER_STACK_SIZE,
         NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
         DEBUG_PRINTF("vTaskAlexaCommander failed\r\n");
+    }
+    if (xTaskCreate(vTaskAlexaStreamer, "Streamer", TASK_ALEXA_STREAMER_STACK_SIZE,
+        NULL, TASK_ALEXA_PRIORITY, NULL) != pdTRUE) {
+        DEBUG_PRINTF("vTaskAlexaStreamer failed\r\n");
     }
 
     DEBUG_PRINTF("Starting Scheduler.. \r\n");
@@ -170,6 +183,7 @@ int main(void)
     for (;;) ;
 }
 
+#if (COMMUNICATION_IO==1)   // Ethernet
 static inline void display_network_info()
 {
     uint8_t* mac = net_get_mac();
@@ -183,12 +197,19 @@ static inline void display_network_info()
     addr = net_get_netmask();
     DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
 }
+#endif
 
 static inline void initialize_network()
 {
+#if (COMMUNICATION_IO==1)   // Ethernet
     int lRet = 0;
+    ip_addr_t ip = {AVS_CONFIG_ETHERNET_IP_ADDRESS};
+    ip_addr_t gw = {AVS_CONFIG_ETHERNET_GATEWAY};
+    ip_addr_t mask = {AVS_CONFIG_ETHERNET_MASK};
+    ip_addr_t dns = {AVS_CONFIG_ETHERNET_DNS};
 
-    net_init( ip, gateway, mask, USE_DHCP, dns, NULL, NULL );
+    net_init( ip, gw, mask, AVS_CONFIG_ETHERNET_USE_DHCP, dns, NULL, NULL );
+
     while ( !net_is_ready() ) {
         vTaskDelay( pdMS_TO_TICKS(1000) );
         DEBUG_PRINTF( "." );
@@ -199,8 +220,43 @@ static inline void initialize_network()
     }
     DEBUG_PRINTF( "\r\n" );
     display_network_info();
+#elif (COMMUNICATION_IO==2) // WiFi
+    WIFINetworkParams_t xNetworkParams;
+    WIFIReturnCode_t xWifiStatus;
+    uint8_t ucIPAddr[ 16 ] = {0};
+
+    /* Setup WiFi parameters to connect to access point. */
+    xNetworkParams.pcSSID = AVS_CONFIG_WIFI_SSID;
+    xNetworkParams.ucSSIDLength = sizeof( AVS_CONFIG_WIFI_SSID );
+    xNetworkParams.pcPassword = AVS_CONFIG_WIFI_PASSWORD;
+    xNetworkParams.ucPasswordLength = sizeof( AVS_CONFIG_WIFI_PASSWORD );
+    xNetworkParams.xSecurity = AVS_CONFIG_WIFI_SECURITY;
+    xWifiStatus = WIFI_On();
+
+    if( xWifiStatus == eWiFiSuccess ) {
+        /* Try connecting using provided wifi credentials. */
+        xWifiStatus = eWiFiFailure;
+        while(xWifiStatus != eWiFiSuccess) {
+            xWifiStatus = WIFI_ConnectAP( &( xNetworkParams ) );
+            if(xWifiStatus != eWiFiSuccess) {
+                DEBUG_PRINTF("Failed to connect to AP\r\n");
+                DEBUG_PRINTF("Re-connecting in 1 seconds %s\r\n", xNetworkParams.pcSSID);
+                vTaskDelay(pdMS_TO_TICKS(1000));
+            }
+            else {
+                WIFI_GetIP( ucIPAddr);
+                DEBUG_PRINTF("\r\n\r\nWiFi connected to AP %s %s\r\n", xNetworkParams.pcSSID, ucIPAddr);
+            }
+        }
+    }
+    else {
+        tfp_printf("WIFI_On failed!\r\n");
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
+#endif
 }
 
+#if (COMMUNICATION_IO==1)   // Ethernet
 #if !NET_USE_EEPROM
 void net_supply_mac(uint8_t *mac)
 {
@@ -212,6 +268,7 @@ void net_supply_mac(uint8_t *mac)
     mac[5] = 0xCC;
 }
 #endif // NET_USE_EEPROM
+#endif
 
 
 
@@ -229,6 +286,7 @@ static char g_cVolumeIncrease = 0;
 
 static SemaphoreHandle_t g_xMutexRecordPlay;
 static char cbRecordVoice(void);
+static char cbSendTriggered(void);
 
 enum {
     REQUEST_RECORD,
@@ -397,6 +455,9 @@ void vIsrAlexaButton(void)
             }
         //}
     }
+    else {
+        vTaskDelay( pdMS_TO_TICKS(1) );
+    }
 }
 
 void vTaskAlexaCommander(void *pvParameters)
@@ -421,6 +482,8 @@ void vTaskAlexaCommander(void *pvParameters)
     for (;;)
     {
 loop:
+
+#if (COMMUNICATION_IO==1)   // Ethernet
         // Ensure network is ready
         if ( !net_is_ready() ) {
         	lRet = 0;
@@ -437,6 +500,7 @@ loop:
             DEBUG_PRINTF( "\r\n" );
             display_network_info();
         }
+#endif
 
         // Handle quit command and disconnection
         if (g_cQuit) {
@@ -499,19 +563,33 @@ loop:
                 avs_record_request(g_pcREQUESTfile[(int)g_cSendCommand], cbRecordVoice);
                 DEBUG_PRINTF("\r\nRecorded Alexa query [%s]...OK\r\n", g_pcREQUEST[(int)g_cSendCommand]);
 
+                DEBUG_PRINTF("\r\nSending Alexa query [%s]...", g_pcREQUEST[(int)g_cSendCommand]);
+                lRet = avs_send_request(g_pcREQUESTfile[(int)g_cSendCommand]);
+                if (!lRet) {
+                    DEBUG_PRINTF("FAILED!\r\n");
+                }
+                else {
+                    DEBUG_PRINTF("OK\r\n");
+                }
+
                 xSemaphoreGive(g_xMutexRecordPlay);
+                goto exit;
             }
         }
 
         // Send command
+        xSemaphoreTake(g_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
         DEBUG_PRINTF("\r\nSending Alexa query [%s]...", g_pcREQUEST[(int)g_cSendCommand]);
-        if (!avs_send_request(g_pcREQUESTfile[(int)g_cSendCommand])) {
+        lRet = avs_send_request(g_pcREQUESTfile[(int)g_cSendCommand]);
+        xSemaphoreGive(g_xMutexRecordPlay);
+        if (!lRet) {
             DEBUG_PRINTF("FAILED!\r\n");
         }
         else {
             DEBUG_PRINTF("OK\r\n");
         }
 
+exit:
         // Reset command
         g_cSendCommand = SEND_COMMAND_RESET;
         g_cRecordVoice = 0;
@@ -529,7 +607,14 @@ void vTaskAlexaStreamer(void *pvParameters)
 
     for (;;)
     {
-        if (!net_is_ready() || !avs_isconnected()) {
+#if (COMMUNICATION_IO==1)   // Ethernet
+        if (!net_is_ready()) {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            continue;
+        }
+#endif
+
+        if (!avs_isconnected()) {
             vTaskDelay(pdMS_TO_TICKS(1000));
             continue;
         }
@@ -538,7 +623,7 @@ void vTaskAlexaStreamer(void *pvParameters)
             if (g_cSendCommand == SEND_COMMAND_RESET) {
 #if USE_RECVPLAY_RESPONSE
                 xSemaphoreTake(g_xMutexRecordPlay, pdMS_TO_TICKS(portMAX_DELAY));
-                lRet = avs_recv_and_play_response();
+                lRet = avs_recv_and_play_response(cbSendTriggered);
                 if (!lRet) {
                     xSemaphoreGive(g_xMutexRecordPlay);
                     break;
@@ -572,4 +657,10 @@ char cbRecordVoice(void)
 {
     return g_cRecordVoice;
 }
+
+char cbSendTriggered(void)
+{
+    return (g_cSendCommand != SEND_COMMAND_RESET);
+}
+
 

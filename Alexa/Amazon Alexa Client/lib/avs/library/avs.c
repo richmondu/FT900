@@ -70,7 +70,11 @@
 #define USE_DO_DIR 0
 #define USE_STEREO_TO_MONO_AVERAGE 0 // Using discard instead of average is better audio quality.
 #define USE_MULTITHREADED_RECVPLAY 0
+#if (COMMUNICATION_IO==1)   // Ethernet
 #define USE_SENDRECV_MUTEX 1
+#elif (COMMUNICATION_IO==2)   // WiFi
+#define USE_SENDRECV_MUTEX 0
+#endif
 #define USE_RECORDPLAY_MUTEX 0
 
 
@@ -396,7 +400,11 @@ int avs_send_request(const char* pcFileName)
     FIL fHandle;
     int iRet = 0;
     char* pcSDCard = g_pcSDCardBuffer;
+#if (COMMUNICATION_IO==1)   // Ethernet
     uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE>>1;
+#elif (COMMUNICATION_IO==2) // WiFi
+    uint32_t ulBytesToProcess = AVS_CONFIG_SDCARD_BUFFER_SIZE>>3;
+#endif
     uint32_t ulBytesToTransfer = 0;
     uint32_t ulBytesSent = 0;
 
@@ -406,11 +414,13 @@ int avs_send_request(const char* pcFileName)
     sdcard_dir("");
 #endif // USE_DO_DIR
 
+    DEBUG_PRINTF(">> openx\r\n");
     // Open file given complete file path in SD card
     if (sdcard_open(&fHandle, pcFileName, 0, 1)) {
         DEBUG_PRINTF("avs_send_request(): sdcard_open failed!\r\n");
         return 0;
     }
+    DEBUG_PRINTF(">> open\r\n");
 
     // Get file size
     ulBytesToTransfer = sdcard_size(&fHandle);
@@ -716,7 +726,7 @@ int avs_play_response(const char* pcFileName)
 // - Convert 8-bit mono (512) to 16-bit stereo (2KB)
 // - Play 2KB on speaker
 /////////////////////////////////////////////////////////////////////////////////////////////
-int avs_recv_and_play_response(void)
+int avs_recv_and_play_response(char (*fxnCallbackExit)(void))
 {
     int iRet = 0;
     char* pcRecv = g_pcSDCardBuffer;
@@ -727,12 +737,12 @@ int avs_recv_and_play_response(void)
 
 
     // Set a timeout for the operation
-    comm_setsockopt(3, 0);
+    comm_setsockopt(1, 0);
 
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
     if (iRet < sizeof(ulBytesToReceive)) {
-        tfp_printf("avs_recv_and_play_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
+    	DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
         return 0;
     }
     else if (ulBytesToReceive == 0) {
@@ -750,12 +760,19 @@ int avs_recv_and_play_response(void)
 
     // Receive the total bytes in segments of buffer size
     do {
+        // When exit callback returns true,
+        // we still receive outstanding data but we dont play it.
+        // This enables us to process higher priority data
+        // such as microphone recording and sending
+        char bExit = (*fxnCallbackExit)();
+
 #if USE_SENDRECV_MUTEX
         xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
 #endif // USE_SENDRECV_MUTEX
 
         // Set a timeout for the operation
         comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
+        DEBUG_PRINTF("recv = %d\r\n", ulBytesToProcess);
 
         // Receive the bytes of transfer size
         iRet = comm_recv(pcRecv, ulBytesToProcess);
@@ -778,17 +795,21 @@ int avs_recv_and_play_response(void)
         // Compute the total bytes received
         ulBytesReceived += iRet;
 
-        // Convert 8-bit mono data to 16-bit stereo data before saving
-        audio_ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
+        // When exit callback returns true,
+        // we still receive outstanding data but we dont play it.
+        if (!bExit) {
+            // Convert 8-bit mono data to 16-bit stereo data before playing
+            audio_ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
 
-        // Play on speaker
-        do {
-            if (audio_speaker_ready()) {
-                audio_play((uint8_t *)pcSpeaker, iRet<<2);
-                audio_speaker_clear();
-                break;
-            }
-        } while (1);
+            // Play on speaker
+            do {
+                if (audio_speaker_ready()) {
+                    audio_play((uint8_t *)pcSpeaker, iRet<<2);
+                    audio_speaker_clear();
+                    break;
+                }
+            } while (1);
+        }
 
         // Compute the transfer size
         if (ulBytesToReceive-ulBytesReceived < ulBytesToProcess) {

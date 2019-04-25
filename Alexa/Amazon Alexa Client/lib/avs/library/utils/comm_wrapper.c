@@ -46,9 +46,18 @@
  */
 
 #include <ft900.h>
-#include "avs_config.h"    // AVS configuration
-#include "lwip/sockets.h"  // lwIP 3rd-party library
+#include "avs_config.h"     // AVS configuration
 #include "comm_wrapper.h"
+
+#if (COMMUNICATION_IO==1)   // Ethernet
+#include "lwip/sockets.h"   // lwIP 3rd-party library
+#elif (COMMUNICATION_IO==2) // WiFi
+#include "wifi.h"
+#include "at.h"
+#include "lwip/sockets.h"   // lwIP 3rd-party library
+#include "FreeRTOS.h"       // FreeRTOS 3rd-party library
+#elif (COMMUNICATION_IO==3) // RS485
+#endif
 
 
 
@@ -57,6 +66,7 @@ static int   g_lErr           = 0;
 
 
 
+#if (COMMUNICATION_IO==1) // Ethernet
 int comm_get_server_port(void)
 {
     return AVS_CONFIG_SERVER_PORT;
@@ -139,7 +149,118 @@ int comm_recv(void *pvBuffer, int lSize)
 
 int comm_errno(void)
 {
-	return errno;
+    return errno;
+}
+#elif (COMMUNICATION_IO==2) // WiFi
+int comm_get_server_port(void)
+{
+    return AVS_CONFIG_SERVER_PORT;
 }
 
+const void* comm_get_server_addr(void)
+{
+    static struct sockaddr_in tServer;
+    tServer.sin_addr.s_addr = AVS_CONFIG_SERVER_ADDR;
+    return (ip_addr_t*)&tServer.sin_addr;
+}
+
+int comm_err(void)
+{
+    return g_lErr;
+}
+
+int comm_connect(void)
+{
+    int8_t at_ret;
+    char acIpAddress[16] = {0};
+    ip_addr_t* pAddr = (ip_addr_t*)comm_get_server_addr();
+
+
+    inet_ntop(AF_INET, pAddr, acIpAddress, 16);
+
+    g_lSocket = 0;
+    at_ret = at_set_cipstart_tcp(g_lSocket, acIpAddress, AVS_CONFIG_SERVER_PORT, 0);
+    if (at_ret != AT_OK) {
+        g_lSocket = -1;
+        return 0;
+    }
+
+    return 1;
+}
+
+void comm_disconnect(void)
+{
+    if (g_lSocket >= 0) {
+        at_set_cipclose(g_lSocket);
+        g_lSocket = -1;
+    }
+}
+
+int comm_isconnected(void)
+{
+    return (g_lSocket>-1);
+}
+
+void comm_setsockopt(int lTimeoutSecs, int lIsSend)
+{
+    if (lIsSend) {
+        //at_timeout_tx_comms(pdMS_TO_TICKS(lTimeoutSecs*1000));
+    }
+    else {
+        at_timeout_rx_comms(pdMS_TO_TICKS(lTimeoutSecs*1000));
+    }
+}
+
+int comm_send(void *pvBuffer, int lSize)
+{
+    //tfp_printf("  at_set_cipsend %d\r\n", lSize);
+    int8_t at_ret = at_set_cipsend(g_lSocket, lSize, (uint8_t *) pvBuffer);
+    if (at_ret != AT_OK) {
+        tfp_printf("at_set_cipsend failed!\r\n");
+        return -1;
+    }
+    return lSize;
+}
+
+int comm_recv(void *pvBuffer, int lSize)
+{
+    int lRet = 0;
+    at_register_ipd(lSize, pvBuffer);
+
+    uint16_t uwRecvLen = lSize;
+    do {
+        //tfp_printf("at_ipd %d\r\n", lSize);
+        int8_t ipd_status = at_ipd((int8_t*)&g_lSocket, &uwRecvLen, (uint8_t **)&pvBuffer);
+        if (ipd_status == AT_DATA_WAITING) {
+            tfp_printf("at_ipd recv! %d\r\n", uwRecvLen);
+            lRet = uwRecvLen;
+            break;
+        }
+        else if (ipd_status == AT_ERROR_TIMEOUT) {
+            //tfp_printf("AT_ERROR_TIMEOUT\r\n");
+            lRet = -1;
+            break;
+        }
+        else if (ipd_status == AT_NO_DATA) {
+            lRet = 0;
+            break;
+        }
+        else {
+            tfp_printf("at_ipd failed! %d\r\n", ipd_status);
+            lRet = -1;
+            break;
+        }
+    }
+    while(1);
+
+    at_delete_ipd(pvBuffer);
+    return lRet;
+}
+
+int comm_errno(void)
+{
+    return 0;
+}
+#elif (COMMUNICATION_IO==3) // RS485
+#endif // COMMUNICATION_IO
 

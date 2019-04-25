@@ -31,6 +31,7 @@
 									<listOptionValue builtIn="false" value="FT32_FREERTOS"/>
 									<listOptionValue builtIn="false" value="FT32_PORT"/>
 									<listOptionValue builtIn="false" value="FT32_PORT_HEAP=4"/>
+									<listOptionValue builtIn="false" value="COMMUNICATION_IO=1"/>
 								</option>
 								<option id="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.383997825" name="Include paths (-I)" superClass="com.ftdichip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT90X_TOOLCHAIN}/hardware/include&quot;"/>
@@ -45,6 +46,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/fatfs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/avs/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/esp32}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.640611795" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1388442167" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -350,6 +352,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/lwip/src/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/fatfs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/avs/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/esp32}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.912315003" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1113047773" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
