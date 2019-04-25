@@ -1,18 +1,20 @@
 /**
   @file uartrb.h
-  @brief Ringbuffer implementation for FT9xx UART.
-  @details Includes flow control and hardware buffering.
+  @brief
+  ESP32 Wifi module.
+
  */
 /*
  * ============================================================================
  * History
  * =======
+ * 2019-04-25 : Created v1
  *
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
  *
  * This source code ("the Software") is provided by Bridgetek Pte Ltd
- *  ("Bridgetek") subject to the licence terms set out
+ * ("Bridgetek") subject to the licence terms set out
  * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
