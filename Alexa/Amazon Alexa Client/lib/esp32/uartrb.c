@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #include <stdint.h>
 #include <string.h>
 
@@ -63,7 +63,7 @@
  * Reading and writing to the UART FIFO is gernerally performed by
  * an interrupt service routine.
  */
-#define RINGBUFFER_SIZE 1024
+#define RINGBUFFER_SIZE 2048
 
 /* Threshold number of bytes in the receive buffer where flow control
  * is to be enacted and signals are de-asserted. When a FIFO is enabled
@@ -91,16 +91,16 @@ typedef struct
 } RingBuffer_t;
 
 /* Receive buffer */
-static RingBuffer_t uart0BufferRx = { {0}, 0, 0, 0 };
+//static RingBuffer_t uart0BufferRx = { {0}, 0, 0, 0 };
 static RingBuffer_t uart1BufferRx = { {0}, 0, 0, 0 };
 /* Transmit buffer */
-static RingBuffer_t uart0BufferTx = { {0}, 0, 0, 0 };
+//static RingBuffer_t uart0BufferTx = { {0}, 0, 0, 0 };
 static RingBuffer_t uart1BufferTx = { {0}, 0, 0, 0 };
 /* Flow control settings */
-static uartrb_flow_t uart0Flow = uartrb_flow_none;
+//static uartrb_flow_t uart0Flow = uartrb_flow_none;
 static uartrb_flow_t uart1Flow = uartrb_flow_none;
 /* Timeout flags */
-static volatile int8_t uart0Timeout = 0;
+//static volatile int8_t uart0Timeout = 0;
 static volatile int8_t uart1Timeout = 0;
 
 /* Local functions. */
@@ -108,17 +108,17 @@ static void uartrb_starttx(ft900_uart_regs_t *dev, RingBuffer_t *uartBuffer);
 static uint16_t uartrb_available_int(RingBuffer_t *uartBuffer);
 static uint16_t uartrb_used_int(RingBuffer_t *uartBuffer);
 static void uartrb_ISR(ft900_uart_regs_t *dev);
-static void uartrb_0_ISR();
+//static void uartrb_0_ISR();
 static void uartrb_1_ISR();
 
 /**
  The Interrupt which handles asynchronous transmission and reception
  of data into the ring buffer
  */
-static void uartrb_0_ISR()
-{
-    uartrb_ISR(UART0);
-}
+//static void uartrb_0_ISR()
+//{
+//    uartrb_ISR(UART0);
+//}
 
 static void uartrb_1_ISR()
 {
@@ -136,7 +136,7 @@ static void uartrb_ISR(ft900_uart_regs_t *dev)
     static uint8_t curint;
 
     static RingBuffer_t *uartBuffer;
-    uartrb_flow_t flow = (dev == UART0)?uart0Flow:uart1Flow;
+    uartrb_flow_t flow = uart1Flow;//(dev == UART0)?uart0Flow:uart1Flow;
 
     curint = uart_get_interrupt(dev);
 
@@ -144,7 +144,7 @@ static void uartrb_ISR(ft900_uart_regs_t *dev)
     if ((curint == uart_interrupt_tx)
             || (curint == uart_interrupt_dcd_ri_dsr_cts))
     {
-        uartBuffer = (dev == UART0)?&uart0BufferTx:&uart1BufferTx;
+        uartBuffer = &uart1BufferTx;//(dev == UART0)?&uart0BufferTx:&uart1BufferTx;
 
         /* Check to see how much data we have to transmit... */
         avail = uartrb_used_int(uartBuffer);
@@ -188,7 +188,7 @@ static void uartrb_ISR(ft900_uart_regs_t *dev)
     /* Receive interrupt... */
     if (curint == uart_interrupt_rx)
     {
-        uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+        uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
         avail = uartrb_available_int(uartBuffer);
 
@@ -273,7 +273,7 @@ static void uartrb_flow_int(ft900_uart_regs_t *dev, RingBuffer_t *uartBuffer)
     /* Assert RTS or DTR - receive buffer not full */
     if (uartBuffer->wait)
     {
-        uartrb_flow_t flow = (dev == UART0)?uart0Flow:uart1Flow;
+        uartrb_flow_t flow = uart1Flow;//(dev == UART0)?uart0Flow:uart1Flow;
         uint16_t avail = uartrb_available_int(uartBuffer);
 
         if (avail > RINGBUFFER_THRESHOLD + RINGBUFFER_THRESHOLD_HYST)
@@ -320,12 +320,12 @@ void uartrb_setup(ft900_uart_regs_t *dev, uartrb_flow_t flow)
     }
 
     /* Attach the interrupt so it can be called... */
-    if (dev == UART0)
-    {
-        interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uartrb_0_ISR);
-        uart0Flow = flow;
-    }
-    else
+    //if (dev == UART0)
+    //{
+    //    interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uartrb_0_ISR);
+    //    uart0Flow = flow;
+    //}
+    //else
     {
         interrupt_attach(interrupt_uart1, (uint8_t) interrupt_uart1, uartrb_1_ISR);
         uart1Flow = flow;
@@ -356,7 +356,7 @@ uint16_t uartrb_putc(ft900_uart_regs_t *dev, uint8_t val)
 {
     uint16_t free;
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferTx:&uart1BufferTx;
+    RingBuffer_t *uartBuffer = &uart1BufferTx;//(dev == UART0)?&uart0BufferTx:&uart1BufferTx;
 
     /* Determine how much space we have ... */
     CRITICAL_SECTION_BEGIN
@@ -391,7 +391,7 @@ uint16_t uartrb_write(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
     uint16_t avail;
     uint16_t free;
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferTx:&uart1BufferTx;
+    RingBuffer_t *uartBuffer = &uart1BufferTx;//(dev == UART0)?&uart0BufferTx:&uart1BufferTx;
 
     if (len == 0)
     {
@@ -423,7 +423,7 @@ uint16_t uartrb_write_wait(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len
 {
     int written;
     int total = 0;
-    volatile int8_t *pTimeout = (dev == UART0)?&uart0Timeout:&uart1Timeout;
+    volatile int8_t *pTimeout = &uart1Timeout;//(dev == UART0)?&uart0Timeout:&uart1Timeout;
 
     *pTimeout = 0;
     while (len)
@@ -447,8 +447,8 @@ uint16_t uartrb_readln(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
     uint16_t avail;
     uint16_t copied = 0;
     int cr = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
-    volatile int8_t *pTimeout = (dev == UART0)?&uart0Timeout:&uart1Timeout;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    volatile int8_t *pTimeout = &uart1Timeout;//(dev == UART0)?&uart0Timeout:&uart1Timeout;
 
     *pTimeout = 0;
     /* Copy in as much data as we can ...
@@ -529,7 +529,7 @@ uint16_t uartrb_read(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
 {
     uint16_t avail;
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     avail = uartrb_used_int(uartBuffer);
@@ -562,7 +562,7 @@ uint16_t uartrb_read_wait(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
 {
     int read;
     int total = 0;
-    volatile int8_t *pTimeout = (dev == UART0)?&uart0Timeout:&uart1Timeout;
+    volatile int8_t *pTimeout = &uart1Timeout;//(dev == UART0)?&uart0Timeout:&uart1Timeout;
 
     *pTimeout = 0;
     while (len)
@@ -590,7 +590,7 @@ uint16_t uartrb_getc(ft900_uart_regs_t *dev, uint8_t *val)
 {
     uint16_t avail;
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     avail = uartrb_used_int(uartBuffer);
@@ -622,7 +622,7 @@ uint16_t uartrb_getc(ft900_uart_regs_t *dev, uint8_t *val)
 uint16_t uartrb_available(ft900_uart_regs_t *dev)
 {
     uint16_t diff;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     diff = uartrb_available_int(uartBuffer);
@@ -634,7 +634,7 @@ uint16_t uartrb_available(ft900_uart_regs_t *dev)
 uint16_t uartrb_used(ft900_uart_regs_t *dev)
 {
     uint16_t diff;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     diff = uartrb_used_int(uartBuffer);
@@ -651,7 +651,7 @@ uint16_t uartrb_used(ft900_uart_regs_t *dev)
 uint16_t uartrb_waiting(ft900_uart_regs_t *dev)
 {
     uint16_t diff;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferTx:&uart1BufferTx;
+    RingBuffer_t *uartBuffer = &uart1BufferTx;//(dev == UART0)?&uart0BufferTx:&uart1BufferTx;
 
     CRITICAL_SECTION_BEGIN
     diff = uartrb_used_int(uartBuffer);
@@ -664,7 +664,7 @@ uint16_t uartrb_peek(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
 {
     uint16_t avail;
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
     uint16_t peek_idx = uartBuffer->rd_idx;
 
     CRITICAL_SECTION_BEGIN
@@ -698,7 +698,7 @@ uint16_t uartrb_peek(ft900_uart_regs_t *dev, uint8_t *buffer, uint16_t len)
 uint16_t uartrb_peekc(ft900_uart_regs_t *dev, uint8_t *val)
 {
     uint16_t copied = 0;
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     if (uartBuffer->wr_idx != uartBuffer->rd_idx)
@@ -713,11 +713,11 @@ uint16_t uartrb_peekc(ft900_uart_regs_t *dev, uint8_t *val)
 
 void uartrb_timeout(ft900_uart_regs_t *dev)
 {
-    if (dev == UART0)
-    {
-        uart0Timeout = 1;
-    }
-    else
+    //if (dev == UART0)
+    //{
+    //    uart0Timeout = 1;
+    //}
+    //else
     {
         uart1Timeout = 1;
     }
@@ -725,7 +725,7 @@ void uartrb_timeout(ft900_uart_regs_t *dev)
 
 void uartrb_flush_read(ft900_uart_regs_t *dev)
 {
-    RingBuffer_t *uartBuffer = (dev == UART0)?&uart0BufferRx:&uart1BufferRx;
+    RingBuffer_t *uartBuffer = &uart1BufferRx;//(dev == UART0)?&uart0BufferRx:&uart1BufferRx;
 
     CRITICAL_SECTION_BEGIN
     uartBuffer->rd_idx = uartBuffer->wr_idx;
@@ -733,3 +733,4 @@ void uartrb_flush_read(ft900_uart_regs_t *dev)
     CRITICAL_SECTION_END
 }
 /* end */
+#endif

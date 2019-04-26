@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #ifndef _WIFI_H_
 #define _WIFI_H_
 
@@ -447,3 +447,4 @@ WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t * pxPMModeType,
                                  void * pvOptionValue );
 
 #endif /* _WIFI_H_ */
+#endif

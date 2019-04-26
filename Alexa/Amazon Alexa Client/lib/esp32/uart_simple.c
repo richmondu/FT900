@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 /* INCLUDES ************************************************************************/
 #include <string.h>
 #include "ft900_uart_simple.h"
@@ -845,3 +845,4 @@ int8_t uart_mode(ft900_uart_regs_t *dev, uart_mode_t mode)
 
 	return iRet;
 }
+#endif

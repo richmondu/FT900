@@ -227,34 +227,38 @@ int comm_send(void *pvBuffer, int lSize)
     return lSize;
 }
 
-// TODO: This is currently not working
-// The data received is corrupted
 int comm_recv(void *pvBuffer, int lSize)
 {
     int lRet = 0;
 
-    uint16_t uwRecvLen = (uint16_t)lSize;
-    at_register_ipd(uwRecvLen, pvBuffer);
+    if (lSize == 4) {
+        uint16_t uwRecvLen = (uint16_t)lSize;
+        at_register_ipd(uwRecvLen, pvBuffer);
 
-    //tfp_printf("comm_recv %d\r\n", lSize);
-    int8_t ipd_status = at_ipd((int8_t*)&g_lSocket, &uwRecvLen, (uint8_t **)&pvBuffer);
-    if (ipd_status == AT_DATA_WAITING) {
-        //tfp_printf("comm_recv at_ipd! %d %d\r\n", uwRecvLen, *((uint32_t*)pvBuffer));
-        lRet = uwRecvLen;
-    }
-    else if (ipd_status == AT_ERROR_TIMEOUT) {
-        lRet = -1;
-    }
-    else if (ipd_status == AT_NO_DATA) {
-        lRet = 0;
+        //tfp_printf("comm_recv %d\r\n", lSize);
+        int8_t ipd_status = at_ipd((int8_t*)&g_lSocket, &uwRecvLen, (uint8_t **)&pvBuffer);
+        if (ipd_status == AT_DATA_WAITING) {
+            //tfp_printf("comm_recv at_ipd! %d %d\r\n", uwRecvLen, *((uint32_t*)pvBuffer));
+            lRet = uwRecvLen;
+        }
+        else if (ipd_status == AT_ERROR_TIMEOUT) {
+            lRet = -1;
+        }
+        else if (ipd_status == AT_NO_DATA) {
+            lRet = 0;
+        }
+        else {
+            tfp_printf("at_ipd failed! %d\r\n", ipd_status);
+            lRet = -1;
+        }
+        //at_delete_ipd(pvBuffer);
     }
     else {
-        tfp_printf("at_ipd failed! %d\r\n", ipd_status);
-        lRet = -1;
+        //tfp_printf("at_recv lSize %d\r\n", lSize);
+        lRet = at_recv(g_lSocket, (uint16_t)lSize, pvBuffer);
+        //tfp_printf("at_recv lRet %d\r\n", lRet);
     }
 
-
-    at_delete_ipd(pvBuffer);
     return lRet;
 }
 

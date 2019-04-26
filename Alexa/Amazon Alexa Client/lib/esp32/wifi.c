@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 /* FreeRTOS includes. */
 #include <stdint.h>
 #include <wifi.h>
@@ -352,3 +352,4 @@ WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t * pxPMModeType,
 
     return xRetVal;
 }
+#endif

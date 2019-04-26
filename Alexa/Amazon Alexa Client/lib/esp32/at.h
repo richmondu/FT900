@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #ifndef _AT_H
 #define _AT_H
 
@@ -306,6 +306,7 @@ int8_t at_register_ipd(uint16_t length, uint8_t *buffer);
 int8_t at_delete_ipd(uint8_t *buffer);
 int8_t at_ipd(int8_t *link_id, uint16_t *length, uint8_t **buffer);
 int8_t at_ipd_info(int8_t *link_id, char *remote_ip, uint16_t *remote_port, uint16_t *length, uint8_t **buffer);
+uint16_t at_recv(int8_t link_id, uint16_t length, uint8_t *buffer);
 
 int8_t at_is_wifi_connected();
 int8_t at_wifi_station_ip();
@@ -317,3 +318,4 @@ enum at_connection at_is_link_id_connected(int8_t link_id);
 #endif /* __cplusplus */
 
 #endif /* _AT_H */
+#endif

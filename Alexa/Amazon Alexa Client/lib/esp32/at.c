@@ -43,6 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
+#if (COMMUNICATION_IO==2) // WiFi
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -904,17 +905,15 @@ static void peek_async_message(void)
 
         if (count == 0)
         {
-            //tfp_printf("peek_async_message count: %d \r\n", count);
             break;
         }
-//        tfp_printf("Async: %s \r\n", message);
+
         found = check_async_message(message, count);
 
         // Remove the async message from ring buffer.
         if (found)
         {
             count = uartrb_read(uart_at, (uint8_t *)message, found);
-            tfp_printf("peek_async_message count: %d \r\n", count);
             at_txresponse(message, count);
         }
 
@@ -930,7 +929,7 @@ static uint16_t check_async_message(char *message, uint16_t length)
     {
         if (strncmp(message, MARKER_IPD, AT_STRING_LENGTH(MARKER_IPD)) == 0)
         {
-            tfp_printf("IPD received \r\n");
+            //tfp_printf("IPD received \r\n");
             async_ipd_receive();
         }
     }
@@ -2641,7 +2640,7 @@ static int8_t async_ipd_receive(void)
         rspcolon = strchr(rspparams, ':');
         if (rspcolon)
         {
-        	tfp_printf("ipd_write->length=%d\r\n", ipd_write->length);
+        	//tfp_printf("ipd_write->length=%d\r\n", ipd_write->length);
             if (packetlen > ipd_write->length)
             {
                 packetlen = ipd_write->length;
@@ -2651,7 +2650,7 @@ static int8_t async_ipd_receive(void)
             // Read in packet data from the device.
             ipd_write->length = uartrb_read_wait(uart_at, ipd_write->buffer, packetlen);
             vTaskDelay (pdMS_TO_TICKS(50));
-            tfp_printf("ipd_write->length=%d\r\n", *((uint32_t*)ipd_write->buffer));
+            //tfp_printf("ipd_write->length=%d\r\n", *((uint32_t*)ipd_write->buffer));
 
             if (xTimerIsTimerActive(at_timer) == pdFALSE)
             {
@@ -2727,6 +2726,30 @@ int8_t at_ipd(int8_t *link_id, uint16_t *length, uint8_t **buffer)
     return at_ipd_info(link_id, NULL, NULL, length, buffer);
 }
 
+uint16_t at_recv(int8_t link_id, uint16_t length, uint8_t *buffer)
+{
+    uint16_t offset = 0;
+    uint16_t len= 0;
+
+    xTimerChangePeriod(at_timer, pdMS_TO_TICKS(50), 0);
+    do {
+        len = uartrb_read(uart_at, buffer+offset, length-offset);
+        offset += len;
+        if (xTimerIsTimerActive(at_timer) == pdFALSE) {
+            break;
+        }
+    }
+    while (offset < length);
+    xTimerStop(at_timer, 0);
+
+    if (offset != length) {
+        // TODO: investigate packet loss
+        offset = length;
+    }
+
+    return offset;
+}
+
 int8_t at_is_wifi_connected()
 {
     peek_async_message();
@@ -2758,3 +2781,4 @@ enum at_connection at_is_link_id_connected(int8_t link_id)
     peek_async_message();
     return at_state_server_connect[link_id];
 }
+#endif

@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #ifndef FT900_UART_SIMPLE_H_
 #define FT900_UART_SIMPLE_H_
 
@@ -375,3 +375,4 @@ int8_t uart_mode(ft900_uart_regs_t *dev, uart_mode_t mode);
 #endif /* __cplusplus */
 
 #endif /* FT900_UART_SIMPLE_H_ */
+#endif

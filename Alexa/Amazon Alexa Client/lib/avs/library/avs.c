@@ -742,7 +742,7 @@ int avs_recv_and_play_response(char (*fxnCallbackExit)(void))
     // Negotiate the bytes to transfer
     iRet = comm_recv((char*)&ulBytesToReceive, sizeof(ulBytesToReceive));
     if (iRet < sizeof(ulBytesToReceive)) {
-    	DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
+        DEBUG_PRINTF("avs_recv_and_play_response(): recv failed! %d %d errno %d\r\n\r\n", iRet, sizeof(ulBytesToReceive), comm_errno());
         return 0;
     }
     else if (ulBytesToReceive == 0) {
@@ -772,7 +772,7 @@ int avs_recv_and_play_response(char (*fxnCallbackExit)(void))
 
         // Set a timeout for the operation
         comm_setsockopt(AVS_CONFIG_RX_TIMEOUT, 0);
-        DEBUG_PRINTF("recv = %d\r\n", ulBytesToProcess);
+        DEBUG_PRINTF("recv = %d %d\r\n", ulBytesToProcess, ulBytesReceived);
 
         // Receive the bytes of transfer size
         iRet = comm_recv(pcRecv, ulBytesToProcess);
@@ -817,7 +817,7 @@ int avs_recv_and_play_response(char (*fxnCallbackExit)(void))
         }
     }
     while (ulBytesReceived < ulBytesToReceive);
-
+    DEBUG_PRINTF(">> Recv  %d bytes\r\n", ulBytesReceived);
 
     audio_speaker_end();
 

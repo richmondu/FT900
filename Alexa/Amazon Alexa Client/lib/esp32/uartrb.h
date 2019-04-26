@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #ifndef _UART_RB_H
 #define _UART_RB_H
 
@@ -81,3 +81,4 @@ void uartrb_flush_read(ft900_uart_regs_t *dev);
 #endif /* __cplusplus */
 
 #endif /* _UART_RB_H */
+#endif

@@ -43,7 +43,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-
+#if (COMMUNICATION_IO==2) // WiFi
 #ifndef FT900_UART_REGSITERS_H_
 #define FT900_UART_REGSITERS_H_
 
@@ -194,4 +194,4 @@ typedef struct
 /* FUNCTION PROTOTYPES *************************************************************/
 
 #endif /* FT900_UART_REGSITERS_H_ */
-
+#endif
