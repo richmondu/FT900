@@ -67,6 +67,7 @@ static int   g_lErr           = 0;
 
 
 #if (COMMUNICATION_IO==1) // Ethernet
+
 int comm_get_server_port(void)
 {
     return AVS_CONFIG_SERVER_PORT;
@@ -151,7 +152,9 @@ int comm_errno(void)
 {
     return errno;
 }
+
 #elif (COMMUNICATION_IO==2) // WiFi
+
 int comm_get_server_port(void)
 {
     return AVS_CONFIG_SERVER_PORT;
@@ -176,7 +179,7 @@ int comm_connect(void)
     ip_addr_t* pAddr = (ip_addr_t*)comm_get_server_addr();
 
 
-    inet_ntop(AF_INET, pAddr, acIpAddress, 16);
+    inet_ntop(AF_INET, pAddr, acIpAddress, sizeof(acIpAddress));
 
     g_lSocket = 0;
     at_ret = at_set_cipstart_tcp(g_lSocket, acIpAddress, AVS_CONFIG_SERVER_PORT, 0);
@@ -204,7 +207,7 @@ int comm_isconnected(void)
 void comm_setsockopt(int lTimeoutSecs, int lIsSend)
 {
     if (lIsSend) {
-        //at_timeout_tx_comms(pdMS_TO_TICKS(lTimeoutSecs*1000));
+        at_timeout_tx_comms(pdMS_TO_TICKS(lTimeoutSecs*1000));
     }
     else {
         at_timeout_rx_comms(pdMS_TO_TICKS(lTimeoutSecs*1000));
@@ -214,44 +217,42 @@ void comm_setsockopt(int lTimeoutSecs, int lIsSend)
 int comm_send(void *pvBuffer, int lSize)
 {
     //tfp_printf("  at_set_cipsend %d\r\n", lSize);
+
     int8_t at_ret = at_set_cipsend(g_lSocket, lSize, (uint8_t *) pvBuffer);
     if (at_ret != AT_OK) {
         tfp_printf("at_set_cipsend failed!\r\n");
         return -1;
     }
+
     return lSize;
 }
 
+// TODO: This is currently not working
+// The data received is corrupted
 int comm_recv(void *pvBuffer, int lSize)
 {
     int lRet = 0;
-    at_register_ipd(lSize, pvBuffer);
 
-    uint16_t uwRecvLen = lSize;
-    do {
-        //tfp_printf("at_ipd %d\r\n", lSize);
-        int8_t ipd_status = at_ipd((int8_t*)&g_lSocket, &uwRecvLen, (uint8_t **)&pvBuffer);
-        if (ipd_status == AT_DATA_WAITING) {
-            tfp_printf("at_ipd recv! %d\r\n", uwRecvLen);
-            lRet = uwRecvLen;
-            break;
-        }
-        else if (ipd_status == AT_ERROR_TIMEOUT) {
-            //tfp_printf("AT_ERROR_TIMEOUT\r\n");
-            lRet = -1;
-            break;
-        }
-        else if (ipd_status == AT_NO_DATA) {
-            lRet = 0;
-            break;
-        }
-        else {
-            tfp_printf("at_ipd failed! %d\r\n", ipd_status);
-            lRet = -1;
-            break;
-        }
+    uint16_t uwRecvLen = (uint16_t)lSize;
+    at_register_ipd(uwRecvLen, pvBuffer);
+
+    //tfp_printf("comm_recv %d\r\n", lSize);
+    int8_t ipd_status = at_ipd((int8_t*)&g_lSocket, &uwRecvLen, (uint8_t **)&pvBuffer);
+    if (ipd_status == AT_DATA_WAITING) {
+        //tfp_printf("comm_recv at_ipd! %d %d\r\n", uwRecvLen, *((uint32_t*)pvBuffer));
+        lRet = uwRecvLen;
     }
-    while(1);
+    else if (ipd_status == AT_ERROR_TIMEOUT) {
+        lRet = -1;
+    }
+    else if (ipd_status == AT_NO_DATA) {
+        lRet = 0;
+    }
+    else {
+        tfp_printf("at_ipd failed! %d\r\n", ipd_status);
+        lRet = -1;
+    }
+
 
     at_delete_ipd(pvBuffer);
     return lRet;
@@ -261,6 +262,8 @@ int comm_errno(void)
 {
     return 0;
 }
+
 #elif (COMMUNICATION_IO==3) // RS485
+// TODO
 #endif // COMMUNICATION_IO
 

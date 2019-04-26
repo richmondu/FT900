@@ -119,8 +119,8 @@ static ft900_uart_regs_t *uart_monitor;
 static TimerHandle_t at_timer;
 //static int at_tx_timeout_cmd = pdMS_TO_TICKS(20000);
 //static int at_rx_timeout_cmd = pdMS_TO_TICKS(20000);
-static int at_tx_timeout_cmd = pdMS_TO_TICKS(1000);
-static int at_rx_timeout_cmd = pdMS_TO_TICKS(1000);
+static int at_tx_timeout_cmd = pdMS_TO_TICKS(30000);
+static int at_rx_timeout_cmd = pdMS_TO_TICKS(30000);
 
 static TimerHandle_t cmd_timer;
 //static int cmd_timeout = pdMS_TO_TICKS(10000);
@@ -128,11 +128,11 @@ static TimerHandle_t cmd_timer;
 //static int cmd_timeout_ipd = pdMS_TO_TICKS(500);
 //static int cmd_timeout_ap = pdMS_TO_TICKS(20000);
 #if 1 // TODO: RMU fix MQTT Connect timeout due to slow ESP32 TLS Connect
-static int cmd_timeout = pdMS_TO_TICKS(2000); // 100 is too slow for AWS
+static int cmd_timeout = pdMS_TO_TICKS(30000); // 100 is too slow for AWS
 #endif
-static int cmd_timeout_inet = pdMS_TO_TICKS(2000);
-static int cmd_timeout_ipd = pdMS_TO_TICKS(500);
-static int cmd_timeout_ap = pdMS_TO_TICKS(20000);
+static int cmd_timeout_inet = pdMS_TO_TICKS(30000);
+static int cmd_timeout_ipd = pdMS_TO_TICKS(30000);
+static int cmd_timeout_ap = pdMS_TO_TICKS(30000);
 
 /* AT device will normally echo commands */
 static enum at_echo at_echo = at_echo_off;
@@ -339,7 +339,7 @@ static int8_t at_txresponse(char *response, uint16_t length)
 {
     int8_t rsp = AT_OK;
 
-#ifdef MONITOR_ECHO_RX
+#if MONITOR_ECHO_RX
     uint16_t dbgCount;
     char *dbgPtr;
     uint16_t count;
@@ -904,6 +904,7 @@ static void peek_async_message(void)
 
         if (count == 0)
         {
+            //tfp_printf("peek_async_message count: %d \r\n", count);
             break;
         }
 //        tfp_printf("Async: %s \r\n", message);
@@ -913,6 +914,7 @@ static void peek_async_message(void)
         if (found)
         {
             count = uartrb_read(uart_at, (uint8_t *)message, found);
+            tfp_printf("peek_async_message count: %d \r\n", count);
             at_txresponse(message, count);
         }
 
@@ -2639,6 +2641,7 @@ static int8_t async_ipd_receive(void)
         rspcolon = strchr(rspparams, ':');
         if (rspcolon)
         {
+        	tfp_printf("ipd_write->length=%d\r\n", ipd_write->length);
             if (packetlen > ipd_write->length)
             {
                 packetlen = ipd_write->length;
@@ -2648,6 +2651,7 @@ static int8_t async_ipd_receive(void)
             // Read in packet data from the device.
             ipd_write->length = uartrb_read_wait(uart_at, ipd_write->buffer, packetlen);
             vTaskDelay (pdMS_TO_TICKS(50));
+            tfp_printf("ipd_write->length=%d\r\n", *((uint32_t*)ipd_write->buffer));
 
             if (xTimerIsTimerActive(at_timer) == pdFALSE)
             {

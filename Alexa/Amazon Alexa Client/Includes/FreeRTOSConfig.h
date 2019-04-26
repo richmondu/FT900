@@ -121,11 +121,10 @@
 
 /* These are defined in FreeRTOS.h, mandatory. */
 #define configMINIMAL_STACK_SIZE                    ((unsigned short)2*128)
-#if (COMMUNICATION_IO==1) // Ethernet
 #define configMAX_PRIORITIES                        5
+#if (COMMUNICATION_IO==1) // Ethernet
 #define configUSE_PREEMPTION                        0
 #elif (COMMUNICATION_IO==2) // WiFi
-#define configMAX_PRIORITIES                        5
 #define configUSE_PREEMPTION                        1
 #endif
 #define configUSE_IDLE_HOOK                         0
@@ -145,19 +144,12 @@
 #define configUSE_TIMERS                            1
 #endif
 #define configQUEUE_REGISTRY_SIZE                   0U
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define configCHECK_FOR_STACK_OVERFLOW              0       //0, 1, or 2
-#elif (COMMUNICATION_IO==2) // WiFi
-#define configCHECK_FOR_STACK_OVERFLOW              2       //0, 1, or 2
-#endif
 #define configUSE_QUEUE_SETS                        0
 #define configUSE_NEWLIB_REENTRANT                  0
 #define portTICK_TYPE_IS_ATOMIC                     0
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define portCRITICAL_NESTING_IN_TCB                 0
-#elif (COMMUNICATION_IO==2) // WiFi
-#define portCRITICAL_NESTING_IN_TCB                 1
-#endif
+
 /* These are defined in FreeRTOS.h, default 0 when !defined. For debug use. */
 #define configGENERATE_RUN_TIME_STATS               0
 #define configUSE_STATS_FORMATTING_FUNCTIONS        0
@@ -175,13 +167,8 @@
 
 /* These must be defined when configUSE_TIMERS==1. */
 #if (configUSE_TIMERS == 1)
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define configTIMER_TASK_PRIORITY                   (configMAX_PRIORITIES)
 #define configTIMER_QUEUE_LENGTH                    (3)
-#elif (COMMUNICATION_IO==2) // WiFi
-#define configTIMER_TASK_PRIORITY                   (configMAX_PRIORITIES - 1)
-#define configTIMER_QUEUE_LENGTH                    (10)
-#endif
 #define configTIMER_TASK_STACK_DEPTH                (256)
 #endif
 
@@ -200,46 +187,24 @@
 
 /* Set the following definitions to 1 to include the API function, or zero to exclude the API function. */
 /* Mandatory. */
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define INCLUDE_vTaskPrioritySet                    0
 #define INCLUDE_uxTaskPriorityGet                   0
 #define INCLUDE_vTaskDelete                         0
 #define INCLUDE_vTaskSuspend                        0
 #define INCLUDE_vTaskDelayUntil                     0
-#elif (COMMUNICATION_IO==2) // WiFi
-#define INCLUDE_vTaskPrioritySet                    1
-#define INCLUDE_uxTaskPriorityGet                   1
-#define INCLUDE_vTaskDelete                         1
-#define INCLUDE_vTaskSuspend                        1
-#define INCLUDE_vTaskDelayUntil                     1
-#endif
 #define INCLUDE_vTaskDelay                          1
 
 /* Optional, default to 0 when !defined. */
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define INCLUDE_xTaskGetIdleTaskHandle              0
 #define INCLUDE_xTimerGetTimerDaemonTaskHandle      0
-#elif (COMMUNICATION_IO==2) // WiFi
-#define INCLUDE_xTaskGetIdleTaskHandle              1
-#define INCLUDE_xTimerGetTimerDaemonTaskHandle      1
-#endif
 #define INCLUDE_xQueueGetMutexHolder                0
 #define INCLUDE_xSemaphoreGetMutexHolder            0
-#if 1//(COMMUNICATION_IO==1) // Ethernet
 #define INCLUDE_pcTaskGetTaskName                   0
 #define INCLUDE_uxTaskGetStackHighWaterMark         0
 #define INCLUDE_eTaskGetState                       0
 #define INCLUDE_xTaskResumeFromISR                  0
 #define INCLUDE_xEventGroupSetBitFromISR            0
 #define INCLUDE_xTimerPendFunctionCall              0
-#elif (COMMUNICATION_IO==2) // WiFi
-#define INCLUDE_pcTaskGetTaskName                   1
-#define INCLUDE_uxTaskGetStackHighWaterMark         1
-#define INCLUDE_eTaskGetState                       1
-#define INCLUDE_xTaskResumeFromISR                  1
-#define INCLUDE_xEventGroupSetBitFromISR            1
-#define INCLUDE_xTimerPendFunctionCall              1
-#endif
 #define INCLUDE_xTaskGetSchedulerState              0
 #define INCLUDE_xTaskGetCurrentTaskHandle           0
 #define INCLUDE_vTaskCleanUpResources               0
