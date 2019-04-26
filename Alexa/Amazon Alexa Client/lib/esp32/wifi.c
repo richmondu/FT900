@@ -261,10 +261,10 @@ WIFIReturnCode_t WIFI_Ping( uint8_t * pucIPAddr,
 }
 
 /*-----------------------------------------------------------*/
-WIFIReturnCode_t WIFI_GetIP( uint8_t * pucIPAddr )
+WIFIReturnCode_t WIFI_GetIP( uint8_t * pucIPAddr, uint8_t * pucGateway, uint8_t * pucMask )
 {
     WIFIReturnCode_t xRetVal = eWiFiFailure;
-    int8_t at_ret = at_query_cipsta((char*)pucIPAddr, NULL, NULL);
+    int8_t at_ret = at_query_cipsta((char*)pucIPAddr, (char*)pucGateway, (char*)pucMask);
     if (AT_OK == at_ret)
     {
         xRetVal = eWiFiSuccess;

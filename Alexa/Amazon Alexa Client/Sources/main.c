@@ -183,9 +183,9 @@ int main(void)
     for (;;) ;
 }
 
-#if (COMMUNICATION_IO==1)   // Ethernet
 static inline void display_network_info()
 {
+#if (COMMUNICATION_IO==1)   // Ethernet
     uint8_t* mac = net_get_mac();
     DEBUG_PRINTF( "MAC=%02X:%02X:%02X:%02X:%02X:%02X\r\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
@@ -196,8 +196,17 @@ static inline void display_network_info()
     DEBUG_PRINTF( "GW=%s\r\n", inet_ntoa(addr) );
     addr = net_get_netmask();
     DEBUG_PRINTF( "MA=%s\r\n", inet_ntoa(addr) );
-}
+#elif (COMMUNICATION_IO==2)   // WiFi
+    uint8_t ucIPAddr[16] = {0};
+    uint8_t ucGateway[16] = {0};
+    uint8_t ucMask[16] = {0};
+    WIFI_GetIP( ucIPAddr, ucGateway, ucMask );
+    DEBUG_PRINTF( "IP=%s\r\n", ucIPAddr );
+    DEBUG_PRINTF( "GW=%s\r\n", ucGateway );
+    DEBUG_PRINTF( "MA=%s\r\n", ucMask );
 #endif
+}
+
 
 static inline void initialize_network()
 {
@@ -219,11 +228,9 @@ static inline void initialize_network()
         }
     }
     DEBUG_PRINTF( "\r\n" );
-    display_network_info();
 #elif (COMMUNICATION_IO==2) // WiFi
     WIFINetworkParams_t xNetworkParams;
     WIFIReturnCode_t xWifiStatus;
-    uint8_t ucIPAddr[ 16 ] = {0};
 
     /* Setup WiFi parameters to connect to access point. */
     xNetworkParams.pcSSID = AVS_CONFIG_WIFI_SSID;
@@ -231,8 +238,8 @@ static inline void initialize_network()
     xNetworkParams.pcPassword = AVS_CONFIG_WIFI_PASSWORD;
     xNetworkParams.ucPasswordLength = sizeof( AVS_CONFIG_WIFI_PASSWORD );
     xNetworkParams.xSecurity = AVS_CONFIG_WIFI_SECURITY;
-    xWifiStatus = WIFI_On();
 
+    xWifiStatus = WIFI_On();
     if( xWifiStatus == eWiFiSuccess ) {
         /* Try connecting using provided wifi credentials. */
         xWifiStatus = eWiFiFailure;
@@ -244,8 +251,7 @@ static inline void initialize_network()
                 vTaskDelay(pdMS_TO_TICKS(1000));
             }
             else {
-                WIFI_GetIP( ucIPAddr);
-                DEBUG_PRINTF("\r\n\r\nWiFi connected to AP %s %s\r\n", xNetworkParams.pcSSID, ucIPAddr);
+                DEBUG_PRINTF("\r\n\r\nWiFi connected to AP %s\r\n", xNetworkParams.pcSSID);
             }
         }
     }
@@ -254,6 +260,7 @@ static inline void initialize_network()
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 #endif
+    display_network_info();
 }
 
 #if (COMMUNICATION_IO==1)   // Ethernet
@@ -486,7 +493,7 @@ loop:
 #if (COMMUNICATION_IO==1)   // Ethernet
         // Ensure network is ready
         if ( !net_is_ready() ) {
-        	lRet = 0;
+            lRet = 0;
             DEBUG_PRINTF( "Waiting for network configuration..." );
             do {
                 vTaskDelay( pdMS_TO_TICKS(1000) );

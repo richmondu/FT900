@@ -335,7 +335,7 @@ WIFIReturnCode_t WIFI_Ping( uint8_t * pucIPAddr,
  * WIFI_GetIP( &ucIPAddr[0] );
  * @endcode
  */
-WIFIReturnCode_t WIFI_GetIP( uint8_t * pucIPAddr );
+WIFIReturnCode_t WIFI_GetIP( uint8_t * pucIPAddr, uint8_t * pucGateway, uint8_t * pucMask );
 
 /**
  * @brief Retrieves the WiFi interface's MAC address.
