@@ -36,6 +36,13 @@ Below is a sequence diagram showing the basic interaction of components of the F
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
 
 
+### FT900 as an Alexa Thin Client
+
+FT900 utilizes RPI server to access Alexa.
+Most of the audio processing is performed by RPI.
+In a nutshell, the FT900 simply enables voice capture and voice/audio content playback.
+
+
 ### FT900 Alexa AVS library
 
 The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). SD Card should be replaced with SPI Flash or I2C EEPROM. The main functions include:
