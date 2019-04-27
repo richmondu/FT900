@@ -47,6 +47,7 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
       - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
       - avs_set_volume()
+      - avs_get_volume()
       - avs_init()
       - avs_free()
 
@@ -62,7 +63,7 @@ The demo currently does not support Wakeword detection. To trigger FT900 to star
 
 The demo provides two ways to trigger voice recording:
 
-      - UART Mode: Press 't' key on UART terminal
+      - UART Mode: Press 'r' key on UART terminal
       - GPIO Mode: Press hardware button connected to GPIO 31
 
 To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
