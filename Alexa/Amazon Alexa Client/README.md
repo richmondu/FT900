@@ -15,7 +15,7 @@ The RPI which runs a customized version of Amazon’s official open-source <b>[A
 
 This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. 
 Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. 
-Customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including access to third-party skills (such as control smart home devices).
+Customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including <b>access to third-party skills</b> (such as control smart home devices).
 
 PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
 Many PanL Displays can be connected to a PanL Hub at the same time.
