@@ -81,8 +81,7 @@ To support Wakeword detection feature on FT900, external MCUs can be integrated 
 
 ### Audio Processing 
 
-The format of audio received by FT900 from RPI is raw/PCM format.
-RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
+FT900 captures and plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
 
 Below is a description of how the audio is processed on FT900.
 
@@ -109,10 +108,23 @@ Below is a description of how the audio is processed on FT900.
       avs_recv_and_play_response_threaded()
       - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)  
-      
-      Notes
-      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
+
+
+### Audio Compression
+    
+FT900 compresses audio sent to RPI and decompresses/expands audio received from RPI.
+This reduces the data bandwidth without affecting audio quality.
+
+      - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
+
+
+### Audio Decoding
+
+The format of audio received by FT900 from RPI is raw/PCM format.
+RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
+
+      - TODO: Investigate if FT900 can do the MP3/AAC decoding.
 
 
 ### Audio Streaming
