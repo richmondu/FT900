@@ -85,6 +85,9 @@ FT900 captures and plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) forma
 
 Below is a description of how the audio is processed on FT900.
 
+
+#### Audio Capture
+
       avs_record_request()
       - Audio recorded (from mic): 16-bit PCM, 16KHZ, stereo (2-channels)
       - Audio saved (to SD card): 16-bit PCM, 16KHZ, mono (1-channel)
@@ -92,6 +95,9 @@ Below is a description of how the audio is processed on FT900.
       avs_send_request()
       - Audio read (from SD card): 16-bit PCM, 16KHZ, mono (1-channel)
       - Audio sent (to RPI): 8-bit u-law, 16KHZ, mono (1-channel)
+
+
+#### Audio Playback
 
       avs_recv_response()
       - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
