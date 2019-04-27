@@ -112,7 +112,7 @@ Below is a description of how the audio is processed on FT900.
 
 To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or RS485.
 
-      - Ethernet: using LWIP
+      - Ethernet: using LWIP embedded TCP/IP library
       - WiFi: using ESP32 WiFi accessed using AT commands over UART
       - RS485: TODO
 
