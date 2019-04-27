@@ -514,10 +514,16 @@ OLD:
 
 Below are the action items for the Alexa Demo.
 
-      1. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
-      2. Support for multiple FT900 clients. (Multiple FT900 should be able to simultaneously send requests to RPI. RPI should queue the requests and only issue a request when a response for previous request is processed.)
-      3. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half. (However, note that RPI will have to convert the 8KHz to 16KHz as Alexa cloud requires 16KHz).
-      4. Use GSTREAMER instead of FFmpeg to decode data for FT900. 
+      1. RPI plays all audio sent to FT900. RPI should not play audio intended for FT900.  
+      2. Alarm playback issue with multiple clients; should persist even after power off.
+      3. FT900 still receives music/alarm playback after disconnection.
+      4. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
+      5. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half.
+      6. Use existing gstreamer framework (instead of FFmpeg or Sox) for audio decoding.
+      7. Integrate libmad MP3 decoder and provide RPI option to send MP3 instead of PCM/raw.
+      8. RPI should also send Alexa "Display Cards" to FT900 since FT900 can be connected to a FT800 display.
+      9. Implement FT900 Alexa Client on ESP32 for an ESP32 Alexa Client.
+      
 
 
 
