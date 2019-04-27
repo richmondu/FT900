@@ -139,6 +139,19 @@ To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or R
       - RS485: TODO
 
 
+### Audio Codec
+
+The audio hardware chip for the FT900 RevC evaluation board is a Wolfson WM.
+I2C is used to configure the settings while I2S is used to capture and play audio.
+
+      - The I2S Master Example 1 and 2 shows how to use the codec.
+      - It only supports 44.1 KHz.
+      - It does not provide an easy to use reusable interface.
+
+So I had to create an audio module to abstract I2S/I2C details, provide simple to use audio interface and support 32 KHz and 16 KHz. 
+As well as several other features, including volume control, channel conversion, 8-bit compression and etc.  
+
+
 ### Test Mode and Test Simulator
 
 The FT900 application provides option to choose from any pre-recorded audio for testing convenience.
