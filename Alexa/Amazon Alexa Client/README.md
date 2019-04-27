@@ -26,9 +26,10 @@ Below is a block diagram showing the implemented components of the FT900 applica
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg" width="623"/>
 
       - SD Card should be replaced with SPI Flash or I2C EEPROM on PanL display.
-      - RTC library is used to measure time elapsed for performance measurement.
+      - Ethernet/WiFi should be replaced with RS485 on PanL display.
       - Button is implemented as GPIO and UART. User can choose between the two.
-
+      - RTC library is used to measure time elapsed for performance measurement.
+      
 Below is a sequence diagram showing the basic interaction of components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
 
