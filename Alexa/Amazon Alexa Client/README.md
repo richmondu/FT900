@@ -10,6 +10,7 @@ The RPI runs a customized version of Amazon’s official open-source <b>[Alexa V
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_steps.jpg" width="623"/>
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_audio.jpg" width="623"/>
 
 This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices, <b>PanL Hub</b> and <b>PanL Display</b>. 
 Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. 
