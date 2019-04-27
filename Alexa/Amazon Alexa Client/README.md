@@ -1,4 +1,4 @@
-# FT900 Alexa Demo
+I # FT900 Alexa Demo
 
 
 This proof-of-concept prototype application demonstrates using <b>FT900 microcontroller</b> (MCU) as an <b>Amazon Echo Dot</b> device, 
@@ -79,14 +79,9 @@ To support Wakeword detection feature on FT900, external MCUs can be integrated 
 [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
 
-### Audio Processing 
+### Audio Capture
 
-FT900 captures and plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
-
-Below is a description of how the audio is processed on FT900.
-
-
-#### Audio Capture
+FT900 captures audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
 
       avs_record_request()
       - Audio recorded (from mic): 16-bit PCM, 16KHZ, stereo (2-channels)
@@ -97,7 +92,9 @@ Below is a description of how the audio is processed on FT900.
       - Audio sent (to RPI): 8-bit u-law, 16KHZ, mono (1-channel)
 
 
-#### Audio Playback
+### Audio Playback
+
+FT900 plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
 
       avs_recv_response()
       - Audio received (from RPI): 8-bit u-law, 16KHZ, mono (1-channel)
