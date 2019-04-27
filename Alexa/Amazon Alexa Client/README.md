@@ -108,6 +108,15 @@ Below is a description of how the audio is processed on FT900.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
+### Audio Streaming
+
+To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or RS485.
+
+      - Ethernet: using LWIP
+      - WiFi: using ESP32 WiFi accessed using AT commands over UART
+      - RS485: TODO
+
+
 ### Test Mode and Test Simulator
 
 The FT900 application provides option to choose from any pre-recorded audio for testing convenience.
