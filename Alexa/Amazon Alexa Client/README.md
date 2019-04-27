@@ -1,4 +1,4 @@
-I # FT900 Alexa Demo
+# FT900 Alexa Demo
 
 
 This proof-of-concept prototype application demonstrates using <b>FT900 microcontroller</b> (MCU) as an <b>Amazon Echo Dot</b> device, 
