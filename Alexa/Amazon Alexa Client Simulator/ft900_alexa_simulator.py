@@ -19,11 +19,15 @@ import argparse
 
 
 ############################################################################################
-# Configurations.
+# Configurations that can be set using application parameter
 ############################################################################################
-CONF_DEVICE_ID              = 2
-CONF_SERVER_ADDR            = '192.168.100.12'
-CONF_SERVER_PORT_CH         = 11234
+CONF_SERVER_ADDR_DEFAULT    = '192.168.100.12'    # --serveraddr
+CONF_SERVER_PORT_DEFAULT    = 11234               # --deviceid 11234+x-1 if --usediffacct is 1
+CONF_DEVICE_ID_DEFAULT      = 2                   # --deviceid
+
+############################################################################################
+# Other configurations.
+############################################################################################
 CONF_FILENAME_REQUEST_TIME  = "audio/REQUEST_what_time_is_it.raw"
 CONF_FILENAME_REQUEST_PERSON= "audio/REQUEST_who_is.raw"
 CONF_FILENAME_REQUEST_MUSIC = "audio/REQUEST_play_music.raw"
@@ -49,7 +53,10 @@ CONF_SAMPLING_RATE          = SAMPLING_RATE_16KHZ
 ############################################################################################
 # Global variable
 ############################################################################################
-g_deviceid = CONF_DEVICE_ID
+g_usediffacct = 0
+g_serveraddr = CONF_SERVER_ADDR_DEFAULT
+g_serverport = CONF_SERVER_PORT_DEFAULT
+g_deviceid = CONF_DEVICE_ID_DEFAULT
 g_socket = None
 g_quit = False
 g_connected = False
@@ -62,11 +69,13 @@ g_connected = False
 def avs_connect():
 
     global g_socket
-    
+    global g_serveraddr
+    global g_serverport
+
     g_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         # Connect to server
-        err = g_socket.connect_ex((CONF_SERVER_ADDR, CONF_SERVER_PORT_CH))
+        err = g_socket.connect_ex((g_serveraddr, g_serverport))
         if err != 0:
             g_socket.close()
             return 0
@@ -269,11 +278,11 @@ class thread_fxn_dialog(threading.Thread):
     def run(self):
         sleep(1)
         global g_quit
-
+        global g_port
 
         while g_quit is False:
 
-            print("\n[DIALOG] Connecting to Alexa provider... {}:{}\n".format(CONF_SERVER_ADDR, CONF_SERVER_PORT_CH1))
+            print("\n[DIALOG] Connecting to Alexa provider... {}:{}\n".format(CONF_SERVER_ADDR, g_port))
             if avs_connect() == 0:
                 sleep(3)
                 continue
@@ -330,11 +339,13 @@ class thread_fxn_streamer(threading.Thread):
         global g_quit
         global g_connected
         global g_deviceid
-        
+        global g_serveraddr
+        global g_serverport
+
         g_connected = False
         counter = 0
         while g_quit is False:
-            print("\n[STREAMER] Connecting to Alexa provider... {}:{} [ID:{}] [{}]".format(CONF_SERVER_ADDR, CONF_SERVER_PORT_CH, g_deviceid, counter))
+            print("\n[STREAMER] Connecting to Alexa provider... {}:{} [ID:{}] [{}]".format(g_serveraddr, g_serverport, g_deviceid, counter))
             if avs_connect() == 0:
                 counter = counter + 1
                 sleep(3)
@@ -415,16 +426,34 @@ def usage():
 ############################################################################################
 def main(args, argc):
 
+    global g_usediffacct
     global g_deviceid
     global g_quit
     global g_connected
-        
+    global g_serveraddr
+    global g_serverport
+
     if sys.version_info < (3, 0):
-        print("Error: Tested using Python 3 only!")
+        print("ERROR: Tested using Python 3.6.6 only!")
         return
 
 
-    g_deviceid = int(args.deviceid, 10)
+    # g_deviceid should be in the range of [1, 16]
+    g_deviceid = int(args.deviceid)
+    if g_deviceid < 1 or g_deviceid > 16:
+        print("ERROR: Invalid device ID! Should be in the range of [1-16]")
+        return
+
+    # Device 1 connects to port CONF_SERVER_PORT_DEFAULT + 0
+    # Device 2 connects to port CONF_SERVER_PORT_DEFAULT + 1
+    # Device X connects to port CONF_SERVER_PORT_DEFAULT + X-1
+    g_usediffacct = int(args.usediffacct)
+    if g_usediffacct:
+        g_serverport = CONF_SERVER_PORT_DEFAULT + g_deviceid - 1
+    else:
+        g_serverport = CONF_SERVER_PORT_DEFAULT
+    g_serveraddr = args.serveraddr
+
 
     while True:
         print("\n===============================================================")
@@ -507,8 +536,12 @@ def main(args, argc):
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--deviceid', required=True, default=CONF_DEVICE_ID,
+    parser.add_argument('--serveraddr', required=True, default=CONF_SERVER_ADDR_DEFAULT,
+        help='Server IP address to use.')
+    parser.add_argument('--deviceid', required=True, default=CONF_DEVICE_ID_DEFAULT,
         help='DeviceID to use.')
+    parser.add_argument('--usediffacct', required=True, default=0,
+        help='Flag to specify if using different account.')
     return parser.parse_args(argv)
 
 
