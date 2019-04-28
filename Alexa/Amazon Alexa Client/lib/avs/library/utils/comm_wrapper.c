@@ -62,12 +62,15 @@
 
 
 
+#if (COMMUNICATION_IO==1) || (COMMUNICATION_IO==2)
 static int   g_lSocket        = -1;
 static int   g_lErr           = 0;
+#endif // (COMMUNICATION_IO==1) || (COMMUNICATION_IO==2)
 
 
 
 #if (COMMUNICATION_IO==1) // Ethernet
+
 
 int comm_get_server_port(void)
 {
@@ -154,7 +157,9 @@ int comm_errno(void)
     return errno;
 }
 
+
 #elif (COMMUNICATION_IO==2) // WiFi
+
 
 int comm_get_server_port(void)
 {
@@ -269,7 +274,9 @@ int comm_errno(void)
     return 0;
 }
 
+
 #elif (COMMUNICATION_IO==3) // RS485
+
 
 int comm_get_server_port(void)
 {
@@ -328,6 +335,7 @@ int comm_errno(void)
     // TODO RS485
     return 0;
 }
+
 
 #endif // COMMUNICATION_IO
 
