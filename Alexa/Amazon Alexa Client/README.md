@@ -132,6 +132,8 @@ RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
 
 ### Audio Streaming
 
+FT900 sends/receives audio to/from RPI in raw PCM 8-bit 16 kHz mono (1 channel) format.
+
 To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or RS485.
 
       - Ethernet: using LWIP embedded TCP/IP library
@@ -595,3 +597,4 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 7. [GSTREAMER media framework](https://gstreamer.freedesktop.org)
 8. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
 9. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
+Is 
