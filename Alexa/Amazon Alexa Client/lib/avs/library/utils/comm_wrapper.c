@@ -50,13 +50,14 @@
 #include "comm_wrapper.h"
 
 #if (COMMUNICATION_IO==1)   // Ethernet
-#include "lwip/sockets.h"   // lwIP 3rd-party library
+#include "lwip/sockets.h"
 #elif (COMMUNICATION_IO==2) // WiFi
 #include "wifi.h"
 #include "at.h"
-#include "lwip/sockets.h"   // lwIP 3rd-party library
-#include "FreeRTOS.h"       // FreeRTOS 3rd-party library
+#include "lwip/sockets.h"
+#include "FreeRTOS.h"
 #elif (COMMUNICATION_IO==3) // RS485
+// TODO RS485
 #endif
 
 
@@ -227,6 +228,7 @@ int comm_send(void *pvBuffer, int lSize)
     return lSize;
 }
 
+// TODO: Fix corruption issue
 int comm_recv(void *pvBuffer, int lSize)
 {
     int lRet = 0;
@@ -268,6 +270,64 @@ int comm_errno(void)
 }
 
 #elif (COMMUNICATION_IO==3) // RS485
-// TODO
+
+int comm_get_server_port(void)
+{
+    // TODO RS485
+    return 0;
+}
+
+const void* comm_get_server_addr(void)
+{
+    // TODO RS485
+    return NULL;
+}
+
+int comm_err(void)
+{
+    // TODO RS485
+    return 0;
+}
+
+int comm_connect(void)
+{
+    // TODO RS485
+    return 1;
+}
+
+void comm_disconnect(void)
+{
+    // TODO RS485
+}
+
+int comm_isconnected(void)
+{
+    // TODO RS485
+    return 0;
+}
+
+void comm_setsockopt(int lTimeoutSecs, int lIsSend)
+{
+    // TODO RS485
+}
+
+int comm_send(void *pvBuffer, int lSize)
+{
+    // TODO RS485
+    return 0;
+}
+
+int comm_recv(void *pvBuffer, int lSize)
+{
+    // TODO RS485
+    return 0;
+}
+
+int comm_errno(void)
+{
+    // TODO RS485
+    return 0;
+}
+
 #endif // COMMUNICATION_IO
 
