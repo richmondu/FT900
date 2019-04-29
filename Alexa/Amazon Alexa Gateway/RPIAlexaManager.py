@@ -7,6 +7,7 @@ import argparse
 
 conf_alexa_dir = "/home/pi/Desktop/alexa"
 conf_debug_level = "INFO"
+num_accounts = 1
 
 
 
@@ -100,6 +101,7 @@ def create_database_dir(account_no):
 def thread_func(account_no):
     global conf_alexa_dir
     global conf_debug_level
+    global num_accounts
     
     # construct the command parameters
     command_term = "lxterminal"
@@ -114,7 +116,10 @@ def thread_func(account_no):
     command_account_no = account_no
 
     # combine the command parameters into a string
-    command = command_term + " -e " + command_app + " " + command_configuration + " " + command_third_party + " " + command_debug_level + " " + str(command_account_no)
+    if num_accounts == 1:
+        command = command_app + " " + command_configuration + " " + command_third_party + " " + command_debug_level + " " + str(command_account_no)
+    else:
+        command = command_term + " -e " + command_app + " " + command_configuration + " " + command_third_party + " " + command_debug_level + " " + str(command_account_no)        
     #print(command)
     
     # execute the command string
@@ -123,6 +128,8 @@ def thread_func(account_no):
 
 
 def main(args, argc):
+    global num_accounts
+
     # parse the input
     num_accounts = int(args.numaccounts)
     
