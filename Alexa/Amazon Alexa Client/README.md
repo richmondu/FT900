@@ -562,9 +562,9 @@ OLD:
 
 Below are the action items for the Alexa Demo.
 
-      1. RPI plays all audio sent to FT900. RPI should not play audio intended for FT900.  
-      2. Alarm playback issue with multiple clients; should persist even after power off.
-      3. FT900 still receives music/alarm playback after disconnection.
+      1. Test and support Alexa notifications using QuoteMaker.
+      2. [BUG] RPI plays all audio sent to FT900. RPI should not play audio intended for FT900.  
+      3. [BUG] Alarm playback issue with multiple clients; should persist even after power off.
       4. Support for wake-word detection in FT900. Currently, user has to press down a button to start voice recording.
       5. Use 8KHz instead of 16KHz in FT900 to further reduce audio transmitted size by half.
       6. Use existing gstreamer framework (instead of FFmpeg or Sox) for audio decoding.
