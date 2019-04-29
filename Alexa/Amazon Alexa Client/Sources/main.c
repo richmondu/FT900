@@ -64,6 +64,8 @@
 #elif (COMMUNICATION_IO==2) // WiFi
 #include "net.h"
 #include "wifi.h"
+#elif (COMMUNICATION_IO==3) // RS485
+// TODO RS485
 #endif // COMMUNICATION_IO
 
 
