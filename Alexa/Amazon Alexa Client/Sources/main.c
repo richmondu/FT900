@@ -134,6 +134,11 @@ static inline void wifi_setup(void)
     gpio_function(55, pad_uart1_cts); /* UART1 CTS MM900EVxA CN3 pin 11 */
     interrupt_enable_globally();
 }
+#elif (COMMUNICATION_IO==3) // WiFi
+static inline void rs485_setup(void)
+{
+    // TODO RS485
+}
 #endif // COMMUNICATION_IO
 
 
@@ -150,6 +155,8 @@ int main(void)
     ethernet_setup();
 #elif (COMMUNICATION_IO==2) // WiFi
     wifi_setup();
+#elif (COMMUNICATION_IO==3) // RS485
+    rs485_setup();
 #endif // COMMUNICATION_IO
 
 #if USE_MEASURE_PERFORMANCE
@@ -183,7 +190,7 @@ int main(void)
     for (;;) ;
 }
 
-static inline void display_network_info()
+static inline void display_communication_info()
 {
 #if (COMMUNICATION_IO==1)   // Ethernet
     uint8_t* mac = net_get_mac();
@@ -204,11 +211,13 @@ static inline void display_network_info()
     DEBUG_PRINTF( "IP=%s\r\n", ucIPAddr );
     DEBUG_PRINTF( "GW=%s\r\n", ucGateway );
     DEBUG_PRINTF( "MA=%s\r\n", ucMask );
+#elif (COMMUNICATION_IO==3)   // RS485
+    // TODO RS485
 #endif
 }
 
 
-static inline void initialize_network()
+static inline void initialize_communication()
 {
 #if (COMMUNICATION_IO==1)   // Ethernet
     int lRet = 0;
@@ -259,8 +268,10 @@ static inline void initialize_network()
         tfp_printf("WIFI_On failed!\r\n");
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
-#endif
-    display_network_info();
+#elif (COMMUNICATION_IO==3)   // RS485
+    // TODO RS485
+#endif // COMMUNICATION_IO
+    display_communication_info();
 }
 
 #if (COMMUNICATION_IO==1)   // Ethernet
@@ -471,8 +482,8 @@ void vTaskAlexaCommander(void *pvParameters)
 {
     int lRet = 0;
 
-    DEBUG_PRINTF("\r\nInitializing network...");
-    initialize_network();
+    DEBUG_PRINTF("\r\nInitializing communication...");
+    initialize_communication();
 
     DEBUG_PRINTF("\r\nInitializing AVS...\r\n");
     avs_init();
@@ -505,9 +516,13 @@ loop:
             }
             while (!net_is_ready());
             DEBUG_PRINTF( "\r\n" );
-            display_network_info();
+            display_communication_info();
         }
-#endif
+#elif (COMMUNICATION_IO==2)   // WiFi
+        // TODO WiFi
+#elif (COMMUNICATION_IO==3)   // RS485
+        // TODO RS485
+#endif // COMMUNICATION_IO
 
         // Handle quit command and disconnection
         if (g_cQuit) {
@@ -619,7 +634,10 @@ void vTaskAlexaStreamer(void *pvParameters)
             vTaskDelay(pdMS_TO_TICKS(1000));
             continue;
         }
-#endif
+#elif (COMMUNICATION_IO==2)   // WiFi
+#elif (COMMUNICATION_IO==3)   // RS485
+        // TODO RS485
+#endif // COMMUNICATION_IO
 
         if (!avs_isconnected()) {
             vTaskDelay(pdMS_TO_TICKS(1000));
