@@ -194,22 +194,24 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
       1. A ConnectionHandler thread is initialized in the main function of the AVS SDK SampleApplication.
       2. The ConnectionHandler thread waits for an FT900 connection.
-      3. Once an FT900 connected, a ClientHandler thread is initiated.
+      3. Once an FT900 connected, a ClientHandler thread is created.
       4. The ClientHandler thread initializes two worker threads, FT900RequestHandler and FT900ResponseHandler.
       5. FT900RequestHandler handles the processing of Alexa requests from FT900.
       6. FT900ResponseHandler handles the processing of Alexa responses to FT900.
-      7. Only 1 FT900 can connect at a time.
-      8. FT900RequestHandler receives Alexa request (8-bit compressed using ulaw algorithm) from FT900.
-      9. FT900RequestHandler decompresses/expands the Alexa request from 8-bit to 16-bit.
-      10. FT900RequestHandler copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
-      11. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
-      12. SpeechSynthesizer copies the data stream to an MP3 file.
-      13. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
-      14. SpeechSynthesizer does not play the response since the request is from FT900.
-      15. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
-      16. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
-      17. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
-      18. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+      7. Multiple FT900s can connect at a time.
+      8. FT900RequestHandler receives Alexa request (8-bit compressed using ulaw algorithm) from FT900 and saves it to a file.
+      9. FT900RequestHandler queues the file for FT900RequestManager.
+      10. FT900RequestManager dequeues the file.
+      11. FT900RequestManager decompresses/expands the Alexa request from 8-bit to 16-bit.
+      12. FT900RequestManager copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
+      13. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
+      14. SpeechSynthesizer copies the data stream to an MP3 file.
+      15. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
+      16. SpeechSynthesizer does not play the response since the request is from FT900.
+      17. FT900ResponseHandler compresses the Alexa response to 8-bit from 16-bit.
+      18. FT900ResponseHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
+      19. The FT900ClientHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      20. The FT900ClientHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
 ### Alexa Capabilities
@@ -305,10 +307,13 @@ Below is a list of files modified:
 Below is a list of files created:
 
       - FT900ConnectionHandler.cpp
+      - FT900ClientHandler.cpp
       - FT900RequestHandler.cpp
       - FT900RequestHook.cpp
+      - FT900RequestManager.cpp
       - FT900ResponseHandler.cpp
       - FT900ResponseHook.cpp
+      - FT900ResponseManager.cpp
       - FT900AudioCompression.cpp
       - FT900AudioCompressionHelper.cpp
       - FT900AudioDecoding.cpp
