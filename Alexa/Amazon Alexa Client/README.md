@@ -40,7 +40,8 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 FT900 utilizes RPI server to access Alexa.
 RPI provides separate Alexa instance to each connected FT900 device as if each FT900 is an Echo Dot device,
-that is each FT900 can be configured to use different Amazon accounts.
+that is each FT900 is not dependend on other FT900s in terms of Aexa usage.
+Moreover, each FT900 can be configured to use different Amazon accounts.
 
 Most of the audio processing is performed by RPI.
 The FT900 simply enables voice capture and audio playback.
