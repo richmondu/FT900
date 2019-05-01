@@ -341,6 +341,36 @@ Below is a description of how the audio is processed on RPI.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream. SOX has been replaced by FFMPEG to support various audio formats, such as AAC, which is not supported by SOX.
 
 
+### Multiple Alexa Instances/Sessions/Accounts
+
+Previously, multiple FT900 devices share a single Alexa instance.
+Each FT900 can send information request to Alexa simultaneously.
+But each FT900 cannot simultaneously play music or any audio content.
+
+To solve this problem, multiple instances of the Alexa application can be executed.
+That is each FT900 device is connected to a unique Alexa instance.
+
+To do this, each application instance will:
+      
+      1. Listen to a different port
+      2. Use a different Alexa configuration file
+      3. Use a different database location
+
+I created a Python script named RPIAlexaManager.py that automates the configuration and execution of multiple Alexa application instances.
+
+Below is the mapping of FT900 device id to the RPI Alexa instance.
+
+      FT900 device 1 connects to port BASE_PORT+0
+      FT900 device 2 connects to port BASE_PORT+1
+      FT900 device X connects to port BASE_PORT+X-1
+      RPI app instance for account 1 listens to port BASE+0
+      RPI app instance for account 2 listens to port BASE+1
+      RPI app instance for account X listens to port BASE+X-1
+      RPI app instance for account 1 uses configuration 1 and database 1.
+      RPI app instance for account 2 uses configuration 2 and database 2.
+      RPI app instance for account X uses configuration X and database X.
+
+
 # Performance analysis/optimization
 
 ### A. Optimization efforts
