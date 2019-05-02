@@ -338,7 +338,30 @@ Below is a description of how the audio is processed on RPI.
 
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
-      - SOX utility is used to convert MP3 data stream to raw PCM16 data stream. SOX has been replaced by FFMPEG to support various audio formats, such as AAC, which is not supported by SOX.
+
+
+### Audio Processing
+
+I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. 
+[AVS SDK uses GStreamer for audio streaming, decoding and playback.]
+
+Previously, I was hooking "MP3/AAC" audio data at the top of the GStreamer pipeline.
+That is, I was hooking the data and then decoding it using FFMPEG.
+At the same time, the GStreamer pipeline is also decoding the audio data for speaker playback.
+As such, there were 2 "decoding" happening causing intense CPU spikes when running multiple Alexa instances.
+
+Now I am hooking beneath the GStreamer pipeline and so I'm getting the "decoded" data already.
+So, there is no more FFMPEG or SoX dependency.
+To do get the decoded data, I modified the GStreamer pipeline and added a "tee" branch that outputs the decoded data to 
+
+      1. the audio sink and
+      2. my callback function
+
+Refer to https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html for an example on how to use "tee" to retrieve output data from a GStreamer pipeline.
+
+Removing the redundant "decoding" also fixes the 50-100% CPU problem occuring when 8 FT900 devices are simultaneously playing music using separate Alexa instances/accounts.
+
+Now, with 8 FT900 devices simulataneously playing music, CPU is now just 40-50%.
 
 
 ### Multiple Alexa Instances/Sessions/Accounts
