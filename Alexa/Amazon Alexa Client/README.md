@@ -36,11 +36,15 @@ Below is a sequence diagram showing the basic interaction of components of the F
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
 
 
-### FT900 as an Alexa Thin Client
+### FT900 as Alexa Thin Client
 
 FT900 utilizes RPI server to access Alexa.
+RPI provides separate Alexa instance to each connected FT900 device as if each FT900 is an Echo Dot device,
+that is each FT900 is not dependend on other FT900s in terms of Aexa usage.
+Moreover, each FT900 can be configured to use different Amazon accounts.
+
 Most of the audio processing is performed by RPI.
-In a nutshell, the FT900 simply enables voice capture and voice/audio content playback.
+The FT900 simply enables voice capture and audio playback.
 
 
 ### FT900 Alexa AVS library
@@ -167,7 +171,9 @@ A Python script application named FT900 Alexa Simulator is also provided to simu
 
 # RPI-side (Alexa Gateway)
 
-Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). The version I am now using is version v1.12.0 AVS SDK. Instructions to install the AVS SDK on RPI can also be found on the github link.
+Amazon provides an official [Alexa Voice Service (AVS) SDK](https://github.com/alexa/avs-device-sdk), (written in C++). 
+The version supported is v1.12.1 AVS SDK. 
+Instructions to install the AVS SDK on RPI can also be found on the github link.
 
 Below is a system diagram of AVS SDK.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/system_diagram_avs.jpg" width="623"/>
@@ -188,21 +194,24 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
       1. A ConnectionHandler thread is initialized in the main function of the AVS SDK SampleApplication.
       2. The ConnectionHandler thread waits for an FT900 connection.
-      3. Once an FT900 connected, it initializes two threads, FT900RequestHandler and FT900ResponseHandler.
-      4. FT900RequestHandler handles the processing of Alexa requests from FT900.
-      5. FT900ResponseHandler handles the processing of Alexa responses to FT900.
-      6. Only 1 FT900 can connect at a time.
-      7. FT900RequestHandler receives Alexa request (8-bit compressed using ulaw algorithm) from FT900.
-      8. FT900RequestHandler decompresses/expands the Alexa request from 8-bit to 16-bit.
-      9. FT900RequestHandler copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
-      10. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
-      11. SpeechSynthesizer copies the data stream to an MP3 file.
-      12. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
-      13. SpeechSynthesizer does not play the response since the request is from FT900.
-      14. FT900RequestHandler compresses the Alexa response to 8-bit from 16-bit.
-      15. FT900RequestHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
-      16. The ConnectionHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
-      17. The ConnectionHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
+      3. Once an FT900 connected, a ClientHandler thread is created.
+      4. The ClientHandler thread initializes two worker threads, FT900RequestHandler and FT900ResponseHandler.
+      5. FT900RequestHandler handles the processing of Alexa requests from FT900.
+      6. FT900ResponseHandler handles the processing of Alexa responses to FT900.
+      7. Multiple FT900s can connect at a time.
+      8. FT900RequestHandler receives Alexa request (8-bit compressed using ulaw algorithm) from FT900 and saves it to a file.
+      9. FT900RequestHandler queues the file for FT900RequestManager.
+      10. FT900RequestManager dequeues the file.
+      11. FT900RequestManager decompresses/expands the Alexa request from 8-bit to 16-bit.
+      12. FT900RequestManager copies the data stream to the microphone input data buffer in PortAudioMicrophoneWrapper.
+      13. The Alexa request is then sent to the cloud and receives the Alexa response which is in MP3 format.
+      14. SpeechSynthesizer copies the data stream to an MP3 file.
+      15. SpeechSynthesizer converts the Alexa response from MP3 format to raw PCM format in a separate thread.
+      16. SpeechSynthesizer does not play the response since the request is from FT900.
+      17. FT900ResponseHandler compresses the Alexa response to 8-bit from 16-bit.
+      18. FT900ResponseHandler sends the Alexa response (8-bit compressed using ulaw algorithm) to FT900.
+      19. The FT900ClientHandler thread waits until FT900RequestHandler and FT90ResponseHandler terminates.
+      20. The FT900ClientHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
 ### Alexa Capabilities
@@ -298,10 +307,13 @@ Below is a list of files modified:
 Below is a list of files created:
 
       - FT900ConnectionHandler.cpp
+      - FT900ClientHandler.cpp
       - FT900RequestHandler.cpp
       - FT900RequestHook.cpp
+      - FT900RequestManager.cpp
       - FT900ResponseHandler.cpp
       - FT900ResponseHook.cpp
+      - FT900ResponseManager.cpp
       - FT900AudioCompression.cpp
       - FT900AudioCompressionHelper.cpp
       - FT900AudioDecoding.cpp
@@ -327,6 +339,36 @@ Below is a description of how the audio is processed on RPI.
       Notes
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
       - SOX utility is used to convert MP3 data stream to raw PCM16 data stream. SOX has been replaced by FFMPEG to support various audio formats, such as AAC, which is not supported by SOX.
+
+
+### Multiple Alexa Instances/Sessions/Accounts
+
+Previously, multiple FT900 devices share a single Alexa instance.
+Each FT900 can send information request to Alexa simultaneously.
+But each FT900 cannot simultaneously play music or any audio content.
+
+To solve this problem, multiple instances of the Alexa application can be executed.
+That is each FT900 device is connected to a unique Alexa instance.
+
+To do this, each application instance will:
+      
+      1. Listen to a different port
+      2. Use a different Alexa configuration file
+      3. Use a different database location
+
+I created a Python script named RPIAlexaManager.py that automates the configuration and execution of multiple Alexa application instances.
+
+Below is the mapping of FT900 device id to the RPI Alexa instance.
+
+      FT900 device 1 connects to port BASE_PORT+0
+      FT900 device 2 connects to port BASE_PORT+1
+      FT900 device X connects to port BASE_PORT+X-1
+      RPI app instance for account 1 listens to port BASE+0
+      RPI app instance for account 2 listens to port BASE+1
+      RPI app instance for account X listens to port BASE+X-1
+      RPI app instance for account 1 uses configuration 1 and database 1.
+      RPI app instance for account 2 uses configuration 2 and database 2.
+      RPI app instance for account X uses configuration X and database X.
 
 
 # Performance analysis/optimization
@@ -477,7 +519,7 @@ Note you can issue voice commands to either RPI or FT900.
 
 Download the latest [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway) code.
          
-A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
+A. Install AVS SDK (latest version is AVS SDK 1.12.1 [04-02-2019])
 
       1. Install the original AVS SDK on RPI using the official installation guide on RPI.
          https://github.com/alexa/avs-device-sdk/wiki/Raspberry-Pi-Quick-Start-Guide-with-Script
@@ -485,7 +527,7 @@ A. Install AVS SDK (latest version is AVS SDK 1.12.0 [02-28-2019])
          Note: Say 'Alexa' to trigger voice recording. Alternatively, press 't' key followed by Enter key to trigger recording.
          First run requires authorization. Go to https://amazon.com/us/code and type the code displayed in  the logs.
          
-B. Integrate AVS SDK modifications (supports AVS SDK 1.12.0 [02-28-2019])
+B. Integrate AVS SDK modifications (supports AVS SDK 1.12.1 [04-02-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
