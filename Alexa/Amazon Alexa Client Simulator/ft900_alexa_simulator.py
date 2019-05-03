@@ -39,6 +39,7 @@ CONF_FILENAME_REQUEST_YES   = "audio/REQUEST_yes.raw"
 CONF_FILENAME_TIMESTAMP     = 0
 CONF_TIMEOUT_SEND           = 10
 CONF_TIMEOUT_RECV           = 10
+CONF_RESET_TIMEOUT          = 1
 
 ############################################################################################
 # Sampling rates.
@@ -215,108 +216,52 @@ def avs_play_response(file_name):
 def avs_recv_and_play_response():
 
     global g_quit
-    
+
     audio = pyaudio.PyAudio()
     stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
-    
-    val = g_socket.recv(4)
-    if val:
-        file_size_recv = struct.unpack('i', val[:])[0]
-        recv_size = 512
-        recved_size = 0
-        
-        while g_quit is False:
-            try:
-                data = g_socket.recv(recv_size)
-                if not data:
-                    print("Error: recv failed! not data")
-                    g_quit = True
-                    break
-                len_data = len(data)
-                if len_data <= 0:
-                    print("Error: recv failed! len_data <= 0")
-                    print(len_data)
-                    break
-                recved_size += len(data)
-                if recved_size == file_size_recv:
-                    break
-                stream.write(audioop.ulaw2lin(data, 2))
-                if recv_size > file_size_recv - recved_size: 
-                    recv_size = file_size_recv - recved_size
-                
-            except socket.error as e:
-                print("error")
-                print(e.args[0])
-            #sleep(0.05)
-    else:
-        g_quit = True
-        
+
+    try:
+        val = g_socket.recv(4)
+        if val:
+            file_size_recv = struct.unpack('I', val[:])[0]
+            recv_size = 512
+            recved_size = 0
+            print("file_size_recv = {}".format(file_size_recv))
+            
+            while g_quit is False:
+                try:
+                    data = g_socket.recv(recv_size)
+                    if not data:
+                        print("Error: recv failed! not data")
+                        g_quit = True
+                        break
+                    len_data = len(data)
+                    if len_data <= 0:
+                        print("Error: recv failed! len_data <= 0")
+                        print(len_data)
+                        break
+                    recved_size += len_data
+                    #print("len_data = {} {}".format(len_data, recved_size))
+                    if recved_size == file_size_recv:
+                        break
+                    stream.write(audioop.ulaw2lin(data, 2))
+                    if recv_size > file_size_recv - recved_size: 
+                        recv_size = file_size_recv - recved_size
+                    
+                except socket.error as e:
+                    print("error")
+                    print(e.args[0])
+                #sleep(0.05)
+        else:
+            print("recv error")
+            g_quit = True
+    except:
+        print("exception")
+
     stream.stop_stream()
     stream.close()
     audio.terminate()
 
-
-
-############################################################################################
-# thread_fxn_dialog
-############################################################################################
-class thread_fxn_dialog(threading.Thread):
-
-    def __init__(self, threadID, name, file_name_request, file_name_response):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
-        self.file_name_request = file_name_request
-        self.file_name_response = file_name_response
-
-    def run(self):
-        sleep(1)
-        global g_quit
-        global g_port
-
-        while g_quit is False:
-
-            print("\n[DIALOG] Connecting to Alexa provider... {}:{}\n".format(CONF_SERVER_ADDR, g_port))
-            if avs_connect() == 0:
-                sleep(3)
-                continue
-            break
-
-
-        while g_quit is False:
-
-            try:
-                print("[DIALOG] Sending Alexa query...", end='', flush=True)
-                start = time()
-                avs_send_request(self.file_name_request)
-                print("[{0:.0f} ms]".format((time()-start)*1000))
-                
-                print("[DIALOG] Streaming Alexa response...", end='', flush=True)
-                start2 = time()
-                avs_recv_and_play_response()
-                print("[{0:.0f} ms]".format((time()-start2)*1000))
-                
-#                print("[DIALOG] Receiving Alexa response...", end='', flush=True)
-#                start2 = time()
-#                file_name = avs_recv_response(self.file_name_response)
-#                print("[{0:.0f} ms]".format((time()-start2)*1000))
-
-#                print("[DIALOG] Playing Alexa response...", end='', flush=True)
-#                start3 = time()
-#                avs_play_response(file_name)
-#                print("[{0:.0f} ms]".format((time()-start3)*1000))
-
-                print("[DIALOG] Performance: {0:.0f} ms".format((time()-start)*1000))
-                break
-            except:
-                print("[DIALOG] Error!")
-
-        while g_quit is False:
-            sleep(1)
- 
-        print("\n[DIALOG] Closing TCP connection...\n")		
-        avs_disconnect()
-        return
 
 ############################################################################################
 # thread_fxn_streamer
@@ -358,6 +303,7 @@ class thread_fxn_streamer(threading.Thread):
                 #avs_play_response(file_name)
                 avs_recv_and_play_response()
             except:
+                print("\navs_recv_and_play_response exception!")
                 break
 
         print("\n[STREAMER] Disconnecting from Alexa provider...\n")
@@ -453,7 +399,7 @@ def main(args, argc):
         print("\n===============================================================")
         print("FT900 Alexa Demo simulator")
         print("===============================================================\n")
-    
+
         # Initialize the streamer thread
         g_quit = False
         g_exit = False
@@ -519,9 +465,9 @@ def main(args, argc):
 
         if g_exit is True:
             break
-        
-        print("Retrying in 15 seconds", end='', flush=True)
-        for i in range(15):
+
+        print("Retrying in {} seconds".format(CONF_RESET_TIMEOUT), end='', flush=True)
+        for i in range(CONF_RESET_TIMEOUT):
             sleep(1)
             print(".", end='', flush=True)
 
