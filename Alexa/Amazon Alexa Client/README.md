@@ -167,8 +167,9 @@ The FT900 application provides option to choose from any pre-recorded audio for 
 
 A Python script application named FT900 Alexa Simulator is also provided to simulate the behavior of FT900 on a Windows machine.
 
-      - It can be run on Windows and Linux machine.
-      - It can assist in automated testing and stress testing of RPI Alexa Gateway.
+These tester and simulator can be a very useful tool as you don't have to speak to the microphone everytime.
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
 
 
 
