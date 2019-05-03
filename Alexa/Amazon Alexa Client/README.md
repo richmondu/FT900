@@ -134,7 +134,7 @@ This reduces the data bandwidth without affecting audio quality.
 The format of audio received by FT900 from RPI is raw/PCM format.
 RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
 
-      - TODO: Investigate if FT900 can do the MP3/AAC decoding.
+      - TODO: Investigate if FT900 can do the MP3/AAC decoding. Utilize libMAD open source MPEG Audio Decoder library.
 
 
 ### Audio Streaming
