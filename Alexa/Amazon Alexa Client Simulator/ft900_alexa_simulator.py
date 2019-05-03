@@ -40,6 +40,7 @@ CONF_FILENAME_TIMESTAMP     = 0
 CONF_TIMEOUT_SEND           = 10
 CONF_TIMEOUT_RECV           = 10
 CONF_RESET_TIMEOUT          = 1
+CONF_CHUNK_SIZE             = 512
 
 ############################################################################################
 # Sampling rates.
@@ -130,7 +131,18 @@ def avs_send_request(file_name):
     g_socket.sendall(val)
 
     # Send Alexa request
-    g_socket.sendall(bytes(file_bytes))
+    # send in chunks instead of sending all to simulate RS485 slowness
+    # g_socket.sendall(bytes(file_bytes))
+    sent_data = 0
+    send_size = CONF_CHUNK_SIZE
+    file_bytes = bytes(file_bytes)
+    #print("{}".format(file_size))
+    while sent_data < file_size:
+        if file_size - sent_data < send_size:
+            send_size = file_size - sent_data
+        g_socket.sendall(file_bytes[sent_data:sent_data+send_size])
+        sent_data += send_size
+        #print("{} {}".format(send_size, sent_data))
 
 ############################################################################################
 # avs_recv_response
@@ -227,7 +239,7 @@ def avs_recv_and_play_response():
             g_quit = True
         else:
             file_size_recv = struct.unpack('I', val[:])[0]
-            recv_size = 512
+            recv_size = CONF_CHUNK_SIZE
             recved_size = 0
             #print("streaming {} bytes".format(file_size_recv))
 
@@ -244,10 +256,11 @@ def avs_recv_and_play_response():
                         print("Error: recv failed! len_data <= 0")
                         print(len_data)
                         break
+
                     recved_size += len_data
-                    #print("len_data = {} {}".format(len_data, recved_size))
                     if recved_size == file_size_recv:
                         break
+
                     stream.write(audioop.ulaw2lin(data, 2))
                     if recv_size > file_size_recv - recved_size: 
                         recv_size = file_size_recv - recved_size
