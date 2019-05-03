@@ -629,9 +629,9 @@ Below are the action items for the Alexa Demo.
 
       1. Test and support Alexa notifications using QuoteMaker.
       2. [BUG] RPI plays all audio sent to FT900. RPI should not play audio intended for FT900.  
-      3. Implement "ESP32 Alexa Client".
-      4. RPI should also send Alexa "Display Cards" to FT900 since FT900 can be connected to a FT800 display.
-      5. Integrate "FT900 libMAD MP3 decoder" and provide RPI option to send MP3 instead of PCM/raw.
+      3. Support "ESP32 Alexa Client".
+      4. Support "Alexa Display Cards" since FT900 can be connected to a FT800 display.
+      5. Support "FT900 libMAD MP3 decoder" and provide RPI option to send MP3 instead of PCM/raw.
       6. Support "FT900 Wake-Word detection". Currently, user has to press down a button to start voice recording.
 
 
