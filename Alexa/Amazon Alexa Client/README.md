@@ -38,6 +38,9 @@ Below is a block diagram showing the implemented components of the FT900 applica
 Below is a sequence diagram showing the basic interaction of components of the FT900 application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram.jpg" width="623"/>
 
+      - Streamer task receives and play audio data (response or audio content)
+      - Commander task records and sends audio request data
+      
 
 ### FT900 as Alexa Thin Client
 
