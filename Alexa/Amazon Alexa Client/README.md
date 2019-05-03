@@ -43,7 +43,7 @@ Below is a sequence diagram showing the basic interaction of components of the F
 
 FT900 utilizes RPI server to access Alexa.
 RPI provides separate Alexa instance to each connected FT900 device as if each FT900 is an Echo Dot device,
-that is each FT900 is not dependend on other FT900s in terms of Aexa usage.
+that is each FT900 is not dependent on other FT900s in terms of Alexa usage.
 Moreover, each FT900 can be configured to use different Amazon accounts.
 
 Most of the audio processing is performed by RPI.
@@ -134,7 +134,7 @@ This reduces the data bandwidth without affecting audio quality.
 The format of audio received by FT900 from RPI is raw/PCM format.
 RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
 
-      - TODO: Investigate if FT900 can do the MP3/AAC decoding.
+      - TODO: Investigate if FT900 can do the MP3/AAC decoding. Utilize libMAD open source MPEG Audio Decoder library.
 
 
 ### Audio Streaming
@@ -167,8 +167,9 @@ The FT900 application provides option to choose from any pre-recorded audio for 
 
 A Python script application named FT900 Alexa Simulator is also provided to simulate the behavior of FT900 on a Windows machine.
 
-      - It can be run on Windows and Linux machine.
-      - It can assist in automated testing and stress testing of RPI Alexa Gateway.
+These tester and simulator can be a very useful tool as you don't have to speak to the microphone everytime.
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
 
 
 
@@ -184,10 +185,6 @@ Below is a system diagram of AVS SDK.
 Below is a block diagram showing the implemented components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi.jpg" width="623"/>
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram_rpi2.jpg" width="623"/>
-
-      - Note that audio from Alexa is MP3 for dialogue responses 
-      - But can be MP3/AAC or other audio formats for contents (music, live news, audio book) and alerts (alarms, timers).
-
 
 Below is a sequence diagram showing the basic interaction of components of the RPI application.
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/sequence_diagram_rpi.jpg" width="623"/>
