@@ -66,10 +66,8 @@ The main component of the Alexa Demo on the FT900 side is the Alexa AVS library.
       - avs_play_response() - Play voice response from SD card
       - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
       - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
-      - avs_set_volume()
-      - avs_get_volume()
-      - avs_init()
-      - avs_free()
+      - avs_set_volume(), avs_get_volume()
+      - avs_init(), avs_free()
 
 As you can see, there are three ways to process Alexa response. The first is the basic implementation while the 2nd and 3rd improves user experience by reducing delay or the waiting time to hear Alexa's response.
 
@@ -560,9 +558,9 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.1 [04-02-2019])
 
       1. The RPI Alexa Gateway is a customized AVS SDK.
          Replace the original avs-device-sdk folder with this modified avs-device-sdk. 
-      2. Install FFMPEG utility
-         new: sudo apt-get install ffmpeg
-         old: sudo apt-get install sox libsox-fmt-mp3 libsox-fmt-all libsox-dev
+      2. [OBSOLETED] Install FFMPEG or SOX utility
+         sudo apt-get install ffmpeg
+         sudo apt-get install sox libsox-fmt-mp3 libsox-fmt-all libsox-dev
       3. Compile and run.
          cd /home/..../alexa/build/SampleApp/src
          sudo ./SampleApp "/home/.../alexa/build/Integration/AlexaClientSDKConfig.json" "/home/.../alexa/third-party/alexa-rpi/models" INFO
@@ -576,10 +574,10 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.1 [04-02-2019])
 
 Download the latest [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) code.
 
-NEW:
-
-      1. Change AVS_CONFIG_SERVER_ADDR in avs_config.h.
-         This should contain the IP address of the RPI
+      1. Change AVS Configuration values in avs_config.h:
+            AVS_CONFIG_SERVER_ADDR - IP address of the RPI
+            AVS_CONFIG_DEVICE_ID - Device ID of the FT900; modify if running multiple FT900 clients
+            AVS_CONFIG_DIFFERENT_ACCOUNT - Flag to indicate if using different Alexa account/instance
       2. Copy request1.raw, request2.raw, ..., request8.raw from test folder to SD card.      
             REQUEST1.RAW - ask current time.
             REQUEST2.RAW - play music from TuneIn radio.
@@ -602,30 +600,6 @@ NEW:
             Press 's' to tell stop.
             Press 'y' to tell yes.
             Press 'q' to quit and restart.
-
-OLD:
-
-      A. Test Mode (Use a pre-recorded request contained in SD card)
-      1. Change AVS_CONFIG_SERVER_ADDR in avs_config.h.
-         This should contain the IP address of the RPI
-      2. Copy test/request.raw to SD card.
-         request.raw is an audio recording of "What time is it?"
-      3. Compile and run.
-         This automatically sends the pre-recorded audio, request.raw, to RPI.
-
-      B. Normal Mode (User presses a key or button to trigger voice recording)
-      1. Change AVS_CONFIG_SERVER_ADDR to avs_config.h.
-         This should contain the IP address of the RPI
-      2. Change TEST_MODE to 0 in main.
-      3. (Optional) Change USE_GPIO to 1 in button.c.
-         (Optional) Connect button to GPIO 31, 5V and GND.
-         (Optional) Default is UART instead of GPIO.
-      4. Compile and run.
-      5. For UART mode, Press 't' to start recording voice command.
-         For GPIO mode, press the button.
-      6. For UART mode, press 't' again to stop recording voice command.
-         For GPIO mode, release the button.
-      7. After stopping the recording, FT900 will send the voice request to RPI.
 
 
 
