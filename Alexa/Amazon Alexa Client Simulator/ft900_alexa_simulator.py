@@ -222,7 +222,10 @@ def avs_recv_and_play_response():
 
     try:
         val = g_socket.recv(4)
-        if val:
+        if not val:
+            print("recv error")
+            g_quit = True
+        else:
             file_size_recv = struct.unpack('I', val[:])[0]
             recv_size = 512
             recved_size = 0
@@ -235,6 +238,7 @@ def avs_recv_and_play_response():
                         print("Error: recv failed! not data")
                         g_quit = True
                         break
+
                     len_data = len(data)
                     if len_data <= 0:
                         print("Error: recv failed! len_data <= 0")
@@ -251,10 +255,7 @@ def avs_recv_and_play_response():
                 except socket.error as e:
                     print("error")
                     print(e.args[0])
-                #sleep(0.05)
-        else:
-            print("recv error")
-            g_quit = True
+
     except:
         print("exception")
 
