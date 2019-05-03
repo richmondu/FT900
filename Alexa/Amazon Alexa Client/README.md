@@ -77,18 +77,6 @@ As you can see, there are three ways to process Alexa response. The first is the
       2. Receive and play response immediately segment by segment.
       3. Receive and play response in separate threads by utilizing some overlapped memory.
 
-### Wakeword Detection
-
-The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
-
-The demo provides two ways to trigger voice recording:
-
-      - UART Mode: Press 'r' key on UART terminal
-      - GPIO Mode: Press hardware button connected to GPIO 31
-
-To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
-[SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
-
 
 ### Audio Capture
 
@@ -174,6 +162,19 @@ A Python script application named FT900 Alexa Simulator is also provided to simu
 These tester and simulator can be a very useful tool as you don't have to speak to the microphone everytime.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
+
+
+### Wake-word/Trigger-word Detection
+
+The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
+
+The demo provides two ways to trigger voice recording:
+
+      - UART Mode: Press 'r' key on UART terminal
+      - GPIO Mode: Press hardware button connected to GPIO 31
+
+To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
+[SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
 
 
