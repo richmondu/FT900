@@ -127,13 +127,7 @@ def avs_send_request(file_name):
     g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
     val = struct.pack('i', file_size)
     g_socket.sendall(val)
-    
-    # Send sample rate to be used
-    timeval = struct.pack('ll', CONF_TIMEOUT_SEND, 0)
-    g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
-    val = struct.pack('i', CONF_SAMPLING_RATE)
-    g_socket.sendall(val)
-    
+
     # Send Alexa request
     g_socket.sendall(bytes(file_bytes))
 

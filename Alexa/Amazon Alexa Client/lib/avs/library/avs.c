@@ -452,22 +452,6 @@ int avs_send_request(const char* pcFileName)
     // Set a timeout for the operation
     comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
 
-    // Send the flag for configurations
-    // Currently the flag is only for specifying the sampling rate of the response
-    uint32_t ulFlag = AVS_CONFIG_SAMPLING_RATE;
-    iRet = comm_send((char*)&ulFlag, sizeof(ulFlag));
-    if (iRet != sizeof(ulFlag)) {
-        DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", iRet, sizeof(ulFlag));
-        iRet = 0;
-        goto err;
-    }
-
-    //DEBUG_PRINTF(">> Sent %d bytes to: ('%s', %d)\r\n", size_tx, addr, port);
-
-
-    // Set a timeout for the operation
-    comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
-
     while (ulBytesSent != ulBytesToTransfer) {
         // Compute the transfer size
         if (ulBytesToTransfer-ulBytesSent < ulBytesToProcess) {
