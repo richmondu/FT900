@@ -226,8 +226,8 @@ def avs_recv_and_play_response():
             file_size_recv = struct.unpack('I', val[:])[0]
             recv_size = 512
             recved_size = 0
-            print("file_size_recv = {}".format(file_size_recv))
-            
+            #print("streaming {} bytes".format(file_size_recv))
+
             while g_quit is False:
                 try:
                     data = g_socket.recv(recv_size)
@@ -247,7 +247,7 @@ def avs_recv_and_play_response():
                     stream.write(audioop.ulaw2lin(data, 2))
                     if recv_size > file_size_recv - recved_size: 
                         recv_size = file_size_recv - recved_size
-                    
+
                 except socket.error as e:
                     print("error")
                     print(e.args[0])
@@ -261,6 +261,33 @@ def avs_recv_and_play_response():
     stream.stop_stream()
     stream.close()
     audio.terminate()
+
+
+############################################################################################
+# thread_fxn_player
+############################################################################################
+class thread_fxn_player(threading.Thread):
+
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+
+    def run(self):
+        sleep(1)
+        global g_quit
+
+        audio = pyaudio.PyAudio()
+        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
+
+        # todo
+        #while g_quit is False:
+
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
+
+        return
 
 
 ############################################################################################
