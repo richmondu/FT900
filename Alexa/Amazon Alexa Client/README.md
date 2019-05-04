@@ -282,6 +282,9 @@ Various audio content services are now working on FT900 microcontroller.
 
 To support audio book playback, I had to replace libsox with ffmpeg as libsox does NOT support AAC audio format.
 
+[UPDATE] GStreamer is now used to decode the data instead of FFMPEG. 
+That is, raw decoded data is now being hook beneath the GStreamer pipeline so FFMPEG is no longer used.
+
 Access to other audio services are restricted by Amazon on AVS-SDK. Need to request access to test Spotify, Amazon Music, etc.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_audio_services.png" width="623"/>
