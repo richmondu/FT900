@@ -18,8 +18,8 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 
 
 ### FT900 Alexa Demo
-- This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can interact with Alexa virtual assistant.
-- This integrates Alexa AVS SDK and adds Alexa Virtualization feature enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
+- This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can interact with Alexa via an edge gateway hub.
+- This integrates Alexa AVS SDK on smart hub platform and adds Alexa Virtualization feature enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
