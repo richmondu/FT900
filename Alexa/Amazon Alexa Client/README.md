@@ -54,7 +54,7 @@ Most of the audio processing is performed by RPI.
 The FT900 simply enables voice capture and audio playback.
 
 
-### FT900 Alexa AVS library
+## FT900 Alexa AVS library
 
 The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). SD Card should be replaced with SPI Flash or I2C EEPROM. The main functions include:
 
@@ -76,7 +76,7 @@ As you can see, there are three ways to process Alexa response. The first is the
       3. Receive and play response in separate threads by utilizing some overlapped memory.
 
 
-### Audio Capture
+## Audio Capture
 
 FT900 captures audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
 
@@ -89,7 +89,7 @@ FT900 captures audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
       - Audio sent (to RPI): 8-bit u-law, 16KHZ, mono (1-channel)
 
 
-### Audio Playback
+## Audio Playback
 
 FT900 plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
 
@@ -110,7 +110,7 @@ FT900 plays audio in raw PCM 16-bit 16 kHz stereo (2 channel) format.
       - Audio played (to speaker): 16-bit PCM, 16KHZ, stereo (2-channels)  
 
 
-### Audio Compression
+## Audio Compression
     
 FT900 compresses audio sent to RPI and decompresses/expands audio received from RPI.
 This reduces the data bandwidth without affecting audio quality.
@@ -119,7 +119,7 @@ This reduces the data bandwidth without affecting audio quality.
       - Converting stereo data stream to mono data stream is done by averaging the consecutive left and right 16-bits WORDS.
 
 
-### Audio Decoding
+## Audio Decoding
 
 The format of audio received by FT900 from RPI is raw/PCM format.
 RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
@@ -127,7 +127,7 @@ RPI performs the decoding to raw/PCM from MP3, AAC or other formats.
       - TODO: Investigate if FT900 can do the MP3/AAC decoding. Utilize libMAD open source MPEG Audio Decoder library.
 
 
-### Audio Streaming
+## Audio Streaming
 
 FT900 sends/receives audio to/from RPI in raw PCM 8-bit 16 kHz mono (1 channel) format.
 
@@ -138,7 +138,7 @@ To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or R
       - RS485: TODO
 
 
-### Audio Codec
+## Audio Codec
 
 The audio hardware chip for the FT900 RevC evaluation board is a Wolfson WM.
 I2C is used to configure the settings while I2S is used to capture and play audio.
@@ -151,7 +151,7 @@ So I had to create an audio module to abstract I2S/I2C details, provide simple t
 As well as several other features, including volume control, channel conversion, 8-bit compression and etc.  
 
 
-### Test Mode and Test Simulator
+## Test Mode and Test Simulator
 
 The FT900 application provides option to choose from any pre-recorded audio for testing convenience.
 
@@ -162,7 +162,7 @@ These tester and simulator can be a very useful tool as you don't have to speak 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
 
 
-### Wake-word/Trigger-word Detection
+## Wake-word/Trigger-word Detection
 
 The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
 
@@ -218,7 +218,7 @@ Below is a sequence diagram showing the basic interaction of components of the R
       20. The FT900ClientHandler thread closes the socket once FT900RequestHandler and FT900ResponseHandler threads terminate. 
 
 
-### Alexa Capabilities
+## Alexa Capabilities
 
 AVS SDK supports 3 major capabilities: 
 
@@ -272,7 +272,7 @@ Below is an experiment that demonstrates the prioritization of Alexa on dialogue
          Music turned off.
 
 
-### Alexa Audio Content Services
+## Alexa Audio Content Services
 
 Various audio content services are now working on FT900 microcontroller. 
 
@@ -288,7 +288,7 @@ Access to other audio services are restricted by Amazon on AVS-SDK. Need to requ
 
 
 
-### RPI Alexa AVS SDK modifications
+## RPI Alexa AVS SDK modifications
 
 In addition to the new modules implemented described in the block diagram and sequence diagram, 
 the primary modifications for the AVS SDK application are contained in PortAudioMicrophoneWrapper class, SpeechSynthesizer class and MediaPlayer classes.
@@ -328,7 +328,7 @@ All of new files starts with FT900 to easily distinguish it from original AVS SD
 After modifications, the total size of the binary executable is 16.2MB.
 
 
-### Audio Processing 
+## Audio Processing 
 
 Below is a description of how the audio is processed on RPI.
 
@@ -344,7 +344,7 @@ Below is a description of how the audio is processed on RPI.
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 
 
-### Audio Hooking/Decoding
+## Audio Hooking/Decoding
 
 I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. 
 [AVS SDK uses GStreamer for audio streaming, decoding and playback.]
@@ -368,7 +368,7 @@ Removing the redundant "decoding" also fixes the 50-100% CPU problem occuring wh
 Now, with 8 FT900 devices simulataneously playing music, CPU is now just 40-50%.
 
 
-### Multiple Alexa Instances/Sessions/Accounts
+## Multiple Alexa Instances/Sessions/Accounts
 
 Previously, multiple FT900 devices share a single Alexa instance.
 Each FT900 can send information request to Alexa simultaneously.
@@ -400,7 +400,8 @@ Below is the mapping of FT900 device id to the RPI Alexa instance.
 
 # Performance analysis/optimization
 
-### A. Optimization efforts
+
+## A. Optimization efforts
 
 Below are the major performance optimization efforts implemented for the demo.
 
@@ -418,7 +419,7 @@ Below are the major performance optimization efforts implemented for the demo.
       - RPI should only play response when the request is from RPI microphone.
 
 
-### B. RPI
+## B. RPI
 
 One round trip of Alexa request and Alexa response on the RPI side (RPI-AVS-RPI) is about 3.2 seconds (now optimized to 2.6 seconds).
 This is for a simple command, "What time is it?". 
@@ -429,7 +430,7 @@ This measures the time RPI accepts FT900 connection until it closes the connecti
 Note that the logs correspond to the sequence diagram above.
 
 
-### C. FT900
+## C. FT900
 
 One round trip of Alexa request and Alexa response on the FT900 side (FT900-RPI-AVS-RPI-FT900) is 5-6 seconds.
 This has been optimized from 6-7 seconds.
@@ -460,7 +461,7 @@ Below are the three modes supported for processing Alexa responses.
 
 # Audio quality analysis
 
-### A. FT900 Speaker playback
+## A. FT900 Speaker playback
 
 Playback of Alexa response on connected speaker is very very good. There is no noise or jittering. It is very smooth.
 
@@ -475,7 +476,7 @@ When streaming the Alexa response directly to the speaker without saving to SD c
 This is an efficient transfer because I2S Master FIFO size is only 2KB.
 
 
-### B. FT900 Microphone recording
+## B. FT900 Microphone recording
 
 Recording of Alexa request on FT900 microphone is good. Background noise can be heard but voice pops out when user speaks very near to microphone.
 
@@ -483,7 +484,7 @@ Recording of Alexa request on FT900 microphone is good. Background noise can be 
 
 # PanL Smart Home Adoption analysis
 
-### A. RS485 small bandwidth issue
+## A. RS485 small bandwidth issue
 
 The demo currently uses Ethernet for communication between RPI and FT900. 
 For PanL, where communication medium is RS485, bandwidth is smaller, about 92KBps only. 
@@ -511,7 +512,7 @@ Note that the demo solution provides both options to save or not to save respons
 (Saving response to SD card is 1-2 seconds slower than NOT saving response to SD card.)
 
 
-### B. CPU usage issue
+## B. CPU usage issue
 
 Another concern is the CPU usage consumed by the application on RPI. 
 
@@ -524,7 +525,7 @@ So the Alexa application on RPI does NOT and can NOT hog the CPU.
 
 # Setup guide
 
-### Prerequisites:
+## Prerequisites:
 
 A. RPI
 
@@ -542,7 +543,7 @@ B. FT900
 Note you can issue voice commands to either RPI or FT900.
 
 
-### RPI setup:
+## RPI setup:
 
 Download the latest [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway) code.
          
@@ -570,7 +571,7 @@ B. Integrate AVS SDK modifications (supports AVS SDK 1.12.1 [04-02-2019])
       4. Setup and run FT900.
 
 
-### FT900 setup:
+## FT900 setup:
 
 Download the latest [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) code.
 
