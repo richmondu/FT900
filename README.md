@@ -18,13 +18,14 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 
 
 ### FT900 Alexa Demo
-- This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can interact with Alexa virtual assistant.
+- This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can interact with Alexa via an edge gateway hub.
+- This integrates Alexa AVS SDK on smart hub platform and adds Alexa Virtualization feature enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client
   https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
 
 
 ### FT900 IoT Security and Cloud Connectivity
-- IoT Security: IoT framework including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source contributions, and IoT Project Templates (for FT900 Eclipse IDE)
+- IoT Security: IoT library including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE)
 - IoT Connectivity: Secure authentication and communication with IoT cloud platforms: Amazon Web Services, Google Cloud Platform and Microsoft Azure.
 - IoT Solutions: Backend of PoC IoT solutions for Electronica/Embedded World summit and client demos leveraging AWS (Greengrass, IoT Core, Lambda, DynamoDB), GCP (IoT Core, Pub/Sub, Dataflow, BigQuery) and Azure (IoT Hub, Stream Analytics, CosmosDB). Frontend NodeJS scripts that accesses Google Cloud SDK and Microsoft Azure SDK to demonstrate authenticating and querying of Big Query and CosmosDB databases.  
