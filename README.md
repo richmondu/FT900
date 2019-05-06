@@ -26,6 +26,6 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 
 
 ### FT900 IoT Security and Cloud Connectivity
-- IoT Security: IoT framework including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source contributions, and IoT Project Templates (for FT900 Eclipse IDE)
+- IoT Security: IoT library including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE)
 - IoT Connectivity: Secure authentication and communication with IoT cloud platforms: Amazon Web Services, Google Cloud Platform and Microsoft Azure.
 - IoT Solutions: Backend of PoC IoT solutions for Electronica/Embedded World summit and client demos leveraging AWS (Greengrass, IoT Core, Lambda, DynamoDB), GCP (IoT Core, Pub/Sub, Dataflow, BigQuery) and Azure (IoT Hub, Stream Analytics, CosmosDB). Frontend NodeJS scripts that accesses Google Cloud SDK and Microsoft Azure SDK to demonstrate authenticating and querying of Big Query and CosmosDB databases.  
