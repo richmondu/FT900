@@ -9,9 +9,13 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
 
   [Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
+  
   [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+  
   [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
+  
   [ESP32 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
+
 
 
 ### FT900 AWS IoT Demo
