@@ -7,10 +7,7 @@ This contains the Amazon Alexa demo, IoT framework including AWS/GCP/Azure IoT d
 - This demonstrates using the <b>FT900 microcontroller as an Amazon Echo Dot device</b>, where users can interact with Alexa via an edge gateway hub.
 - This integrates Alexa AVS SDK on smart hub device running on Raspberry PI platform and adds <b>Alexa Virtualization feature</b> enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
 - This will be integrated to <b>PanL Smart Home Automation</b> (PanL Hub and PanL Display).
-- [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway), 
-  [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client),  
-  [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator),  
-  [ESP32 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
+- [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway), [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client), [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator), [ESP32 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
 
 
 
