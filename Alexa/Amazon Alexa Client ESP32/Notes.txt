@@ -1,0 +1,56 @@
+MicroPython for ESP32
+https://docs.micropython.org/en/latest/esp32/tutorial/intro.html#esp32-intro
+
+
+Setup:
+1. pip install esptool
+2. Get esptool.py from https://github.com/espressif/esptool
+3. Get esp32-20190125-v1.10.bin from https://micropython.org/download#esp32
+   [FYI: esp32-20190125-v1.10.bin has TCP RECV issue; replace with esp32-20190507-v1.10-326-g089c9b71d.bin]
+4. Run esptool.py to program 
+   python esptool.py --port COM40 erase_flash
+   python esptool.py --chip esp32 --port COM40 --baud 115200 write_flash -z 0x1000 esp32-20190507-v1.10-326-g089c9b71d.bin
+
+
+Test:
+1. python esptool.py --port COM40 --baud 115200 read_mac
+2. python esptool.py --port COM40 --baud 115200 flash_id
+3. Open TeraTerm using port COM40 baud 115200.
+   If "OSError: [Errno 2] ENOENT" appears,
+   follow instructions at https://github.com/micropython/micropython-esp32/issues/90
+
+   import os
+   os.listdir()
+
+   f = open("main.py", "w")
+   f.write("print(\"main.py: Hello\")\n")
+   f.close()
+   #os.remove('main.py')
+
+
+Boot-up files:
+1. 2 files needed: boot.py and main.py
+2. boot.py script is executed first (if it exists) and then once it completes the main.py script is executed. 
+3. You can create these files yourself and populate them with the code that you want to run when the device starts up.
+
+
+Copying files:
+1. Install RSHELL
+   pip install rshell
+2. Create boot.py and main.py then copy to ESP32
+   rshell
+   connect serial COM40 115200
+   cp boot.py /pyboard
+   cp main.py /pyboard
+3. Type
+   a. repl
+   b. or open teraterm COM40 115200
+4. Reset ESP32
+
+
+Notes:
+The main characteristic of a board is 
+1. how much flash it has, 
+2. how the GPIO pins are connected to the outside world, 
+3. whether it includes a built-in USB-serial convertor to make the UART available to your PC.
+
