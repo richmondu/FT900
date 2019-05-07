@@ -1,11 +1,11 @@
 # FT900 IoT/Smart Home
 
-This contains the IoT framework including IoT demo applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers.
+This contains the Amazon Alexa demo, IoT framework including AWS/GCP/Azure IoT demo applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers.
 
 
 ### FT900 Alexa Demo
 - This demonstrates using the FT900 microcontroller as an Amazon Echo Dot device, where users can interact with Alexa via an edge gateway hub.
-- This integrates Alexa AVS SDK on smart hub platform and adds Alexa Virtualization feature enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
+- This integrates Alexa AVS SDK on smart hub platform and adds <b>Alexa Virtualization feature</b> enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
 
   [Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
