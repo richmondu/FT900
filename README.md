@@ -22,13 +22,13 @@ This contains the IoT framework including IoT demo applications for FTDI/Bridget
 - This integrates Alexa AVS SDK on smart hub platform and adds Alexa Virtualization feature enabling multiple in-house MCUs to access Alexa using different Alexa instances and Amazon accounts.
 - This will be integrated to PanL Smart Home Automation (PanL Hub and PanL Display).
 
-  [Alexa Gateway] https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
+  [Alexa Gateway] (https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
   
-  [FT900 Alexa Client] https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client
+  [FT900 Alexa Client] (https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
   
-  [FT900 Alexa Client Simulator] https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator
+  [FT900 Alexa Client Simulator] (https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
   
-  [ESP32 Alexa Client] https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32
+  [ESP32 Alexa Client] (https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
 
 
 
