@@ -9,8 +9,8 @@ The next generation PanL Display will use ESP32 microcontroller instead of FT900
 
 Refer to the following links:
 
-        https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client and
-        https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway
+[FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+[Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
 
 
 Instructions:
