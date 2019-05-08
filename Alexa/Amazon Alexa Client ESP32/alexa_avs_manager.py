@@ -147,10 +147,10 @@ class alexa_avs_manager():
         print("\r\n===============================================================")
         print("ESP32 Alexa Demo exits...")
         print("===============================================================\r\n\r\n")
+
         self.exiting = True
         _thread.exit()
         return
-
 
     def run(self):
         _thread.start_new_thread(self.thread_fxn_manager, ())
