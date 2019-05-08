@@ -46,7 +46,9 @@ Copying files:
 
    cp main.py /pyboard
    cp alexa_avs.py /pyboard
-   cp -r audio /pyboard/audio
+
+   mkdir /pyboard/audio
+   cp audio/... /pyboard/audio
    cp boot.py /pyboard
 
    ls -l /pyboard
