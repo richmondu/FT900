@@ -43,9 +43,9 @@ Copying files:
 2. Create boot.py and main.py then copy to ESP32
    rshell -a
    connect serial COM40 115200
-
    cp main.py /pyboard
    cp alexa_avs.py /pyboard
+   cp alexa_avs_manager.py /pyboard
 
    mkdir /pyboard/audio
    cp audio/... /pyboard/audio
