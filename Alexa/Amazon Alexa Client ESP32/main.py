@@ -1,66 +1,144 @@
-import socket
-import struct
+from alexa_avs import alexa_avs
+import _thread
 import time
 
 
 
-CONFIG_SERVER_IP = '192.168.100.12'
-CONFIG_SERVER_PORT = 11234
-CONFIG_DEVICE_ID = 1
-CONFIG_RECV_CHUNK_SIZE = 512
-CONFIG_CONNECT_RETRY_SECS = 3
+############################################################################################
+# configuration
+############################################################################################
+CONFIG_DEVICE_ID               = 1
+CONFIG_FILENAME_REQUEST_TIME   = "audio/REQUEST_what_time_is_it.raw"
+CONFIG_FILENAME_REQUEST_PERSON = "audio/REQUEST_who_is.raw"
+CONFIG_FILENAME_REQUEST_MUSIC  = "audio/REQUEST_play_music.raw"
+CONFIG_FILENAME_REQUEST_NEWS   = "audio/REQUEST_play_live_news.raw"
+CONFIG_FILENAME_REQUEST_BOOK   = "audio/REQUEST_play_audio_book.raw"
+CONFIG_FILENAME_REQUEST_ALARM  = "audio/REQUEST_set_alarm.raw"
+CONFIG_FILENAME_REQUEST_STOP   = "audio/REQUEST_stop.raw"
+CONFIG_FILENAME_REQUEST_YES    = "audio/REQUEST_yes.raw"
 
 
+############################################################################################
+# usage
+############################################################################################
+def usage():
 
-print("\r\n===============================================================")
-print("ESP32 Alexa Demo")
-print("===============================================================\r\n")
+    print("\r\n===============================================================")
+    print("[MAIN] Usage:")
+    print("[MAIN]   Press 'q' key to quit...")
+    print("[MAIN]   Press 't' key to ask Alexa what time is it...")
+    print("[MAIN]   Press 'p' key to ask Alexa who is...")
+    print("[MAIN]   Press 'm' key to ask Alexa to play music...")
+    print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
+    print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
+    print("[MAIN]   Press 'a' key to ask Alexa to set alarm...")
+    print("[MAIN]   Press 's' key to tell Alexa to stop...")
+    print("[MAIN]   Press 'y' key to tell Alexa yes...")
+    print("===============================================================\r\n")
 
-while True:
-    # create sockets
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # connect to server
-    connect_retry = 0
-    sockaddr = socket.getaddrinfo(CONFIG_SERVER_IP, CONFIG_SERVER_PORT)[0][-1]
-    while True:
-        try:
-            print("Connecting to Alexa provider... {}:{} [ID:{}] [{}]\r\n".format(CONFIG_SERVER_IP, CONFIG_SERVER_PORT, CONFIG_DEVICE_ID, connect_retry))
-            s.connect(sockaddr)
-            print("Connected successfully!")
+############################################################################################
+# thread_fxn_streamer
+############################################################################################
+def thread_fxn_streamer(avs_handle, device_id):
+
+    while not avs_handle.is_quit():
+
+        # connect to server
+        connect_retry = 0
+        while not avs_handle.is_quit():
+            print("\r\n[STREAMER] Connecting to Alexa provider... {}:{} [ID:{}] [{}]".format(avs_handle.get_server_ip(), avs_handle.get_server_port(), device_id, connect_retry))
+            if not avs_handle.connect(device_id):
+                connect_retry += 1
+                time.sleep(3)
+                continue
+            print("\r\n[STREAMER] Connected successfully!")
+            usage()
             break
-        except:
-            connect_retry += 1
-            time.sleep(CONFIG_CONNECT_RETRY_SECS)
-            continue
 
-    # send the device id
-    val = struct.pack('I', CONFIG_DEVICE_ID)
-    s.send(val)
-
-
-    while True:
-        # receive the size of audio segment
-        val = s.recv(4)
-        if not val:
-            print("Recv size ERROR")
-            break
-        total_size = int(struct.unpack('i', val[:])[0])
-        print(total_size)
-
-        # receive the audio segment
-        want_recv = CONFIG_RECV_CHUNK_SIZE
-        total_recv = 0
-        while total_recv < total_size:
-            if total_size-total_recv < want_recv:
-                want_recv = total_size-total_recv
-            #print(want_recv)
-            val = s.recv(want_recv)
-            if not val:
-                print("Recv size ERROR2")
+        # stream from server
+        while not avs_handle.is_quit():
+            if not avs_handle.recv_and_play_response():
                 break
-            total_recv += len(val)
-            #print(total_recv)
 
-    # close socket
-    s.close()
+        # disconnect from server
+        avs_handle.disconnect()
+        print("\r\n[STREAMER] Disconnected from Alexa provider...")
+
+    print("\r\n[STREAMER] exits...")
+    _thread.exit()
+    return
+
+
+############################################################################################
+# thread_fxn_commander
+############################################################################################
+def thread_fxn_commander(avs_handle, file_request):
+
+    # exit if not connected
+    if not avs_handle.is_connected():
+        print("[COMMANDER] Not connected...")
+        _thread.exit()
+        return
+
+    # send request
+    if not avs_handle.is_quit():
+        print("[COMMANDER] Sending Alexa query [{}]...".format(file_request))
+        avs_handle.send_request(file_request)
+        print("OK")
+
+    _thread.exit()
+    return
+
+
+
+############################################################################################
+# main
+############################################################################################
+def main():
+
+    print("\r\n===============================================================")
+    print("ESP32 Alexa Demo")
+    print("===============================================================\r\n")
+
+    avs_handle = alexa_avs()
+
+    # start the streamer thread
+    _thread.start_new_thread(thread_fxn_streamer, (avs_handle, CONFIG_DEVICE_ID, ))
+
+    # wait for user input
+    while not avs_handle.is_quit():
+        key = input("")
+        if key == 'q':
+            avs_handle.quit()
+        elif key == 'h':
+            usage()
+        elif key=='t':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_TIME, ))
+        elif key=='p':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_PERSON, ))
+        elif key=='m':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_MUSIC, ))
+        elif key=='n':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_NEWS, ))
+        elif key=='b':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_BOOK, ))
+        elif key=='a':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_ALARM, ))
+        elif key=='s':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_STOP, ))
+        elif key=='y':
+            _thread.start_new_thread(thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_YES, ))
+        else:
+            time.sleep(1)
+
+
+    time.sleep(1)
+    print("\r\n===============================================================")
+    print("ESP32 Alexa Demo exits...")
+    print("===============================================================\r\n\r\n")
+    return
+
+
+if __name__ == '__main__':
+    main()
