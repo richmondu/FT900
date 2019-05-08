@@ -41,10 +41,16 @@ Copying files:
 1. Install RSHELL
    pip install rshell
 2. Create boot.py and main.py then copy to ESP32
-   rshell
+   rshell -a
    connect serial COM40 115200
-   cp boot.py /pyboard
+
    cp main.py /pyboard
+   cp alexa_avs.py /pyboard
+   cp -r audio /pyboard/audio
+   cp boot.py /pyboard
+
+   ls -l /pyboard
+   ls -l /pyboard/audio
 3. Type
    a. repl
    b. or open teraterm COM40 115200
