@@ -1,11 +1,11 @@
-from alexa_avs_manager import alexa_avs_manager
+from alexa.avs_manager import avs_manager
 
 
 
 def main():
 
     # run alexa manager
-    alexa_manager = alexa_avs_manager()
+    alexa_manager = avs_manager()
     alexa_manager.run()
 
     # trigger alexa manager to quit

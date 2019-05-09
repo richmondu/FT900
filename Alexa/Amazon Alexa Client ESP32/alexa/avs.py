@@ -13,10 +13,10 @@ import uheapq
 #CONFIG_SERVER_IP                    = '192.168.100.12'
 CONFIG_SERVER_IP                     = '192.168.0.125'
 CONFIG_SERVER_PORT                   = 11234
-CONFIG_SEND_CHUNK_SIZE               = 512
-CONFIG_RECV_CHUNK_SIZE               = 512
+CONFIG_BUFFER_SEND_SIZE              = 512
+CONFIG_BUFFER_RECV_SIZE              = 512
 CONFIG_RECV_TIMEOUT_MS               = 1000
-CONFIG_RECV2_TIMEOUT_MS              = 3000
+CONFIG_RECV_TIMEOUT_MS_2             = 10000
 
 ############################################################################################
 # Device capabilities
@@ -55,9 +55,9 @@ CONF_AUDIO_RECV_BITRATE              = DEVICE_CAPABILITIES_BITRATE_16000
 CONF_AUDIO_RECV_CHANNEL              = DEVICE_CAPABILITIES_CHANNEL_1
 
 ############################################################################################
-# alexa avs class
+# avs class
 ############################################################################################
-class alexa_avs:
+class avs:
 
     def __init__(self):
         self.handle = None
@@ -65,6 +65,7 @@ class alexa_avs:
         self.poller = None
         self.prev_total_size = 0
         self.queue_data = None
+        self.buffer_send = None
 
     def avs_set_capabilities(self, format, depth, rate, channel):
         cap = 0
@@ -100,6 +101,7 @@ class alexa_avs:
 
         self.queue_data = []
         uheapq.heapify(self.queue_data)
+        self.buffer_send = bytearray(CONFIG_BUFFER_SEND_SIZE)
 
         return True
 
@@ -133,36 +135,41 @@ class alexa_avs:
 
         # send size of file to send
         val = struct.pack('I', file_size)
-        self.handle.sendall(val)
-        print(file_size)
+        self.handle.send(val)
+        #print(file_size)
 
         # send file in chunks
         total_size = 0
-        buffer = bytearray(2048) #CONFIG_SEND_CHUNK_SIZE*2)
         while True:
-            read_size = file.readinto(buffer)
+            # read bytes into buffer
+            read_size = file.readinto(self.buffer_send)
             if read_size == 0:
                 break
+
+            # send buffer
+            if read_size == CONFIG_BUFFER_SEND_SIZE:
+                self.handle.send(self.buffer_send)
+            else:
+                # note: sending part of buffer allocates memory
+                self.handle.send(self.buffer_send[:read_size])
             total_size += read_size
-            print(total_size)
-            self.handle.sendall(buffer[:read_size])
+            # print(total_size)
 
             #send_size = int(read_size/2)
-            #short16s = struct.unpack('h'*send_size, buffer[:])
+            #short16s = struct.unpack('h'*send_size, buffer_send[:])
             #for i in range(send_size):
-            #    buffer[i] = u_law_e(short16s[i])
-            #self.handle.sendall(buffer[:send_size])
+            #    buffer_send[i] = u_law_e(short16s[i])
+            #self.handle.sendall(buffer_send[:send_size])
             #print(send_size)
 
         # close file
         file.close()
-        print("")
         return True
 
     def recv_and_play_audio(self):
 
         # set receive timeout
-        self.handle.settimeout(1.0)
+        self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS)
         #if self.poller is None:
         #    self.poller = uselect.poll()
         #    self.poller.register(self.handle, uselect.POLLIN)
@@ -183,7 +190,7 @@ class alexa_avs:
         except:
             return False
 
-        want_recv = CONFIG_RECV_CHUNK_SIZE
+        want_recv = CONFIG_BUFFER_RECV_SIZE
         total_recv = 0
         if total_size > 153600:
             # handle double send
@@ -210,32 +217,33 @@ class alexa_avs:
                 return False
 
         self.prev_total_size = total_size
-        print("")
+        # print("")
         return True
 
     def recv_audio(self):
         # set receive timeout
-        self.handle.settimeout(1.0)
+        self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS)
 
         # receive the size of audio segment
         try:
             val = self.handle.recv(4)
             if not val:
-                #print("Recv size ERROR")
+                print("Recv size ERROR")
                 return False
             total_size = int(struct.unpack('I', val[:])[0])
-            print(total_size)
         except OSError:
             return True
         except:
+            print("Recv size ERROR2")
             return False
 
-        want_recv = CONFIG_RECV_CHUNK_SIZE
+        want_recv = CONFIG_BUFFER_RECV_SIZE
         total_recv = 0
         if total_size > 153600:
             # handle double send
             total_size = self.prev_total_size
             total_recv = 4
+        print(total_size)
 
         # receive the audio segment
         while total_recv < total_size:
@@ -243,27 +251,33 @@ class alexa_avs:
                 want_recv = total_size-total_recv
 
             # receive audio segment
-            self.handle.settimeout(1.0)
+            #self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS_2)
             try:
                 data = self.handle.recv(want_recv)
                 if not data:
-                    print("Recv size ERROR2")
+                    print("Recv size ERROR3")
                     return False
                 total_recv += len(data)
                 #print(total_recv)
-                
-                # queue the data
-                uheapq.heappush(self.queue_data, data)
-                print("push {}".format(len(data)))
-
-                # dequeue the data
-                # val = uheapq.heappop(self.queue_data)
-                # print("pop {}".format(len(val)))
-                
             except OSError:
                 return True
             except:
+                print("Recv size ERROR4")
                 return False
+
+            # queue the data
+            while True:
+                try:
+                    uheapq.heappush(self.queue_data, data)
+                    break
+                except:
+                    time.sleep(1)
+                    continue
+            # print("push {}".format(len(data)))
+
+            # dequeue the data
+            # val = uheapq.heappop(self.queue_data)
+            # print("pop {}".format(len(val)))
 
         self.prev_total_size = total_size
         print("")
@@ -275,7 +289,7 @@ class alexa_avs:
         try:
             # dequeue a data
             data = uheapq.heappop(self.queue_data)
-            print("pop {}".format(len(data)))
+            # print("pop {}".format(len(data)))
 
             # play dequeued data
             #TODO

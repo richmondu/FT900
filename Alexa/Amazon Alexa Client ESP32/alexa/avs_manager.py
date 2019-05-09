@@ -1,4 +1,4 @@
-from alexa_avs import alexa_avs
+from alexa.avs import avs
 import _thread
 import time
 
@@ -8,21 +8,21 @@ import time
 # configuration
 ############################################################################################
 CONFIG_DEVICE_ID               = 1
-CONFIG_FILENAME_REQUEST_TIME   = "audio/REQUEST_what_time_is_it.raw"
-CONFIG_FILENAME_REQUEST_PERSON = "audio/REQUEST_who_is.raw"
-CONFIG_FILENAME_REQUEST_MUSIC  = "audio/REQUEST_play_music.raw"
-CONFIG_FILENAME_REQUEST_NEWS   = "audio/REQUEST_play_live_news.raw"
-CONFIG_FILENAME_REQUEST_BOOK   = "audio/REQUEST_play_audio_book.raw"
-CONFIG_FILENAME_REQUEST_ALARM  = "audio/REQUEST_set_alarm.raw"
-CONFIG_FILENAME_REQUEST_STOP   = "audio/REQUEST_stop.raw"
-CONFIG_FILENAME_REQUEST_YES    = "audio/REQUEST_yes.raw"
+CONFIG_FILENAME_REQUEST_TIME   = "alexa/audio/REQUEST_what_time_is_it.raw"
+CONFIG_FILENAME_REQUEST_PERSON = "alexa/audio/REQUEST_who_is.raw"
+CONFIG_FILENAME_REQUEST_MUSIC  = "alexa/audio/REQUEST_play_music.raw"
+CONFIG_FILENAME_REQUEST_NEWS   = "alexa/audio/REQUEST_play_live_news.raw"
+CONFIG_FILENAME_REQUEST_BOOK   = "alexa/audio/REQUEST_play_audio_book.raw"
+CONFIG_FILENAME_REQUEST_ALARM  = "alexa/audio/REQUEST_set_alarm.raw"
+CONFIG_FILENAME_REQUEST_STOP   = "alexa/audio/REQUEST_stop.raw"
+CONFIG_FILENAME_REQUEST_YES    = "alexa/audio/REQUEST_yes.raw"
 
 
 
 ############################################################################################
-# alexa avs manager class
+# avs manager class
 ############################################################################################
-class alexa_avs_manager():
+class avs_manager():
 
     def __init__(self):
         self.quits = False
@@ -104,7 +104,7 @@ class alexa_avs_manager():
         print("ESP32 Alexa Demo")
         print("===============================================================\r\n")
 
-        avs_handle = alexa_avs()
+        avs_handle = avs()
 
         # start the streamer thread
         _thread.start_new_thread(self.thread_streamer, (avs_handle, CONFIG_DEVICE_ID, ))
