@@ -15,6 +15,7 @@ import audioop
 import threading
 import msvcrt
 import argparse
+import queue
 
 
 
@@ -198,88 +199,79 @@ def avs_send_request(file_name):
 ############################################################################################
 # avs_recv_response
 ############################################################################################
-def avs_recv_response(file_name):
+def avs_recv_response(queue_data):
 
     global g_socket
+    global g_quit
     
-    # Receive size of Alexa response
-    #timeval = struct.pack('ll', CONF_TIMEOUT_RECV, 0)
-    #g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeval)
-    val = g_socket.recv(4)
-    if not val:
-        return
-    file_size_recv = int(struct.unpack('i', val[:])[0])
-    
-    # Receive Alexa response
-    #timeval = struct.pack('ll', CONF_TIMEOUT_RECV, 0)
-    #g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeval)
-    
-#    data = g_socket.recv(1024)
-#    len_data = len(data)
-#    while len_data > 0:
-#        data2 = g_socket.recv(1024)
-#        len_data = len(data2)
-#        if len_data <= 0:
-#            break
-#        data = data + data2
-        
-    data = g_socket.recv(file_size_recv)
-    file_size_recv = file_size_recv - len(data)
-    while (file_size_recv):
-        data2 = g_socket.recv(file_size_recv)
-        file_size_recv = file_size_recv - len(data2)
-        data = data + data2
+    try:
+        val = g_socket.recv(4)
+        if not val:
+            print("recv error")
+            g_quit = True
+        else:
+            file_size_recv = struct.unpack('I', val[:])[0]
+            recv_size = CONF_CHUNK_SIZE
+            recved_size = 0
+            #print("streaming {} bytes".format(file_size_recv))
 
-    # Expanding Alexa response from 8-bit to 16-bit
-    if CONF_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
-        data = audioop.ulaw2lin(data, 2)
+            while g_quit is False:
+                try:
+                    # recv data
+                    data = g_socket.recv(recv_size)
+                    if not data:
+                        print("Error: recv failed! not data")
+                        g_quit = True
+                        break
 
-    # Get filename with timestamp
-    file_name_recv = file_name
-    if CONF_FILENAME_TIMESTAMP:
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        file_name_recv = file_name[0:file_name.lower().find(".raw")] + "_" + str(timestamp) + ".raw"
-    
-    # Save Alexa response to file
-    file_recv = open(file_name_recv, "wb")
-    file_recv.write(data)
-    file_recv.close()
-    return file_name_recv
+                    # get length of data
+                    len_data = len(data)
+                    if len_data <= 0:
+                        print("Error: recv failed! len_data <= 0")
+                        print(len_data)
+                        break
+
+                    # update total bytes recvd
+                    recved_size += len_data
+                    if recved_size == file_size_recv:
+                        break
+
+                    # queue the data
+                    queue_data.put(data)
+                    # print("queue_data.put {}".format(len_data))
+
+                    # compute bytes to recv
+                    if recv_size > file_size_recv - recved_size: 
+                        recv_size = file_size_recv - recved_size
+
+                except socket.error as e:
+                    print("error")
+                    print(e.args[0])
+
+    except:
+        print("avs_recv_response exception")
+
+    return
 
 ############################################################################################
 # avs_play_response
 ############################################################################################
-def avs_play_response(file_name):
+def avs_play_response(queue_data, stream):
 
-    # Get the rate based on configuration
-    bitrate = 0
-    if (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_16000):
-        bitrate = 16000
-    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_32000):
-        bitrate = 32000
-    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_44100):
-        bitrate = 44100
-    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_48000):
-        bitrate = 48000
-    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_8000):
-        bitrate = 8000
+    # Get data from queue
+    data = queue_data.get()
+    if data is None:
+        return False
+    #print("queue_data.get {}".format(len(data)))
+            
+    # Decompress and play data
+    if CONF_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
+        data = audioop.ulaw2lin(data, 2)
+    stream.write(data)
 
-    # Get the channel based on configuration
-    channel = 0
-    if (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_1):
-        channel = 1
-    elif (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_2):
-        channel = 2
+    queue_data.task_done()
+    return True
 
-    # Play alexa response from file
-    audio = pyaudio.PyAudio()
-    stream = audio.open(format=pyaudio.paInt16, channels=channel, rate=bitrate, output=True)
-    file_name_read = file_name
-    file_read = open(file_name_read, "rb")
-    stream.write(file_read.read())
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
 
 ############################################################################################
 # avs_recv_and_play_response
@@ -287,6 +279,7 @@ def avs_play_response(file_name):
 def avs_recv_and_play_response():
 
     global g_quit
+    global g_socket
 
     # Get the rate based on configuration
     bitrate = 0
@@ -335,7 +328,6 @@ def avs_recv_and_play_response():
                     len_data = len(data)
                     if len_data <= 0:
                         print("Error: recv failed! len_data <= 0")
-                        print(len_data)
                         break
 
                     # update total bytes recvd
@@ -369,25 +361,56 @@ def avs_recv_and_play_response():
 ############################################################################################
 class thread_fxn_player(threading.Thread):
 
-    def __init__(self, threadID, name):
+    def __init__(self, threadID, name, queue_data):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
+        self.queue_data = queue_data
 
     def run(self):
         sleep(1)
         global g_quit
 
+        # Get the rate based on configuration
+        bitrate = 0
+        if (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_16000):
+            bitrate = 16000
+        elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_32000):
+            bitrate = 32000
+        elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_44100):
+            bitrate = 44100
+        elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_48000):
+            bitrate = 48000
+        elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_8000):
+            bitrate = 8000
+
+        # Get the channel based on configuration
+        channel = 0
+        if (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_1):
+            channel = 1
+        elif (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_2):
+            channel = 2
+        
+        # Initialize audio player
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
+        stream = audio.open(format=pyaudio.paInt16, channels=channel, rate=bitrate, output=True)
 
-        # todo
-        #while g_quit is False:
+        # Dequeue and play audio
+        while g_quit is False:
+            if not avs_play_response(self.queue_data, stream):
+                sleep(1)
 
+        # Uninitialize audio player
         stream.stop_stream()
         stream.close()
         audio.terminate()
 
+        # Drain the queue
+        while not self.queue_data.empty():
+            data = self.queue_data.get()
+            self.queue_data.task_done()
+
+        print("thread_fxn_player exits")
         return
 
 
@@ -396,10 +419,11 @@ class thread_fxn_player(threading.Thread):
 ############################################################################################
 class thread_fxn_streamer(threading.Thread):
 
-    def __init__(self, threadID, name):
+    def __init__(self, threadID, name, queue_data):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
+        self.queue_data = queue_data
 
     def run(self):
         sleep(1)
@@ -426,10 +450,8 @@ class thread_fxn_streamer(threading.Thread):
 
         while g_quit is False:
             try: 
-                #file_name = "test.raw"
-                #avs_recv_response(file_name)
-                #avs_play_response(file_name)
-                avs_recv_and_play_response()
+                avs_recv_response(self.queue_data)
+                #avs_recv_and_play_response()
             except:
                 print("\navs_recv_and_play_response exception!")
                 break
@@ -531,8 +553,11 @@ def main(args, argc):
         # Initialize the streamer thread
         g_quit = False
         g_exit = False
+        queue_data = queue.Queue()
         threads = []
-        t = thread_fxn_streamer(0, "streamer")
+        t = thread_fxn_streamer(0, "streamer", queue_data)
+        t.start()
+        t = thread_fxn_player(0, "player", queue_data)
         t.start()
         threads.append(t)
 
