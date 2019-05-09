@@ -8,7 +8,8 @@ def do_connect():
     wlan.active(True)
     if not wlan.isconnected():
         print('[BOOT] connecting to network...')
-        wlan.connect('Virus-infected Wifi', 'MahirapTandaan')
+        #wlan.connect('Virus-infected Wifi', 'MahirapTandaan')
+        wlan.connect('HomeBro_ULTERA_EXT', 'MadalingTandaan')
         while not wlan.isconnected():
             pass
     print('[BOOT] network config:', wlan.ifconfig())

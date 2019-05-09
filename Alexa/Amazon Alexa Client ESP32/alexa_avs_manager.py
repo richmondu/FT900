@@ -30,25 +30,6 @@ class alexa_avs_manager():
 
 
     ############################################################################################
-    # usage
-    ############################################################################################
-    def usage(self):
-
-        print("\r\n===============================================================")
-        print("[MAIN] Usage:")
-        print("[MAIN]   Press 'q' key to quit...")
-        print("[MAIN]   Press 't' key to ask Alexa what time is it...")
-        print("[MAIN]   Press 'p' key to ask Alexa who is...")
-        print("[MAIN]   Press 'm' key to ask Alexa to play music...")
-        print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
-        print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
-        print("[MAIN]   Press 'a' key to ask Alexa to set alarm...")
-        print("[MAIN]   Press 's' key to tell Alexa to stop...")
-        print("[MAIN]   Press 'y' key to tell Alexa yes...")
-        print("===============================================================\r\n")
-
-
-    ############################################################################################
     # thread_fxn_streamer
     ############################################################################################
     def thread_fxn_streamer(self, avs_handle, device_id):
@@ -117,7 +98,7 @@ class alexa_avs_manager():
 
         # wait for user input
         while not self.quits:
-            key = input("")
+            key = input("").lower()
             if key == 'q':
                 avs_handle.quit()
                 break
@@ -151,6 +132,21 @@ class alexa_avs_manager():
         self.exiting = True
         _thread.exit()
         return
+
+    def usage(self):
+
+        print("\r\n===============================================================")
+        print("[MAIN] Usage:")
+        print("[MAIN]   Press 'q' key to quit...")
+        print("[MAIN]   Press 't' key to ask Alexa what time is it...")
+        print("[MAIN]   Press 'p' key to ask Alexa who is...")
+        print("[MAIN]   Press 'm' key to ask Alexa to play music...")
+        print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
+        print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
+        print("[MAIN]   Press 'a' key to ask Alexa to set alarm...")
+        print("[MAIN]   Press 's' key to tell Alexa to stop...")
+        print("[MAIN]   Press 'y' key to tell Alexa yes...")
+        print("===============================================================\r\n")
 
     def run(self):
         _thread.start_new_thread(self.thread_fxn_manager, ())
