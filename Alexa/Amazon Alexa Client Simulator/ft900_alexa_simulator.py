@@ -18,39 +18,67 @@ import argparse
 
 
 
+
+
 ############################################################################################
 # Configurations that can be set using application parameter
 ############################################################################################
-CONF_SERVER_ADDR_DEFAULT    = '192.168.100.12'    # --serveraddr
-CONF_SERVER_PORT_DEFAULT    = 11234               # --deviceid 11234+x-1 if --usediffacct is 1
-CONF_DEVICE_ID_DEFAULT      = 2                   # --deviceid
+CONF_SERVER_ADDR_DEFAULT             = '192.168.100.12'    # --serveraddr
+CONF_SERVER_PORT_DEFAULT             = 11234               # --deviceid 11234+x-1 if --usediffacct is 1
+CONF_DEVICE_ID_DEFAULT               = 2                   # --deviceid
 
 ############################################################################################
 # Other configurations.
 ############################################################################################
-CONF_FILENAME_REQUEST_TIME  = "audio/REQUEST_what_time_is_it.raw"
-CONF_FILENAME_REQUEST_PERSON= "audio/REQUEST_who_is.raw"
-CONF_FILENAME_REQUEST_MUSIC = "audio/REQUEST_play_music.raw"
-CONF_FILENAME_REQUEST_NEWS  = "audio/REQUEST_play_live_news.raw"
-CONF_FILENAME_REQUEST_BOOK  = "audio/REQUEST_play_audio_book.raw"
-CONF_FILENAME_REQUEST_ALARM = "audio/REQUEST_set_alarm.raw"
-CONF_FILENAME_REQUEST_STOP  = "audio/REQUEST_stop.raw"
-CONF_FILENAME_REQUEST_YES   = "audio/REQUEST_yes.raw"
-CONF_FILENAME_TIMESTAMP     = 0
-CONF_TIMEOUT_SEND           = 10
-CONF_TIMEOUT_RECV           = 10
-CONF_RESET_TIMEOUT          = 1
-CONF_CHUNK_SIZE             = 512
+CONF_FILENAME_REQUEST_TIME           = "audio/REQUEST_what_time_is_it.raw"
+CONF_FILENAME_REQUEST_PERSON         = "audio/REQUEST_who_is.raw"
+CONF_FILENAME_REQUEST_MUSIC          = "audio/REQUEST_play_music.raw"
+CONF_FILENAME_REQUEST_NEWS           = "audio/REQUEST_play_live_news.raw"
+CONF_FILENAME_REQUEST_BOOK           = "audio/REQUEST_play_audio_book.raw"
+CONF_FILENAME_REQUEST_ALARM          = "audio/REQUEST_set_alarm.raw"
+CONF_FILENAME_REQUEST_STOP           = "audio/REQUEST_stop.raw"
+CONF_FILENAME_REQUEST_YES            = "audio/REQUEST_yes.raw"
+CONF_FILENAME_TIMESTAMP              = 0
+CONF_TIMEOUT_SEND                    = 10
+CONF_TIMEOUT_RECV                    = 10
+CONF_RESET_TIMEOUT                   = 1
+CONF_CHUNK_SIZE                      = 512
 
 ############################################################################################
-# Sampling rates.
+# Device capabilities
 ############################################################################################
-SAMPLING_RATE_44100HZ       = 1
-SAMPLING_RATE_48KHZ         = 2
-SAMPLING_RATE_32KHZ         = 3
-SAMPLING_RATE_16KHZ         = 4
-SAMPLING_RATE_8KHZ          = 5
-CONF_SAMPLING_RATE          = SAMPLING_RATE_16KHZ
+DEVICE_CAPABILITIES_OFFSET_FORMAT    = 0
+DEVICE_CAPABILITIES_OFFSET_BITDEPTH  = 4
+DEVICE_CAPABILITIES_OFFSET_BITRATE   = 8
+DEVICE_CAPABILITIES_OFFSET_CHANNEL   = 12
+DEVICE_CAPABILITIES_MASK_FORMAT      = 0xF
+DEVICE_CAPABILITIES_MASK_BITDEPTH    = 0xF
+DEVICE_CAPABILITIES_MASK_BITRATE     = 0xF
+DEVICE_CAPABILITIES_MASK_CHANNEL     = 0xF
+DEVICE_CAPABILITIES_FORMAT_RAW       = 0
+DEVICE_CAPABILITIES_FORMAT_MP3       = 1
+DEVICE_CAPABILITIES_FORMAT_WAV       = 2
+DEVICE_CAPABILITIES_FORMAT_AAC       = 3
+DEVICE_CAPABILITIES_BITDEPTH_8       = 0
+DEVICE_CAPABILITIES_BITDEPTH_16      = 1
+DEVICE_CAPABILITIES_BITDEPTH_24      = 2
+DEVICE_CAPABILITIES_BITDEPTH_32      = 3
+DEVICE_CAPABILITIES_BITRATE_16000    = 0
+DEVICE_CAPABILITIES_BITRATE_32000    = 1
+DEVICE_CAPABILITIES_BITRATE_44100    = 2
+DEVICE_CAPABILITIES_BITRATE_48000    = 3
+DEVICE_CAPABILITIES_BITRATE_96000    = 4
+DEVICE_CAPABILITIES_BITRATE_8000     = 5
+DEVICE_CAPABILITIES_CHANNEL_1        = 0
+DEVICE_CAPABILITIES_CHANNEL_2        = 1
+CONF_AUDIO_SEND_FORMAT               = DEVICE_CAPABILITIES_FORMAT_RAW
+CONF_AUDIO_SEND_BITDEPTH             = DEVICE_CAPABILITIES_BITDEPTH_8
+CONF_AUDIO_SEND_BITRATE              = DEVICE_CAPABILITIES_BITRATE_16000
+CONF_AUDIO_SEND_CHANNEL              = DEVICE_CAPABILITIES_CHANNEL_1
+CONF_AUDIO_RECV_FORMAT               = DEVICE_CAPABILITIES_FORMAT_RAW
+CONF_AUDIO_RECV_BITDEPTH             = DEVICE_CAPABILITIES_BITDEPTH_8
+CONF_AUDIO_RECV_BITRATE              = DEVICE_CAPABILITIES_BITRATE_16000
+CONF_AUDIO_RECV_CHANNEL              = DEVICE_CAPABILITIES_CHANNEL_1
 
 ############################################################################################
 # Global variable
@@ -64,6 +92,19 @@ g_quit = False
 g_connected = False
 
 
+
+
+
+############################################################################################
+# avs_set_capabilities
+############################################################################################
+def avs_set_capabilities(format, depth, rate, channel):
+    cap = 0
+    cap |= (format  & DEVICE_CAPABILITIES_MASK_FORMAT)   << DEVICE_CAPABILITIES_OFFSET_FORMAT
+    cap |= (depth   & DEVICE_CAPABILITIES_MASK_BITDEPTH) << DEVICE_CAPABILITIES_OFFSET_BITDEPTH
+    cap |= (rate    & DEVICE_CAPABILITIES_MASK_BITRATE)  << DEVICE_CAPABILITIES_OFFSET_BITRATE
+    cap |= (channel & DEVICE_CAPABILITIES_MASK_CHANNEL)  << DEVICE_CAPABILITIES_OFFSET_CHANNEL
+    return (cap & 0xFFFF)
 
 ############################################################################################
 # avs_connect
@@ -82,11 +123,20 @@ def avs_connect():
             g_socket.close()
             return 0
 
-        # Send device ID
+        # Set device info
+        buf = bytes()
+        buf += struct.pack('I', g_deviceid)
+        sendCap = avs_set_capabilities(CONF_AUDIO_SEND_FORMAT, CONF_AUDIO_SEND_BITDEPTH, CONF_AUDIO_SEND_BITRATE, CONF_AUDIO_SEND_CHANNEL)
+        buf += struct.pack('H', sendCap)
+        recvCap = avs_set_capabilities(CONF_AUDIO_RECV_FORMAT, CONF_AUDIO_RECV_BITDEPTH, CONF_AUDIO_RECV_BITRATE, CONF_AUDIO_RECV_CHANNEL)
+        buf += struct.pack('H', recvCap)
+
+        # Set timeout
         timeval = struct.pack('ll', CONF_TIMEOUT_SEND, 0)
         g_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
-        val = struct.pack('I', g_deviceid)
-        g_socket.sendall(val)
+
+        # Send device info
+        g_socket.sendall(buf)
 
     except:
         g_socket.close()
@@ -121,7 +171,8 @@ def avs_send_request(file_name):
     file.close()
 
     # Compress file bytes from 16-bit to 8-bit
-    file_bytes = audioop.lin2ulaw(file_bytes, 2)
+    if CONF_AUDIO_SEND_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
+        file_bytes = audioop.lin2ulaw(file_bytes, 2)
     file_size = len(file_bytes)
 
     # Send size of Alexa request
@@ -180,7 +231,8 @@ def avs_recv_response(file_name):
         data = data + data2
 
     # Expanding Alexa response from 8-bit to 16-bit
-    data = audioop.ulaw2lin(data, 2)
+    if CONF_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
+        data = audioop.ulaw2lin(data, 2)
 
     # Get filename with timestamp
     file_name_recv = file_name
@@ -199,22 +251,29 @@ def avs_recv_response(file_name):
 ############################################################################################
 def avs_play_response(file_name):
 
-    # Get the rate based on sampling rate
-    rate = 0
-    if (CONF_SAMPLING_RATE == SAMPLING_RATE_16KHZ):
-        rate = 16000
-    elif (CONF_SAMPLING_RATE == SAMPLING_RATE_44100HZ):
-        rate = 44100
-    elif (CONF_SAMPLING_RATE == SAMPLING_RATE_48KHZ):
-        rate = 48000
-    elif (CONF_SAMPLING_RATE == SAMPLING_RATE_32KHZ):
-        rate = 32000
-    elif (CONF_SAMPLING_RATE == SAMPLING_RATE_8KHZ):
-        rate = 8000
-        
+    # Get the rate based on configuration
+    bitrate = 0
+    if (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_16000):
+        bitrate = 16000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_32000):
+        bitrate = 32000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_44100):
+        bitrate = 44100
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_48000):
+        bitrate = 48000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_8000):
+        bitrate = 8000
+
+    # Get the channel based on configuration
+    channel = 0
+    if (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_1):
+        channel = 1
+    elif (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_2):
+        channel = 2
+
     # Play alexa response from file
     audio = pyaudio.PyAudio()
-    stream = audio.open(format=pyaudio.paInt16, channels=1, rate=rate, output=True)
+    stream = audio.open(format=pyaudio.paInt16, channels=channel, rate=bitrate, output=True)
     file_name_read = file_name
     file_read = open(file_name_read, "rb")
     stream.write(file_read.read())
@@ -229,8 +288,28 @@ def avs_recv_and_play_response():
 
     global g_quit
 
+    # Get the rate based on configuration
+    bitrate = 0
+    if (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_16000):
+        bitrate = 16000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_32000):
+        bitrate = 32000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_44100):
+        bitrate = 44100
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_48000):
+        bitrate = 48000
+    elif (CONF_AUDIO_RECV_BITRATE == DEVICE_CAPABILITIES_BITRATE_8000):
+        bitrate = 8000
+
+    # Get the channel based on configuration
+    channel = 0
+    if (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_1):
+        channel = 1
+    elif (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_2):
+        channel = 2
+
     audio = pyaudio.PyAudio()
-    stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
+    stream = audio.open(format=pyaudio.paInt16, channels=channel, rate=bitrate, output=True)
 
     try:
         val = g_socket.recv(4)
@@ -245,23 +324,31 @@ def avs_recv_and_play_response():
 
             while g_quit is False:
                 try:
+                    # recv data
                     data = g_socket.recv(recv_size)
                     if not data:
                         print("Error: recv failed! not data")
                         g_quit = True
                         break
 
+                    # get length of data
                     len_data = len(data)
                     if len_data <= 0:
                         print("Error: recv failed! len_data <= 0")
                         print(len_data)
                         break
 
+                    # update total bytes recvd
                     recved_size += len_data
                     if recved_size == file_size_recv:
                         break
 
-                    stream.write(audioop.ulaw2lin(data, 2))
+                    # play recvd data
+                    if CONF_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
+                        data = audioop.ulaw2lin(data, 2)
+                    stream.write(data)
+
+                    # compute bytes to recv
                     if recv_size > file_size_recv - recved_size: 
                         recv_size = file_size_recv - recved_size
 
