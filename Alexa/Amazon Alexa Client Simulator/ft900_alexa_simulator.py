@@ -2,6 +2,7 @@
 # This is an FT900 Alexa Simulator
 # It simulates the behavior of FT900 Alexa Client for the FT900 Alexa Demo
 # It communicates with RPI Alexa Gateway which routes request/responses to/from Alexa cloud
+# It implements 3 threads: Streamer [recv], Commander [send], Player [play]
 ############################################################################################
 import sys
 import socket
@@ -154,9 +155,9 @@ def avs_disconnect():
     g_socket.close()
 
 ############################################################################################
-# avs_send_request
+# avs_send_audio
 ############################################################################################
-def avs_send_request(file_name):
+def avs_send_audio(file_name):
 
     global g_socket
     
@@ -197,9 +198,9 @@ def avs_send_request(file_name):
         #print("{} {}".format(send_size, sent_data))
 
 ############################################################################################
-# avs_recv_response
+# avs_recv_audio
 ############################################################################################
-def avs_recv_response(queue_data):
+def avs_recv_audio(queue_data):
 
     global g_socket
     global g_quit
@@ -249,14 +250,14 @@ def avs_recv_response(queue_data):
                     print(e.args[0])
 
     except:
-        print("avs_recv_response exception")
+        print("avs_recv_audio exception")
 
     return
 
 ############################################################################################
-# avs_play_response
+# avs_play_audio
 ############################################################################################
-def avs_play_response(queue_data, stream):
+def avs_play_audio(queue_data, stream):
 
     # Get data from queue
     data = queue_data.get()
@@ -274,9 +275,9 @@ def avs_play_response(queue_data, stream):
 
 
 ############################################################################################
-# avs_recv_and_play_response
+# avs_recv_and_play_audio
 ############################################################################################
-def avs_recv_and_play_response():
+def avs_recv_and_play_audio():
 
     global g_quit
     global g_socket
@@ -357,9 +358,9 @@ def avs_recv_and_play_response():
 
 
 ############################################################################################
-# thread_fxn_player
+# thread_player
 ############################################################################################
-class thread_fxn_player(threading.Thread):
+class thread_player(threading.Thread):
 
     def __init__(self, threadID, name, queue_data):
         threading.Thread.__init__(self)
@@ -397,7 +398,7 @@ class thread_fxn_player(threading.Thread):
 
         # Dequeue and play audio
         while g_quit is False:
-            if not avs_play_response(self.queue_data, stream):
+            if not avs_play_audio(self.queue_data, stream):
                 sleep(1)
 
         # Uninitialize audio player
@@ -410,14 +411,14 @@ class thread_fxn_player(threading.Thread):
             data = self.queue_data.get()
             self.queue_data.task_done()
 
-        print("thread_fxn_player exits")
+        print("thread_player exits")
         return
 
 
 ############################################################################################
-# thread_fxn_streamer
+# thread_streamer
 ############################################################################################
-class thread_fxn_streamer(threading.Thread):
+class thread_streamer(threading.Thread):
 
     def __init__(self, threadID, name, queue_data):
         threading.Thread.__init__(self)
@@ -450,10 +451,10 @@ class thread_fxn_streamer(threading.Thread):
 
         while g_quit is False:
             try: 
-                avs_recv_response(self.queue_data)
-                #avs_recv_and_play_response()
+                avs_recv_audio(self.queue_data)
+                #avs_recv_and_play_audio()
             except:
-                print("\navs_recv_and_play_response exception!")
+                print("\navs_recv_and_play_audio exception!")
                 break
 
         print("\n[STREAMER] Disconnecting from Alexa provider...\n")
@@ -466,9 +467,9 @@ class thread_fxn_streamer(threading.Thread):
 
 
 ############################################################################################
-# thread_fxn_commander
+# thread_commander
 ############################################################################################
-class thread_fxn_commander(threading.Thread):
+class thread_commander(threading.Thread):
 
     def __init__(self, threadID, name, file_request):
         threading.Thread.__init__(self)
@@ -487,7 +488,7 @@ class thread_fxn_commander(threading.Thread):
         if g_quit is False:
             print("[COMMANDER] Sending Alexa query [{}]...".format(self.file_request), end='', flush=True)
             start = time()
-            avs_send_request(self.file_request)
+            avs_send_audio(self.file_request)
             print("[{0:.0f} ms]".format((time()-start)*1000))
 
         return
@@ -555,9 +556,9 @@ def main(args, argc):
         g_exit = False
         queue_data = queue.Queue()
         threads = []
-        t = thread_fxn_streamer(0, "streamer", queue_data)
+        t = thread_streamer(0, "streamer", queue_data)
         t.start()
-        t = thread_fxn_player(0, "player", queue_data)
+        t = thread_player(0, "player", queue_data)
         t.start()
         threads.append(t)
 
@@ -568,7 +569,7 @@ def main(args, argc):
                 print(key)
                 if key=='q':
                     # send stop command to stop music or alarm
-                    t = thread_fxn_commander (1, "commander", CONF_FILENAME_REQUEST_STOP)
+                    t = thread_commander (1, "commander", CONF_FILENAME_REQUEST_STOP)
                     t.start()
                     # wait for thread to finish
                     t.join()
@@ -587,28 +588,28 @@ def main(args, argc):
                     g_exit = True
                     break
                 elif key=='t':
-                    t = thread_fxn_commander (2, "commander", CONF_FILENAME_REQUEST_TIME)
+                    t = thread_commander (2, "commander", CONF_FILENAME_REQUEST_TIME)
                     t.start()
                 elif key=='p':
-                    t = thread_fxn_commander (3, "commander", CONF_FILENAME_REQUEST_PERSON)
+                    t = thread_commander (3, "commander", CONF_FILENAME_REQUEST_PERSON)
                     t.start()
                 elif key=='m':
-                    t = thread_fxn_commander (4, "commander", CONF_FILENAME_REQUEST_MUSIC)
+                    t = thread_commander (4, "commander", CONF_FILENAME_REQUEST_MUSIC)
                     t.start()
                 elif key=='n':
-                    t = thread_fxn_commander (5, "commander", CONF_FILENAME_REQUEST_NEWS)
+                    t = thread_commander (5, "commander", CONF_FILENAME_REQUEST_NEWS)
                     t.start()
                 elif key=='b':
-                    t = thread_fxn_commander (6, "commander", CONF_FILENAME_REQUEST_BOOK)
+                    t = thread_commander (6, "commander", CONF_FILENAME_REQUEST_BOOK)
                     t.start()
                 elif key=='a':
-                    t = thread_fxn_commander (7, "commander", CONF_FILENAME_REQUEST_ALARM)
+                    t = thread_commander (7, "commander", CONF_FILENAME_REQUEST_ALARM)
                     t.start()
                 elif key=='s':
-                    t = thread_fxn_commander (8, "commander", CONF_FILENAME_REQUEST_STOP)
+                    t = thread_commander (8, "commander", CONF_FILENAME_REQUEST_STOP)
                     t.start()
                 elif key=='y':
-                    t = thread_fxn_commander (9, "commander", CONF_FILENAME_REQUEST_YES)
+                    t = thread_commander (9, "commander", CONF_FILENAME_REQUEST_YES)
                     t.start()
                 else:
                     sleep(1)
