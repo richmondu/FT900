@@ -45,16 +45,17 @@
  */
 
 #include "ft900.h"
-#include "tinyprintf.h"         // tinyprintf 3rd-party library
-#include "FreeRTOS.h"           // FreeRTOS 3rd-party library
-#include "task.h"               // FreeRTOS 3rd-party library
-#include "semphr.h"             // FreeRTOS 3rd-party library
+#include "tinyprintf.h"               // tinyprintf 3rd-party library
+#include "FreeRTOS.h"                 // FreeRTOS 3rd-party library
+#include "task.h"                     // FreeRTOS 3rd-party library
+#include "semphr.h"                   // FreeRTOS 3rd-party library
 
-#include "avs/avs.h"            // AVS library
-#include "avs_config.h"         // AVS configuration
-#include "utils/audio.h"        // Audio utility
-#include "utils/sdcard.h"       // SD card utility
-#include "utils/comm_wrapper.h" // Communication wrapper
+#include "avs/avs.h"                  // AVS library
+#include "avs_config.h"               // AVS configuration
+#include "utils/audio.h"              // Audio utility
+#include "utils/sdcard.h"             // SD card utility
+#include "utils/comm_wrapper.h"       // Communication wrapper
+#include "utils/device_information.h" // Device information
 
 
 
@@ -279,12 +280,27 @@ int avs_connect(void)
     g_lVolumePercent = 80;
     audio_mic_set_volume(100);
 
-    // Send device ID
+    // Set device info
+    TDeviceInfo tDeviceInfo = {0};
+    tDeviceInfo.m_ulDeviceID = AVS_CONFIG_DEVICE_ID;
+    tDeviceInfo.m_uwSendCapabilities = SET_DEVICE_CAPABILITIES(
+        AVS_CONFIG_AUDIO_SEND_FORMAT,
+        AVS_CONFIG_AUDIO_SEND_BITDEPTH,
+        AVS_CONFIG_AUDIO_SEND_BITRATE,
+        AVS_CONFIG_AUDIO_SEND_CHANNEL);
+    tDeviceInfo.m_uwRecvCapabilities = SET_DEVICE_CAPABILITIES(
+        AVS_CONFIG_AUDIO_RECV_FORMAT,
+        AVS_CONFIG_AUDIO_RECV_BITDEPTH,
+        AVS_CONFIG_AUDIO_RECV_BITRATE,
+        AVS_CONFIG_AUDIO_RECV_CHANNEL);
+
+    // Set timeout
     comm_setsockopt(AVS_CONFIG_TX_TIMEOUT, 1);
-    unsigned int ulDeviceID = AVS_CONFIG_DEVICE_ID;
-    int iRet = comm_send((char*)&ulDeviceID, sizeof(ulDeviceID));
-    if (iRet != sizeof(ulDeviceID)) {
-        DEBUG_PRINTF("avs_connect(): comm_send failed! %d %d\r\n\r\n", iRet, sizeof(ulBytesToTransfer));
+
+    // Send device info
+    int iRet = comm_send((char*)&tDeviceInfo, sizeof(tDeviceInfo));
+    if (iRet != sizeof(tDeviceInfo)) {
+        DEBUG_PRINTF("avs_connect(): comm_send failed! %d %d\r\n\r\n", iRet, sizeof(tDeviceInfo));
         comm_disconnect();
         return 0;
     }
@@ -468,13 +484,16 @@ int avs_send_request(const char* pcFileName)
         }
 
         if (ulReadSize) {
-            // Convert in-place from 16-bit to 8-bit
-            audio_pcm16_to_ulaw(ulReadSize, pcSDCard, pcSDCard);
+            if (AVS_CONFIG_AUDIO_SEND_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8) {
+                // Convert in-place from 16-bit to 8-bit
+                audio_pcm16_to_ulaw(ulReadSize, pcSDCard, pcSDCard);
+                ulReadSize = ulReadSize>>1;
+            }
 
             // Send the converted bytes
-            iRet = comm_send(pcSDCard, ulReadSize>>1);
+            iRet = comm_send(pcSDCard, ulReadSize);
             if (iRet <= 0) {
-                DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulReadSize>>1, iRet);
+                DEBUG_PRINTF("avs_send_request(): send failed! %d %d\r\n\r\n", (int)ulReadSize, iRet);
                 iRet = 0;
                 goto err;
             }
@@ -581,13 +600,18 @@ int avs_recv_response(const char* pcFileName)
         // Compute the total bytes received
         ulBytesReceived += iRet;
 
-        // Convert 8-bit data to 16-bit data before saving
-        audio_ulaw_to_pcm16(iRet, pcRecv, pcSDCard);
+        // Compress bytes based on configuration settings
+        char* pBuffer = pcRecv;
+        if (AVS_CONFIG_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8) {
+            // Convert 8-bit data to 16-bit data before saving
+            audio_ulaw_to_pcm16(iRet, pcRecv, pcSDCard);
+            iRet = iRet<<1;
+            pBuffer = pcSDCard;
+        }
 
         // Save to 16-bit decoded data to SD card
         ulWriteSize = 0;
-        iRet = iRet<<1;
-        sdcard_write(&fHandle, pcSDCard, iRet, (UINT*)&ulWriteSize);
+        sdcard_write(&fHandle, pBuffer, iRet, (UINT*)&ulWriteSize);
         if (iRet != ulWriteSize) {
             DEBUG_PRINTF("avs_recv_response(): sdcard_write failed! %d %d\r\n\r\n", iRet, (int)ulWriteSize);
             sdcard_close(&fHandle);
@@ -782,13 +806,25 @@ int avs_recv_and_play_response(char (*fxnCallbackExit)(void))
         // When exit callback returns true,
         // we still receive outstanding data but we dont play it.
         if (!bExit) {
-            // Convert 8-bit mono data to 16-bit stereo data before playing
-            audio_ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
+            // Uncompress based on configuration setting
+            char* pBuffer = pcRecv;
+            if (AVS_CONFIG_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8) {
+                // Convert 8-bit mono data to 16-bit stereo data before playing
+                audio_ulaw_to_pcm16_stereo(iRet, pcRecv, pcSpeaker);
+                iRet = iRet<<2;
+                pBuffer = pcSpeaker;
+            }
+            else if (AVS_CONFIG_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_16) {
+                // Input is mono 1 channel; speaker requires stereo 2 channels
+                audio_mono_to_stereo(pcSpeaker, pcRecv, iRet);
+                iRet = iRet<<1;
+                pBuffer = pcSpeaker;
+            }
 
             // Play on speaker
             do {
                 if (audio_speaker_ready()) {
-                    audio_play((uint8_t *)pcSpeaker, iRet<<2);
+                    audio_play((uint8_t *)pBuffer, iRet);
                     audio_speaker_clear();
                     break;
                 }
@@ -882,18 +918,23 @@ int avs_recv_and_play_response_threaded(const char* pcFileName)
             }
             //tfp_printf(">> Recv  %d bytes %d\r\n", iRet, g_hContext.m_ulWriteSize);
 
-            // Convert 8-bit data to 16-bit data before saving
-            audio_ulaw_to_pcm16(iRet, acRecv, acSDCard);
+            // Uncompress based on configuration setting
+            char* pBuffer = acRecv;
+            if (AVS_CONFIG_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8) {
+                // Convert 8-bit data to 16-bit data before saving
+                audio_ulaw_to_pcm16(iRet, acRecv, acSDCard);
+                iRet = iRet<<1;
+                pBuffer = acSDCard;
+            }
 
             /* Get write position */
             sdcard_lseek(&g_hContext.m_fHandle, g_hContext.m_ulWriteSize);
             
             /* Write data to specified position */
             uint32_t ulWriteSize = 0;
-            int lSizeToWrite = iRet<<1;
-            sdcard_write(&g_hContext.m_fHandle, acSDCard, lSizeToWrite, (UINT*)&ulWriteSize);
-            if (lSizeToWrite != ulWriteSize) {
-                DEBUG_PRINTF("avs_recv_and_play_response_threaded(): sdcard_write failed! %d %d\r\n\r\n", lSizeToWrite, (int)ulWriteSize);
+            sdcard_write(&g_hContext.m_fHandle, pBuffer, iRet, (UINT*)&ulWriteSize);
+            if (iRet != ulWriteSize) {
+                DEBUG_PRINTF("avs_recv_and_play_response_threaded(): sdcard_write failed! %d %d\r\n\r\n", iRet, (int)ulWriteSize);
                 xSemaphoreGive(g_hContext.m_xMutexFile);
                 if (ulBytesReceived) {
                     xSemaphoreTake(g_hContext.m_xMutexRun, pdMS_TO_TICKS(portMAX_DELAY));
