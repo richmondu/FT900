@@ -87,12 +87,10 @@ class avs_manager():
     ############################################################################################
     def thread_player(self, avs_handle):
 
-        print("\r\n[PLAYER] starts...")
         while not avs_handle.is_quit():
             if not avs_handle.play_audio():
                 time.sleep(1)
 
-        print("\r\n[PLAYER] exits...")
         _thread.exit()
         return
 
