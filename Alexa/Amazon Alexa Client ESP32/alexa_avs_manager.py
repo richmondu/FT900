@@ -28,11 +28,30 @@ class alexa_avs_manager():
         self.quits = False
         self.exiting = False
 
+    ############################################################################################
+    # thread_commander
+    ############################################################################################
+    def thread_commander(self, avs_handle, file_request):
+
+        # exit if not connected
+        if not avs_handle.is_connected():
+            print("[COMMANDER] Not connected...")
+            _thread.exit()
+            return
+
+        # send request
+        if not avs_handle.is_quit():
+            print("[COMMANDER] Sending Alexa query [{}]...".format(file_request))
+            avs_handle.send_audio(file_request)
+            print("OK")
+
+        _thread.exit()
+        return
 
     ############################################################################################
-    # thread_fxn_streamer
+    # thread_streamer
     ############################################################################################
-    def thread_fxn_streamer(self, avs_handle, device_id):
+    def thread_streamer(self, avs_handle, device_id):
 
         while not avs_handle.is_quit():
 
@@ -50,8 +69,10 @@ class alexa_avs_manager():
 
             # stream from server
             while not avs_handle.is_quit():
-                if not avs_handle.recv_and_play_response():
+                if not avs_handle.recv_audio():
                     break
+                #if not avs_handle.recv_and_play_audio():
+                #    break
 
             # disconnect from server
             avs_handle.disconnect()
@@ -61,32 +82,24 @@ class alexa_avs_manager():
         _thread.exit()
         return
 
-
     ############################################################################################
-    # thread_fxn_commander
+    # thread_player
     ############################################################################################
-    def thread_fxn_commander(self, avs_handle, file_request):
+    def thread_player(self, avs_handle):
 
-        # exit if not connected
-        if not avs_handle.is_connected():
-            print("[COMMANDER] Not connected...")
-            _thread.exit()
-            return
+        print("\r\n[PLAYER] starts...")
+        while not avs_handle.is_quit():
+            if not avs_handle.play_audio():
+                time.sleep(1)
 
-        # send request
-        if not avs_handle.is_quit():
-            print("[COMMANDER] Sending Alexa query [{}]...".format(file_request))
-            avs_handle.send_request(file_request)
-            print("OK")
-
+        print("\r\n[PLAYER] exits...")
         _thread.exit()
         return
 
-
     ############################################################################################
-    # thread_fxn_manager
+    # thread_manager
     ############################################################################################
-    def thread_fxn_manager(self):
+    def thread_manager(self):
         print("\r\n===============================================================")
         print("ESP32 Alexa Demo")
         print("===============================================================\r\n")
@@ -94,9 +107,12 @@ class alexa_avs_manager():
         avs_handle = alexa_avs()
 
         # start the streamer thread
-        _thread.start_new_thread(self.thread_fxn_streamer, (avs_handle, CONFIG_DEVICE_ID, ))
+        _thread.start_new_thread(self.thread_streamer, (avs_handle, CONFIG_DEVICE_ID, ))
 
-        # wait for user input
+        # start the player thread
+        _thread.start_new_thread(self.thread_player, (avs_handle, ))
+
+        # wait for user input to start the commander thread
         while not self.quits:
             key = input("").lower()
             if key == 'q':
@@ -105,36 +121,39 @@ class alexa_avs_manager():
             elif key == 'h':
                 usage()
             elif key=='t':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_TIME, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_TIME, ))
             elif key=='p':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_PERSON, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_PERSON, ))
             elif key=='m':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_MUSIC, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_MUSIC, ))
             elif key=='n':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_NEWS, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_NEWS, ))
             elif key=='b':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_BOOK, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_BOOK, ))
             elif key=='a':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_ALARM, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_ALARM, ))
             elif key=='s':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_STOP, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_STOP, ))
             elif key=='y':
-                _thread.start_new_thread(self.thread_fxn_commander, (avs_handle, CONFIG_FILENAME_REQUEST_YES, ))
+                _thread.start_new_thread(self.thread_commander, (avs_handle, CONFIG_FILENAME_REQUEST_YES, ))
 
+        # manager was cancelled, so manually quit avs
         if not avs_handle.is_quit():
             avs_handle.quit()
 
+        # display some message
         time.sleep(1)
         print("\r\n===============================================================")
         print("ESP32 Alexa Demo exits...")
         print("===============================================================\r\n\r\n")
 
+        # set exiting status for wait function
         self.exiting = True
+
         _thread.exit()
         return
 
     def usage(self):
-
         print("\r\n===============================================================")
         print("[MAIN] Usage:")
         print("[MAIN]   Press 'q' key to quit...")
@@ -149,7 +168,7 @@ class alexa_avs_manager():
         print("===============================================================\r\n")
 
     def run(self):
-        _thread.start_new_thread(self.thread_fxn_manager, ())
+        _thread.start_new_thread(self.thread_manager, ())
         return
 
     def wait(self):

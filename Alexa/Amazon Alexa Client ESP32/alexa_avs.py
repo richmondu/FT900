@@ -2,6 +2,7 @@ import socket
 import uselect
 import struct
 import os
+import uheapq
 #import audioop
 
 
@@ -63,6 +64,7 @@ class alexa_avs:
         self.quits = False
         self.poller = None
         self.prev_total_size = 0
+        self.queue_data = None
 
     def avs_set_capabilities(self, format, depth, rate, channel):
         cap = 0
@@ -96,6 +98,9 @@ class alexa_avs:
         # Send device info
         self.handle.sendall(buf)
 
+        self.queue_data = []
+        uheapq.heapify(self.queue_data)
+
         return True
 
     def disconnect(self):
@@ -110,61 +115,7 @@ class alexa_avs:
             return False
         return True
 
-    def recv_and_play_response(self):
-
-        # set receive timeout
-        self.handle.settimeout(1.0)
-        #if self.poller is None:
-        #    self.poller = uselect.poll()
-        #    self.poller.register(self.handle, uselect.POLLIN)
-        #res = self.poller.poll(CONFIG_RECV_TIMEOUT_MS)
-        #if not res:
-        #    return True
-
-        # receive the size of audio segment
-        try:
-            val = self.handle.recv(4)
-            if not val:
-                #print("Recv size ERROR")
-                return False
-            total_size = int(struct.unpack('I', val[:])[0])
-            print(total_size)
-        except OSError:
-            return True
-        except:
-            return False
-
-        want_recv = CONFIG_RECV_CHUNK_SIZE
-        total_recv = 0
-        if total_size > 153600:
-            # handle double send
-            total_size = self.prev_total_size
-            total_recv = 4
-
-        # receive the audio segment
-        while total_recv < total_size:
-            if total_size-total_recv < want_recv:
-                want_recv = total_size-total_recv
-
-            # receive audio segment
-            try:
-                val = self.handle.recv(want_recv)
-                if not val:
-                    print("Recv size ERROR2")
-                    return False
-                total_recv += len(val)
-                print(total_recv)
-            except OSError:
-                return True
-            except:
-                return False
-
-        self.prev_total_size = total_size
-        print("")
-        return True
-
-
-    def send_request(self, file_name):
+    def send_audio(self, file_name):
 
         # get file size
         statinfo = os.stat(file_name)
@@ -206,6 +157,131 @@ class alexa_avs:
         # close file
         file.close()
         print("")
+        return True
+
+    def recv_and_play_audio(self):
+
+        # set receive timeout
+        self.handle.settimeout(1.0)
+        #if self.poller is None:
+        #    self.poller = uselect.poll()
+        #    self.poller.register(self.handle, uselect.POLLIN)
+        #res = self.poller.poll(CONFIG_RECV_TIMEOUT_MS)
+        #if not res:
+        #    return True
+
+        # receive the size of audio segment
+        try:
+            val = self.handle.recv(4)
+            if not val:
+                #print("Recv size ERROR")
+                return False
+            total_size = int(struct.unpack('I', val[:])[0])
+            print(total_size)
+        except OSError:
+            return True
+        except:
+            return False
+
+        want_recv = CONFIG_RECV_CHUNK_SIZE
+        total_recv = 0
+        if total_size > 153600:
+            # handle double send
+            total_size = self.prev_total_size
+            total_recv = 4
+
+        # receive the audio segment
+        while total_recv < total_size:
+            if total_size-total_recv < want_recv:
+                want_recv = total_size-total_recv
+
+            # receive audio segment
+            self.handle.settimeout(1.0)
+            try:
+                val = self.handle.recv(want_recv)
+                if not val:
+                    print("Recv size ERROR2")
+                    return False
+                total_recv += len(val)
+                print(total_recv)
+            except OSError:
+                return True
+            except:
+                return False
+
+        self.prev_total_size = total_size
+        print("")
+        return True
+
+    def recv_audio(self):
+        # set receive timeout
+        self.handle.settimeout(1.0)
+
+        # receive the size of audio segment
+        try:
+            val = self.handle.recv(4)
+            if not val:
+                #print("Recv size ERROR")
+                return False
+            total_size = int(struct.unpack('I', val[:])[0])
+            print(total_size)
+        except OSError:
+            return True
+        except:
+            return False
+
+        want_recv = CONFIG_RECV_CHUNK_SIZE
+        total_recv = 0
+        if total_size > 153600:
+            # handle double send
+            total_size = self.prev_total_size
+            total_recv = 4
+
+        # receive the audio segment
+        while total_recv < total_size:
+            if total_size-total_recv < want_recv:
+                want_recv = total_size-total_recv
+
+            # receive audio segment
+            self.handle.settimeout(1.0)
+            try:
+                data = self.handle.recv(want_recv)
+                if not data:
+                    print("Recv size ERROR2")
+                    return False
+                total_recv += len(data)
+                #print(total_recv)
+                
+                # queue the data
+                uheapq.heappush(self.queue_data, data)
+                print("push {}".format(len(data)))
+
+                # dequeue the data
+                # val = uheapq.heappop(self.queue_data)
+                # print("pop {}".format(len(val)))
+                
+            except OSError:
+                return True
+            except:
+                return False
+
+        self.prev_total_size = total_size
+        print("")
+        return True
+
+    def play_audio(self):
+        if self.queue_data is None:
+            return False
+        try:
+            # dequeue a data
+            data = uheapq.heappop(self.queue_data)
+            print("pop {}".format(len(data)))
+
+            # play dequeued data
+            #TODO
+        except:
+            #print("play_audio exception ")
+            return False
         return True
 
     def is_quit(self):
