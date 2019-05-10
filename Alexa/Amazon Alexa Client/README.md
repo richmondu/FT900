@@ -32,6 +32,7 @@ Below is a block diagram showing the implemented components of the FT900 applica
 
       - SD Card should be replaced with SPI Flash or I2C EEPROM on PanL display.
       - Ethernet/WiFi should be replaced with RS485 on PanL display.
+      - Using WiFi is optional but requires ESP32 WiFi add-on module.
       - Button is implemented as GPIO and UART. User can choose between the two.
       - RTC library is used to measure time elapsed for performance measurement.
       
@@ -43,7 +44,7 @@ Below is a sequence diagram showing the basic interaction of components of the F
       - Streamer task receives and play audio data (response or audio content)      
 
 
-## FT900 as Alexa Thin Client
+## FT900 Alexa Thin Client
 
 FT900 utilizes RPI server to access Alexa.
 RPI provides separate Alexa instance to each connected FT900 device as if each FT900 is an Echo Dot device,
@@ -58,22 +59,32 @@ The FT900 simply enables voice capture and audio playback.
 
 The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). SD Card should be replaced with SPI Flash or I2C EEPROM. The main functions include:
 
-      - avs_connect() - Establish connection with RPI
-      - avs_disconnect() - Closes connection with RPI
-      - avs_record_request() - Record voice request from microphone and save to SD card
-      - avs_send_request() - Read voice request from SD card and send to RPI
-      - avs_receive_response() - Receive voice response from RPI and save to SD card
-      - avs_play_response() - Play voice response from SD card
-      - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
-      - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
-      - avs_set_volume(), avs_get_volume()
-      - avs_init(), avs_free()
+      1. avs_connect() - Establishes connection with RPI and sends device information (device id, send capabalities, recv capabilities)
+      2. avs_disconnect() - Closes connection with RPI
+      3. avs_record_request() - Record voice request from microphone and save to SD card
+      4. avs_send_request() - Read voice request from SD card and send to RPI
+      5. avs_receive_response() - Receive voice response from RPI and save to SD card
+      6. avs_play_response() - Play voice response from SD card
+      7. avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      8. avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
+      9. avs_set_volume(), avs_get_volume()
+      10. avs_init(), avs_free()
 
 As you can see, there are three ways to process Alexa response. The first is the basic implementation while the 2nd and 3rd improves user experience by reducing delay or the waiting time to hear Alexa's response.
 
       1. Receive and play response by completely receiving all data and save to memory before starting to play it.
       2. Receive and play response immediately segment by segment.
       3. Receive and play response in separate threads by utilizing some overlapped memory.
+
+
+## Device Information
+
+Device information is sent during avs_connect() function. This registers the device identification number, send audio device capabilities and recv audio device capabilities. Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. Device capabilities include:
+      
+      1. audio format (RAW, MP3, WAV, AAC, etc)
+      2. audio bit depth (8-bit, 16-bit, 24-bit, etc)
+      3. audio bit rate (16000 hz, 32000 hz, 44100 hz, 48000 hz, etc)
+      4. audio channel (mono, stereo)
 
 
 ## Audio Capture
@@ -162,9 +173,9 @@ These tester and simulator can be a very useful tool as you don't have to speak 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
 
 
-## Wake-word/Trigger-word Detection
+## Wake-word Detection
 
-The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
+The FT900 application currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
 
 The demo provides two ways to trigger voice recording:
 
@@ -174,6 +185,27 @@ The demo provides two ways to trigger voice recording:
 To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
 [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
+
+## WiFi Connectivity
+
+The FT900 application uses Ethernet connection to communicate with the RPI server. 
+It can be configured to use WiFi connection by defining COMMUNICATION_IO==2.
+Using WiFi requires adding an ESP32 WiFi development board as a slave module.
+FT900 communicates with the ESP32 WiFi via AT commands and UART interface.
+
+      1. COMMUNICATION_IO==1 : Ethernet
+      2. COMMUNICATION_IO==2 : WiFi
+      3. COMMUNICATION_IO==3 : RS485
+
+Below is how to connect the ESP32 WiFi development board to FT900.
+
+      ESP32 GPIO15 (UART1 CTS) - FT900 CN3 3 (UART1 RTS) // Red wire
+      ESP32 GPIO17 (UART1 TXD) - FT900 CN3 7 (UART1 RXD) // Orange wire
+      ESP32 GPIO16 (UART1 RXD) - FT900 CN3 9 (UART1 TXD) // Yellow wire
+      ESP32 GPIO14 (UART1 RTS) - FT900 CN3 11(UART1 CTS) // Green wire
+
+Performance using WiFi connection is currently slow resulting to jittery audio playback.
+This is either caused by UART bandwidth or UART ringbuffer implementation.
 
 
 # RPI-side (Alexa Gateway)
@@ -617,6 +649,19 @@ Below are the action items for the Alexa Demo.
       4. Support "FT900 libMAD MP3 decoder" and provide RPI option to send MP3 instead of PCM/raw.
       5. Support "FT900 Wake-Word detection". Currently, user has to press down a button to start voice recording.
       6. [BUG] RPI AVS SDK audio playback is disabled. Current code assumes that only FT900 clients can use Alexa.
+
+
+
+# Sub-projects
+
+1. [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
+
+2. [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+
+3. [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
+
+4. [ESP32 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
+
 
 
 # References

@@ -15,7 +15,7 @@ This is the customized Amazon AVS SDK application that supports Alexa Virtualiza
 
 Refer to the following links:
 
-- [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+- [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) - contains most documentation
 
 - [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
 
