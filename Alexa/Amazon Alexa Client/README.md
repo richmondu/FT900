@@ -629,6 +629,19 @@ Below are the action items for the Alexa Demo.
       6. [BUG] RPI AVS SDK audio playback is disabled. Current code assumes that only FT900 clients can use Alexa.
 
 
+
+# Related projects
+
+1. [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
+
+2. [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+
+3. [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
+
+4. [ESP32 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20ESP32)
+
+
+
 # References
 
 Below are the essential links to familiarize with Alexa and audio terminologies needed for FT900 Alexa Demo.
