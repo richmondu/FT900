@@ -447,7 +447,9 @@ int avs_send_request(const char* pcFileName)
     }
     sdcard_lseek(&fHandle, 0);
     DEBUG_PRINTF(">> %s %d bytes (16-bit)\r\n", pcFileName, (int)ulBytesToTransfer);
-    ulBytesToTransfer = (ulBytesToTransfer >> 1);
+    if (AVS_CONFIG_AUDIO_SEND_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8) {
+        ulBytesToTransfer = (ulBytesToTransfer >> 1);
+    }
 
 #if USE_SENDRECV_MUTEX
     xSemaphoreTake(m_xMutexSendRecv, pdMS_TO_TICKS(portMAX_DELAY));
