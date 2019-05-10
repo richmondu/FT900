@@ -379,12 +379,11 @@ Below is a description of how the audio is processed on RPI.
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 
 
-## Audio Hooking/Decoding
+## Audio Hooking
 
-I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. 
-[AVS SDK uses GStreamer for audio streaming, decoding and playback.]
+I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. AVS SDK uses GStreamer for audio streaming, decoding and playback.
 
-Previously, I was hooking "MP3/AAC" audio data at the top of the GStreamer pipeline.
+Previously, I was hooking "MP3/AAC" audio encoded data at the top of the GStreamer pipeline.
 That is, I was hooking the encoded audio data and then manually decoding it using third-party library FFMPEG that I manually added.
 At the same time, the GStreamer pipeline is also decoding the audio data for speaker playback.
 As such, there were 2 "decoding" happening causing intense CPU spikes when running multiple Alexa instances.
@@ -394,7 +393,9 @@ So, there is no more FFMPEG or SoX dependency.
 To do get the decoded data, I modified the GStreamer pipeline and added a "tee" branch that outputs the decoded data to 
 
       1. the audio sink and
-      2. my callback function
+      2. my callback function [the app sink]
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
 
 Refer to https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html for an example on how to use "tee" to retrieve output data from a GStreamer pipeline.
 
