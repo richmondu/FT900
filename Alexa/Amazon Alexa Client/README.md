@@ -381,6 +381,8 @@ Below is a description of how the audio is processed on RPI.
 
 ## Audio Hooking [GStreamer Pipeline]
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
+
 I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. AVS SDK uses GStreamer for audio streaming, decoding and playback.
 
 Previously, I was hooking "MP3/AAC" audio encoded data at the top of the GStreamer pipeline.
@@ -394,8 +396,6 @@ To do get the decoded data, I modified the GStreamer pipeline to:
 
       1. add tee branch to output decoded data to both audiosink and appsink
       2. replace audiosink with fakesink to disable audio playback in RPI
-
-<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
 
 Refer to https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html for an example on how to use "tee" to retrieve output data from a GStreamer pipeline.
 
