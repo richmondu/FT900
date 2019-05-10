@@ -32,6 +32,7 @@ Below is a block diagram showing the implemented components of the FT900 applica
 
       - SD Card should be replaced with SPI Flash or I2C EEPROM on PanL display.
       - Ethernet/WiFi should be replaced with RS485 on PanL display.
+      - Using WiFi is optional but requires ESP32 WiFi add-on module.
       - Button is implemented as GPIO and UART. User can choose between the two.
       - RTC library is used to measure time elapsed for performance measurement.
       
