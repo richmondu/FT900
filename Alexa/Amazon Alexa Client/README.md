@@ -630,7 +630,7 @@ Below are the action items for the Alexa Demo.
 
 
 
-# Related projects
+# Sub-projects
 
 1. [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
 
