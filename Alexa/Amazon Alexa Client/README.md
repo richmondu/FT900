@@ -379,7 +379,7 @@ Below is a description of how the audio is processed on RPI.
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 
 
-## Audio Hooking
+## Audio Hooking [GStreamer Pipeline]
 
 I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. AVS SDK uses GStreamer for audio streaming, decoding and playback.
 
@@ -390,10 +390,10 @@ As such, there were 2 "decoding" happening causing intense CPU spikes when runni
 
 Now I am hooking beneath the GStreamer pipeline and so I'm getting the "decoded" data already.
 So, there is no more FFMPEG or SoX dependency.
-To do get the decoded data, I modified the GStreamer pipeline and added a "tee" branch that outputs the decoded data to 
+To do get the decoded data, I modified the GStreamer pipeline to:
 
-      1. the audio sink and
-      2. my callback function [the app sink]
+      1. add tee branch to output decoded data to both audiosink and appsink
+      2. replace audiosink with fakesink to disable audio playback in RPI
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
 
