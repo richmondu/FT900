@@ -384,6 +384,8 @@ Below is a description of how the audio is processed on RPI.
 I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. 
 [AVS SDK uses GStreamer for audio streaming, decoding and playback.]
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
+
 Previously, I was hooking "MP3/AAC" audio data at the top of the GStreamer pipeline.
 That is, I was hooking the encoded audio data and then manually decoding it using third-party library FFMPEG that I manually added.
 At the same time, the GStreamer pipeline is also decoding the audio data for speaker playback.
