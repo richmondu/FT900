@@ -2,6 +2,7 @@ import socket
 import uselect
 import struct
 import os
+import time
 import uheapq
 #import audioop
 
@@ -63,10 +64,11 @@ class avs:
         self.handle = None
         self.quits = False
         self.poller = None
-        self.prev_total_size = 0
         self.queue_data = None
         self.buffer_send = None
-
+        self.buffer_recv = None
+        self.makefile_recv = None
+        
     def avs_set_capabilities(self, format, depth, rate, channel):
         cap = 0
         cap |= (format  & DEVICE_CAPABILITIES_MASK_FORMAT)   << DEVICE_CAPABILITIES_OFFSET_FORMAT
@@ -102,7 +104,8 @@ class avs:
         self.queue_data = []
         uheapq.heapify(self.queue_data)
         self.buffer_send = bytearray(CONFIG_BUFFER_SEND_SIZE)
-
+        #self.buffer_recv = bytearray(CONFIG_BUFFER_RECV_SIZE)
+        #self.makefile_recv = self.handle.makefile("rb", 0)
         return True
 
     def disconnect(self):
@@ -192,10 +195,6 @@ class avs:
 
         want_recv = CONFIG_BUFFER_RECV_SIZE
         total_recv = 0
-        if total_size > 153600:
-            # handle double send
-            total_size = self.prev_total_size
-            total_recv = 4
 
         # receive the audio segment
         while total_recv < total_size:
@@ -203,7 +202,7 @@ class avs:
                 want_recv = total_size-total_recv
 
             # receive audio segment
-            self.handle.settimeout(1.0)
+            self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS_2)
             try:
                 val = self.handle.recv(want_recv)
                 if not val:
@@ -216,8 +215,6 @@ class avs:
             except:
                 return False
 
-        self.prev_total_size = total_size
-        # print("")
         return True
 
     def recv_audio(self):
@@ -239,20 +236,19 @@ class avs:
 
         want_recv = CONFIG_BUFFER_RECV_SIZE
         total_recv = 0
-        if total_size > 153600:
-            # handle double send
-            total_size = self.prev_total_size
-            total_recv = 4
-        print(total_size)
+        print("streaming {} bytes".format(total_size))
 
+        #self.makefile_recv.flush()
+        
         # receive the audio segment
         while total_recv < total_size:
             if total_size-total_recv < want_recv:
                 want_recv = total_size-total_recv
 
             # receive audio segment
-            #self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS_2)
+            self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS_2)
             try:
+                #data = self.makefile_recv.read(want_recv)
                 data = self.handle.recv(want_recv)
                 if not data:
                     print("Recv size ERROR3")
@@ -261,26 +257,30 @@ class avs:
                 #print(total_recv)
             except OSError:
                 return True
+            except MemoryError:
+                print("Recv size ERRORX")
+                return True
             except:
                 print("Recv size ERROR4")
                 return False
 
             # queue the data
-            while True:
-                try:
-                    uheapq.heappush(self.queue_data, data)
-                    break
-                except:
-                    time.sleep(1)
-                    continue
-            # print("push {}".format(len(data)))
+            #while True:
+            #    try:
+            #        uheapq.heappush(self.queue_data, self.buffer_recv)
+            #        print("push {}".format(len(data)))
+            #        break
+            #    except:
+            #        print("push {} failed!".format(len(data)))
+            #        time.sleep(0.1)
+            #        continue
+            
 
             # dequeue the data
             # val = uheapq.heappop(self.queue_data)
             # print("pop {}".format(len(val)))
 
-        self.prev_total_size = total_size
-        print("")
+        print("streamed  {} bytes".format(total_recv))
         return True
 
     def play_audio(self):
