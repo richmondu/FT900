@@ -197,7 +197,15 @@ FT900 communicates with the ESP32 WiFi via AT commands and UART interface.
       2. COMMUNICATION_IO==2 : WiFi
       3. COMMUNICATION_IO==3 : RS485
 
+Below is how to connect the ESP32 WiFi development board to FT900.
+
+      ESP32 GPIO15 (UART1 CTS) - FT900 CN3 3 (UART1 RTS) // Red wire
+      ESP32 GPIO17 (UART1 TXD) - FT900 CN3 7 (UART1 RXD) // Orange wire
+      ESP32 GPIO16 (UART1 RXD) - FT900 CN3 9 (UART1 TXD) // Yellow wire
+      ESP32 GPIO14 (UART1 RTS) - FT900 CN3 11(UART1 CTS) // Green wire
+
 Performance using WiFi connection is currently slow resulting to jittery audio playback.
+This is either caused by UART bandwidth or UART ringbuffer implementation.
 
 
 # RPI-side (Alexa Gateway)
