@@ -379,7 +379,7 @@ Below is a description of how the audio is processed on RPI.
       - G711 u-law lossless companding (compression/expanding) algorithm is used to convert data stream from 16-bit to 8-bit and vice versa. Compressing the data before transmission reduces the data bandwidth usage by half.
 
 
-## Audio Hooking
+## Audio Hooking [GStreamer Pipeline]
 
 I'm now hooking "RAW decoded" audio data from the GStreamer pipeline. AVS SDK uses GStreamer for audio streaming, decoding and playback.
 
