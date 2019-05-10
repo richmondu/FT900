@@ -43,7 +43,7 @@ Below is a sequence diagram showing the basic interaction of components of the F
       - Streamer task receives and play audio data (response or audio content)      
 
 
-## FT900 as Alexa Thin Client
+## FT900 Alexa Thin Client
 
 FT900 utilizes RPI server to access Alexa.
 RPI provides separate Alexa instance to each connected FT900 device as if each FT900 is an Echo Dot device,
