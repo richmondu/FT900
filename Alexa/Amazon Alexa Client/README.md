@@ -20,7 +20,7 @@ This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices,
 Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. 
 Customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including <b>access to third-party skills</b> (such as control smart home devices).
 
-PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
+PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display Controller, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
 Many PanL Displays can be connected to a PanL Hub at the same time.
 Customers will be able to <b>use the PanL Hub and any of the connected PanL Display as an Amazon Echo Dot device</b>.
 
@@ -31,7 +31,7 @@ Below is a block diagram showing the implemented components of the FT900 applica
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg" width="623"/>
 
       - SD Card should be replaced with SPI Flash or I2C EEPROM on PanL display.
-      - Ethernet/WiFi should be replaced with RS485 on PanL display.
+      - Ethernet/WiFi should be replaced with RS485 MSTP on PanL display.
       - Using WiFi is optional but requires ESP32 WiFi add-on module.
       - Button is implemented as GPIO and UART. User can choose between the two.
       - RTC library is used to measure time elapsed for performance measurement.
@@ -146,7 +146,7 @@ To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or R
 
       - Ethernet: using LWIP embedded TCP/IP library
       - WiFi: using ESP32 WiFi accessed using AT commands over UART
-      - RS485: TODO
+      - RS485 MSTP: TODO
 
 
 ## Audio Codec
