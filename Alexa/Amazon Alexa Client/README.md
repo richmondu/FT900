@@ -406,6 +406,8 @@ Now, with 8 FT900 devices simulataneously playing music, CPU is now just 40-50%.
 
 ## Multiple Alexa Instances/Sessions/Accounts
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_multiple_instances.jpg" width="623"/>
+
 Previously, multiple FT900 devices share a single Alexa instance.
 Each FT900 can send information request to Alexa simultaneously.
 But each FT900 cannot simultaneously play music or any audio content.
