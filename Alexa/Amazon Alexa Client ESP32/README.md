@@ -1,7 +1,7 @@
 # ESP32 Alexa Client
 
 
-This Python application simulates FT900 behavior for the ESP32 Alexa application.
+This MicroPython-based application simulates FT900 Alexa Client but uses ESP32 MCU instead of FT900 MCU.
 
 An FT900 MCU or ESP32 MCU can connect to the RPI Alexa Gateway.
 
