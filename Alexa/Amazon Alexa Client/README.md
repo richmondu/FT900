@@ -173,9 +173,9 @@ These tester and simulator can be a very useful tool as you don't have to speak 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator.png" width="623"/>
 
 
-## Wake-word/Trigger-word Detection
+## Wake-word Detection
 
-The demo currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
+The FT900 application currently does not support Wakeword detection. To trigger FT900 to start recording voice, user has to press down a button. To stop recording, user has to release the button. This works similar to the remote control for Amazon's Firestick TV.
 
 The demo provides two ways to trigger voice recording:
 
@@ -185,6 +185,19 @@ The demo provides two ways to trigger voice recording:
 To support Wakeword detection feature on FT900, external MCUs can be integrated as slave devices to handle wakeword detection. 
 [SparkFun's board](https://petewarden.com/2019/03/07/launching-tensorflow-lite-for-microcontrollers/) is an example board that can be used for wakeword detection.
 
+
+## WiFi Connectivity
+
+The FT900 application uses Ethernet connection to communicate with the RPI server. 
+It can be configured to use WiFi connection by defining COMMUNICATION_IO==2.
+Using WiFi requires adding an ESP32 WiFi development board as a slave module.
+FT900 communicates with the ESP32 WiFi via AT commands and UART interface.
+
+      1. COMMUNICATION_IO==1 : Ethernet
+      2. COMMUNICATION_IO==2 : WiFi
+      3. COMMUNICATION_IO==3 : RS485
+
+Performance using WiFi connection is currently slow resulting to jittery audio playback.
 
 
 # RPI-side (Alexa Gateway)
