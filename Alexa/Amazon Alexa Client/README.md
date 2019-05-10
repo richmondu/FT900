@@ -58,22 +58,29 @@ The FT900 simply enables voice capture and audio playback.
 
 The main component of the Alexa Demo on the FT900 side is the Alexa AVS library. I created the library to be reusable (for PanL Display) and easy to use (abstract the audio, the SD card and the network communication). SD Card should be replaced with SPI Flash or I2C EEPROM. The main functions include:
 
-      - avs_connect() - Establish connection with RPI
-      - avs_disconnect() - Closes connection with RPI
-      - avs_record_request() - Record voice request from microphone and save to SD card
-      - avs_send_request() - Read voice request from SD card and send to RPI
-      - avs_receive_response() - Receive voice response from RPI and save to SD card
-      - avs_play_response() - Play voice response from SD card
-      - avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
-      - avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
-      - avs_set_volume(), avs_get_volume()
-      - avs_init(), avs_free()
+      1. avs_connect() - Establishes connection with RPI and sends device information (device id, send capabalities, recv capabilities)
+      2. avs_disconnect() - Closes connection with RPI
+      3. avs_record_request() - Record voice request from microphone and save to SD card
+      4. avs_send_request() - Read voice request from SD card and send to RPI
+      5. avs_receive_response() - Receive voice response from RPI and save to SD card
+      6. avs_play_response() - Play voice response from SD card
+      7. avs_recv_and_play_response() - Receive and play voice response from RPI without saving to SD card (faster performance)
+      8. avs_recv_and_play_response_threaded() - Receive and play voice response from RPI in separate threads using overlapping io. 
+      9. avs_set_volume(), avs_get_volume()
+      10. avs_init(), avs_free()
 
 As you can see, there are three ways to process Alexa response. The first is the basic implementation while the 2nd and 3rd improves user experience by reducing delay or the waiting time to hear Alexa's response.
 
       1. Receive and play response by completely receiving all data and save to memory before starting to play it.
       2. Receive and play response immediately segment by segment.
       3. Receive and play response in separate threads by utilizing some overlapped memory.
+
+Device information is sent during avs_connect() function. This registers the device identification number, send audio device capabilities and recv audio device capabilities. Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. Device capabilities include:
+      
+      1. audio format (RAW, MP3, etc)
+      2. bit depth (8-bit, 16-bit, etc)
+      3. bit rate (16000 hz, etc)
+      4. channel (mono, stereo)
 
 
 ## Audio Capture
