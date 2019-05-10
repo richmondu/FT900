@@ -393,7 +393,7 @@ So, there is no more FFMPEG or SoX dependency.
 To do get the decoded data, I modified the GStreamer pipeline and added a "tee" branch that outputs the decoded data to 
 
       1. the audio sink and
-      2. my callback function
+      2. my callback function [the app sink]
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/alexa_gstreamer_pipeline.jpg" width="623"/>
 
