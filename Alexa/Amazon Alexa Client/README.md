@@ -79,7 +79,14 @@ As you can see, there are three ways to process Alexa response. The first is the
 
 ## Device Information
 
-Device information is sent during avs_connect() function. This registers the device identification number, send audio device capabilities and recv audio device capabilities. Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. Device capabilities include:
+Device information is sent during avs_connect() function. This registers 
+
+      1. device identification number
+      2. send audio device capabilities
+      3. recv audio device capabilities. 
+
+Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. 
+Device capabilities include:
       
       1. audio format (RAW, MP3, WAV, AAC, etc)
       2. audio bit depth (8-bit, 16-bit, 24-bit, etc)
