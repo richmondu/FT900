@@ -3,7 +3,7 @@
 
 This MicroPython-based application simulates FT900 Alexa Client but uses ESP32 MCU instead of FT900 MCU.
 
-An FT900 MCU or ESP32 MCU can connect to the RPI Alexa Gateway.
+An FT900 MCU or ESP32 MCU can connect to the RPI Alexa Gateway to access Alexa.
 
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/system_diagram.jpg" width="623"/>
@@ -20,7 +20,7 @@ Refer to the following links:
 
 - [Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
 
-- [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) - contains most documentation
+- [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) - main documentation is here
 
 - [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
 
