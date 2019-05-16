@@ -259,7 +259,7 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 ## Alexa Capabilities
 
-AVS SDK supports 3 major capabilities: 
+AVS SDK supports 3 major capabilities: <b>Dialogs</b>, <b>Alerts</b> and <b>Contents</b>.
 
       1. Dialogs - for dialog/speech/user-interaction directives (SpeechSynthesizer)
       2. Alerts - for timer/alarm directives (Alerts)
@@ -282,7 +282,7 @@ To support #2 and #3 on FT900, I hooked into the MediaPlayer class of AVS SDK in
          Previously, connection to RPI was only established when requests are sent.
          This method is no longer possible as Alerts are not active and Contents are long.
    
-Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and music.
+Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and audio content.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator_logs.png" width="623"/>
 
@@ -313,7 +313,7 @@ Below is an experiment that demonstrates the prioritization of Alexa on dialogue
 
 ## Alexa Audio Content Services
 
-Various audio content services are now working on FT900 microcontroller. 
+Various audio content are now working on FT900 MCU: <b>music radio</b>, <b>live news</b> and <b>audio books</b>. 
 
       1. music radio - TuneIn:  OK
       2. live news   - FoxNews: OK
