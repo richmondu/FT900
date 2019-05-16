@@ -84,3 +84,5 @@ The resulting binary sizes is as follows:
         total        1138800    
 
 Libraries that will not be used should be removed to allocate more memory for PanL framework and applications.
+
+This has been tested to be working using the current ESP32 Alexa demo. 
