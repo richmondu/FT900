@@ -43,9 +43,11 @@ Copying files:
 2. Create boot.py and main.py then copy to ESP32
    rshell -a
    connect serial COM40 115200
+   ls -l /pyboard
 
    cp alexa/avs.py /pyboard/alexa
    cp alexa/avs_manager.py /pyboard/alexa
+   ls -l /pyboard/alexa
 
    cp alexa/audio/REQUEST_play_audio_book.RAW /pyboard/alexa/audio
    cp alexa/audio/REQUEST_play_live_news.RAW /pyboard/alexa/audio
@@ -55,6 +57,7 @@ Copying files:
    cp alexa/audio/REQUEST_what_time_is_it.RAW /pyboard/alexa/audio
    cp alexa/audio/REQUEST_who_is.RAW /pyboard/alexa/audio
    cp alexa/audio/REQUEST_yes.RAW /pyboard/alexa/audio
+   ls -l /pyboard/alexa/audio
 
    mkdir /pyboard/alexa
    mkdir /pyboard/alexa/audio
@@ -63,9 +66,6 @@ Copying files:
    mkdir /pyboard/audio
    cp audio/... /pyboard/audio
  
-
-   ls -l /pyboard
-   ls -l /pyboard/audio
 3. Type
    a. repl
    b. or open teraterm COM40 115200
