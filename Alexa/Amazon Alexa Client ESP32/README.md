@@ -82,3 +82,5 @@ The resulting binary sizes is as follows:
         partitions      3072
         application  1073264
         total        1138800    
+
+Libraries that will not be used should be removed to allocate more memory for PanL framework and applications.
