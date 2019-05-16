@@ -20,7 +20,7 @@ This demo is targeted for <b>FTDI/Bridgetek’s</b> existing smart home devices,
 Having <b>[Alexa built-in](https://developer.amazon.com/alexa-voice-service)</b> to <b>PanL Smart Home</b> allow customers to talk directly to Alexa via PanL without needing to buy Amazon Echo devices. 
 Customers will have access to the <b>built in capabilities of Alexa</b> (like ask informations, play music/live news/audio book and set timers/alarms/notifications) including <b>access to third-party skills</b> (such as control smart home devices).
 
-PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
+PanL Hub, which runs on RPI, acts as the <b>Alexa Hub/Gateway</b> while the PanL Display Controller, which runs on FT900 microcontroller, acts as the <b>Alexa Client</b>. 
 Many PanL Displays can be connected to a PanL Hub at the same time.
 Customers will be able to <b>use the PanL Hub and any of the connected PanL Display as an Amazon Echo Dot device</b>.
 
@@ -31,7 +31,7 @@ Below is a block diagram showing the implemented components of the FT900 applica
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/block_diagram.jpg" width="623"/>
 
       - SD Card should be replaced with SPI Flash or I2C EEPROM on PanL display.
-      - Ethernet/WiFi should be replaced with RS485 on PanL display.
+      - Ethernet/WiFi should be replaced with RS485 MSTP on PanL display.
       - Using WiFi is optional but requires ESP32 WiFi add-on module.
       - Button is implemented as GPIO and UART. User can choose between the two.
       - RTC library is used to measure time elapsed for performance measurement.
@@ -79,7 +79,14 @@ As you can see, there are three ways to process Alexa response. The first is the
 
 ## Device Information
 
-Device information is sent during avs_connect() function. This registers the device identification number, send audio device capabilities and recv audio device capabilities. Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. Device capabilities include:
+Device information is sent during avs_connect() function. This registers 
+
+      1. device identification number
+      2. send audio device capabilities
+      3. recv audio device capabilities. 
+
+Sending device capabilities are useful for RPI to simultaneously support different MCU clients that may have different audio capabilities. 
+Device capabilities include:
       
       1. audio format (RAW, MP3, WAV, AAC, etc)
       2. audio bit depth (8-bit, 16-bit, 24-bit, etc)
@@ -146,7 +153,7 @@ To communicate with Alexa, FT900 communicates with RPI using Ethernet, WiFi or R
 
       - Ethernet: using LWIP embedded TCP/IP library
       - WiFi: using ESP32 WiFi accessed using AT commands over UART
-      - RS485: TODO
+      - RS485 MSTP: TODO
 
 
 ## Audio Codec
@@ -252,7 +259,7 @@ Below is a sequence diagram showing the basic interaction of components of the R
 
 ## Alexa Capabilities
 
-AVS SDK supports 3 major capabilities: 
+AVS SDK supports 3 major capabilities: <b>Dialogs</b>, <b>Alerts</b> and <b>Contents</b>.
 
       1. Dialogs - for dialog/speech/user-interaction directives (SpeechSynthesizer)
       2. Alerts - for timer/alarm directives (Alerts)
@@ -275,7 +282,7 @@ To support #2 and #3 on FT900, I hooked into the MediaPlayer class of AVS SDK in
          Previously, connection to RPI was only established when requests are sent.
          This method is no longer possible as Alerts are not active and Contents are long.
    
-Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and music.
+Below is an experiment that demonstrates the prioritization of Alexa on dialogues responses, alarms and audio content.
 
 <img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/ft900_simulator_logs.png" width="623"/>
 
@@ -306,7 +313,7 @@ Below is an experiment that demonstrates the prioritization of Alexa on dialogue
 
 ## Alexa Audio Content Services
 
-Various audio content services are now working on FT900 microcontroller. 
+Various audio content are now working on FT900 MCU: <b>music radio</b>, <b>live news</b> and <b>audio books</b>. 
 
       1. music radio - TuneIn:  OK
       2. live news   - FoxNews: OK
@@ -659,7 +666,7 @@ Below are the action items for the Alexa Demo.
 
 1. [RPI Alexa Gateway](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Gateway)
 
-2. [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client)
+2. [FT900 Alexa Client](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client) - main documentation is here
 
 3. [FT900 Alexa Client Simulator](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client%20Simulator)
 
@@ -689,4 +696,3 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 7. [FFMPEG for audio decoding (supports MP3/AAC audio formats)](https://ffmpeg.org)
 8. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
 9. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
-Is 
