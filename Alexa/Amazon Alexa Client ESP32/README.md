@@ -57,10 +57,11 @@ Below are instructions to run basic application
 
 ## Building MicroPython port for ESP32
 
+MicroPython port for ESP32 should be customized to allocate more memory for PanL usage.
 
-Note that the instructions specified in https://github.com/micropython/micropython/tree/master/ports/esp32 does not work as is.
+Instructions to compile/build MicroPython port for ESP32 is specified in https://github.com/micropython/micropython/tree/master/ports/esp32 but it does not work as is.
 
-Below are instructions to compile/build MicroPython for ESP32.
+To fill-in the gaps, below are instructions to help make the process straight-forward.
 
         1.
         2.
