@@ -61,7 +61,7 @@ MicroPython port for ESP32 should be customized to allocate more memory for PanL
 
 Instructions to compile/build MicroPython port for ESP32 is specified in https://github.com/micropython/micropython/tree/master/ports/esp32 but it does not work as is.
 
-To fill-in the gaps, below are instructions to help make the process straight-forward.
+To fill-in the gaps, below are complementary details to help make the process straight-forward.
 
         1.
         2.
