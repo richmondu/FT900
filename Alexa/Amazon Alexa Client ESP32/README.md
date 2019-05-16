@@ -28,7 +28,7 @@ Refer to the following links:
 
 ## Creating a simple MicroPython application on ESP32
 
-Below are instructions to run basic application
+Below are instructions to run a simple Hello World application
 
         1. pip install esptool
 
@@ -57,7 +57,7 @@ Below are instructions to run basic application
 
 ## Building MicroPython port for ESP32
 
-MicroPython port for ESP32 should be customized to allocate more memory for PanL usage.
+MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
 
 Instructions to compile/build MicroPython port for ESP32 is specified in https://github.com/micropython/micropython/tree/master/ports/esp32 but it does not work as is.
 
@@ -84,6 +84,6 @@ The resulting binary sizes is as follows:
         application  1073264
         total        1138800    
 
-Libraries that will not be used should be removed to allocate more memory for PanL framework and applications.
+Libraries that will not be used should be removed to allocate more memory for PanL usage.
 
 This has been tested to be working using the current ESP32 Alexa demo. 
