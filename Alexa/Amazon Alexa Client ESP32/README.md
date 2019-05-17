@@ -65,7 +65,7 @@ This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cl
 
 ### ESP32 Alexa demo
 
-This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that supports multiple connected FT900/ESP32 clients.
+This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that enables multiple connected FT900/ESP32 clients to access Alexa.
 
 
 ## Building MicroPython port for ESP32
