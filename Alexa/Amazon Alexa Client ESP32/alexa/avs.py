@@ -4,7 +4,6 @@ import struct
 import os
 import time
 import uheapq
-#import audioop
 
 
 
@@ -66,9 +65,7 @@ class avs:
         self.poller = None
         self.queue_data = None
         self.buffer_send = None
-        self.buffer_recv = None
-        self.makefile_recv = None
-        
+
     def avs_set_capabilities(self, format, depth, rate, channel):
         cap = 0
         cap |= (format  & DEVICE_CAPABILITIES_MASK_FORMAT)   << DEVICE_CAPABILITIES_OFFSET_FORMAT
@@ -101,11 +98,10 @@ class avs:
         # Send device info
         self.handle.sendall(buf)
 
+        # Initialize variables
         self.queue_data = []
         uheapq.heapify(self.queue_data)
         self.buffer_send = bytearray(CONFIG_BUFFER_SEND_SIZE)
-        #self.buffer_recv = bytearray(CONFIG_BUFFER_RECV_SIZE)
-        #self.makefile_recv = self.handle.makefile("rb", 0)
         return True
 
     def disconnect(self):
@@ -238,8 +234,6 @@ class avs:
         total_recv = 0
         print("streaming {} bytes".format(total_size))
 
-        #self.makefile_recv.flush()
-        
         # receive the audio segment
         while total_recv < total_size:
             if total_size-total_recv < want_recv:
@@ -248,7 +242,6 @@ class avs:
             # receive audio segment
             self.handle.settimeout(CONFIG_RECV_TIMEOUT_MS_2)
             try:
-                #data = self.makefile_recv.read(want_recv)
                 data = self.handle.recv(want_recv)
                 if not data:
                     print("Recv size ERROR3")
@@ -265,20 +258,13 @@ class avs:
                 return False
 
             # queue the data
-            #while True:
-            #    try:
-            #        uheapq.heappush(self.queue_data, self.buffer_recv)
-            #        print("push {}".format(len(data)))
-            #        break
-            #    except:
-            #        print("push {} failed!".format(len(data)))
-            #        time.sleep(0.1)
-            #        continue
-            
-
-            # dequeue the data
-            # val = uheapq.heappop(self.queue_data)
-            # print("pop {}".format(len(val)))
+            try:
+                uheapq.heappush(self.queue_data, data)
+                print("push {}".format(len(data)))
+                #time.sleep(0.010)
+            except:
+                print("push {} failed!".format(len(data)))
+                return False
 
         print("streamed  {} bytes".format(total_recv))
         return True
@@ -289,10 +275,9 @@ class avs:
         try:
             # dequeue a data
             data = uheapq.heappop(self.queue_data)
-            # print("pop {}".format(len(data)))
+            print("pop {}".format(len(data)))
 
-            # play dequeued data
-            #TODO
+            # TODO: play data
         except:
             #print("play_audio exception ")
             return False
