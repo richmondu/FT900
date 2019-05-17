@@ -55,6 +55,15 @@ Below are instructions to run a simple Hello World application
             reset ESP32
 
 
+## Running custom MicroPython applications on ESP32
+
+Below are demo applications I have created to experiment and learn with MicroPython on ESP32.
+
+### ESP32 AWS/GCP/Azure IoT demo
+
+### ESP32 Alexa demo
+
+ 
 ## Building MicroPython port for ESP32
 
 MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
