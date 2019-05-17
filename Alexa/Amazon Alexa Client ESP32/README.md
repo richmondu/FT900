@@ -61,11 +61,46 @@ MicroPython port for ESP32 should be customized to allocate more memory for PanL
 
 Instructions to compile/build MicroPython port for ESP32 is specified in https://github.com/micropython/micropython/tree/master/ports/esp32 but it does not work as is.
 
-To fill-in the gaps, below are complementary details to help make the process straight-forward.
+To fill-in the gaps, below are complementary details to make the process straight-forward.
 
-        1.
-        2.
-        3.
+        1. git checkout 5c88c5996dbde6208e3bec05abc21ff6cd822d26
+        
+        2. Create micropython/ports/esp32/GNUmakefile
+           ESPIDF = $(HOME)/esp/esp-idf
+           #ESPIDF="F:/msys32/home/richmond/esp/esp-idf"
+           PORT = COM40
+           FLASH_MODE = dio
+           FLASH_SIZE = 4MB
+           CROSS_COMPILE = xtensa-esp32-elf-
+           SDKCONFIG = boards/sdkconfig
+           include Makefile     
+           
+        3. Modify micropython/ports/esp32/Makefile
+           MICROPY_PY_BTREE = 0
+           #MICROPY_PY_BTREE = 1
+           ESPCOMP_KCONFIGS = $(shell find "F:/msys32/home/richmond/esp/esp-idf/components" -name Kconfig)
+           ESPCOMP_KCONFIGS_PROJBUILD = $(shell find "F:/msys32/home/richmond/esp/esp-idf/components" -name Kconfig.projbuild)         
+           #ESPCOMP_KCONFIGS = $(shell find $(ESPCOMP) -name Kconfig)
+           #ESPCOMP_KCONFIGS_PROJBUILD = $(shell find $(ESPCOMP) -name Kconfig.projbuild)
+           
+        4. Update files in micropython/ports/esp32/modules/ 
+           dht.py
+           ds18x20.py
+           ntptime.py
+           onewire.py
+           upip.py
+           upip_utarfile,py
+           upysh.py
+           urequests.py
+           webrepl.py
+           webrepl_setup.py
+           websocket_hepler.py
+           umqtt/simple.py
+           umqtt/robust.py
+
+        5. Update micropython/py/objmodule.c
+           #if 0//MICROPY_PY_BTREE
+           #endif
 
 The resulting binary sizes is as follows:
 
