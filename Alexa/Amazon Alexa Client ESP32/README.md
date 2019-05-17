@@ -59,11 +59,15 @@ Below are instructions to run a simple Hello World application
 
 Below are demo applications I have created to experiment and learn with MicroPython on ESP32.
 
-### ESP32 AWS/GCP/Azure IoT demo
+### ESP32 IoT demo
+
+This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cloud platforms using MQTT over TLS.
 
 ### ESP32 Alexa demo
 
- 
+This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that supports multiple connected FT900/ESP32 clients.
+
+
 ## Building MicroPython port for ESP32
 
 MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
