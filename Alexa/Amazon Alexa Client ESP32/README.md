@@ -65,7 +65,7 @@ Below are instructions to run a simple Hello World application
 
 ## Running custom MicroPython applications on ESP32
 
-Below are demo applications I have created to experiment and learn with MicroPython on ESP32.
+Below are demo applications I have created to experiment and learn MicroPython on ESP32.
 
 ### ESP32 IoT demo
 
