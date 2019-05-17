@@ -11,8 +11,8 @@ import uheapq
 ############################################################################################
 # configuration
 ############################################################################################
-#CONFIG_SERVER_IP                    = '192.168.100.12'
-CONFIG_SERVER_IP                     = '192.168.0.125'
+CONFIG_SERVER_IP                     = '192.168.100.12'
+#CONFIG_SERVER_IP                    = '192.168.0.125'
 CONFIG_SERVER_PORT                   = 11234
 CONFIG_BUFFER_SEND_SIZE              = 512
 CONFIG_BUFFER_RECV_SIZE              = 512
