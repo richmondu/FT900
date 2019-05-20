@@ -26,15 +26,16 @@ Refer to the following links:
 
 
 
-## MicroPython on ESP32
+# MicroPython on ESP32
 
 ESP32 MCU is a new platform to be used for 2nd-generation PanL displays.
 The first generation PanL displays uses the in-house FT900 MCU.
 
 ESP32 MCU supports C and MicroPython programming languages.
  
+ 
 
-## Creating a simple MicroPython application on ESP32
+# Creating a simple MicroPython application on ESP32
 
 Below are instructions to run a simple Hello World application
 
@@ -63,7 +64,8 @@ Below are instructions to run a simple Hello World application
             reset ESP32
 
 
-## Running custom MicroPython applications on ESP32
+
+# Running custom MicroPython applications on ESP32
 
 Below are demo applications I have created to experiment and learn MicroPython on ESP32.
 
@@ -71,17 +73,24 @@ Below are demo applications I have created to experiment and learn MicroPython o
 
 This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cloud platforms using MQTT over TLS.
 
-A similar application for FT900 MCU exists in here.
+        1. Copy iot folder to ESP32 /pyboard/iot
+        2. Enable test_iot_demo() in main.py
+        
+A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure).
 
 
 ### ESP32 Alexa demo
 
 This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that enables multiple connected FT900/ESP32 clients to simultaneously access Alexa.
 
-A similar application for FT900 MCU exists in here.
+        1. Copy alexa folder to ESP32 /pyboard/alexa
+        2. Enable test_alexa_demo() in main.py
+        
+A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client).
 
 
-## Building MicroPython port for ESP32
+
+# Building MicroPython port for ESP32
 
 MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
 
