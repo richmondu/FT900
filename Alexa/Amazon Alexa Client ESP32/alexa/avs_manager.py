@@ -98,9 +98,9 @@ class avs_manager():
     # thread_manager
     ############################################################################################
     def thread_manager(self):
-        print("\r\n===============================================================")
+        print("\r\n=======================================================================")
         print("ESP32 Alexa Demo")
-        print("===============================================================\r\n")
+        print("=======================================================================\r\n")
 
         avs_handle = avs()
 
@@ -141,9 +141,9 @@ class avs_manager():
 
         # display some message
         time.sleep(1)
-        print("\r\n===============================================================")
+        print("\r\n=======================================================================")
         print("ESP32 Alexa Demo exits...")
-        print("===============================================================\r\n\r\n")
+        print("=======================================================================\r\n\r\n")
 
         # set exiting status for wait function
         self.exiting = True
@@ -152,7 +152,7 @@ class avs_manager():
         return
 
     def usage(self):
-        print("\r\n===============================================================")
+        print("\r\n=======================================================================")
         print("[MAIN] Usage:")
         print("[MAIN]   Press 'q' key to quit...")
         print("[MAIN]   Press 't' key to ask Alexa what time is it...")
@@ -163,7 +163,7 @@ class avs_manager():
         print("[MAIN]   Press 'a' key to ask Alexa to set alarm...")
         print("[MAIN]   Press 's' key to tell Alexa to stop...")
         print("[MAIN]   Press 'y' key to tell Alexa yes...")
-        print("===============================================================\r\n")
+        print("=======================================================================\r\n")
 
     def run(self):
         _thread.start_new_thread(self.thread_manager, ())

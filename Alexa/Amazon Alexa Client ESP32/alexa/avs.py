@@ -1,9 +1,10 @@
 import socket
-import uselect
+#import uselect
 import struct
 import os
 import time
-import uheapq
+#import heapq
+import uheapq as heapq
 
 
 
@@ -100,7 +101,7 @@ class avs:
 
         # Initialize variables
         self.queue_data = []
-        uheapq.heapify(self.queue_data)
+        heapq.heapify(self.queue_data)
         self.buffer_send = bytearray(CONFIG_BUFFER_SEND_SIZE)
         return True
 
@@ -259,7 +260,7 @@ class avs:
 
             # queue the data
             try:
-                uheapq.heappush(self.queue_data, data)
+                heapq.heappush(self.queue_data, data)
                 print("push {}".format(len(data)))
                 #time.sleep(0.010)
             except:
@@ -274,7 +275,7 @@ class avs:
             return False
         try:
             # dequeue a data
-            data = uheapq.heappop(self.queue_data)
+            data = heapq.heappop(self.queue_data)
             print("pop {}".format(len(data)))
 
             # TODO: play data
