@@ -73,13 +73,19 @@ This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cl
 
 A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure).
 
-
+        1. Copy iot folder to ESP32 /pyboard/iot
+        2. Enable test_iot_demo() in main.py
+        
+        
 ### ESP32 Alexa demo
 
 This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that enables multiple connected FT900/ESP32 clients to simultaneously access Alexa.
 
 A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client).
 
+        1. Copy alexa folder to ESP32 /pyboard/alexa
+        2. Enable test_alexa_demo() in main.py
+        
 
 ## Building MicroPython port for ESP32
 
