@@ -26,15 +26,16 @@ Refer to the following links:
 
 
 
-## MicroPython on ESP32
+# MicroPython on ESP32
 
 ESP32 MCU is a new platform to be used for 2nd-generation PanL displays.
 The first generation PanL displays uses the in-house FT900 MCU.
 
 ESP32 MCU supports C and MicroPython programming languages.
  
+ 
 
-## Creating a simple MicroPython application on ESP32
+# Creating a simple MicroPython application on ESP32
 
 Below are instructions to run a simple Hello World application
 
@@ -64,7 +65,7 @@ Below are instructions to run a simple Hello World application
 
 
 
-## Running custom MicroPython applications on ESP32
+# Running custom MicroPython applications on ESP32
 
 Below are demo applications I have created to experiment and learn MicroPython on ESP32.
 
@@ -89,7 +90,7 @@ A similar application for FT900 MCU exists in [here](https://github.com/richmond
 
 
 
-## Building MicroPython port for ESP32
+# Building MicroPython port for ESP32
 
 MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
 
