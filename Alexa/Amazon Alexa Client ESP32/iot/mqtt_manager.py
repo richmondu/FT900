@@ -240,17 +240,19 @@ class mqtt_manager():
         print("ESP32 AWS/GCP/Azure IoT Demo")
         print("=======================================================================\r\n")
 
-        client = self.setup()
-        try:
-            self.connect(client)
-        except Exception as e:
-            print("Connect exception!\r\n")
-            sys.print_exception(e)
-            self.exiting = True
-            _thread.exit()
-            return
-        _thread.start_new_thread(self.thread_publisher, (client, ))
-
+        #client = self.setup()
+        #try:
+        #    self.connect(client)
+        #except Exception as e:
+        #    print("Connect exception!\r\n")
+        #    sys.print_exception(e)
+        #    self.exiting = True
+        #    _thread.exit()
+        #    return
+        #_thread.start_new_thread(self.thread_publisher, (client, ))
+        client = None
+        self.usage()
+        
         # wait for user input to start the commander thread
         while not self.quits:
             key = input("").lower()
@@ -267,11 +269,6 @@ class mqtt_manager():
                     client = None
                 time.sleep(1)
                 self.usage()
-            elif key=='c': # Connect to same server
-                if client == None:
-                    client = self.setup()
-                    self.connect(client)
-                    _thread.start_new_thread(self.thread_publisher, (client, ))
             elif key=='a': # Amazon Web Services
                 if client == None:
                     self.server = CONFIG_SERVER_AWS_IOT
@@ -315,7 +312,6 @@ class mqtt_manager():
         print("[MAIN] Usage:")
         print("[MAIN]   Press 'q' key to quit...")
         print("[MAIN]   Press 'd' key to disconnect...")
-        print("[MAIN]   Press 'c' key to connect and publish...")
         print("[MAIN]   Press 'a' key to connect & publish to Amazon AWS IoT...")
         print("[MAIN]   Press 'g' key to connect & publish to Google Cloud IoT...")
         print("[MAIN]   Press 'm' key to connect & publish to Microsoft Azure IoT...")

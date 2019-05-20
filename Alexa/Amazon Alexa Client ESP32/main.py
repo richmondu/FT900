@@ -28,8 +28,8 @@ def main():
     ntptime.settime()
 
 
-    test_alexa_demo()
-    #test_iot_demo()
+    #test_alexa_demo()
+    test_iot_demo()
 
     return
 
