@@ -84,6 +84,8 @@ This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cl
         
 A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure).
 
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/esp32_usage_iot_demo.jpg" width="623"/>
+
 
 ### ESP32 Alexa demo
 
@@ -93,6 +95,8 @@ This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘ed
         2. Enable test_alexa_demo() in main.py
         
 A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client).
+
+<img src="https://github.com/richmondu/FT900/blob/master/Alexa/Amazon%20Alexa%20Client/docs/images/esp32_usage_alexa_demo.jpg" width="623"/>
 
 
 
