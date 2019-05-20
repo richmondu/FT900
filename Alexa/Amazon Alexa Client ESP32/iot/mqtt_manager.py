@@ -11,7 +11,8 @@ import uhashlib as hashlib
 import ubinascii
 
 
-# select CONFIG_SERVER
+
+# select default server
 CONFIG_SERVER_AWS_IOT       = ('amasgua12bmkv-ats.iot.us-east-1.amazonaws.com', 8883)
 CONFIG_SERVER_GCP_IOT       = ('mqtt.googleapis.com', 8883)
 CONFIG_SERVER_AZURE_IOT     = ('FT900IoTHub.azure-devices.net', 8883)
