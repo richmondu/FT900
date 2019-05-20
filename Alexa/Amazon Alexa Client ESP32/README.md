@@ -35,9 +35,9 @@ ESP32 MCU supports C and MicroPython programming languages.
  
  
 
-# Creating a simple MicroPython application on ESP32
+# Setting up MicroPython on ESP32
 
-Below are instructions to run a simple Hello World application
+Below are instructions to setup ESP32 to use MicroPython
 
         1. pip install esptool
 
@@ -50,11 +50,17 @@ Below are instructions to run a simple Hello World application
             python esptool.py --port COM40 erase_flash
             python esptool.py --chip esp32 --port COM40 --baud 115200 write_flash -z 0x1000 esp32-20190507-v1.10-326-g089c9b71d.bin
 
-        5. Create boot.py and main.py files
+
+
+# Creating a simple MicroPython application on ESP32
+
+Below are instructions to run a simple Hello World application
+
+        1. Create boot.py and main.py files
            Create boot.py with print("boot.py - Hello World!")
            Create main.py with print("main.py - Hello World!")
 
-        5. Copy boot.py and main.py files to ESP32 using RSHELL.
+        2. Copy boot.py and main.py files to ESP32 using RSHELL.
             pip install rshell
             rshell
             connect serial COM40 115200
