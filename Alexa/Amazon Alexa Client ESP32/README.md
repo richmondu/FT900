@@ -71,14 +71,14 @@ Below are demo applications I have created to experiment and learn MicroPython o
 
 This demonstrates secure IoT connectivity with AWS IoT, GCP IoT and Azure IoT cloud platforms using MQTT over TLS.
 
-A similar application for FT900 MCU exists in here.
+A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure).
 
 
 ### ESP32 Alexa demo
 
 This demonstrates accessing Alexa Voice Services by connecting to an Alexa ‘edge’ gateway that enables multiple connected FT900/ESP32 clients to simultaneously access Alexa.
 
-A similar application for FT900 MCU exists in here.
+A similar application for FT900 MCU exists in [here](https://github.com/richmondu/FT900/tree/master/Alexa/Amazon%20Alexa%20Client).
 
 
 ## Building MicroPython port for ESP32
