@@ -49,6 +49,8 @@ Copying files:
    cp alexa/avs_manager.py /pyboard/alexa
    ls -l /pyboard/alexa
 
+   cp iot/mqtt_manager.py /pyboard/iot
+
    cp alexa/audio/REQUEST_play_audio_book.RAW /pyboard/alexa/audio
    cp alexa/audio/REQUEST_play_live_news.RAW /pyboard/alexa/audio
    cp alexa/audio/REQUEST_play_music.RAW /pyboard/alexa/audio
