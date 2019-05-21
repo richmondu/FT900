@@ -1,4 +1,6 @@
-print('[BOOT] booting up')
+import micropython
+
+micropython.mem_info()
 
 def do_connect():
     import network
@@ -14,7 +16,7 @@ def do_connect():
             pass
     print('[BOOT] network config:', wlan.ifconfig())
 
-
+print('[BOOT] booting up')
 do_connect()
 print('[BOOT] connected to WIFI\r\n\r\n')
 
