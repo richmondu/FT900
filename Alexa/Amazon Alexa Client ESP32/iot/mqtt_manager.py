@@ -77,6 +77,10 @@ class mqtt_manager():
     ############################################################################################
     def thread_publisher(self, client_handle):
 
+        if client_handle is None:
+            _thread.exit()
+            return
+
         # publish request continuously
         devices = ["hopper", "knuth", "turing"]
         while not self.quits:
@@ -173,7 +177,8 @@ class mqtt_manager():
         print(jwt)
         return jwt
 
-    def setup(self):
+    def setup(self, server):
+        self.server = server
         if self.server == CONFIG_SERVER_AWS_IOT:
             certificate_file = CONFIG_AWS_CERTIFICATE_FILE
             certificate_pkey = CONFIG_AWS_CERTIFICATE_PKEY
@@ -189,11 +194,11 @@ class mqtt_manager():
             credentials_user = CONFIG_GCP_CREDENTIAL_USER
             try:
                 credentials_pass = self.generate_jwt(CONFIG_GCP_PROJECT_ID, certificate_pkey, 3600*12)
+                if credentials_pass is None:
+                    return None
             except:
                 print("generate_jwt exception")
-                self.exiting = True
-                _thread.exit()
-                return
+                return None
         elif self.server == CONFIG_SERVER_AZURE_IOT:
             certificate_file = CONFIG_AZU_CERTIFICATE_FILE
             certificate_pkey = CONFIG_AZU_CERTIFICATE_PKEY
@@ -230,6 +235,8 @@ class mqtt_manager():
         _thread.exit()
 
     def connect(self, client):
+        if client is None:
+            return None
         print("Connecting to {}:{}...".format(self.server[0], self.server[1]))
         self.is_connected = False
         self.connection_failed = False
@@ -239,9 +246,13 @@ class mqtt_manager():
             time.sleep(1)
         if self.connection_failed == True:
             print("\r\nConnection failed!\r\n\r\n")
-            return False
+            return None
         print("\r\nConnected!\r\n\r\n")
-        return True
+        return client
+
+    def disconnect(self, client):
+        client.disconnect()
+        return None
 
     ############################################################################################
     # thread_manager
@@ -253,57 +264,39 @@ class mqtt_manager():
 
         client = None
         self.usage()
-        #client = self.setup()
-        #client.connect()
-        
+        #client = self.connect(self.setup(CONFIG_SERVER_MOSQUITTO))
+        #_thread.start_new_thread(self.thread_publisher, (client, ))
+
         # wait for user input to start the commander thread
         while not self.quits:
             key = input("").lower()
             if key == 'q':
                 if client is not None:
-                    client.disconnect()
-                    client = None
+                    client = self.disconnect(client)
                 break
             elif key == 'h':
                 self.usage()
             elif key=='d': # Disconnect from server
                 if client is not None:
-                    client.disconnect()
-                    client = None
+                    client = self.disconnect(client)
                 time.sleep(1)
                 self.usage()
             elif key=='a': # Amazon Web Services
                 if client == None:
-                    self.server = CONFIG_SERVER_AWS_IOT
-                    client = self.setup()
-                    if self.connect(client):
-                        _thread.start_new_thread(self.thread_publisher, (client, ))
-                    else:
-                        client = None
+                    client = self.connect(self.setup(CONFIG_SERVER_AWS_IOT))
+                    _thread.start_new_thread(self.thread_publisher, (client, ))
             elif key=='g': # Google Cloud
                 if client == None:
-                    self.server = CONFIG_SERVER_GCP_IOT
-                    client = self.setup()
-                    if self.connect(client):
-                        _thread.start_new_thread(self.thread_publisher, (client, ))
-                    else:
-                        client = None
+                    client = self.connect(self.setup(CONFIG_SERVER_GCP_IOT))
+                    _thread.start_new_thread(self.thread_publisher, (client, ))
             elif key=='m': # Microsoft Azure
                 if client == None:
-                    self.server = CONFIG_SERVER_AZURE_IOT
-                    client = self.setup()
-                    if self.connect(client):
-                        _thread.start_new_thread(self.thread_publisher, (client, ))
-                    else:
-                        client = None
+                    client = self.connect(self.setup(CONFIG_SERVER_AZURE_IOT))
+                    _thread.start_new_thread(self.thread_publisher, (client, ))
             elif key=='e': # Eclipse Mosquitto
                 if client == None:
-                    self.server = CONFIG_SERVER_MOSQUITTO
-                    client = self.setup()
-                    if self.connect(client):
-                        _thread.start_new_thread(self.thread_publisher, (client, ))
-                    else:
-                        client = None
+                    client = self.connect(self.setup(CONFIG_SERVER_MOSQUITTO))
+                    _thread.start_new_thread(self.thread_publisher, (client, ))
 
         # display some message
         time.sleep(1)
