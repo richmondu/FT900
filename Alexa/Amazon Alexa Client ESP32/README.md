@@ -109,9 +109,28 @@ Instructions to compile/build MicroPython port for ESP32 is specified in https:/
 To fill-in the gaps, below are complementary details to make the process straight-forward.
 
         1. Checkout specific version of ESP IoT Development Framework (ESP-IDF)
+           git clone https://github.com/espressif/esp-idf.git
            git checkout 5c88c5996dbde6208e3bec05abc21ff6cd822d26
+           git submodule update --init --recursive
         
-        2. Create micropython/ports/esp32/GNUmakefile
+        2. Checkout MicroPython
+           git clone https://github.com/micropython/micropython
+        
+        3. Compile MicroPython cross-compiler
+           cd micropython
+           make -C mpy-cross PYTHON=python2
+           
+           Expected result:
+           GEN build/genhdr/mpversion.h
+           GEN build/genhdr/qstrdefs.collected.h
+           QSTR not updated
+           CC main.c
+           LINK mpy-cross
+              text    data     bss     dec     hex filename
+            300085    2628     704  303417   4a139 mpy-cross
+           make: Leaving directory '/home/richmond/esp/micropython/mpy-cross'
+                      
+        4. Create micropython/ports/esp32/GNUmakefile
            ESPIDF = $(HOME)/esp/esp-idf
            #ESPIDF="F:/msys32/home/richmond/esp/esp-idf"
            PORT = COM40
@@ -121,7 +140,7 @@ To fill-in the gaps, below are complementary details to make the process straigh
            SDKCONFIG = boards/sdkconfig
            include Makefile     
            
-        3. Modify micropython/ports/esp32/Makefile
+        5. Modify micropython/ports/esp32/Makefile
            MICROPY_PY_BTREE = 0
            #MICROPY_PY_BTREE = 1
            ESPCOMP_KCONFIGS = $(shell find "F:/msys32/home/richmond/esp/esp-idf/components" -name Kconfig)
@@ -129,7 +148,7 @@ To fill-in the gaps, below are complementary details to make the process straigh
            #ESPCOMP_KCONFIGS = $(shell find $(ESPCOMP) -name Kconfig)
            #ESPCOMP_KCONFIGS_PROJBUILD = $(shell find $(ESPCOMP) -name Kconfig.projbuild)
            
-        4. Update files in micropython/ports/esp32/modules/ 
+        6. Update files in micropython/ports/esp32/modules/ 
            dht.py
            ds18x20.py
            ntptime.py
@@ -144,27 +163,24 @@ To fill-in the gaps, below are complementary details to make the process straigh
            umqtt/simple.py
            umqtt/robust.py
 
-        5. Update micropython/py/objmodule.c
+        7. Update micropython/py/objmodule.c
            #if 0//MICROPY_PY_BTREE
            #endif
 
-The resulting binary sizes is as follows:
-
-        mpy-cross is the cross-compiler which is used to turn scripts into precompiled bytecode.
-        LINK mpy-cross
-        text    data     bss     dec     hex filename
-        300085    2628     704  303417   4a139 mpy-cross
-
-        LINK build/application.elf
-        text    data     bss     dec     hex filename
-        839176  233948   28180 1101304  10cdf8 build/application.elf
-
-        Create build/firmware.bin
-        bootloader     20624
-        partitions      3072
-        application  1073264
-        total        1138800    
+        8. Compile MicroPython port for ESP32
+           cd ports/esp32
+           make PYTHON=python2
+           
+           Expected result:
+           LINK build/application.elf
+           text    data     bss     dec     hex filename
+           839176  233948   28180 1101304  10cdf8 build/application.elf
+           Create build/firmware.bin
+           bootloader     20624
+           partitions      3072
+           application  1073264
+           total        1138800    
 
 Libraries that will not be used should be removed to allocate more memory for PanL usage.
 
-This has been tested to be working using the current ESP32 Alexa demo. 
+This customized MicroPython build has been tested to be working using the current ESP32 Alexa demo. 
