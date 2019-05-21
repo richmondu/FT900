@@ -3,6 +3,7 @@ from iot.mqtt_manager import mqtt_manager
 import esp
 import gc
 import ntptime
+import utime
 
 
 
@@ -18,6 +19,10 @@ def test_iot_demo():
     #iot_manager.quit()
     iot_manager.wait()
 
+def localtime_to_string(localtime) :
+    (year, month, day, hour, minute, second, millis, _tzinfo) = localtime
+    return "%d-%02d-%02d_%02d:%02d:%02d.%03d" % (year, month, day, hour, minute, second, millis)
+
 def main():
 
     # set debug
@@ -25,7 +30,13 @@ def main():
     # activate garbage collector
     gc.collect()
     # set rtc time
-    ntptime.settime()
+    try:
+        ntptime.settime()
+        # print current time
+        print("\r\n\r\n\r\n")
+        print(localtime_to_string(utime.localtime()))
+    except:
+        pass
 
 
     #test_alexa_demo()
