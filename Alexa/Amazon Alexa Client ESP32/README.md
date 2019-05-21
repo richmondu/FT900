@@ -100,7 +100,7 @@ A similar application for FT900 MCU exists in [here](https://github.com/richmond
 
 
 
-# Building MicroPython port for ESP32
+# Building and deploying MicroPython port for ESP32
 
 MicroPython port for ESP32 should be customized to allocate more memory for PanL fraemwork and application.
 
@@ -167,7 +167,7 @@ To fill-in the gaps, below are complementary details to make the process straigh
            #if 0//MICROPY_PY_BTREE
            #endif
 
-        8. Compile MicroPython port for ESP32
+        8. Build MicroPython port for ESP32
            cd ports/esp32
            make PYTHON=python2
            
@@ -180,6 +180,9 @@ To fill-in the gaps, below are complementary details to make the process straigh
            partitions      3072
            application  1073264
            total        1138800    
+
+        9. Deploy MicroPython build to ESP32
+           make deploy PYTHON=python2
 
 Libraries that will not be used should be removed to allocate more memory for PanL usage.
 
