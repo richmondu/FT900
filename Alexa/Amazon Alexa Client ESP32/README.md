@@ -108,7 +108,8 @@ Instructions to compile/build MicroPython port for ESP32 is specified in https:/
 
 To fill-in the gaps, below are complementary details to make the process straight-forward.
 
-        1. git checkout 5c88c5996dbde6208e3bec05abc21ff6cd822d26
+        1. Checkout specific version of ESP IoT Development Framework (ESP-IDF)
+           git checkout 5c88c5996dbde6208e3bec05abc21ff6cd822d26
         
         2. Create micropython/ports/esp32/GNUmakefile
            ESPIDF = $(HOME)/esp/esp-idf
