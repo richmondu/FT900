@@ -69,6 +69,8 @@ class mqtt_manager():
         self.quits = False
         self.exiting = False
         self.server = CONFIG_SERVER
+        self.is_connected = False
+        self.connection_failed = False
 
     ############################################################################################
     # thread_publisher
@@ -151,32 +153,23 @@ class mqtt_manager():
         #signature = ubinascii.hexlify(hashobj.digest())
         #print("3")
 
-        print("0")
         try:
             hashobj = hmac.new(pkey, msg=jwt, digestmod=hashlib.sha256)
         except Exception as e:
             sys.print_exception(e)
-            #print("Oops!",sys.exc_info()[0],"occured.")
             return None
-        print("1")
         try:
             signature = ubinascii.hexlify(hashobj.digest())
         except Exception as e:
             sys.print_exception(e)
-            #print("Oops!",sys.exc_info()[0],"occured.")
-            print("hmac.digest")
             return None
-        print("2")
 
         print("signature: {}".format(signature))
         signature = base64.b64encode(signature)
         print("signature: {}".format(signature))
 
         jwt = str(jwt, 'utf-8')
-        print("4")
         jwt += "." + signature.decode('utf-8')
-        print("5")
-        #jwt = str(jwt, 'utf-8')
         print(jwt)
         return jwt
 
@@ -227,10 +220,28 @@ class mqtt_manager():
             client = MQTTClient(credentials_id, self.server[0], port=self.server[1], user=credentials_user, password=credentials_pass, ssl=True, ssl_params=client_ssl)
         return client
 
+    def thread_connect(self, client):
+        try:
+            client.connect()
+            self.is_connected = True
+        except:
+            self.connection_failed = True
+            pass
+        _thread.exit()
+
     def connect(self, client):
         print("Connecting to {}:{}...".format(self.server[0], self.server[1]))
-        client.connect()
-        print("Connected!\r\n")
+        self.is_connected = False
+        self.connection_failed = False
+        _thread.start_new_thread(self.thread_connect, (client, ))
+        while self.is_connected == False and self.connection_failed == False:
+            print(".", end='')
+            time.sleep(1)
+        if self.connection_failed == True:
+            print("\r\nConnection failed!\r\n\r\n")
+            return False
+        print("\r\nConnected!\r\n\r\n")
+        return True
 
     ############################################################################################
     # thread_manager
@@ -240,18 +251,10 @@ class mqtt_manager():
         print("ESP32 AWS/GCP/Azure IoT Demo")
         print("=======================================================================\r\n")
 
-        #client = self.setup()
-        #try:
-        #    self.connect(client)
-        #except Exception as e:
-        #    print("Connect exception!\r\n")
-        #    sys.print_exception(e)
-        #    self.exiting = True
-        #    _thread.exit()
-        #    return
-        #_thread.start_new_thread(self.thread_publisher, (client, ))
         client = None
         self.usage()
+        #client = self.setup()
+        #client.connect()
         
         # wait for user input to start the commander thread
         while not self.quits:
@@ -273,26 +276,34 @@ class mqtt_manager():
                 if client == None:
                     self.server = CONFIG_SERVER_AWS_IOT
                     client = self.setup()
-                    self.connect(client)
-                    _thread.start_new_thread(self.thread_publisher, (client, ))
+                    if self.connect(client):
+                        _thread.start_new_thread(self.thread_publisher, (client, ))
+                    else:
+                        client = None
             elif key=='g': # Google Cloud
                 if client == None:
                     self.server = CONFIG_SERVER_GCP_IOT
                     client = self.setup()
-                    self.connect(client)
-                    _thread.start_new_thread(self.thread_publisher, (client, ))
+                    if self.connect(client):
+                        _thread.start_new_thread(self.thread_publisher, (client, ))
+                    else:
+                        client = None
             elif key=='m': # Microsoft Azure
                 if client == None:
                     self.server = CONFIG_SERVER_AZURE_IOT
                     client = self.setup()
-                    self.connect(client)
-                    _thread.start_new_thread(self.thread_publisher, (client, ))
+                    if self.connect(client):
+                        _thread.start_new_thread(self.thread_publisher, (client, ))
+                    else:
+                        client = None
             elif key=='e': # Eclipse Mosquitto
                 if client == None:
                     self.server = CONFIG_SERVER_MOSQUITTO
                     client = self.setup()
-                    self.connect(client)
-                    _thread.start_new_thread(self.thread_publisher, (client, ))
+                    if self.connect(client):
+                        _thread.start_new_thread(self.thread_publisher, (client, ))
+                    else:
+                        client = None
 
         # display some message
         time.sleep(1)
