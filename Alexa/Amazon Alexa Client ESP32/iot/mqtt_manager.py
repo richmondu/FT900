@@ -9,6 +9,7 @@ from iot import base64, hmac
 #from iot import hashlib
 import uhashlib as hashlib
 import ubinascii
+import ujson
 
 
 
@@ -86,12 +87,16 @@ class mqtt_manager():
         while not self.quits:
             for j in range(3):
 
-                # construct topic and payload
-                sensor_value = str(urandom.getrandbits(32) % 10 + 30)
-                charge_value = str(urandom.getrandbits(32) % 30 - 10)
-                discharge_value = str(urandom.getrandbits(32) % 5)
-                payload = '{\r\n "deviceId":' + '"' + devices[j] + '"' + ',\r\n "sensorReading":' + sensor_value + ',\r\n "batteryCharge":' + charge_value + ',\r\n "batteryDischargeRate":' + discharge_value + '\r\n}'
-                
+                # construct payload
+                payload = {
+                    'deviceid': devices[j],
+                    'sensorReading': urandom.getrandbits(32) % 10 + 30,
+                    'batteryCharge': urandom.getrandbits(32) % 30 - 10,
+                    'batteryDischargeRate': urandom.getrandbits(32) % 5
+                }
+                payload = ujson.dumps(payload)
+
+                # construct topic
                 if self.server == CONFIG_SERVER_AWS_IOT:
                     topic = "device/" + devices[j] + "/devicePayload"
                 elif self.server == CONFIG_SERVER_AZURE_IOT:
