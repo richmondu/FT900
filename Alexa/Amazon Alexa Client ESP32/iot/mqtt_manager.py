@@ -73,6 +73,27 @@ class mqtt_manager():
         self.is_connected = False
         self.connection_failed = False
 
+    def generate_payload(self, device):
+        payload = {
+            'deviceid': device,
+            'sensorReading': urandom.getrandbits(32) % 10 + 30,
+            'batteryCharge': urandom.getrandbits(32) % 30 - 10,
+            'batteryDischargeRate': urandom.getrandbits(32) % 5
+        }
+        payload = ujson.dumps(payload)
+        return payload
+
+    def generate_topic(self, device):
+        if self.server == CONFIG_SERVER_AWS_IOT:
+            topic = "device/" + device + "/devicePayload"
+        elif self.server == CONFIG_SERVER_AZURE_IOT:
+            topic = "devices/" + CONFIG_AZU_CREDENTIAL_ID + "/messages/events/"
+        elif self.server == CONFIG_SERVER_GCP_IOT:
+            topic = "/devices/" + CONFIG_GCP_CREDENTIAL_ID + "/events"
+        else:
+            topic = "device/" + device + "/devicePayload"
+        return topic
+
     ############################################################################################
     # thread_publisher
     ############################################################################################
@@ -87,26 +108,9 @@ class mqtt_manager():
         while not self.quits:
             for j in range(3):
 
-                # construct payload
-                payload = {
-                    'deviceid': devices[j],
-                    'sensorReading': urandom.getrandbits(32) % 10 + 30,
-                    'batteryCharge': urandom.getrandbits(32) % 30 - 10,
-                    'batteryDischargeRate': urandom.getrandbits(32) % 5
-                }
-                payload = ujson.dumps(payload)
-
-                # construct topic
-                if self.server == CONFIG_SERVER_AWS_IOT:
-                    topic = "device/" + devices[j] + "/devicePayload"
-                elif self.server == CONFIG_SERVER_AZURE_IOT:
-                    topic = "devices/" + CONFIG_AZU_CREDENTIAL_ID + "/messages/events/"
-                elif self.server == CONFIG_SERVER_GCP_IOT:
-                    topic = "/devices/" + CONFIG_GCP_CREDENTIAL_ID + "/events"
-                else:
-                    topic = "device/" + devices[j] + "/devicePayload"
-
-                # display topic and payload
+                # construct payload and topic
+                payload = self.generate_payload(devices[j])
+                topic = self.generate_topic(devices[j])
                 print(topic + " [" + str(len(payload)) + "]")
                 print(payload)
 
