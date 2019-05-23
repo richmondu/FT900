@@ -260,11 +260,14 @@ def avs_recv_audio(queue_data):
 def avs_play_audio(queue_data, stream):
 
     # Get data from queue
-    data = queue_data.get()
-    if data is None:
+    try:
+        data = queue_data.get(block=True, timeout=1)
+        if len(data) == 0:
+            return False
+    except:
         return False
     #print("queue_data.get {}".format(len(data)))
-            
+
     # Decompress and play data
     if CONF_AUDIO_RECV_BITDEPTH == DEVICE_CAPABILITIES_BITDEPTH_8:
         data = audioop.ulaw2lin(data, 2)
@@ -391,7 +394,7 @@ class thread_player(threading.Thread):
             channel = 1
         elif (CONF_AUDIO_RECV_CHANNEL == DEVICE_CAPABILITIES_CHANNEL_2):
             channel = 2
-        
+
         # Initialize audio player
         audio = pyaudio.PyAudio()
         stream = audio.open(format=pyaudio.paInt16, channels=channel, rate=bitrate, output=True)
@@ -407,11 +410,12 @@ class thread_player(threading.Thread):
         audio.terminate()
 
         # Drain the queue
+        print("\n[PLAYER] Playback exiting...")
         while not self.queue_data.empty():
             data = self.queue_data.get()
             self.queue_data.task_done()
 
-        print("thread_player exits")
+        print("\n[PLAYER] Playback exited!\n")
         return
 
 
@@ -462,6 +466,7 @@ class thread_streamer(threading.Thread):
             avs_disconnect()
             g_connected = False
         g_quit = True
+        print("\n[STREAMER] Disconnected from Alexa provider!\n")
 
         return
 
@@ -620,7 +625,7 @@ def main(args, argc):
         if g_exit is True:
             break
 
-        print("Retrying in {} seconds".format(CONF_RESET_TIMEOUT), end='', flush=True)
+        print("\nRetrying in {} seconds".format(CONF_RESET_TIMEOUT), end='', flush=True)
         for i in range(CONF_RESET_TIMEOUT):
             sleep(1)
             print(".", end='', flush=True)
