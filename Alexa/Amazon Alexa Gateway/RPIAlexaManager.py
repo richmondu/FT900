@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 import argparse
+import time
 
 
 
@@ -30,8 +31,15 @@ def create_configuration_file(account_no):
     if account_no == 1:
         print("{} does NOT exist".format(path))
         return 0;
-    config_src = "AlexaClientSDKConfig.json"
-    path_src = conf_alexa_dir + "/build/Integration/" + config_src
+    
+    # set folder permission
+    path_src = conf_alexa_dir + "/build/Integration/"
+    os.system("sudo chmod 777 " + path_src)
+    time.sleep(1)
+
+    # check file path
+    config_src = "AlexaClientSDKConfig.json"    
+    path_src += config_src
     if os.path.exists(path_src) == False:
         print("{} does NOT exist yet".format(path))
         return 0
