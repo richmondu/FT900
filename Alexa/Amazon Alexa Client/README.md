@@ -443,8 +443,34 @@ Below is the mapping of FT900 device id to the RPI Alexa instance.
       RPI app instance for account X uses configuration X and database X.
 
 
-# Performance analysis/optimization
+## Display Cards
 
+RPI Alexa server now sends "display cards" data to clients.
+Currently tested with the Device Simulator Python application [not yet implemented on FT900 and ESP32].
+
+The following questions produces the 5 different Alexa display cards templates.
+
+      BodyTemplate1   "One plus one"   
+      BodyTemplate2   "Who is Lebron James?"
+      ListTemplate1   "What's on my TODO list?"
+      WeatherTemplate	"What is the weather in San Francisco?"
+      PlayerTemplate  "Play BadSongMusic from TuneIn"
+
+Alexa Voice Service supports Display Cards for devices with Alexa built-in. 
+The Display Cards feature enables screen-based product to show visual content to complement voice responses from Alexa.
+There are 5 display card templates Alexa supports:
+
+      PlayerTemplate  :RenderPlayerInfo directive, "Now Playing" template for music.
+      BodyTemplate1	:text only template, Wikipedia entries without images
+      BodyTemplate2	:body text and a single image, Wikipedia entries with images.
+      ListTemplate1	:template for lists and calendar entries, Shopping lists, to do lists, and calendar entries.
+      WeatherTemplate	:template designed to display weather data, Weather information
+ 
+Refer to https://developer.amazon.com/docs/alexa-voice-service/display-cards-tablets.html for more information about Display Cards.
+
+
+
+# Performance analysis/optimization
 
 ## A. Optimization efforts
 
