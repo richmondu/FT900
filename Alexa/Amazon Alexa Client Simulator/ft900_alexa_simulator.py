@@ -17,6 +17,7 @@ import threading
 import msvcrt
 import argparse
 import queue
+import json
 
 
 
@@ -32,19 +33,24 @@ CONF_DEVICE_ID_DEFAULT               = 2                   # --deviceid
 ############################################################################################
 # Other configurations.
 ############################################################################################
-CONF_FILENAME_REQUEST_TIME           = "audio/REQUEST_what_time_is_it.raw"
-CONF_FILENAME_REQUEST_PERSON         = "audio/REQUEST_who_is.raw"
-CONF_FILENAME_REQUEST_MUSIC          = "audio/REQUEST_play_music.raw"
-CONF_FILENAME_REQUEST_NEWS           = "audio/REQUEST_play_live_news.raw"
-CONF_FILENAME_REQUEST_BOOK           = "audio/REQUEST_play_audio_book.raw"
-CONF_FILENAME_REQUEST_ALARM          = "audio/REQUEST_set_alarm.raw"
-CONF_FILENAME_REQUEST_STOP           = "audio/REQUEST_stop.raw"
-CONF_FILENAME_REQUEST_YES            = "audio/REQUEST_yes.raw"
-CONF_FILENAME_TIMESTAMP              = 0
-CONF_TIMEOUT_SEND                    = 10
-CONF_TIMEOUT_RECV                    = 10
-CONF_RESET_TIMEOUT                   = 1
-CONF_CHUNK_SIZE                      = 512
+CONF_FILENAME_REQUEST_TIME             = "audio/REQUEST_what_time_is_it.raw"
+CONF_FILENAME_REQUEST_PERSON           = "audio/REQUEST_who_is.raw"
+CONF_FILENAME_REQUEST_MUSIC            = "audio/REQUEST_play_music.raw"
+CONF_FILENAME_REQUEST_NEWS             = "audio/REQUEST_play_live_news.raw"
+CONF_FILENAME_REQUEST_BOOK             = "audio/REQUEST_play_audio_book.raw"
+CONF_FILENAME_REQUEST_ALARM            = "audio/REQUEST_set_alarm.raw"
+CONF_FILENAME_REQUEST_STOP             = "audio/REQUEST_stop.raw"
+CONF_FILENAME_REQUEST_YES              = "audio/REQUEST_yes.raw"
+CONF_FILENAME_TIMESTAMP                = 0
+CONF_TIMEOUT_SEND                      = 10
+CONF_TIMEOUT_RECV                      = 10
+CONF_RESET_TIMEOUT                     = 1
+CONF_CHUNK_SIZE                        = 512
+CONF_DISPLAYCARD_PORT_ADDITION         = 100
+CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER = 0
+CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR  = 1
+CONF_DISPLAYCARD_TEMPLATECARD_RENDER   = 2
+CONF_DISPLAYCARD_TEMPLATECARD_CLEAR    = 3
 
 ############################################################################################
 # Device capabilities
@@ -498,6 +504,89 @@ class thread_commander(threading.Thread):
 
         return
 
+
+############################################################################################
+# thread_renderer
+############################################################################################
+class thread_renderer(threading.Thread):
+
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+
+    def run(self):
+        global g_quit
+        global g_serverport
+        global g_connected
+
+        while not g_connected:
+            sleep(1)
+
+        if g_quit is False:
+            try:
+                socket_handle = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                socket_handle.bind(('', g_serverport + CONF_DISPLAYCARD_PORT_ADDITION))
+                socket_handle.listen(3)
+                socket_handle.settimeout(1)
+            except:
+                print('\n[RENDERER] Socket exception')
+                return
+
+        while g_quit is False:
+            try:
+                (conn, (ip, port)) = socket_handle.accept()
+            except:
+                continue
+
+            # receive the header
+            val = conn.recv(8)
+            if not val:
+                print("\n[RENDERER] recv header error")
+                g_quit = True
+            else:
+                # size: unsigned int
+                # type: unsigned char
+                # reserved1: unsigned char
+                # reserved2: unsigned short
+                data_size = struct.unpack('I', val[0:4])[0]
+                data_type = struct.unpack('B', val[4:5])[0]
+                data_reserved1 = struct.unpack('B', val[5:6])[0]
+                data_reserved2 = struct.unpack('H', val[6:8])[0]
+                print('\n[RENDERER] Display card {}:{}:{}:{}'.format(data_size, data_type, data_reserved1, data_reserved2))
+                if data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER:
+                    print('CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER')
+                elif data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR:
+                    print('CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR')
+                elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_RENDER:
+                    print('CONF_DISPLAYCARD_TEMPLATECARD_RENDER')
+                elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_CLEAR:
+                    print('CONF_DISPLAYCARD_TEMPLATECARD_CLEAR')
+
+            # receive the actual json_payload
+            if data_size > 0:
+                json_payload = conn.recv(data_size)
+                if not json_payload:
+                    print("\n[RENDERER] recv data error")
+                    g_quit = True
+                else:
+                    json_payload = json_payload.decode("utf-8")
+                    self.printJSON(json_payload, data_type)
+
+            sleep(1)
+            conn.close()
+
+        socket_handle.close()
+        print("\n[RENDERER] Exited!\n")
+        return
+
+    def printJSON(self, json_payload, data_type):
+        json_payload = json.loads(json_payload)
+        print("")
+        for key,val in json_payload.items():
+            print("{}: {}\r\n".format(key, val))
+
+
 ############################################################################################
 # Usage
 ############################################################################################
@@ -564,6 +653,8 @@ def main(args, argc):
         t = thread_streamer(0, "streamer", queue_data)
         t.start()
         t = thread_player(0, "player", queue_data)
+        t.start()
+        t = thread_renderer(0, "renderer")
         t.start()
         threads.append(t)
 
