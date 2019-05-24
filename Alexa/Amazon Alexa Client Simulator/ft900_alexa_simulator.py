@@ -42,6 +42,8 @@ CONF_FILENAME_REQUEST_ALARM            = "audio/REQUEST_set_alarm.raw"
 CONF_FILENAME_REQUEST_STOP             = "audio/REQUEST_stop.raw"
 CONF_FILENAME_REQUEST_YES              = "audio/REQUEST_yes.raw"
 CONF_FILENAME_REQUEST_WEATHER          = "audio/REQUEST_what_is_the_weather.raw"
+CONF_FILENAME_REQUEST_ONEPLUSONE       = "audio/REQUEST_one_plus_one.RAW"
+CONF_FILENAME_REQUEST_LISTTODO         = "audio/REQUEST_list_todo.RAW"
 CONF_FILENAME_TIMESTAMP                = 0
 CONF_TIMEOUT_SEND                      = 10
 CONF_TIMEOUT_RECV                      = 10
@@ -611,6 +613,8 @@ def usage():
     print("[MAIN]   Press 't' key to ask Alexa what time is it...")
     print("[MAIN]   Press 'p' key to ask Alexa who is...")
     print("[MAIN]   Press 'w' key to ask Alexa what is the weather...")
+    print("[MAIN]   Press 'o' key to ask Alexa one plus one...")
+    print("[MAIN]   Press 'l' key to ask Alexa what's on my todo list...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
     print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
     print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
@@ -722,6 +726,12 @@ def main(args, argc):
                     t.start()
                 elif key=='w':
                     t = thread_commander (10, "commander", CONF_FILENAME_REQUEST_WEATHER)
+                    t.start()
+                elif key=='o':
+                    t = thread_commander (11, "commander", CONF_FILENAME_REQUEST_ONEPLUSONE)
+                    t.start()
+                elif key=='l':
+                    t = thread_commander (12, "commander", CONF_FILENAME_REQUEST_LISTTODO)
                     t.start()
                 else:
                     sleep(1)
