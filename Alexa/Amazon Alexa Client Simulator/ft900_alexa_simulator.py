@@ -41,6 +41,7 @@ CONF_FILENAME_REQUEST_BOOK             = "audio/REQUEST_play_audio_book.raw"
 CONF_FILENAME_REQUEST_ALARM            = "audio/REQUEST_set_alarm.raw"
 CONF_FILENAME_REQUEST_STOP             = "audio/REQUEST_stop.raw"
 CONF_FILENAME_REQUEST_YES              = "audio/REQUEST_yes.raw"
+CONF_FILENAME_REQUEST_WEATHER          = "audio/REQUEST_what_is_the_weather.raw"
 CONF_FILENAME_TIMESTAMP                = 0
 CONF_TIMEOUT_SEND                      = 10
 CONF_TIMEOUT_RECV                      = 10
@@ -565,13 +566,21 @@ class thread_renderer(threading.Thread):
 
             # receive the actual json_payload
             if data_size > 0:
-                json_payload = conn.recv(data_size)
-                if not json_payload:
-                    print("\n[RENDERER] recv data error")
-                    g_quit = True
-                else:
-                    json_payload = json_payload.decode("utf-8")
-                    self.printJSON(json_payload, data_type)
+                recv_size = 0
+                json_payload = bytes()
+                while recv_size < data_size:
+                    payload = conn.recv(data_size)
+                    if not payload:
+                        print("\n[RENDERER] recv data error")
+                        g_quit = True
+                        break
+                    else:
+                        # print(len(payload))
+                        recv_size += len(payload)
+                        json_payload += payload
+                json_payload = json_payload.decode("utf-8")
+                # print("total={}".format(len(json_payload)))
+                self.printJSON(json_payload, data_type)
 
             sleep(1)
             conn.close()
@@ -581,10 +590,13 @@ class thread_renderer(threading.Thread):
         return
 
     def printJSON(self, json_payload, data_type):
-        json_payload = json.loads(json_payload)
-        print("")
-        for key,val in json_payload.items():
-            print("{}: {}\r\n".format(key, val))
+        try:
+            json_payload = json.loads(json_payload)
+            print("")
+            for key,val in json_payload.items():
+                print("{}: {}\r\n".format(key, val))
+        except:
+            print(json_payload)
 
 
 ############################################################################################
@@ -598,6 +610,7 @@ def usage():
     print("[MAIN]   Press 'e' key to exit application...")
     print("[MAIN]   Press 't' key to ask Alexa what time is it...")
     print("[MAIN]   Press 'p' key to ask Alexa who is...")
+    print("[MAIN]   Press 'w' key to ask Alexa what is the weather...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
     print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
     print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
@@ -706,6 +719,9 @@ def main(args, argc):
                     t.start()
                 elif key=='y':
                     t = thread_commander (9, "commander", CONF_FILENAME_REQUEST_YES)
+                    t.start()
+                elif key=='w':
+                    t = thread_commander (10, "commander", CONF_FILENAME_REQUEST_WEATHER)
                     t.start()
                 else:
                     sleep(1)
