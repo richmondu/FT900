@@ -445,11 +445,15 @@ Below is the mapping of FT900 device id to the RPI Alexa instance.
 
 ## Display Cards
 
-RPI Alexa server now sends "display cards" data to clients.
+RPI Alexa server now sends "display cards" data, including attached images, to clients.
 Currently tested with the Device Simulator Python application [not yet implemented on FT900 and ESP32].
 
-TODO: Display the "display cards" data based on the UI template guidelines. 
-Currently, im just printing the received data which is in JSON format.
+Display cards can contain 0, 1 or many source image URLs to be used for rendering of Display Cards.
+RPI Alexa server parses the image URLs from the Display Card data using rapidJSON and then uses libcURL to download the images.
+The downloaded images is sent to the client as well.
+
+TODO: Update client to display the "display cards" data and images based on the UI template guidelines. 
+Currently, the received data is just printed.
 
 The following questions produces the 5 different Alexa display cards templates.
 
