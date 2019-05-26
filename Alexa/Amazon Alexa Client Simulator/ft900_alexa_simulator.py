@@ -54,6 +54,8 @@ CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER = 0
 CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR  = 1
 CONF_DISPLAYCARD_TEMPLATECARD_RENDER   = 2
 CONF_DISPLAYCARD_TEMPLATECARD_CLEAR    = 3
+CONF_DISPLAYCARD_IMAGE_PNG             = 4
+CONF_DISPLAYCARD_IMAGE_JPG             = 5
 
 ############################################################################################
 # Device capabilities
@@ -565,6 +567,10 @@ class thread_renderer(threading.Thread):
                     print('CONF_DISPLAYCARD_TEMPLATECARD_RENDER')
                 elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_CLEAR:
                     print('CONF_DISPLAYCARD_TEMPLATECARD_CLEAR')
+                elif data_type == CONF_DISPLAYCARD_IMAGE_PNG:
+                    print('CONF_DISPLAYCARD_IMAGE_PNG')
+                elif data_type == CONF_DISPLAYCARD_IMAGE_JPG:
+                    print('CONF_DISPLAYCARD_IMAGE_JPG')
 
             # receive the actual json_payload
             if data_size > 0:
@@ -580,7 +586,6 @@ class thread_renderer(threading.Thread):
                         # print(len(payload))
                         recv_size += len(payload)
                         json_payload += payload
-                json_payload = json_payload.decode("utf-8")
                 # print("total={}".format(len(json_payload)))
                 self.printJSON(json_payload, data_type)
 
@@ -593,12 +598,13 @@ class thread_renderer(threading.Thread):
 
     def printJSON(self, json_payload, data_type):
         try:
+            json_payload = json_payload.decode("utf-8")
             json_payload = json.loads(json_payload)
             print("")
             for key,val in json_payload.items():
                 print("{}: {}\r\n".format(key, val))
         except:
-            print(json_payload)
+            print(len(json_payload))
 
 
 ############################################################################################
