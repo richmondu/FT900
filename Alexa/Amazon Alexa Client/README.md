@@ -729,3 +729,5 @@ Below are the essential links to familiarize with Alexa and audio terminologies 
 7. [FFMPEG for audio decoding (supports MP3/AAC audio formats)](https://ffmpeg.org)
 8. [G711 Audio Companding algorithms (used for u-law audio compression/expanding)](https://en.wikipedia.org/wiki/G.711)
 9. [Alexa Interaction model (dialog/speech, alerts/alarms, content/music)](https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html)
+10. [rapidJSON, a fast json parser/generator library](http://rapidjson.org/)
+11. [libcURL, a multiprotocol file transfer library](https://curl.haxx.se/libcurl/)
