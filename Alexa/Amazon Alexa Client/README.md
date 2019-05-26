@@ -687,11 +687,14 @@ Download the latest [FT900 Alexa Client](https://github.com/richmondu/FT900/tree
 Below are the action items for the Alexa Demo.
 
       1. Test and support Alexa notifications using QuoteMaker.
-      2. Support "ESP32 Alexa Client".
+      2. Support "ESP32 Alexa Client". 
+         [ongoing, can send/recv data to/from Alexa server already. but no playback and recording yet.]
       3. Support "Alexa Display Cards" since FT900 can be connected to a FT800 display.
-      4. Support "FT900 libMAD MP3 decoder" and provide RPI option to send MP3 instead of PCM/raw.
-      5. Support "FT900 Wake-Word detection". Currently, user has to press down a button to start voice recording.
-      6. [BUG] RPI AVS SDK audio playback is disabled. Current code assumes that only FT900 clients can use Alexa.
+         [ongoing, rpi forwards the display card data to clients already. but need to forward images as well given URLs]
+      4. Create a fully "Automated Voice Testing" framework.
+      5. Support "FT900 libMAD MP3 decoder" and provide RPI option to send MP3 instead of PCM/raw.
+      6. Support "FT900 Wake-Word detection". Currently, user has to press down a button to start voice recording.
+      7. [BUG] RPI AVS SDK audio playback is disabled. Current code assumes that only FT900 clients can use Alexa.
 
 
 
