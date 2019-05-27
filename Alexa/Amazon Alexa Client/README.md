@@ -461,7 +461,7 @@ The following questions produces the 5 different Alexa display cards templates.
       BodyTemplate2   "Who is Lebron James?"
       ListTemplate1   "What's on my TODO list?"
       WeatherTemplate "What is the weather in San Francisco?"
-      PlayerTemplate  "Play BadSongMusic from TuneIn"
+      PlayerTemplate  "Play Bad Song Radio music from TuneIn"
 
 Alexa Voice Service supports Display Cards for devices with Alexa built-in. 
 The Display Cards feature enables screen-based product to show visual content to complement voice responses from Alexa.
