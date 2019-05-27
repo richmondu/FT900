@@ -50,13 +50,6 @@ CONF_TIMEOUT_SEND                      = 10
 CONF_TIMEOUT_RECV                      = 10
 CONF_RESET_TIMEOUT                     = 1
 CONF_CHUNK_SIZE                        = 512
-CONF_DISPLAYCARD_PORT_ADDITION         = 100
-CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER = 0
-CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR  = 1
-CONF_DISPLAYCARD_TEMPLATECARD_RENDER   = 2
-CONF_DISPLAYCARD_TEMPLATECARD_CLEAR    = 3
-CONF_DISPLAYCARD_IMAGE_PNG             = 4
-CONF_DISPLAYCARD_IMAGE_JPG             = 5
 
 ############################################################################################
 # Device capabilities
@@ -93,6 +86,21 @@ CONF_AUDIO_RECV_FORMAT               = DEVICE_CAPABILITIES_FORMAT_RAW
 CONF_AUDIO_RECV_BITDEPTH             = DEVICE_CAPABILITIES_BITDEPTH_16
 CONF_AUDIO_RECV_BITRATE              = DEVICE_CAPABILITIES_BITRATE_16000
 CONF_AUDIO_RECV_CHANNEL              = DEVICE_CAPABILITIES_CHANNEL_1
+
+############################################################################################
+# Display cards
+############################################################################################
+CONF_DISPLAYCARD_PORT_ADDITION         = 100
+CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER = 0
+CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR  = 1
+CONF_DISPLAYCARD_TEMPLATECARD_RENDER   = 2
+CONF_DISPLAYCARD_TEMPLATECARD_CLEAR    = 3
+CONF_DISPLAYCARD_IMAGE_PNG             = 4
+CONF_DISPLAYCARD_IMAGE_JPG             = 5
+CONF_DISPLAYCARD_BODY_TEMPLATE1        = "BodyTemplate1"
+CONF_DISPLAYCARD_BODY_TEMPLATE2        = "BodyTemplate2"
+CONF_DISPLAYCARD_LIST_TEMPLATE1        = "ListTemplate1"
+CONF_DISPLAYCARD_WEATHER_TEMPLATE      = "WeatherTemplate"
 
 ############################################################################################
 # Global variable
@@ -552,18 +560,7 @@ class thread_renderer(threading.Thread):
                 data_reserved1 = struct.unpack('B', val[5:6])[0]
                 data_reserved2 = struct.unpack('H', val[6:8])[0]
                 print('\n[RENDERER] Display card {}:{}:{}:{}'.format(data_size, data_type, data_reserved1, data_reserved2))
-                if data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER:
-                    print('CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER')
-                elif data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR:
-                    print('CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR')
-                elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_RENDER:
-                    print('CONF_DISPLAYCARD_TEMPLATECARD_RENDER')
-                elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_CLEAR:
-                    print('CONF_DISPLAYCARD_TEMPLATECARD_CLEAR')
-                elif data_type == CONF_DISPLAYCARD_IMAGE_PNG:
-                    print('CONF_DISPLAYCARD_IMAGE_PNG')
-                elif data_type == CONF_DISPLAYCARD_IMAGE_JPG:
-                    print('CONF_DISPLAYCARD_IMAGE_JPG')
+                self.printDataType(data_type)
 
             # receive the actual json_payload
             if data_size > 0:
@@ -589,13 +586,224 @@ class thread_renderer(threading.Thread):
         print("\n[RENDERER] Exited!\n")
         return
 
+    def printDataType(self, data_type):
+        if data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER:
+            print('CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER')
+        elif data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR:
+            print('CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR')
+            print("\r\n\r\n")
+        elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_RENDER:
+            print('CONF_DISPLAYCARD_TEMPLATECARD_RENDER')
+        elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_CLEAR:
+            print('CONF_DISPLAYCARD_TEMPLATECARD_CLEAR')
+            print("\r\n\r\n")
+        elif data_type == CONF_DISPLAYCARD_IMAGE_PNG:
+            print('CONF_DISPLAYCARD_IMAGE_PNG')
+        elif data_type == CONF_DISPLAYCARD_IMAGE_JPG:
+            print('CONF_DISPLAYCARD_IMAGE_JPG')
+
+    def printTemplateCard(self, json_payload):
+        # get template type, maintitle and subtitle
+        elem_template = json_payload["type"]
+        elem_mainTitle = json_payload["title"]["mainTitle"]
+        try:
+            elem_subTitle = json_payload["title"]["subTitle"]
+        except:
+            elem_subTitle = None
+        print("")
+        print("MAINTITLE: {}".format(elem_mainTitle))
+        if elem_subTitle is not None:
+            print("SUBTITLE: {}".format(elem_subTitle))
+
+        # print template details
+        if elem_template == CONF_DISPLAYCARD_BODY_TEMPLATE1:
+            # BodyTemplate1
+            # mainTitle
+            # subTitle
+            # textField
+            elem_textField = json_payload["textField"]
+            print("TEXTFIELD: {}".format(elem_textField))
+
+        elif elem_template == CONF_DISPLAYCARD_BODY_TEMPLATE2:
+            # BodyTemplate2
+            # mainTitle
+            # subTitle
+            # textField
+            # sources
+            #   url
+            #   size
+            elem_textField = json_payload["textField"]
+            print("\r\nTEXTFIELD: {}".format(elem_textField))
+            elem_imageSources = json_payload["image"]["sources"]
+            print("\r\nIMAGESOURCES:")
+            for i in range(len(elem_imageSources)):
+                elem_size = elem_imageSources[i]["size"]
+                if elem_size == "SMALL":
+                    elem_url = elem_imageSources[i]["url"]
+                    print("  {} {}".format(elem_size, elem_url))
+                    break
+
+        elif elem_template == CONF_DISPLAYCARD_LIST_TEMPLATE1:
+            # ListTemplate1
+            # mainTitle
+            # subTitle
+            # listItems
+            #   leftTextField
+            #   rightTextField
+            elem_listItems = json_payload["listItems"]
+            print("TEXTFIELD:")
+            for i in range(len(elem_listItems)):
+                elem_leftTextField = elem_listItems[i]["leftTextField"]
+                elem_rightTextField = elem_listItems[i]["rightTextField"]
+                print("  {} {}".format(elem_leftTextField, elem_rightTextField))
+
+        elif elem_template == CONF_DISPLAYCARD_WEATHER_TEMPLATE:
+            # WeatherTemplate
+            # mainTitle
+            # subTitle
+            # currentWeather
+            # highTemperature
+            # lowTemperature
+            # weatherForecast
+            #   day
+            #   highTemperature
+            #   lowTemperature
+            elem_currentWeather = json_payload["currentWeather"]
+            print("\r\nCURRENTWEATHER: {}".format(elem_currentWeather))
+            elem_currentWeatherIcon = json_payload["currentWeatherIcon"]["sources"]
+            for i in range(len(elem_currentWeatherIcon)):
+                elem_size = elem_currentWeatherIcon[i]["size"]
+                if elem_size == "SMALL":
+                    elem_widthPixels = elem_currentWeatherIcon[i]["widthPixels"]
+                    elem_heightPixels = elem_currentWeatherIcon[i]["heightPixels"]
+                    elem_url = elem_currentWeatherIcon[i]["url"]
+                    elem_darkBackgroundUrl = elem_currentWeatherIcon[i]["darkBackgroundUrl"]
+                    print("  {} {} {}".format(elem_size, elem_widthPixels, elem_heightPixels))
+                    print("  {}".format(elem_url))
+                    #print("  {}".format(elem_darkBackgroundUrl))
+                    break
+                    
+            elem_highTemperature = json_payload["highTemperature"]["value"]
+            print("\r\nHIGHTEMPERATURE: {}".format(elem_highTemperature))
+            elem_highTemperatureIcon = json_payload["highTemperature"]["arrow"]["sources"]
+            for i in range(len(elem_highTemperatureIcon)):
+                elem_size = elem_highTemperatureIcon[i]["size"]
+                if elem_size == "SMALL":
+                    elem_widthPixels = elem_highTemperatureIcon[i]["widthPixels"]
+                    elem_heightPixels = elem_highTemperatureIcon[i]["heightPixels"]
+                    elem_url = elem_highTemperatureIcon[i]["url"]
+                    elem_darkBackgroundUrl = elem_highTemperatureIcon[i]["darkBackgroundUrl"]
+                    print("  {} {} {}".format(elem_size, elem_widthPixels, elem_heightPixels))
+                    print("  {}".format(elem_url))
+                    #print("  {}".format(elem_darkBackgroundUrl))
+                    break
+
+            elem_lowTemperature = json_payload["lowTemperature"]["value"]
+            print("\r\nLOWTEMPERATURE: {}".format(elem_lowTemperature))
+            elem_lowTemperatureIcon = json_payload["lowTemperature"]["arrow"]["sources"]
+            for i in range(len(elem_lowTemperatureIcon)):
+                elem_size = elem_lowTemperatureIcon[i]["size"]
+                if elem_size == "SMALL":
+                    elem_widthPixels = elem_lowTemperatureIcon[i]["widthPixels"]
+                    elem_heightPixels = elem_lowTemperatureIcon[i]["heightPixels"]
+                    elem_url = elem_lowTemperatureIcon[i]["url"]
+                    elem_darkBackgroundUrl = elem_lowTemperatureIcon[i]["darkBackgroundUrl"]
+                    print("  {} {} {}".format(elem_size, elem_widthPixels, elem_heightPixels))
+                    print("  {}".format(elem_url))
+                    #print("  {}".format(elem_darkBackgroundUrl))
+                    break
+                    
+            elem_weatherForecast = json_payload["weatherForecast"]
+            print("\r\nWEATHERFORECAST:")
+            for i in range(len(elem_weatherForecast)):
+                elem_day = elem_weatherForecast[i]["day"]
+                elem_highTemp = elem_weatherForecast[i]["highTemperature"]
+                elem_lowTemp = elem_weatherForecast[i]["lowTemperature"]
+                print("\r\n  {} {} {}".format(elem_day, elem_highTemp, elem_lowTemp))
+                elem_imageSources = elem_weatherForecast[i]["image"]["sources"]
+                for j in range(len(elem_imageSources)):
+                    elem_size = elem_imageSources[j]["size"]
+                    if elem_size == "SMALL":
+                        elem_widthPixels = elem_imageSources[j]["widthPixels"]
+                        elem_heightPixels = elem_imageSources[j]["heightPixels"]
+                        elem_url = elem_imageSources[j]["url"]
+                        elem_darkBackgroundUrl = elem_imageSources[j]["darkBackgroundUrl"]
+                        print("  {} {} {}".format(elem_size, elem_widthPixels, elem_heightPixels))
+                        print("  {}".format(elem_url))
+                        #print("  {}".format(elem_darkBackgroundUrl))
+                        break
+                        
+    def printPlayerInfoCard(self, json_payload):
+        # PlayerTemplate
+        # titleSubtext1
+        # titleSubtext2
+        # provider
+        #   name
+        #   logo
+        # art
+        #   size
+        #   url
+        # controls
+        #   name
+        #   type
+        #   enabled
+        #   selected
+        try:
+            elem_title = json_payload["content"]["title"]
+        except:
+            elem_title = None
+        try:
+            elem_titleSubtext1 = json_payload["content"]["titleSubtext1"]
+            elem_titleSubtext2 = json_payload["content"]["titleSubtext2"]
+        except:
+            elem_titleSubtext1 = None
+            elem_titleSubtext2 = None
+
+        print("TITLE: {}".format(elem_title))
+        print("TITLESUBTEXT1: {}".format(elem_titleSubtext1))
+        print("TITLESUBTEXT2: {}".format(elem_titleSubtext2))
+
+        elem_providerName = json_payload["content"]["provider"]["name"]
+        print("\r\nPROVIDERNAME: {}".format(elem_providerName))
+        elem_providerLogoSources = json_payload["content"]["provider"]["logo"]["sources"]
+        for i in range(len(elem_providerLogoSources)):
+            elem_url = elem_providerLogoSources[i]["url"]
+            print("  {}".format(elem_url))
+
+        print("\r\nART:")
+        elem_artSources = json_payload["content"]["art"]["sources"]
+        for i in range(len(elem_artSources)):
+            try:
+                elem_size = elem_artSources[i]["size"]
+            except:
+                elem_size = None
+            elem_url = elem_artSources[i]["url"]
+            print("  {} {}".format(elem_size, elem_url))
+
+        elem_controls = json_payload["controls"]
+        print("\r\nCONTROLS:")
+        for i in range(len(elem_controls)):
+            elem_name = elem_controls[i]["name"]
+            elem_type = elem_controls[i]["type"]
+            elem_enabled = elem_controls[i]["enabled"]
+            elem_selected = elem_controls[i]["selected"]
+            print("  {} {} enabled={} selected={}".format(elem_name, elem_type, elem_enabled, elem_selected))
+
     def printJSON(self, json_payload, data_type):
+        debug_json_payload = 0
         try:
             json_payload = json_payload.decode("utf-8")
             json_payload = json.loads(json_payload)
-            print("")
-            for key,val in json_payload.items():
-                print("{}: {}\r\n".format(key, val))
+            
+            if debug_json_payload != 0:
+                print("")
+                for key,val in json_payload.items():
+                    print("{}: {}\r\n".format(key, val))
+                
+            if data_type == CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER:
+                self.printPlayerInfoCard(json_payload)
+            elif data_type == CONF_DISPLAYCARD_TEMPLATECARD_RENDER:
+                self.printTemplateCard(json_payload)
         except:
             print(len(json_payload))
 
