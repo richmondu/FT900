@@ -90,6 +90,7 @@ CONF_AUDIO_RECV_CHANNEL              = DEVICE_CAPABILITIES_CHANNEL_1
 ############################################################################################
 # Display cards
 ############################################################################################
+CONF_DISPLAYCARD_SUPPORT               = True
 CONF_DISPLAYCARD_PORT_ADDITION         = 100
 CONF_DISPLAYCARD_PLAYERINFOCARD_RENDER = 0
 CONF_DISPLAYCARD_PLAYERINFOCARD_CLEAR  = 1
@@ -879,8 +880,9 @@ def main(args, argc):
         t.start()
         t = thread_player(queue_data)
         t.start()
-        t = thread_renderer()
-        t.start()
+        if CONF_DISPLAYCARD_SUPPORT:
+            t = thread_renderer()
+            t.start()
         threads.append(t)
 
         # Process user input
