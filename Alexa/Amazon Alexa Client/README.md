@@ -467,12 +467,39 @@ Alexa Voice Service supports Display Cards for devices with Alexa built-in.
 The Display Cards feature enables screen-based product to show visual content to complement voice responses from Alexa.
 There are 5 display card templates Alexa supports:
 
-      PlayerTemplate  :RenderPlayerInfo directive, "Now Playing" template for music.
-      BodyTemplate1   :text only template, Wikipedia entries without images
-      BodyTemplate2   :body text and a single image, Wikipedia entries with images.
-      ListTemplate1   :template for lists and calendar entries, Shopping lists, to do lists, and calendar entries.
-      WeatherTemplate :template designed to display weather data, Weather information
- 
+
+      BodyTemplate1   : text only template, Wikipedia entries without images
+                      : title/mainTitle
+                      : title/subTitle
+                      : textField
+      BodyTemplate2   : body text and a single image, Wikipedia entries with images.
+                      : title/mainTitle
+                      : title/subTitle
+                      : textField   
+                      : image/sources/[size, url]
+      ListTemplate1   : template for lists and calendar entries, Shopping lists, to do lists, and calendar entries.
+                      : title/mainTitle
+                      : title/subTitle
+                      : listItems/[leftTextField, rightTextField]
+      WeatherTemplate : template designed to display weather data, Weather information
+                      : title/mainTitle
+                      : title/subTitle
+                      : currentWeather
+                      : currentWeatherIcon/sources/[size, widthPixels, heightPixels, url, darkBackgroundUrl]
+                      : highTemperature/value
+                      : highTemperature/arrow/sources/[size, widthPixels, heightPixels, url, darkBackgroundUrl]
+                      : lowTemperature/value
+                      : lowTemperature/arrow/sources/[size, widthPixels, heightPixels, url, darkBackgroundUrl]
+                      : weatherForecast/[day, highTemperature, lowTemperature, 
+                                         image/sources/[size, widthPixels, heightPixels, url, darkBackgroundUrl]]
+      PlayerTemplate  : RenderPlayerInfo directive, "Now Playing" template for music.
+                      : content/title
+                      : content/titleSubtext1
+                      : content/titleSubtext2
+                      : content/provider/name
+                      : content/provider/logo/sources/[url]
+                      : content/art/sources/[size, url]
+                      : controls/[name, type, enabled, selected]
 Refer to https://developer.amazon.com/docs/alexa-voice-service/display-cards-tablets.html for more information about Display Cards.
 
 
