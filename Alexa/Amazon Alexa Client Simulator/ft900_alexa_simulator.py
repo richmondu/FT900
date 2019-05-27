@@ -44,6 +44,7 @@ CONF_FILENAME_REQUEST_YES              = "audio/REQUEST_yes.raw"
 CONF_FILENAME_REQUEST_WEATHER          = "audio/REQUEST_what_is_the_weather.raw"
 CONF_FILENAME_REQUEST_ONEPLUSONE       = "audio/REQUEST_one_plus_one.RAW"
 CONF_FILENAME_REQUEST_LISTTODO         = "audio/REQUEST_list_todo.RAW"
+CONF_FILENAME_REQUEST_WHEREIS          = "audio/REQUEST_where_is_manila.RAW"
 CONF_FILENAME_TIMESTAMP                = 0
 CONF_TIMEOUT_SEND                      = 10
 CONF_TIMEOUT_RECV                      = 10
@@ -376,10 +377,8 @@ def avs_recv_and_play_audio():
 ############################################################################################
 class thread_player(threading.Thread):
 
-    def __init__(self, threadID, name, queue_data):
+    def __init__(self, queue_data):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
         self.queue_data = queue_data
 
     def run(self):
@@ -435,10 +434,8 @@ class thread_player(threading.Thread):
 ############################################################################################
 class thread_streamer(threading.Thread):
 
-    def __init__(self, threadID, name, queue_data):
+    def __init__(self, queue_data):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
         self.queue_data = queue_data
 
     def run(self):
@@ -487,10 +484,8 @@ class thread_streamer(threading.Thread):
 ############################################################################################
 class thread_commander(threading.Thread):
 
-    def __init__(self, threadID, name, file_request):
+    def __init__(self, file_request):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
         self.file_request = file_request
 
     def run(self):
@@ -515,10 +510,8 @@ class thread_commander(threading.Thread):
 ############################################################################################
 class thread_renderer(threading.Thread):
 
-    def __init__(self, threadID, name):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
 
     def run(self):
         global g_quit
@@ -621,6 +614,7 @@ def usage():
     print("[MAIN]   Press 'w' key to ask Alexa what is the weather...")
     print("[MAIN]   Press 'o' key to ask Alexa one plus one...")
     print("[MAIN]   Press 'l' key to ask Alexa what's on my todo list...")
+    print("[MAIN]   Press 'r' key to ask Alexa where is manila...")
     print("[MAIN]   Press 'm' key to ask Alexa to play music...")
     print("[MAIN]   Press 'n' key to ask Alexa to play live news...")
     print("[MAIN]   Press 'b' key to ask Alexa to play audio book...")
@@ -673,11 +667,11 @@ def main(args, argc):
         g_exit = False
         queue_data = queue.Queue()
         threads = []
-        t = thread_streamer(0, "streamer", queue_data)
+        t = thread_streamer(queue_data)
         t.start()
-        t = thread_player(0, "player", queue_data)
+        t = thread_player(queue_data)
         t.start()
-        t = thread_renderer(0, "renderer")
+        t = thread_renderer()
         t.start()
         threads.append(t)
 
@@ -688,7 +682,7 @@ def main(args, argc):
                 print(key)
                 if key=='q':
                     # send stop command to stop music or alarm
-                    t = thread_commander (1, "commander", CONF_FILENAME_REQUEST_STOP)
+                    t = thread_commander (CONF_FILENAME_REQUEST_STOP)
                     t.start()
                     # wait for thread to finish
                     t.join()
@@ -707,37 +701,40 @@ def main(args, argc):
                     g_exit = True
                     break
                 elif key=='t':
-                    t = thread_commander (2, "commander", CONF_FILENAME_REQUEST_TIME)
+                    t = thread_commander (CONF_FILENAME_REQUEST_TIME)
                     t.start()
                 elif key=='p':
-                    t = thread_commander (3, "commander", CONF_FILENAME_REQUEST_PERSON)
+                    t = thread_commander (CONF_FILENAME_REQUEST_PERSON)
                     t.start()
                 elif key=='m':
-                    t = thread_commander (4, "commander", CONF_FILENAME_REQUEST_MUSIC)
+                    t = thread_commander (CONF_FILENAME_REQUEST_MUSIC)
                     t.start()
                 elif key=='n':
-                    t = thread_commander (5, "commander", CONF_FILENAME_REQUEST_NEWS)
+                    t = thread_commander (CONF_FILENAME_REQUEST_NEWS)
                     t.start()
                 elif key=='b':
-                    t = thread_commander (6, "commander", CONF_FILENAME_REQUEST_BOOK)
+                    t = thread_commander (CONF_FILENAME_REQUEST_BOOK)
                     t.start()
                 elif key=='a':
-                    t = thread_commander (7, "commander", CONF_FILENAME_REQUEST_ALARM)
+                    t = thread_commander (CONF_FILENAME_REQUEST_ALARM)
                     t.start()
                 elif key=='s':
-                    t = thread_commander (8, "commander", CONF_FILENAME_REQUEST_STOP)
+                    t = thread_commander (CONF_FILENAME_REQUEST_STOP)
                     t.start()
                 elif key=='y':
-                    t = thread_commander (9, "commander", CONF_FILENAME_REQUEST_YES)
+                    t = thread_commander (CONF_FILENAME_REQUEST_YES)
                     t.start()
                 elif key=='w':
-                    t = thread_commander (10, "commander", CONF_FILENAME_REQUEST_WEATHER)
+                    t = thread_commander (CONF_FILENAME_REQUEST_WEATHER)
                     t.start()
                 elif key=='o':
-                    t = thread_commander (11, "commander", CONF_FILENAME_REQUEST_ONEPLUSONE)
+                    t = thread_commander (CONF_FILENAME_REQUEST_ONEPLUSONE)
                     t.start()
                 elif key=='l':
-                    t = thread_commander (12, "commander", CONF_FILENAME_REQUEST_LISTTODO)
+                    t = thread_commander (CONF_FILENAME_REQUEST_LISTTODO)
+                    t.start()
+                elif key=='r':
+                    t = thread_commander (CONF_FILENAME_REQUEST_WHEREIS)
                     t.start()
                 else:
                     sleep(1)
