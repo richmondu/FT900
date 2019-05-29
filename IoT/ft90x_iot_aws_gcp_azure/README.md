@@ -132,3 +132,12 @@ Below are the IoT cloud solutions architecture used for this demo application.
        FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
        This enables developers to easily create cloud-connected FT900 IoT applications.
        IoT Configuration views are also provided so users can set the MQTT credentials using Eclipse view instead of code.
+
+### MQTT Message Brokers and MQTT Clients
+
+The following tools can be used to test the client and the cloud setup.
+        
+        1. MQTT.FX - an MQTT client that can be used to test the cloud setup, credentials and certificates.
+        2. Eclipse Mosquitto - a simple MQTT message broker that can be used to test the FT900 client.
+        3. Pivotal RabbitMQ - an enterprise message broker that supports MQTT and can be used to test the FT900 client.
+        
