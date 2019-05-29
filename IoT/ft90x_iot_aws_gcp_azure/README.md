@@ -133,7 +133,7 @@ Below are the IoT cloud solutions architecture used for this demo application.
        This enables developers to easily create cloud-connected FT900 IoT applications.
        IoT Configuration views are also provided so users can set the MQTT credentials using Eclipse view instead of code.
 
-### MQTT Message Brokers and MQTT Clients
+### MQTT Messaging Systems and MQTT Clients
 
 The following tools can be used to test the client and the cloud setup.
         
