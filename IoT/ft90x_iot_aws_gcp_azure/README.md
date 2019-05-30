@@ -141,3 +141,4 @@ The following tools can be used to test the client and the cloud setup.
         2. Eclipse Mosquitto - a simple MQTT message broker that can be used to test the FT900 client.
         3. Pivotal RabbitMQ - an enterprise message broker that supports MQTT and can be used to test the FT900 client.
         
+TODO: Experiment with Apache Kafka as replacement for Mosquitto and RabbitMQ.
