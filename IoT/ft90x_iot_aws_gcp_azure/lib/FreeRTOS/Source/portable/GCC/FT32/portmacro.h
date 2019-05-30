@@ -116,9 +116,7 @@
 
 /* Hardware includes. */
 #include <ft900.h>
-#ifdef __TFP_PRINTF__
 #include <tinyprintf.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
