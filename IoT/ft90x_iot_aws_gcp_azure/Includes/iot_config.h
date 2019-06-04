@@ -15,10 +15,11 @@
 //   MQTT_BROKER_AWS_GREENGRASS
 //   MQTT_BROKER_GCP_EDGE - not yet supported
 //   MQTT_BROKER_MAZ_EDGE - not yet supported
+//   MQTT_BROKER_LOCAL - for RabbitMQ/Mosquitto local broker
 //   Refer to iot_config_brokers.h
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
+#define USE_MQTT_BROKER               MQTT_BROKER_LOCAL
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +41,8 @@
     // Microsoft IoT requires a root CA
     #define USE_ROOT_CA               1
 #else
-    #define USE_ROOT_CA               0
+    #define USE_ROOT_CA               1
+    #define USE_MBEDTLS_MAX_SIZES     0
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -135,13 +137,23 @@
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     #include <iot_config_azure.h>
 #else
-    // Set values here for unsupported/untested MQTT brokers
-    #define USE_DEVICE_ID             "deviceid"
+    // Set values here for generic MQTT brokers
+    #define USE_DEVICE_ID             "deviceid"      // replace me
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
-    #define MQTT_BROKER               ""
+    #define MQTT_BROKER               "192.168.100.5" // replace me
     #define MQTT_CLIENT_NAME          USE_DEVICE_ID
-    #define MQTT_CLIENT_USER          NULL
-    #define MQTT_CLIENT_PASS          NULL
+    #define MQTT_CLIENT_USER          "guest"         // replace me
+    #define MQTT_CLIENT_PASS          "guest"         // replace me
+
+    // This certificate refers to rootca.pem
+    extern __flash__ uint8_t ca_data[]        asm("rootca_pem");
+    extern __flash__ uint8_t ca_data_end[]    asm("rootca_pem_end");
+    // This certificate refers to ft900device1_cert.pem
+    extern __flash__ uint8_t cert_data[]      asm("ft900device1_cert_pem");
+    extern __flash__ uint8_t cert_data_end[]  asm("ft900device1_cert_pem_end");
+    // This private key refers to ft900device1_pkey.pem
+    extern __flash__ uint8_t pkey_data[]      asm("ft900device1_pkey_pem");
+    extern __flash__ uint8_t pkey_data_end[]  asm("ft900device1_pkey_pem_end");
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////

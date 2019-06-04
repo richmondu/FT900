@@ -91,7 +91,7 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
         #define IOT_APP_TASK_STACK_SIZE          (1024 + 64)
     #endif
 #else
-#define IOT_APP_TASK_STACK_SIZE                  (1024 + 64)
+#define IOT_APP_TASK_STACK_SIZE                  (512)
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 
