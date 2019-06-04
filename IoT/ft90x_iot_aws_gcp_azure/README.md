@@ -142,3 +142,67 @@ The following tools can be used to test the client and the cloud setup.
         3. Pivotal RabbitMQ - an enterprise message broker that supports MQTT and can be used to test the FT900 client.
         
 TODO: Experiment with Apache Kafka as replacement for Mosquitto and RabbitMQ.
+
+#### RabbitMQ Setup
+
+        // Installation
+        1. Install Erlang http://www.erlang.org/downloads]
+        2. Install RabbitMQ [https://www.rabbitmq.com/install-windows.html]
+        3. Install RabbitMQ MQTT plugin [https://www.rabbitmq.com/mqtt.html]
+           >> Open RabbitMQ Command Prompt
+           >> rabbitmq-plugins enable rabbitmq_mqtt
+
+        // Configuration
+        4. Add environment variable RABBITMQ_CONFIG_FILE %APPDATA%\RabbitMQ\rabbitmq.config
+        5. Create configuration file %APPDATA%\RabbitMQ\rabbitmq.config based on rabbitmq.config.example
+        6. Update configuration file to enable the following
+           {loopback_users, []},
+           {ssl_options, [{cacertfile,           "rootca.pem"},
+                          {certfile,             "ft900device1_cert.pem"},
+                          {keyfile,              "ft900device1_pkey.pem"},
+                          {verify,               verify_peer},
+                          {fail_if_no_peer_cert, false},
+                          {ciphers,  ["RSA-AES128-SHA", "RSA-AES256-SHA"]} ]}
+           {default_user, <<"guest">>},
+           {default_pass, <<"guest">>},
+           {allow_anonymous, false},
+           {tcp_listeners, [1883]},
+           {ssl_listeners, [8883]}
+        7. Restart RabbitMQ
+           >> Open RabbitMQ Command Prompt
+           >> rabbitmq-service.bat stop 
+           >> rabbitmq-service.bat remove
+           >> rabbitmq-service.bat install
+           >> rabbitmq-service.bat start
+        8. Copy certificates to %APPDATA%\RabbitMQ 
+           rootca.pem, ft900device1_cert.pem, ft900device1_pkey.pem
+
+        // Testing
+        9. Install MQTT.FX [https://mqttfx.jensd.de/] - MQTT Client
+        10. Create MQTT.FX Connection Profile
+            Profile Name: My MQTT Client
+            Profile Type: MQTT Broker
+            Broker Address: <ip address of PC running RabbitMQ>
+            Broker Port: 8883
+            Client ID: deviceid
+            User Credentials User Name: guest
+            User Credentials Password: guest
+            SSL/TLS Enable SSL/TLS: Check
+            SSL/TLS Protocol: TLSv1.2
+            SSL/TLS Self-signed certificates:
+              CA File: <full path to rootca.pem>
+              Client Certificate File: <full path to ft900device1_cert.pem>
+              Client Key File: <full path to ft900device1_pkey.pem>
+        11. Select MQTT.FX Connection Profile 'My MQTT Client' and click Connect
+        12. Go to MQTT.FX Subcribe tab and set topic to 'topic/subtopic' and click Subscribe button
+        13. Go to MQTT.FX Publish tab and set topic to 'topic/subtopic' and 'hello world' message and click Publish button
+        14. Go to MQTT.FX Subcribe tab and verify 'hello world' message appears
+
+        // Testing with FT900
+        15. Download https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
+        16. Update iot_config.h
+            // Set MQTT broker to use local MQTT settings
+            #define USE_MQTT_BROKER MQTT_BROKER_LOCAL
+            // Update IP address of PC running RabbitMQ
+            #define MQTT_BROKER "192.168.100.5"
+        17. Compile and run.
