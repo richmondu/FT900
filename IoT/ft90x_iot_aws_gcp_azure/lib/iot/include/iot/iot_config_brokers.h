@@ -52,7 +52,8 @@
 #define MQTT_BROKER_AWS_GREENGRASS    4    // local AWS Greengrass broker
 //#define MQTT_BROKER_GCP_EDGE        5    // local Google IoT Edge broker
 //#define MQTT_BROKER_MAZ_EDGE        6    // local Microsoft IoT Edge broker
-#define MQTT_BROKER_COUNT             5
+#define MQTT_BROKER_LOCAL             5    // local MQTT brokers (Pivotal RabbitMQ, Eclipse Mosquitto, Apache Kafka)
+#define MQTT_BROKER_COUNT             6
 
 ///////////////////////////////////////////////////////////////////////////////////
 
