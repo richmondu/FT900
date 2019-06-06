@@ -200,7 +200,7 @@ TODO: Experiment with Apache Kafka as replacement for Mosquitto and RabbitMQ.
 
         // Testing with FT900
         15. Download https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
-        16. Update iot_config.h
+        16. Update iot_config.h.
             // Set MQTT broker to use local MQTT settings
             #define USE_MQTT_BROKER MQTT_BROKER_LOCAL
             // Update IP address of PC running RabbitMQ
