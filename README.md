@@ -38,3 +38,4 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 - This demonstrates secure HTTPS connectivity to Amazon SNS endpoint including SigV4 Signature generation for HTTP POST request.
 - This allows FT900 to send text/sms or email messages via Amazon SNS.
 - Since most Amazon services utilizes SigV4 Signature authentication, it means that FT900 can now theoritically access most Amazon services.
+- https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_sns_client
