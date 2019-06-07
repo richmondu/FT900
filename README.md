@@ -26,14 +26,15 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 
 
-# FT900 IoT Cloud Demo (AWS/GCP/Azure)
+# FT900 AWS/GCP/Azure IoT Demo
 - This demonstrates secure MQTT connectivity to IoT cloud services: Amazon AWS IoT Core, Google Cloud IoT Core and Microsoft Azure IoT Hub using the newly created IoT library running over open-source third party libraries LWIP's MQTT and mbedTLS.
 - This was presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
+- This utilizes the IoT library I created which includes AWS/GCP/Azure cloud onnectivity, mbedTLS SSL library integration, SSL certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
 
 
 
-# FT900 IoT Security and Cloud Connectivity
-- IoT Security: IoT library including mbedTLS integration, SSL certificate authentication, JWT/SAS security token generation, ciphersuite-memory tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE)
-- IoT Connectivity: Secure authentication and communication with IoT cloud platforms: Amazon Web Services, Google Cloud Platform and Microsoft Azure.
-- IoT Solutions: Backend of PoC IoT solutions for Electronica/Embedded World summit and client demos leveraging AWS (Greengrass, IoT Core, Lambda, DynamoDB), GCP (IoT Core, Pub/Sub, Dataflow, BigQuery) and Azure (IoT Hub, Stream Analytics, CosmosDB). Frontend NodeJS scripts that accesses Google Cloud SDK and Microsoft Azure SDK to demonstrate authenticating and querying of Big Query and CosmosDB databases.  
+# FT900 Amazon SNS Demo
+- This demonstrates secure HTTPS connectivity to Amazon SNS endpoint including SigV4 Signature generation for HTTP POST request.
+- This allows FT900 to send text/sms or email messages via Amazon SNS.
+- Since most Amazon services utilizes SigV4 Signature authentication, it means that FT900 can now theoritically access most Amazon services.
