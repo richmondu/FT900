@@ -128,6 +128,26 @@ Below are the IoT cloud solutions architecture used for this demo application.
           cosmosdbclient.js demonstrates authenticating and querying of CosmosDB database
        
 
+# IoT Protocols
+
+### MQTT over TLS
+
+### HTTP over TLS
+
+### Websockets over TLS
+
+
+# IoT Authentication
+
+### X.509 Certificate authentication
+
+### JWT authentication
+
+### SAS authentication
+
+### SigV4 authentication
+
+
 # MQTT Messaging Systems and MQTT Clients
 
 The following tools can be used to test the client and the cloud setup.
