@@ -37,7 +37,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
   
 - These were presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
-- These utilize the IoT library I created which includes AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
+- The IoT library consists of AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
 
 
 
