@@ -600,7 +600,7 @@ static void iot_app_task( void *pvParameters )
     Socket_t xSocket = SOCKETS_Socket();
     SocketsSockaddr_t xAddress = {0};
     xAddress.pcServer = CONFIG_AWS_HOST;
-    xAddress.usPort = 443;
+    xAddress.usPort = CONFIG_HTTP_TLS_PORT;
     lRet = SOCKETS_Connect( xSocket, &xAddress );
     if (lRet != SOCKETS_ERROR_NONE) {
         DEBUG_PRINTF( "SOCKETS_Connect failed! %d\r\n", lRet );
