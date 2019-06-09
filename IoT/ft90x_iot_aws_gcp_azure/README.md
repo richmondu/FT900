@@ -1,4 +1,4 @@
-# FT900 IoT Cloud demo
+# FT900 IoT Cloud (AWS/GCP/Azure) demo
 
 
 This project is an improvement of my FT900 AWS IoT demo located at https://github.com/richmondu/FT900/tree/master/IoT/aws_demos_ft_greengrass_lwip_mbedtls . 
