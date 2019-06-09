@@ -28,6 +28,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 # FT900 AWS/GCP/Azure IoT Demo [MQTT]
 - This demonstrates <b>secure MQTT connectivity</b> to popular IoT cloud services:
+
   Amazon AWS IoT Core [using X.509 certificate authentication] 
   Google Cloud IoT Core [using JWT authentication]
   Microsoft Azure IoT Hub [using SAS authentication and X.509 certificate authentication] 
@@ -40,6 +41,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 # FT900 Amazon SNS/Lambda/IoT Client Demo [HTTPS]
 - These demonstrate <b>secure HTTPS connectivity</b> to Amazon services and SigV4 Signature generation for HTTP POST request.
 - This consists of the following demo applications
+
   FT900 Amazon SNS Client - sending of text/SMS or email messages
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_sns_httpclient
   FT900 Amazon Lambda Client - invoking serverless cloud function
