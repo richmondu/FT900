@@ -26,16 +26,23 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 
 
-# FT900 AWS/GCP/Azure IoT Demo
-- This demonstrates secure MQTT connectivity to IoT cloud services: Amazon AWS IoT Core, Google Cloud IoT Core and Microsoft Azure IoT Hub using the newly created IoT library running over open-source third party libraries LWIP's MQTT and mbedTLS.
-- This was presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
+# FT900 AWS/GCP/Azure IoT Demo [MQTT]
+- This demonstrates <b>secure MQTT connectivity</b> to popular IoT cloud services:
+  Amazon AWS IoT Core [using X.509 certificate authentication] 
+  Google Cloud IoT Core [using JWT authentication]
+  Microsoft Azure IoT Hub [using SAS authentication and X.509 certificate authentication] 
+- These were presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
-- This utilizes the IoT library I created which includes AWS/GCP/Azure cloud onnectivity, mbedTLS SSL library integration, SSL certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
+- These utilize the IoT library I created which includes AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
 
 
 
-# FT900 Amazon SNS Client Demo
-- This demonstrates text/email messaging using FT900 via secure HTTPS connectivity to Amazon SNS endpoint and SigV4 Signature generation for HTTP POST request.
-- By using Amazon SNS, FT900 is able to send text/sms or email messages.
-- Since most Amazon services utilizes SigV4 Signature authentication, it means that FT900 can now theoritically access most Amazon services.
-- https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_sns_client
+# FT900 Amazon SNS/Lambda/IoT Client Demo [HTTPS]
+- These demonstrate <b>secure HTTPS connectivity</b> to Amazon services and SigV4 Signature generation for HTTP POST request.
+- This consists of the following demo applications
+  FT900 Amazon SNS Client - sending of text/SMS or email messages
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_sns_httpclient
+  FT900 Amazon Lambda Client - invoking serverless cloud function
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_lambda_httpclient
+  FT900 Amazon IoT Client - publishing sensor data
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
