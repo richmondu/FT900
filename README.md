@@ -44,7 +44,9 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
   FT900 Amazon SNS Client - sending of text/SMS or email messages
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_sns_httpclient
+  
   FT900 Amazon Lambda Client - invoking serverless cloud function
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_lambda_httpclient
+  
   FT900 Amazon IoT Client - publishing sensor data
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
