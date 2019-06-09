@@ -30,8 +30,11 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 - This demonstrates <b>secure MQTT connectivity</b> to popular IoT cloud services:
 
   Amazon AWS IoT Core [using X.509 certificate authentication] 
+  
   Google Cloud IoT Core [using JWT authentication]
+  
   Microsoft Azure IoT Hub [using SAS authentication and X.509 certificate authentication] 
+  
 - These were presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
 - These utilize the IoT library I created which includes AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
@@ -39,7 +42,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 
 # FT900 Amazon SNS/Lambda/IoT Client Demo [HTTPS]
-- These demonstrate <b>secure HTTPS connectivity</b> to Amazon services and SigV4 Signature generation for HTTP POST request.
+- These demonstrate <b>secure HTTPS connectivity</b> (with SigV4 authentication) to Amazon services.
 - This consists of the following demo applications
 
   FT900 Amazon SNS Client - sending of text/SMS or email messages
