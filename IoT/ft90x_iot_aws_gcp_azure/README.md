@@ -127,11 +127,6 @@ Below are the IoT cloud solutions architecture used for this demo application.
           FRONTEND: browser -> (Dashboard webpage using cosmosdbclient.js) Storage -> CosmosDB [TODO]
           cosmosdbclient.js demonstrates authenticating and querying of CosmosDB database
        
-# FT900 Eclipse Toolchain
-
-       FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
-       This enables developers to easily create cloud-connected FT900 IoT applications.
-       IoT Configuration views are also provided so users can set the MQTT credentials using Eclipse view instead of code.
 
 # MQTT Messaging Systems and MQTT Clients
 
@@ -206,3 +201,10 @@ TODO: Experiment with Apache Kafka as replacement for Mosquitto and RabbitMQ.
             // Update IP address of PC running RabbitMQ
             #define MQTT_BROKER "192.168.100.5"
         17. Compile and run.
+
+
+# FT900 Eclipse Toolchain
+
+       FT900 Eclipse Toolchain now supports IoT Project templates for AWS, GCP and Azure. 
+       This enables developers to easily create cloud-connected FT900 IoT applications.
+       IoT Configuration views are also provided so users can set the MQTT credentials using Eclipse view instead of code.
