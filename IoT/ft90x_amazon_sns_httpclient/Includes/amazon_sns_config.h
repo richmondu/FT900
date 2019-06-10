@@ -13,7 +13,7 @@
 #define CONFIG_AWS_SNS_TOPIC_ARN    ""                                                      // update me
 #define CONFIG_AWS_SNS_PHONE_NUMBER "+639175900612"
 
-// Update based on your SNS region
+// Update based on your AWS SNS region
 #define CONFIG_AWS_REGION           "ap-southeast-1"                                        // update me
 #define CONFIG_AWS_HOST             "sns.ap-southeast-1.amazonaws.com"                      // update me
 
