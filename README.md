@@ -42,7 +42,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 
 # FT900 Amazon SNS/Lambda/DynamoDB/IoT Client Demo [HTTP over TLS]
-- These demonstrate <b>secure HTTP connectivity</b> (with <b>SigV4 authentication</b>) to Amazon services.
+- These demonstrate <b>secure HTTP connectivity</b> (with <b>SigV4 authentication</b>) to access REST APIs of Amazon services.
 - This consists of the following demo applications
 
   <b>FT900 Amazon SNS Client</b> - sending of text/SMS or email messages
