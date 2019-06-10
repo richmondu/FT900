@@ -16,7 +16,7 @@
 // and create email subscription to FT900SNStopic
 #define CONFIG_AWS_SNS_TOPIC_ARN    ""                                                      // update me
 
-// Update based on your SNS region
+// Update based on your AWS Lambda region
 #define CONFIG_AWS_REGION           "ap-southeast-1"                                        // update me
 #define CONFIG_AWS_HOST             "lambda.ap-southeast-1.amazonaws.com"                   // update me
 
