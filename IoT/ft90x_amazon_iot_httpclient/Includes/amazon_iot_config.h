@@ -8,7 +8,7 @@
 #define CONFIG_AWS_ACCESS_KEY       ""                                                      // update me
 #define CONFIG_AWS_SECRET_KEY       ""                                                      // update me
 
-// Update based on your SNS region
+// Update based on your AWS IoT region
 #define CONFIG_AWS_REGION           "us-east-1"                                             // update me
 #define CONFIG_AWS_HOST             "data.iot.us-east-1.amazonaws.com"                      // update me
 
