@@ -41,7 +41,7 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
 
 
 
-# FT900 Amazon SNS/Lambda/IoT Client Demo [HTTP over TLS]
+# FT900 Amazon SNS/Lambda/DynamoDB/IoT Client Demo [HTTP over TLS]
 - These demonstrate <b>secure HTTP connectivity</b> (with <b>SigV4 authentication</b>) to Amazon services.
 - This consists of the following demo applications
 
@@ -50,6 +50,9 @@ This contains the <b>IoT framework</b>, <b>Amazon Alexa demo</b> and <b>AWS/GCP/
   
   <b>FT900 Amazon Lambda Client</b> - invoking serverless cloud function
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_lambda_httpclient
+  
+  <b>FT900 Amazon DynamoDB Client</b> - adding items to a database table
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_dynamodb_httpclient
   
   <b>FT900 Amazon IoT Client</b> - publishing sensor data
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
