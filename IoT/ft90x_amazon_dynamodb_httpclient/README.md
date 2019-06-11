@@ -16,6 +16,19 @@ Instructions:
         2. Compile, run and verify if text or email has been received
 
 
+Sample request packet:
+
+        POST / HTTP/1.1
+        Host:dynamodb.us-east-1.amazonaws.com
+        X-Amz-Target:DynamoDB_20120810.PutItem
+        Content-Type:application/x-amz-json-1.0
+        X-Amz-Date:20190611T060614Z
+        Authorization:AWS4-HMAC-SHA256 Credential=AKIAJIMSC33TIO5IVGLQ/20190611/us-east-1/dynamodb/aws4_request,SignedHeaders=content-type;host;x-amz-date;x-amz-target,Signature=9c44740ac1eae7f0ce05c16adc08ec225cc699fd9a1fcd97539d6f7c60fe4dfa
+        Content-Length:214
+
+        {"TableName": "GreengrassDashboard-IoTGSDynamoDeviceStatusTable-1JGCAR33OAYSP", "Item": {"deviceId": {"S": "hopper"}, "sensorReading": {"N": "39"}, "batteryCharge": {"N": "-8"}, "batteryDischargeRate": {"N": "2"}}}
+
+
 Notes:
 
 Determining the HTTPS POST request required some reverse-engineering using AWS SDK Boto3 Python library. 
