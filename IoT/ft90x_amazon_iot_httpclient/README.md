@@ -15,6 +15,17 @@ Instructions:
         2. Compile, run and verify if text or email has been received
 
 
+Sample request packet:
+
+        POST /topics/device/hopper/devicePayload HTTP/1.1
+        Host:data.iot.us-east-1.amazonaws.com
+        X-Amz-Date:20190611T061045Z
+        Authorization:AWS4-HMAC-SHA256 Credential=AKIAJIMSC33TIO5IVGLQ/20190611/us-east-1/iotdata/aws4_request,SignedHeaders=host;x-amz-date,Signature=9464080ffe9a7a2a67e98ea5314fc45335ae86684b619903443ec722437f27d4
+        Content-Length:91
+
+        {"deviceId": "hopper", "sensorReading": 39, "batteryCharge": 11, "batteryDischargeRate": 1}
+
+
 Notes:
 
 Determining the HTTPS POST request required some reverse-engineering using AWS SDK Boto3 Python library. 
