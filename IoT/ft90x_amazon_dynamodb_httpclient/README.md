@@ -1,7 +1,7 @@
 # FT900 Amazon DynamoDB client
 
 
-This project demonstrates FT900 HTTPS connectivity to Amazon DynamoDB by implementing SigV4 Signature authentication on HTTP POST request packets.
+This project demonstrates FT900 HTTPS connectivity to Amazon DynamoDB by implementing SigV4 Signature authentication on HTTP POST request packets sent over secure TLS connection.
 
 
 FT900 can now add items to AWS DynamoDB database table by sending HTTPS POST request (signed with SigV4 Signature authentication) to Amazon Lambda endpoint.
