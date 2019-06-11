@@ -1,7 +1,7 @@
 # FT900 Amazon IoT client
 
 
-This project demonstrates FT900 HTTPS connectivity to Amazon IoT by implementing SigV4 Signature authentication on HTTP POST request packets.
+This project demonstrates FT900 HTTPS connectivity to Amazon IoT by implementing SigV4 Signature authentication on HTTP POST request packets sent over secure TLS connection.
 
 
 FT900 can now publish sensor data to AWS IoT Core by sending HTTPS POST request (signed with SigV4 Signature authentication) to Amazon IoT endpoint.
