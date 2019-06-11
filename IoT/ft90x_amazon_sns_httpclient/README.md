@@ -26,6 +26,28 @@ Instructions:
         3. Compile, run and verify if text or email has been received
 
 
+Sample request packets:
+
+        POST / HTTP/1.1
+        Host:sns.ap-southeast-1.amazonaws.com
+        Content-Type:application/x-www-form-urlencoded
+        X-Amz-Date:20190611T054832Z
+        Authorization:AWS4-HMAC-SHA256 Credential=AKIAJIMSC33TIO5IVGLQ/20190611/ap-southeast-1/sns/aws4_request,SignedHeaders=content-type;host;x-amz-date,Signature=0fd240db776171fbb15aa1e8ea911a69059038e2651887b4c6501dc81e1811d6
+        Content-Length:95
+
+        Action=Publish&Version=2010-03-31&PhoneNumber=%2B639175900612&Message=Hello+World+from+FT900%21
+
+
+        POST / HTTP/1.1
+        Host:sns.ap-southeast-1.amazonaws.com
+        Content-Type:application/x-www-form-urlencoded
+        X-Amz-Date:20190611T055208Z
+        Authorization:AWS4-HMAC-SHA256 Credential=AKIAJIMSC33TIO5IVGLQ/20190611/ap-southeast-1/sns/aws4_request,SignedHeaders=content-type;host;x-amz-date,Signature=59d9fa63e23ebc7dc79115ee163973a05f17eab19882f79583903833576cb6b8
+        Content-Length:140
+
+        Action=Publish&Version=2010-03-31&TopicArn=arn%3Aaws%3Asns%3Aap-southeast-1%3A773510983687%3AFT900SNStopic&Message=Hello+World+from+FT900%21
+
+
 Notes:
 
 Determining the HTTPS POST request required some reverse-engineering using AWS SDK Boto3 Python library. 
