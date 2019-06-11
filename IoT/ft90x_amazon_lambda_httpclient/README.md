@@ -17,6 +17,18 @@ Instructions:
         2. Compile, run and verify if text or email has been received
 
 
+Sample request packet:
+
+        POST /2015-03-31/functions/FT900LambdaToSNS/invocations HTTP/1.1
+        Host:lambda.ap-southeast-1.amazonaws.com
+        Content-Type:application/json
+        X-Amz-Date:20190611T055819Z
+        Authorization:AWS4-HMAC-SHA256 Credential=AKIAJIMSC33TIO5IVGLQ/20190611/ap-southeast-1/lambda/aws4_request,SignedHeaders=content-type;host;x-amz-date,Signature=5bc2381b7a0720aa9f738b5d88533b542e692318e8ec9ecbe6e469727d9e243a
+        Content-Length:115
+
+        {"topic": "arn:aws:sns:ap-southeast-1:773510983687:FT900SNStopic", "subject": "subject", "body": "body of message"}
+
+
 Notes:
 
 Determining the HTTPS POST request required some reverse-engineering using AWS SDK Boto3 Python library. 
