@@ -1,7 +1,7 @@
 # FT900 Amazon Lambda client
 
 
-This project demonstrates FT900 HTTPS connectivity to Amazon Lambda by implementing SigV4 Signature authentication on HTTP POST request packets.
+This project demonstrates FT900 HTTPS connectivity to Amazon Lambda by implementing SigV4 Signature authentication on HTTP POST request packets sent over secure TLS connection.
 
 
 FT900 can now trigger AWS Lambda serverless functions by sending HTTPS POST request (signed with SigV4 Signature authentication) to Amazon Lambda endpoint.
