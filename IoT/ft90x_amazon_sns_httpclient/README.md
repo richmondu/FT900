@@ -1,7 +1,7 @@
 # FT900 Amazon SNS client
 
 
-This project demonstrates FT900 HTTPS connectivity to Amazon SNS by implementing SigV4 Signature authentication on HTTP POST request packets.
+This project demonstrates FT900 HTTPS connectivity to Amazon SNS by implementing SigV4 Signature authentication on HTTP POST request packets sent over secure TLS connection.
 
 
 FT900 can now send text/email messages by sending HTTPS POST request (signed with SigV4 Signature authentication) to Amazon SNS endpoint.
