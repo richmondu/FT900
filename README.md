@@ -41,7 +41,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 
 
 
-# FT900 Amazon SNS/Lambda/DynamoDB/IoT Client Demo [HTTP over TLS]
+# FT900 Amazon Services Client Demo [HTTP over TLS]
 - These demonstrate <b>secure HTTP connectivity</b> (with <b>SigV4 authentication</b>) to access REST APIs of Amazon services.
 - This consists of the following demo applications
 
