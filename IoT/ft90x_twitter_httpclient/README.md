@@ -23,9 +23,9 @@ Sample request packet:
         Connection:close
         Content-Type:application/x-www-form-urlencoded
         Authorization:OAuth oauth_consumer_key="AWpC4F23xG33siMsPZR2JX3Jp",oauth_nonce="
-704004537824812392248604814340",oauth_signature="uondjlS6RPlcVNlv05YGaGTn5bQ%3D"
-,oauth_signature_method="HMAC-SHA1",oauth_timestamp="1560332973",oauth_token="46
-786209-AY4py6wN5OAAdEHYMOifVfJvGXX45K2Kkbgw143qR",oauth_version="1.0"
+        704004537824812392248604814340",oauth_signature="uondjlS6RPlcVNlv05YGaGTn5bQ%3D"
+        ,oauth_signature_method="HMAC-SHA1",oauth_timestamp="1560332973",oauth_token="46
+        786209-AY4py6wN5OAAdEHYMOifVfJvGXX45K2Kkbgw143qR",oauth_version="1.0"
         Content-Length:40
         Host:api.twitter.com
 
