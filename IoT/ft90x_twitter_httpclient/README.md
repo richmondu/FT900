@@ -12,7 +12,7 @@ Instructions:
         1. Create a Twitter developer account at https://developer.twitter.com
         2. Create an app.
         3. Copy the keys and tokens: (Used for generating OAuth signature)
-           Consumer API keys
+           Consumer API keys:
              API key
              API secret key
            Access token & access token secret:
@@ -24,7 +24,9 @@ Instructions:
             CONFIG_TWITTER_ACCESS_TOKEN
             CONFIG_TWITTER_ACCESS_SECRET
         5. Compile, run and verify if tweet has been posted on your Twitter account
-
+        
+        Note that in real-word scenario, access token & access token secret is dynamically retrieved using OAuth handshake.
+        
 
 Sample request packet:
 
