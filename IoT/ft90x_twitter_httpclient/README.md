@@ -64,4 +64,6 @@ References:
        target="_blank"><img src="https://img.youtube.com/vi/SXDce0e3Ue4/0.jpg" 
        alt="OAuth Twitter" width="480" border="10" /></a>
        
-2. https://developer.twitter.com/en/docs/basics/authentication/guides/authorizing-a-request
+2. [Twitter HTTPS POST request packet for posting a tweet](https://developer.twitter.com/en/docs/basics/authentication/guides/authorizing-a-request)
+
+3. [Twitter OAuth Handshake for dynamically retrieving access token](https://developer.twitter.com/en/docs/basics/authentication/overview/3-legged-oauth)
