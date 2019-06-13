@@ -25,8 +25,9 @@ Instructions:
             CONFIG_TWITTER_ACCESS_SECRET
         5. Compile, run and verify if tweet has been posted on your Twitter account
         
-        Note that in real-word scenario, access token & access token secret is dynamically retrieved using OAuth handshake.
-        
+        Note that in real-word scenario, access token & access token secret is dynamically retrieved using OAuth handshake. 
+        Different access token & access token secret will be provided for different users.
+
 
 Sample request packet:
 
