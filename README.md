@@ -15,7 +15,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 
 
 
-# FT900 AWS IoT Demo
+# FT900 AWS IoT Demo [MQTT over TLS]
 - This demonstrates secure MQTT connectivity to Amazon AWS IoT Core and AWS Greengrass using MQTT library from Amazon FreeRTOS aka AWS IoT SDK.
 - It contains end-to-end demo including lambda functions for backend cloud and local gateway (Greengrass). 
 - This was made after I successfully integrated mbedTLS open-source library with optimal settings for memory footprint.
