@@ -19,10 +19,10 @@ Instructions:
              Access token
              Access token secret
         4. Update twitter_config.h
-            CONFIG_TWITTER_CONSUMER_API_KEY
-            CONFIG_TWITTER_CONSUMER_SECRET_KEY
-            CONFIG_TWITTER_ACCESS_TOKEN
-            CONFIG_TWITTER_ACCESS_SECRET
+             CONFIG_TWITTER_CONSUMER_API_KEY
+             CONFIG_TWITTER_CONSUMER_SECRET_KEY
+             CONFIG_TWITTER_ACCESS_TOKEN
+             CONFIG_TWITTER_ACCESS_SECRET
         5. Compile, run and verify if tweet has been posted on your Twitter account
         
         Note that in real-word scenario, access token & access token secret is dynamically retrieved using OAuth handshake. 
