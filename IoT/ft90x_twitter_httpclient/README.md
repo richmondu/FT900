@@ -7,7 +7,7 @@ This project demonstrates FT900 HTTPS connectivity to Twitter by implementing OA
 FT900 can now post tweets to Twitter by sending HTTPS POST request (signed with OAuth Signature authentication) to Twitter REST API endpoint.
 
 
-Instructions:
+### Instructions:
 
         1. Create a Twitter developer account at https://developer.twitter.com
         2. Create an app.
@@ -29,7 +29,7 @@ Instructions:
         Different access token & access token secret will be provided for different users.
 
 
-Sample request packet:
+### Sample request packet:
 
         POST /1.1/statuses/update.json HTTP/1.1
         Connection:close
@@ -57,7 +57,8 @@ Sample request packet:
         5. OAuth Signature: uondjlS6RPlcVNlv05YGaGTn5bQ%3D
 
 
-References:
+### References:
+
 1. OAuth, What is it and how it works, Twitter example
 
       <a href="https://www.youtube.com/watch?v=SXDce0e3Ue4"
