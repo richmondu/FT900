@@ -42,7 +42,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 
 
 # FT900 Amazon Services Demo [HTTP over TLS]
-- These demonstrate <b>secure HTTP connectivity</b> (with <b>SigV4 authentication</b>) to access REST APIs of Amazon services.
+- These demonstrate <b>secure HTTPS connectivity</b> (with <b>SigV4 authentication</b>) to access REST APIs of Amazon services.
 - This consists of the following demo applications
 
   <b>FT900 Amazon SNS Client</b> - sending of text/SMS or email messages
@@ -56,3 +56,10 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
   
   <b>FT900 Amazon IoT Client</b> - publishing sensor data
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
+  
+
+
+# FT900 Twitter Demo [HTTP over TLS]
+- This demonstrates <b>secure HTTPS connectivity</b> (with <b>OAuth authentication</b>) to access REST APIs of Twitter.
+- The application demonstrates posting tweets to Twitter.
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_twitter_httpclient
