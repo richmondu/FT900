@@ -43,3 +43,8 @@ Sample request packet:
         3. HMAC-SHA1 signature: ba89dd8e54ba44f95c54d96fd396066864e7e5b4
         4. Base64 signature: uondjlS6RPlcVNlv05YGaGTn5bQ=
         5. OAuth Signature: uondjlS6RPlcVNlv05YGaGTn5bQ%3D
+
+
+References:
+
+https://developer.twitter.com/en/docs/basics/authentication/guides/authorizing-a-request
