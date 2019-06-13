@@ -58,9 +58,10 @@ Sample request packet:
 
 
 References:
-1. OAuth, What is it and how it works?
+1. OAuth, What is it and how it works, Twitter example
 
       <a href="https://www.youtube.com/watch?v=SXDce0e3Ue4"
-       target="_blank"></a>
+       target="_blank"><img src="https://img.youtube.com/vi/SXDce0e3Ue4/0.jpg" 
+       alt="OAuth Twitter" width="480" border="10" /></a>
        
 2. https://developer.twitter.com/en/docs/basics/authentication/guides/authorizing-a-request
