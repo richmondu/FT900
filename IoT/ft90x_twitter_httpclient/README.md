@@ -64,6 +64,10 @@ FT900 can now post tweets to Twitter by sending HTTPS POST request (signed with 
       <a href="https://www.youtube.com/watch?v=SXDce0e3Ue4"
        target="_blank"><img src="https://img.youtube.com/vi/SXDce0e3Ue4/0.jpg" 
        alt="OAuth Twitter" width="480" border="10" /></a>
+
+      <a href="https://www.youtube.com/watch?v=996OiexHze0"
+       target="_blank"><img src="https://img.youtube.com/vi/996OiexHze0/0.jpg" 
+       alt="OAuth Twitter" width="480" border="10" /></a>
        
 2. [Twitter HTTPS POST request packet for posting a tweet](https://developer.twitter.com/en/docs/basics/authentication/guides/authorizing-a-request)
 
