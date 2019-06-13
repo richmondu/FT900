@@ -9,12 +9,21 @@ FT900 can now post tweets to Twitter by sending HTTPS POST request (signed with 
 
 Instructions:
 
-        1. Update twitter_config.h to include your Twitter keys and tokens
+        1. Create a Twitter developer account at https://developer.twitter.com
+        2. Create an app.
+        3. Copy the keys and tokens: (Used for generating OAuth signature)
+           Consumer API keys
+             API key
+             API secret key
+           Access token & access token secret:
+             Access token
+             Access token secret
+        4. Update twitter_config.h
             CONFIG_TWITTER_CONSUMER_API_KEY
             CONFIG_TWITTER_CONSUMER_SECRET_KEY
             CONFIG_TWITTER_ACCESS_TOKEN
             CONFIG_TWITTER_ACCESS_SECRET
-        2. Compile, run and verify if tweet has been posted on your Twitter account
+        5. Compile, run and verify if tweet has been posted on your Twitter account
 
 
 Sample request packet:
