@@ -200,7 +200,7 @@ TODO: Experiment with Apache Kafka as replacement for Mosquitto and RabbitMQ.
             Profile Type: MQTT Broker
             Broker Address: <ip address of PC running RabbitMQ>
             Broker Port: 8883
-            Client ID: ft900dev1
+            Client ID: ft900device1
             User Credentials User Name: guest
             User Credentials Password: guest
             SSL/TLS Enable SSL/TLS: Check
