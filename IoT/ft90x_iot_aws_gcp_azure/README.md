@@ -134,7 +134,6 @@ Below are the IoT cloud solutions architecture used for this demo application.
 
 ### HTTP over TLS
 
-### Websockets over TLS
 
 
 # IoT Authentication
