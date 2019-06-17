@@ -147,6 +147,8 @@ Below are the IoT cloud solutions architecture used for this demo application.
 
 ### SigV4 authentication
 
+### OAuth authentication
+
 
 # MQTT Messaging Systems and MQTT Clients
 
