@@ -15,7 +15,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 
 
 
-# FT900 AWS IoT Demo [MQTT over TLS]
+# FT900 AWS IoT Sensor Demo [MQTT over TLS]
 - This demonstrates secure MQTT connectivity to Amazon AWS IoT Core and AWS Greengrass using MQTT library from Amazon FreeRTOS aka AWS IoT SDK.
 - It contains end-to-end demo including lambda functions for backend cloud and local gateway (Greengrass). 
 - This was made after I successfully integrated mbedTLS open-source library with optimal settings for memory footprint.
@@ -26,7 +26,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 
 
 
-# FT900 AWS/GCP/Azure IoT Demo [MQTT over TLS]
+# FT900 AWS/GCP/Azure IoT Sensor Demo [MQTT over TLS]
 - This demonstrates <b>secure MQTT connectivity</b> to popular IoT cloud services:
 
   <b>Amazon AWS IoT Core</b> [using <b>X.509 certificate authentication</b>] 
@@ -38,7 +38,7 @@ This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>
 - These were presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
 - The IoT library consists of AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
-
+- Modify USE_MQTT_BROKER to select your chosen cloud platform or local MQTT broker
 
 
 # FT900 Amazon Services Demo [HTTP over TLS]
