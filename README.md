@@ -1,6 +1,6 @@
 # FT900 IoT/Smart Home
 
-This contains the <b>IoT framework</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>,  <b>Twitter demo</b> and <b>Amazon Alexa demo</b> applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers (MCUs).
+This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AWS/GCP/Azure IoT end-to-end demo</b>,  <b>Twitter demo</b> and <b>Amazon Alexa demo</b> applications for FTDI/Bridgetek's FT900 series of memory-constrained microcontrollers (MCUs).
 
 
 # FT900 Alexa Demo
