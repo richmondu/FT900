@@ -28,6 +28,7 @@ This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AW
 
 # FT900 AWS/GCP/Azure IoT Sensor Demo [MQTT over TLS]
 - This demonstrates <b>secure MQTT connectivity</b> to popular IoT cloud services:
+  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
 
   <b>Amazon AWS IoT Core</b> [using <b>X.509 certificate authentication</b>] 
   
@@ -36,7 +37,7 @@ This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AW
   <b>Microsoft Azure IoT Hub</b> [using <b>SAS authentication</b> and X.509 certificate authentication] 
   
 - These were presented in Embedded World 2019 https://www.ftdichip.com/Embedded%20World%202019.htm
-  https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_aws_gcp_azure
+
 - The IoT library consists of AWS/GCP/Azure IoT cloud connectivity, mbedTLS SSL library integration, X.509 certificate handling/authentication, JWT/SAS access token generation, ciphersuite security-memory footprint tradeoffs, LWIP open-source bug fix contributions, and IoT Project Templates (for FT900 Eclipse IDE).
 - Modify USE_MQTT_BROKER to select your chosen cloud platform or local MQTT broker
 
