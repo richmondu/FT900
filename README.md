@@ -54,7 +54,7 @@ This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AW
   <b>FT900 Amazon DynamoDB Client</b> - adding items to a database table
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_dynamodb_httpclient
   
-  <b>FT900 Amazon IoT Client</b> - publishing sensor data
+  <b>FT900 Amazon IoT Core Client</b> - publishing sensor data
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
   
 
