@@ -41,6 +41,7 @@ This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AW
 - Modify USE_MQTT_BROKER to select your chosen cloud platform or local MQTT broker
 
 
+
 # FT900 Amazon Services Demo [HTTP over TLS]
 - These demonstrate <b>secure HTTPS connectivity</b> (with <b>SigV4 authentication</b>) to access REST APIs of Amazon services.
 - This consists of the following demo applications
@@ -56,7 +57,9 @@ This contains the <b>IoT device framework</b>, <b>IoT device platform</b>, <b>AW
   
   <b>FT900 Amazon IoT Core Client</b> - publishing sensor data
   https://github.com/richmondu/FT900/tree/master/IoT/ft90x_amazon_iot_httpclient
-  
+
+<img src="https://github.com/richmondu/FT900/blob/master/IoT/ft90x_iot_aws_gcp_azure/doc/FT900_Amazon_HTTPS_REST_APIs.png" width="800"/>
+
 
 
 # FT900 Twitter Demo [HTTP over TLS]
