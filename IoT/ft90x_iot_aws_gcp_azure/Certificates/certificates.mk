@@ -6,28 +6,18 @@ RELDIR = ../Certificates
 CRT_SRCS += \
 rootca.pem \
 ft900device1_cert.pem \
-ft900device2_cert.pem \
-ft900device3_cert.pem \
 ft900device1_pkey.pem \
-ft900device2_pkey.pem \
-ft900device3_pkey.pem \
 rootca_aws_ats.pem \
 rootca_aws_ver.pem \
-rootca_gg.pem \
 rootca_azure.pem \
 ft900device1_sas_azure.pem
 
 CRT_S += \
 $(OUTDIR)/rootca.S \
 $(OUTDIR)/ft900device1_cert.S \
-$(OUTDIR)/ft900device2_cert.S \
-$(OUTDIR)/ft900device3_cert.S \
 $(OUTDIR)/ft900device1_pkey.S \
-$(OUTDIR)/ft900device2_pkey.S \
-$(OUTDIR)/ft900device3_pkey.S \
 $(OUTDIR)/rootca_aws_ats.S \
 $(OUTDIR)/rootca_aws_ver.S \
-$(OUTDIR)/rootca_gg.S \
 $(OUTDIR)/rootca_azure.S \
 $(OUTDIR)/ft900device1_sas_azure.S
 
