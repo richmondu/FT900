@@ -50,10 +50,11 @@
 #define MQTT_BROKER_GCP_IOT           2    // Google Cloud Platform IoT cloud
 #define MQTT_BROKER_MAZ_IOT           3    // Microsoft Azure IoT cloud
 #define MQTT_BROKER_AWS_GREENGRASS    4    // local AWS Greengrass broker
-//#define MQTT_BROKER_GCP_EDGE        5    // local Google IoT Edge broker
-//#define MQTT_BROKER_MAZ_EDGE        6    // local Microsoft IoT Edge broker
-#define MQTT_BROKER_LOCAL             5    // local MQTT brokers (Pivotal RabbitMQ, Eclipse Mosquitto, Apache Kafka)
-#define MQTT_BROKER_COUNT             6
+#define MQTT_BROKER_GCP_EDGE          5    // local Google IoT Edge broker
+#define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
+#define MQTT_BROKER_ADAFRUITIO        7    // Adafruit IO IoT cloud
+#define MQTT_BROKER_LOCAL             8    // local MQTT brokers (Pivotal RabbitMQ, Eclipse Mosquitto, Apache Kafka)
+#define MQTT_BROKER_COUNT             9
 
 ///////////////////////////////////////////////////////////////////////////////////
 

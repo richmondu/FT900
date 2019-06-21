@@ -76,7 +76,7 @@ const uint8_t* iot_certificate_getca(size_t* len)
 
 const uint8_t* iot_certificate_getcert(size_t* len)
 {
-#if (USE_MQTT_BROKER != MQTT_BROKER_UNKNOWN)
+#if USE_DEVICE_CERT
     return read_file(cert_data, cert_data_end, len);
 #else
     *len = 0;
@@ -86,7 +86,7 @@ const uint8_t* iot_certificate_getcert(size_t* len)
 
 const uint8_t* iot_certificate_getpkey(size_t* len)
 {
-#if (USE_MQTT_BROKER != MQTT_BROKER_UNKNOWN)
+#if USE_DEVICE_CERT
     return read_file(pkey_data, pkey_data_end, len);
 #else
     *len = 0;

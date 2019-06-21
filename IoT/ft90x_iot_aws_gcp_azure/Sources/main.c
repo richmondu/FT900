@@ -90,6 +90,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
     #elif (MAZ_AUTH_TYPE == AUTH_TYPE_X509CERT)
         #define IOT_APP_TASK_STACK_SIZE          (1024 + 64)
     #endif
+#elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
+#define IOT_APP_TASK_STACK_SIZE                  (512)
 #else
 #define IOT_APP_TASK_STACK_SIZE                  (512)
 #endif
@@ -304,17 +306,20 @@ static inline char* user_generate_subscribe_topic()
     // Google Cloud does not seem to support MQTT subscribe for telemetry events, only for config
     static char topic[64] = {0};
     tfp_snprintf( topic, sizeof(topic),
-        "/devices/%s/config", (char*)iot_getdeviceid() );
+        "/devices/%s/config", (char*)iot_utils_getdeviceid() );
     //tfp_snprintf(topic, sizeof(topic),
-    //    "/devices/%s/events", (char*)iot_getdeviceid());
+    //    "/devices/%s/events", (char*)iot_utils_getdeviceid());
     return topic;
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     static char topic[64] = {0};
     tfp_snprintf( topic, sizeof(topic),
-        "devices/%s/messages/devicebound/#", (char*)iot_getdeviceid() );
+        "devices/%s/messages/devicebound/#", (char*)iot_utils_getdeviceid() );
     //tfp_snprintf(topic, sizeof(topic),
-    //    "devices/%s/messages/events/#", (char*)iot_getdeviceid());
+    //    "devices/%s/messages/events/#", (char*)iot_utils_getdeviceid());
     return topic;
+#elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
+    static char topic[64] = {0};
+    tfp_snprintf( topic, sizeof(topic), "%s/feeds/#", (char*)MQTT_CLIENT_USER );
 #else
     return "#";
 #endif
@@ -351,6 +356,9 @@ static inline int user_generate_publish_topic(
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     // Fixed format - do not modify
     return tfp_snprintf( topic, size, "devices/%s/messages/events/", (char*)iot_utils_getdeviceid() );
+#elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
+    // Should start with <username>/feeds/
+    return tfp_snprintf( topic, size, "%s/feeds/%s", MQTT_CLIENT_USER, param );
 #else
     return tfp_snprintf( topic, size, "topic/subtopic" );
 #endif

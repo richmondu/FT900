@@ -312,15 +312,15 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
     memset( handle, 0, sizeof( iot_context ) );
 
     certificates_cb( &tls_certificates );
-    if (!tls_certificates.cert) {
-        mqtt_info.tls_config = altcp_tls_create_config_client(
-            tls_certificates.ca, tls_certificates.ca_len );
-    }
-    else {
+    if (tls_certificates.ca && tls_certificates.cert) {
         mqtt_info.tls_config = altcp_tls_create_config_client_2wayauth(
             tls_certificates.ca, tls_certificates.ca_len,
             tls_certificates.pkey, tls_certificates.pkey_len, NULL, 0,
             tls_certificates.cert, tls_certificates.cert_len );
+    }
+    else {
+        mqtt_info.tls_config = altcp_tls_create_config_client(
+            tls_certificates.ca, tls_certificates.ca_len );
     }
     vPortFree( (u8_t*)tls_certificates.ca );
     vPortFree( (u8_t*)tls_certificates.cert );
