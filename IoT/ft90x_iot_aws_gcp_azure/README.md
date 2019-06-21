@@ -98,7 +98,16 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        9. MQTT SubscribeTopic: devices/DEVICE_ID/messages/devicebound/#
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
-              
+
+### Adafruit.IO
+    1. MQTT Endpoint: io.adafruit.com
+    2. MQTT ClientId: ANY
+    3. MQTT Username: USERNAME
+    4. MQTT Password: AIO KEY
+    5. MQTT PublishTopic: USERNAME/feed/topic
+    6. MQTT SubscribeTopic: USERNAME/feed/#
+  
+             
 ### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
        2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity.
