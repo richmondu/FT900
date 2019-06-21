@@ -15,6 +15,7 @@
 //   MQTT_BROKER_AWS_GREENGRASS
 //   MQTT_BROKER_GCP_EDGE - not yet supported
 //   MQTT_BROKER_MAZ_EDGE - not yet supported
+//   MQTT_BROKER_ADAFRUITIO
 //   MQTT_BROKER_LOCAL - for RabbitMQ/Mosquitto local broker
 //   Refer to iot_config_brokers.h
 ///////////////////////////////////////////////////////////////////////////////////
@@ -33,16 +34,24 @@
     #define USE_ROOT_CA               1
     #define USE_MBEDTLS_MAX_SIZES     2 // if using ATS endpoint
     //#define USE_MBEDTLS_MAX_SIZES   0 // if using non-ATS endpoint
+    #define USE_DEVICE_CERT           1
 #elif (USE_MQTT_BROKER == MQTT_BROKER_GCP_IOT)
     // Google IoT does not need a root CA
     #define USE_ROOT_CA               0 // memory footprint optimization
     #define USE_MBEDTLS_MAX_SIZES     0 // memory footprint optimization
+    #define USE_DEVICE_CERT           1
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     // Microsoft IoT requires a root CA
     #define USE_ROOT_CA               1
+    #define USE_DEVICE_CERT           1
+#elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
+    #define USE_ROOT_CA               0
+    #define USE_MBEDTLS_MAX_SIZES     2
+    #define USE_DEVICE_CERT           0
 #else
     #define USE_ROOT_CA               1
     #define USE_MBEDTLS_MAX_SIZES     0
+    #define USE_DEVICE_CERT           1
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +112,12 @@
 //     MQTT_CLIENT_NAME = DEVICE_ID
 //     MQTT_CLIENT_USER = “HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14”
 //     MQTT_CLIENT_PASS = NULL // not needed
+//   AdafruitIO
+//     MQTT_BROKER = "io.adafruit.com"
+//     MQTT_BROKER_PORT = 8883
+//     MQTT_CLIENT_NAME = DEVICE_ID // any
+//     MQTT_CLIENT_USER = Username  // Check AdafruitIO dashboard
+//     MQTT_CLIENT_PASS = AIO Key   // Check AdafruitIO dashboard
 //
 // TLS CERTIFICATES
 // Authentication with Amazon AWS, Google Cloud and Microsoft Azure
@@ -126,7 +141,8 @@
 //     Rootca_azure.pem
 //     Ft900device1_cert.pem
 //     Ft900device1_pkey.pem
-//
+//   Sample for AdafruitIO
+//     TLS certificates are not needed
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Load the configuration from a file for easier modification by users
@@ -136,6 +152,8 @@
     #include <iot_config_gcp.h>
 #elif (USE_MQTT_BROKER == MQTT_BROKER_MAZ_IOT)
     #include <iot_config_azure.h>
+#elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
+    #include <iot_config_adafruitio.h>
 #else
     // Set values here for generic MQTT brokers
     #define USE_DEVICE_ID             "deviceid"      // replace me
