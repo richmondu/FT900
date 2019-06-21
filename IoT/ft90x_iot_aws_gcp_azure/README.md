@@ -106,7 +106,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     4. MQTT Password: AIO KEY
     5. MQTT PublishTopic: USERNAME/feed/topic
     6. MQTT SubscribeTopic: USERNAME/feed/#
-  
+    * CA, device cert, device pkey are not needed.
              
 ### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
