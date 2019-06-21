@@ -19,7 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-// This demo application provides 3 sets of device certificates
 #define USE_DEVICE_ID             "ft900device1"
 #define MQTT_BROKER_PORT          MQTT_TLS_PORT
 #define MQTT_BROKER               "io.adafruit.com"
