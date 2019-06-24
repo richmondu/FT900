@@ -92,6 +92,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
     #endif
 #elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
 #define IOT_APP_TASK_STACK_SIZE                  (512)
+#elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
+#define IOT_APP_TASK_STACK_SIZE                  (512)
 #else
 #define IOT_APP_TASK_STACK_SIZE                  (512)
 #endif
@@ -359,6 +361,9 @@ static inline int user_generate_publish_topic(
 #elif (USE_MQTT_BROKER == MQTT_BROKER_ADAFRUITIO)
     // Should start with <username>/feeds/
     return tfp_snprintf( topic, size, "%s/feeds/%s", MQTT_CLIENT_USER, param );
+#elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
+    // Fixed format - do not modify
+    return tfp_snprintf( topic, size, "/v1.6/devices/%s", (char*)iot_utils_getdeviceid() );
 #else
     return tfp_snprintf( topic, size, "topic/subtopic" );
 #endif
