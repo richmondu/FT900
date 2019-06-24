@@ -21,6 +21,7 @@ $(OUTDIR)/rootca_aws_ver.S \
 $(OUTDIR)/rootca_azure.S \
 $(OUTDIR)/ft900device1_sas_azure.S
 
+CRT_S2 = 
 
 
 #-------------------------------------------------------------------------------
@@ -54,5 +55,5 @@ $(OUTDIR)/%.S: $(INDIR)/%.pem
 
 .PHONY: clean
 clean:
-	-$(RM) $(CRT_S) 
+	-$(RM) $(CRT_S2) 
 	-@echo ' '
