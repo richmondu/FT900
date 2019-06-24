@@ -54,8 +54,9 @@
 #define MQTT_BROKER_MAZ_EDGE          6    // local Microsoft IoT Edge broker
 #define MQTT_BROKER_ADAFRUITIO        7    // Adafruit IO IoT cloud
 #define MQTT_BROKER_UBIDOTS           8    // Ubidots IoT cloud
-#define MQTT_BROKER_LOCAL             9    // local MQTT brokers (Pivotal RabbitMQ, Eclipse Mosquitto, Apache Kafka)
-#define MQTT_BROKER_COUNT             10
+#define MQTT_BROKER_THINGSPEAK        9    // ThingSpeak IoT cloud
+#define MQTT_BROKER_LOCAL             10   // local MQTT brokers (Pivotal RabbitMQ, Eclipse Mosquitto, Apache Kafka)
+#define MQTT_BROKER_COUNT             11
 
 ///////////////////////////////////////////////////////////////////////////////////
 

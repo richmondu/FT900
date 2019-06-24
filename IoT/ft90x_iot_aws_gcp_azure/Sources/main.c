@@ -94,6 +94,8 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
 #define IOT_APP_TASK_STACK_SIZE                  (512)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
 #define IOT_APP_TASK_STACK_SIZE                  (512)
+#elif (USE_MQTT_BROKER == MQTT_BROKER_THINGSPEAK)
+#define IOT_APP_TASK_STACK_SIZE                  (512)
 #else
 #define IOT_APP_TASK_STACK_SIZE                  (512)
 #endif
@@ -364,6 +366,9 @@ static inline int user_generate_publish_topic(
 #elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
     // Fixed format - do not modify
     return tfp_snprintf( topic, size, "/v1.6/devices/%s", (char*)iot_utils_getdeviceid() );
+#elif (USE_MQTT_BROKER == MQTT_BROKER_THINGSPEAK)
+    // Fixed format - do not modify
+    return tfp_snprintf( topic, size, "channels/%s/publish/%s", THINGSPEAK_CHANNEL_ID, THINGSPEAK_WRITE_KEY );
 #else
     return tfp_snprintf( topic, size, "topic/subtopic" );
 #endif
@@ -394,6 +399,12 @@ static inline int user_generate_publish_payload(
         param,
         iot_utils_gettimeepoch(),
         iot_utils_gettimeiso(format),
+        rand() % 10 + 30,
+        rand() % 30 - 10,
+        rand() % 5 );
+#elif (USE_MQTT_BROKER == MQTT_BROKER_THINGSPEAK)
+    len = tfp_snprintf( payload, size,
+        "field1=%d&field2=%d&field3=%d",
         rand() % 10 + 30,
         rand() % 30 - 10,
         rand() % 5 );

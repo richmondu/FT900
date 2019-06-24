@@ -13,15 +13,16 @@
 //   MQTT_BROKER_GCP_IOT
 //   MQTT_BROKER_MAZ_IOT
 //   MQTT_BROKER_AWS_GREENGRASS
-//   MQTT_BROKER_GCP_EDGE - not yet supported
-//   MQTT_BROKER_MAZ_EDGE - not yet supported
+//   MQTT_BROKER_GCP_EDGE        - not yet supported
+//   MQTT_BROKER_MAZ_EDGE        - not yet supported
 //   MQTT_BROKER_ADAFRUITIO
 //   MQTT_BROKER_UBIDOTS
-//   MQTT_BROKER_LOCAL - for RabbitMQ/Mosquitto local broker
+//   MQTT_BROKER_THINGSPEAK
+//   MQTT_BROKER_LOCAL           - for RabbitMQ/Mosquitto local broker
 //   Refer to iot_config_brokers.h
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define USE_MQTT_BROKER               MQTT_BROKER_UBIDOTS
+#define USE_MQTT_BROKER               MQTT_BROKER_AWS_IOT
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +53,10 @@
 #elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
     #define USE_ROOT_CA               0
     #define USE_MBEDTLS_MAX_SIZES     2
+    #define USE_DEVICE_CERT           0
+#elif (USE_MQTT_BROKER == MQTT_BROKER_THINGSPEAK)
+    #define USE_ROOT_CA               0
+    #define USE_MBEDTLS_MAX_SIZES     3
     #define USE_DEVICE_CERT           0
 #else
     #define USE_ROOT_CA               1
@@ -129,6 +134,12 @@
 //     MQTT_CLIENT_NAME = ANY
 //     MQTT_CLIENT_USER = TOKEN    // Check Ubidots dashboard
 //     MQTT_CLIENT_PASS = ANY
+//   ThingSpeak
+//     MQTT_BROKER = "mqtt.thingspeak.com"
+//     MQTT_BROKER_PORT = 8883
+//     MQTT_CLIENT_NAME = ANY
+//     MQTT_CLIENT_USER = ANY
+//     MQTT_CLIENT_PASS = MQTT API KEY   // Check ThingSpeak dashboard
 //
 // TLS CERTIFICATES
 // Authentication with Amazon AWS, Google Cloud and Microsoft Azure
@@ -156,6 +167,8 @@
 //     Not needed
 //   Sample for Ubidots
 //     Not needed
+//   Sample for ThingSpeak
+//     Not needed
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -170,6 +183,8 @@
     #include <iot_config_adafruitio.h>
 #elif (USE_MQTT_BROKER == MQTT_BROKER_UBIDOTS)
     #include <iot_config_ubidots.h>
+#elif (USE_MQTT_BROKER == MQTT_BROKER_THINGSPEAK)
+    #include <iot_config_thingspeak.h>
 #else
     // Set values here for generic MQTT brokers
     #define USE_DEVICE_ID             "deviceid"      // replace me
