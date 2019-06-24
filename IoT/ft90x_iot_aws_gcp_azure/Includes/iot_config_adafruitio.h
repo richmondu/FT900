@@ -19,12 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define USE_DEVICE_ID             "ft900device1"
+#define USE_DEVICE_ID             "ft900device1"                     // UPDATE ME
 #define MQTT_BROKER_PORT          MQTT_TLS_PORT
 #define MQTT_BROKER               "io.adafruit.com"
 #define MQTT_CLIENT_NAME          USE_DEVICE_ID
-#define MQTT_CLIENT_USER          "richmondu"
-#define MQTT_CLIENT_PASS          "fbecbda926d940b3a7c68742608d358d"
+#define MQTT_CLIENT_USER          "richmondu"                        // UPDATE ME
+#define MQTT_CLIENT_PASS          "fbecbda926d940b3a7c68742608d358d" // UPDATE ME
 
 ///////////////////////////////////////////////////////////////////////////////////
 
