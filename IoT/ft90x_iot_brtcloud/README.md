@@ -1,5 +1,6 @@
-# libpyiotcloud [https://github.com/richmondu/libpyiotcloud]
+# FT900 client for 
 
+This project is an FT900 MQTT client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud).
 libpyiotcloud platform demonstrates a custom IoT platform for remote access and control of an MCU-based smart device 
 from a web client application via REST APIs (HTTP over TLS) 
 with back-end AMQP (over TLS) connectivity and device-side MQTT/AMQP (over TLS) connectivity.
