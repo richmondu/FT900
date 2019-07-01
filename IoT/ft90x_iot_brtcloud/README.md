@@ -144,9 +144,11 @@ Device MQTT/AMQP Connectivity
 
        pip install -r requirements.txt
 
-    3. Run web_server.bat
+    3. Install MongoDB database.
+    
+    4. Run web_server.bat
   
-    4. Run device_simulator.py_mqtt_ft900device1.bat and device_simulator.py_mqtt_ft900device2.bat OR 
+    5. Run device_simulator.py_mqtt_ft900device1.bat and device_simulator.py_mqtt_ft900device2.bat OR 
        run device_simulator.py_amqp_ft900device1.bat and device_simulator.py_amqp_ft900device2.bat OR 
        run device_simulator.js_mqtt_ft900device1.bat and device_simulator.js_mqtt_ft900device2.bat OR 
        run FT900 MCU with the following details:
@@ -161,7 +163,7 @@ Device MQTT/AMQP Connectivity
        device cert: ft900device2_cert.pem
        device pkey: ft900device2_pkey.pem
 
-    5. Run client.bat
+    6. Run client.bat
 
 
 
