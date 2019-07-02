@@ -35,7 +35,7 @@ AWS EC2, Linode, Heroku, Rackspace, DigitalOcean or etc.
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/architecture.png" width="800"/>
 
 #### UML Use case diagram:
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/usecase.png" width="800"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/usecase.png" width="1000"/>
 
 #### UML Sequence diagram:
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/sequence.png" width="800"/>
