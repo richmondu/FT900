@@ -30,7 +30,8 @@ This new project demonstrates the FT900 IoT framework including secure IoT cloud
 Below are the MQTT settings and TLS credentials needed to connect to IoT cloud services of AWS, GCP and Azure. 
 
 ### Amazon AWS IoT Core
-    1. MQTT Endpoint: NAME-ats.iot.REGION.amazonaws.com (Default is now an ATS-endpoint)
+    0. MQTT Endpoint: NAME-ats.iot.REGION.amazonaws.com (Default is now an ATS-endpoint)
+    1. MQTT Port: 8883
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
     4. MQTT Password: NONE
@@ -46,7 +47,8 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     * DEVICE: Sends CA, device certificate, device private key for TLS connection
 
 ### Amazon AWS Greengrass
-    1. MQTT Endpoint: local Greengrass device hostname or IP address
+    0. MQTT Endpoint: local Greengrass device hostname or IP address
+    1. MQTT Port: 8883
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
     3. MQTT Username: NONE
     4. MQTT Password: NONE
@@ -60,7 +62,8 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
     
 ### Google Cloud Platform IoT Core
-    1. MQTT Endpoint: mqtt.googleapis.com
+    0. MQTT Endpoint: mqtt.googleapis.com
+    1. MQTT Port: 8883
     2. MQTT ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
     3. MQTT Username: ANY
     4. MQTT Password: JSON Web Token (JWT) security token (contains signature created with asymmetric device private key)
@@ -74,7 +77,8 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     
 ### Microsoft Azure IoT Hub
     A. Authentication with SAS Security Token
-       1. MQTT Endpoint: HUB_NAME.azure-devices.net
+       0. MQTT Endpoint: HUB_NAME.azure-devices.net
+       1. MQTT Port: 8883
        2. MQTT ClientId: DEVICE_ID
        3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
        4. MQTT Password: Shared Access Signature (SAS) security token (contains signature created with symmetric shared access key)
@@ -87,7 +91,8 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * DEVICE: send ms.der as CA for TLS connection
          
     B. Authentication with X.509 Self-Signed Certificates
-       1. MQTT Endpoint: HUB_NAME.azure-devices.net
+       0. MQTT Endpoint: HUB_NAME.azure-devices.net
+       1. MQTT Port: 8883
        2. MQTT ClientId: DEVICE_ID
        3. MQTT Username: HUB_NAME.azure-devices.net/DEVICE_ID/api-version=2016-11-14
        4. MQTT Password: NULL
@@ -100,14 +105,35 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * DEVICE: send ms.der, device certificate and private key for TLS connection
 
 ### Adafruit.IO
-    1. MQTT Endpoint: io.adafruit.com
+    0. MQTT Endpoint: io.adafruit.com
+    1. MQTT Port: 8883
     2. MQTT ClientId: ANY
-    3. MQTT Username: USERNAME
-    4. MQTT Password: AIO KEY
-    5. MQTT PublishTopic: USERNAME/feed/topic
-    6. MQTT SubscribeTopic: USERNAME/feed/#
+    3. MQTT Username: USERNAME // Check Adafruit dashboard
+    4. MQTT Password: AIO KEY // Check Adafruit dashboard
+    5. MQTT PublishTopic: ClientId/feeds
+    6. MQTT SubscribeTopic: ClientId/feeds/#
     * CA, device cert, device pkey are not needed.
-             
+
+### Ubidots
+    0. MQTT Endpoint: things.ubidots.com
+    1. MQTT Port: 8883
+    2. MQTT ClientId: ANY
+    3. MQTT Username: TOKEN // Check Ubidots dashboard
+    4. MQTT Password: ANY
+    5. MQTT PublishTopic: /v1.6/devices/ClientId
+    6. MQTT SubscribeTopic: /v1.6/devices/ClientId/#
+    * CA, device cert, device pkey are not needed.
+
+### ThingSpeak
+    0. MQTT Endpoint: mqtt.thingspeak.com
+    1. MQTT Port: 8883
+    2. MQTT ClientId: ANY
+    3. MQTT Username: ANY
+    4. MQTT Password: MQTT API KEY // Check ThingSpeak dashboard
+    5. MQTT PublishTopic: channels/THINGSPEAK_CHANNEL_ID/publish/THINGSPEAK_WRITE_KEY 
+    6. MQTT SubscribeTopic: channels/THINGSPEAK_CHANNEL_ID/publish/THINGSPEAK_WRITE_KEY /#
+    * CA, device cert, device pkey are not needed.
+
 ### Notes:
        1. Use MQTT.FX to troubleshoot and test validity of MQTT settings and TLS certificates.   
        2. mbedTLS configurables MBEDTLS_SSL_MAX_CONTENT_LEN and MBEDTLS_MPI_MAX_SIZE have to be increased to 3.5KB and 512 respectively, to support Azure IoT connectivity.
