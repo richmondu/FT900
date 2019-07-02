@@ -46,7 +46,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends CA, device certificate, device private key for TLS connection
 
-### Amazon AWS Greengrass
+### Amazon AWS Greengrass (https://aws.amazon.com/iot/)
     0. MQTT Endpoint: local Greengrass device hostname or IP address
     1. MQTT Port: 8883
     2. MQTT ClientId: DEVICE_ID (or THING_NAME if registered with a THING)
@@ -61,7 +61,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
       AWS IoT actually provides certificate generation.
     * DEVICE: Sends GreengrassGroupCA, device certificate, device private key for TLS connection
     
-### Google Cloud Platform IoT Core
+### Google Cloud Platform IoT Core (https://cloud.google.com/iot-core/)
     0. MQTT Endpoint: mqtt.googleapis.com
     1. MQTT Port: 8883
     2. MQTT ClientId: projects/PROJECT_ID/locations/LOCATION_ID/registries/REGISTRY_ID/devices/DEVICE_ID
@@ -75,7 +75,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     * CLOUD: Certificate must be registered in Google Cloud IoT Core
     * DEVICE: No certificate is sent for TLS connection
     
-### Microsoft Azure IoT Hub
+### Microsoft Azure IoT Hub (https://azure.microsoft.com/en-us/services/iot-hub/)
     A. Authentication with SAS Security Token
        0. MQTT Endpoint: HUB_NAME.azure-devices.net
        1. MQTT Port: 8883
@@ -104,7 +104,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
        * CLOUD: set the "Thumbprint" of device certificate (double click certificate->Details Tab->Thumbprint)
        * DEVICE: send ms.der, device certificate and private key for TLS connection
 
-### Adafruit.IO
+### Adafruit.IO (https://io.adafruit.com/)
     0. MQTT Endpoint: io.adafruit.com
     1. MQTT Port: 8883
     2. MQTT ClientId: ANY
@@ -114,7 +114,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     6. MQTT SubscribeTopic: ClientId/feeds/#
     * CA, device cert, device pkey are not needed.
 
-### Ubidots
+### Ubidots (https://ubidots.com/)
     0. MQTT Endpoint: things.ubidots.com
     1. MQTT Port: 8883
     2. MQTT ClientId: ANY
@@ -124,7 +124,7 @@ Below are the MQTT settings and TLS credentials needed to connect to IoT cloud s
     6. MQTT SubscribeTopic: /v1.6/devices/ClientId/#
     * CA, device cert, device pkey are not needed.
 
-### ThingSpeak
+### ThingSpeak (https://thingspeak.com/)
     0. MQTT Endpoint: mqtt.thingspeak.com
     1. MQTT Port: 8883
     2. MQTT ClientId: ANY
