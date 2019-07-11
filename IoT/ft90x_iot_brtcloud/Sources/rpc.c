@@ -63,7 +63,7 @@ int get_gpio( int number )
 {
     uint8_t state;
 
-    gpio_dir((uint8_t)number, pad_dir_input);
+    gpio_dir((uint8_t)number, pad_dir_output);
     //gpio_pull((uint8_t)number, pad_pull_pullup);
 
     state = gpio_read((uint8_t)number);
