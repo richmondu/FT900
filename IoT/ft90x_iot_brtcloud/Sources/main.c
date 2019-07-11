@@ -307,7 +307,7 @@ static inline char* user_generate_subscribe_topic()
 #else
     static char* topic = NULL;
     if ( !topic ) {
-        int len = strlen(CUSTOMER_ID) + 1 + strlen((char*)iot_utils_getdeviceid()) + 1 + 1 + 1;
+        int len = strlen((char*)iot_utils_getdeviceid()) + 1 + 1 + 1;
         topic = pvPortMalloc( len );
         if ( topic ) {
             memset( topic, 0, len );
@@ -462,7 +462,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( strncmp( ptr, API_GET_STATUS, len ) == 0 ) {
 
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic);
-        tfp_snprintf( payload, sizeof(payload), "{\"status\": \"%s\"}", API_STATUS_RUNNING);
+        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RUNNING);
         iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
     }
@@ -470,12 +470,12 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
         ptr = (char*)mqtt_subscribe_recv->payload;
 
-        char* status = parse_gpio_str(ptr, "\"status\": ",  '}');
+        char* status = parse_gpio_str(ptr, "\"value\": ",  '}');
         //DEBUG_PRINTF( "%s\r\n", status );
 
         if ( strncmp( status, API_STATUS_RESTART, strlen(API_STATUS_RESTART)) == 0 ) {
             tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-            tfp_snprintf( payload, sizeof(payload), "{\"status\": \"%s\"}", API_STATUS_RESTARTING );
+            tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RESTARTING );
             iot_publish( g_handle, topic, payload, strlen(payload), 1 );
             xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
         }
@@ -565,11 +565,11 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
         ptr = (char*)mqtt_subscribe_recv->payload;
 
-        char* data = parse_gpio_str(ptr, "\"data\": ",  '}');
+        char* data = parse_gpio_str(ptr, "\"value\": ",  '}');
         //DEBUG_PRINTF( "%s\r\n", status );
 
          tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-         tfp_snprintf( payload, sizeof(payload), "{\"data\": \"%s\"}", data );
+         tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
          iot_publish( g_handle, topic, payload, strlen(payload), 1 );
 
          DEBUG_PRINTF( "%s\r\n", data );
