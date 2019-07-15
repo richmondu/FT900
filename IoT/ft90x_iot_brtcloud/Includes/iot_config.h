@@ -140,11 +140,11 @@
 #else
     // Set values here for generic MQTT brokers
     #define USE_DEVICE_ID             "9dfa09de9c360f6f7b61da26efd75cbb6e77526a" // replace me
-    #define MQTT_BROKER               "192.168.100.5"   // replace me
+    #define MQTT_BROKER               "192.168.100.11"  // replace me
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_CLIENT_NAME          USE_DEVICE_ID     // replace me
-    #define MQTT_CLIENT_USER          "guest"           // replace me
-    #define MQTT_CLIENT_PASS          "guest"           // replace me
+    #define MQTT_CLIENT_USER          NULL
+    #define MQTT_CLIENT_PASS          NULL
 
     // This certificate refers to rootca.pem            // replace me
     extern __flash__ uint8_t ca_data[]        asm("rootca_pem");
