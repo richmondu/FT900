@@ -344,37 +344,50 @@ An alternative solution is using an AWS serverless solution wherein:
 
 ### Others
 
-       Run web_server.bat
+       A. Run web_server.bat
 
-       Run device_simulator.py_mqtt_ft900device1.bat and device_simulator.py_mqtt_ft900device2.bat OR 
-       run device_simulator.py_amqp_ft900device1.bat and device_simulator.py_amqp_ft900device2.bat OR 
-       run device_simulator.js_mqtt_ft900device1.bat and device_simulator.js_mqtt_ft900device2.bat OR 
-       run FT900 MCU with the following details:
+       B. Run device_simulator.py_mqtt_ft900device1.bat and device_simulator.py_mqtt_ft900device2.bat OR 
+          run device_simulator.py_amqp_ft900device1.bat and device_simulator.py_amqp_ft900device2.bat OR 
+          run device_simulator.js_mqtt_ft900device1.bat and device_simulator.js_mqtt_ft900device2.bat OR 
+          run FT900 MCU with the following details:
 
-       device id: ft900device1
-       device ca: rootca.pem
-       device cert: ft900device1_cert.pem
-       device pkey: ft900device1_pkey.pem
-       OR
-       device id: ft900device2
-       device ca: rootca.pem
-       device cert: ft900device2_cert.pem
-       device pkey: ft900device2_pkey.pem
+          device id: id for ft900device1
+          device ca: rootca.pem
+          device cert: ft900device1_cert.pem
+          device pkey: ft900device1_pkey.pem
 
-       Browse https://127.0.0.1 [or run client.bat for API testing]
+       C. Browse https://127.0.0.1 [or run client.bat for API testing]
+
+
+### AWS EC2
+
+       // AWS EC2 setup
+       A. Create a t2.micro instance of Ubuntu 16.04
+       B. Dowload "Private key file for authentication" for SSH access
+       C. Copy the "IPv4 Public IP" address
+       D. Enable ports: 22 (SSH), 8883 (MQTTS), 5671 (AMQPS), 443 (HTTPS)
+
+       // PUTTY setup (for SSH console access)
+       A. Go to Category > Connection > SSH > Auth, then click Browse for "Private key file for authentication"    
+       B. Set "hostname (or IP address)" to "ubuntu@IPV4_PUBLIC_IP_ADDRESS"
+       
+       // WINSCP setup (for SSH file transfer access)
+       A. Create New Site
+       B. Set "Host name:" to IPV4_PUBLIC_IP_ADDRESS
+       C. Set "User name:" to ubuntu
 
 
 # Testing and Troubleshooting
 
 ### MQTT/AMQP Device
 
-- [FT900 MCU device (LWIP-MQTT client)](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_brtcloud)
+- [FT900 MCU device (LWIP-MQTT over mbedTLS client)](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_brtcloud)
 
 ### MQTT/AMQP Device simulators
 
-- [Python Paho-MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/blob/master/device_simulator.py)
-- [Python Pika-AMQP client device simulator](https://github.com/richmondu/libpyiotcloud/blob/master/device_simulator.py)
-- [NodeJS MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/blob/master/device_simulator.js)
+- [Python Paho-MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.py)
+- [Python Pika-AMQP client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.py)
+- [NodeJS MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.js)
 
 ### Test utilities
 
