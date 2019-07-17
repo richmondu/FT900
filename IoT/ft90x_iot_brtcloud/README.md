@@ -40,19 +40,19 @@ An alternative solution is using an AWS serverless solution wherein:
 
 
 ### High-level architecture diagram:
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/architecture.png" width="1000"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/architecture.png" width="1000"/>
 
 ### UML Use case diagram:
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/usecase.png" width="800"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/usecase.png" width="800"/>
 
 ### UML Sequence diagram (user sign-up/sign-in):
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/sequence1.png" width="800"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/sequence1.png" width="800"/>
 
 ### UML Sequence diagram (device registration):
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/sequence2.png" width="800"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/sequence2.png" width="800"/>
 
 ### UML Sequence diagram (device access/control):
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/images/sequence3.png" width="800"/>
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/sequence3.png" width="800"/>
 
 ### Notes:
 
