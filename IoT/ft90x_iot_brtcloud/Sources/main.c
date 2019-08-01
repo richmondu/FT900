@@ -371,7 +371,7 @@ static char* parse_gpio_str( char* ptr, char* str, char end )
 
 static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 {
-    char topic[64] = {0};
+    char topic[80] = {0};
     char payload[32] = {0};
 
 
@@ -568,13 +568,26 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         char* data = parse_gpio_str(ptr, "\"value\": ",  '}');
         //DEBUG_PRINTF( "%s\r\n", status );
 
-         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-         tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
-         iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
+        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
 
-         DEBUG_PRINTF( "%s\r\n", data );
+        DEBUG_PRINTF( "%s\r\n", data );
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // TRIGGER NOTIFICATIONS
+    ///////////////////////////////////////////////////////////////////////////////////
+    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATIONS, len ) == 0 ) {
+
+        ptr = (char*)mqtt_subscribe_recv->payload;
+
+        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+        iot_publish( g_handle, topic, ptr, strlen(ptr), 1 );
+
+        //DEBUG_PRINTF( "%s\r\n", ptr );
+    }
 
     iot_subscribe( g_handle, user_generate_subscribe_topic(), user_subscribe_receive_cb, 1 );
 }

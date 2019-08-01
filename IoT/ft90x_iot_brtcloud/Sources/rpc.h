@@ -42,21 +42,22 @@
 #define SOURCES_RPC_H_
 
 
-#define API_GET_GPIO          "get_gpio"
-#define API_SET_GPIO          "set_gpio"
-#define API_GET_RTC           "get_rtc"
-#define API_SET_RTC           "set_rtc"
-#define API_GET_MAC           "get_mac"
-#define API_GET_IP            "get_ip"
-#define API_GET_SUBNET        "get_subnet"
-#define API_GET_GATEWAY       "get_gateway"
-#define API_SET_MAC           "set_mac"
-#define API_GET_STATUS        "get_status"
-#define API_SET_STATUS        "set_status"
-#define API_WRITE_UART        "write_uart"
-#define API_STATUS_RESTART    "restart"
-#define API_STATUS_RUNNING    "running"
-#define API_STATUS_RESTARTING "restarting"
+#define API_GET_GPIO                "get_gpio"
+#define API_SET_GPIO                "set_gpio"
+#define API_GET_RTC                 "get_rtc"
+#define API_SET_RTC                 "set_rtc"
+#define API_GET_MAC                 "get_mac"
+#define API_GET_IP                  "get_ip"
+#define API_GET_SUBNET              "get_subnet"
+#define API_GET_GATEWAY             "get_gateway"
+#define API_SET_MAC                 "set_mac"
+#define API_GET_STATUS              "get_status"
+#define API_SET_STATUS              "set_status"
+#define API_WRITE_UART              "write_uart"
+#define API_TRIGGER_NOTIFICATIONS   "trigger_notifications"
+#define API_STATUS_RESTART          "restart"
+#define API_STATUS_RUNNING          "running"
+#define API_STATUS_RESTARTING       "restarting"
 
 int      get_gpio( int number );
 void     set_gpio( int number, int value );
