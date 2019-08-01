@@ -139,8 +139,8 @@
     #include <iot_config_azure.h>
 #else
     // Set values here for generic MQTT brokers
-    #define USE_DEVICE_ID             "9dfa09de9c360f6f7b61da26efd75cbb6e77526a" // replace me
-    #define MQTT_BROKER               "192.168.100.11"  // replace me
+    #define USE_DEVICE_ID             "31a71e7c8877173123219dcc87c37db813954c1e" // replace me
+    #define MQTT_BROKER               "ec2-54-85-32-68.compute-1.amazonaws.com"  // replace me
     #define MQTT_BROKER_PORT          MQTT_TLS_PORT
     #define MQTT_CLIENT_NAME          USE_DEVICE_ID     // replace me
     #define MQTT_CLIENT_USER          NULL
