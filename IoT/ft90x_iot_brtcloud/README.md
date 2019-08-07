@@ -1,5 +1,8 @@
 # FT900 client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
+Simulators are also available at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
+
+
 # libpyiotcloud
 
 libpyiotcloud is a dockerized IoT platform for secure remote access and control of an MCU-based smart device 
