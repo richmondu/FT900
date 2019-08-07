@@ -1,9 +1,9 @@
 # FT900 client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
-This project is an FT900 MQTT client example for libpyiotcloud.
+# libpyiotcloud
 
-libpyiotcloud platform demonstrates a custom IoT cloud platform for secure access and control of an MCU-based smart device 
-remotely from a mobile or desktop web application via REST APIs (<b>HTTP over TLS</b>) 
+libpyiotcloud is a dockerized IoT platform for secure remote access and control of an MCU-based smart device 
+from a mobile or desktop web application via REST APIs (<b>HTTP over TLS</b>) 
 with back-end <b>AMQP over TLS</b> connectivity and device-side <b>MQTT over TLS</b> connectivity.
 
 
@@ -16,11 +16,20 @@ This requires device to frequently send sensor data in order to generate graphs.
 It lacks support for the use-case of remote access and control memory-constrained microcontrollers.
 In this use-case, the device only sends the data when queried.
 
+Comparable IoT platforms for our use-case of remote device access and control include the IoT platforms of 
+
+    - TP-Link (with Kasa mobile application) for TPLink smart bulbs/smart plugs, and 
+    - Xiaomi (YeeLight mobile app) for Xiaomi's smart smart bulbs/smart plugs.
+
+However, these IoT platforms are tied up to their smart devices.
+Our IoT platform is generic for all smart devices and IoT devices that can be build on top of any MCU, but primarily using our in-house FT9XX MCUs.
+
 
 # Architecture
 
-This IoT platform is a server-based IoT cloud platform that leverages Flask, GUnicorn, Nginx, RabbitMQ, MongoDB, Amazon Cognito and Amazon Pinpoint.
-It can be deployed in local PC or in the cloud - AWS EC2, Linode, Heroku, Rackspace, DigitalOcean or etc.
+This IoT platform is a server-based IoT cloud platform that leverages 
+Flask, GUnicorn, Nginx, RabbitMQ, MongoDB, Amazon Cognito, Amazon Pinpoint and Docker. 
+It can be deployed in a local PC or in the cloud - AWS EC2, Linode, Heroku, Rackspace, DigitalOcean or etc.
 
 - Nginx web server - https://www.nginx.com/
 - GUnicorn WSGI server - https://gunicorn.org/
@@ -31,6 +40,9 @@ It can be deployed in local PC or in the cloud - AWS EC2, Linode, Heroku, Racksp
 - Amazon Cognito (user sign-up/sign-in) - https://aws.amazon.com/cognito/
 - Amazon Pinpoint (email/SMS notifications) - https://aws.amazon.com/pinpoint/
 - Amazon SNS (email/SMS notifications) - https://aws.amazon.com/sns/
+- Docker containerization (dockerfiles, docker-compose) - https://www.docker.com/
+- Ionic mobile/web frontend framework - https://ionicframework.com/
+- Postman (API testing tool) - https://www.getpostman.com/
 
 An alternative solution is using an AWS serverless solution wherein:
 
@@ -56,13 +68,12 @@ An alternative solution is using an AWS serverless solution wherein:
 
 ### Notes:
 
-    1. This is a simple design and will not likely scale to millions of devices.
-    2. RabbitMQ supports AMQP and MQTT.
-    3. For MQTT to work, MQTT plugin must be installed in RabbitMQ.
-    4. Login API will return an access token that will be used for succeeding API calls.
-    5. Register device API will return deviceid, rootca, device certificate and device private key.
-    6. Device shall use deviceid as MQTT client id and use the rootca, device certificate and device private key.
-    7. The webserver has been tested on Linux using GUnicorn.
+    1. RabbitMQ supports AMQP and MQTT.
+    2. For MQTT to work, MQTT plugin must be installed in RabbitMQ.
+    3. Login API will return an access token that will be used for succeeding API calls.
+    4. Register device API will return deviceid, rootca, device certificate and device private key.
+    5. Device shall use deviceid as MQTT client id and use the rootca, device certificate and device private key.
+    6. The webserver has been tested on Linux Ubuntu 16.04 using GUnicorn and Nginx.
 
 
 
@@ -70,33 +81,28 @@ An alternative solution is using an AWS serverless solution wherein:
 
 ### Features
 
-    1. User sign-up/sign-in and Device Registration
-       A. Using Amazon Cognito for user sign-up/sign-in
-       B. Using MongoDB NoSQL database for storing device info during device registration
-       C. Unique ca-signed certificate + privatekey generated for registered devices
-    2. Device Access/Control
-       A. get/set GPIOs
-       B. get/set RTC
-       C. get MAC address
-       D. get IP/Subnet/Gateway addresses
-       E. reset device
-       F. write UART
+    1. User sign-up/sign-in, Device Registration, Email/SMS Notifications
+       A. Amazon Cognito for user sign-up and sign-in
+       B. MongoDB NoSQL database for storing registered device information
+       C. OpenSSL for generating certificates on-demand for registered devices
+       D. Email/SMS notifications using AmazonPinpoint (device-initiated, client-initiated)
+    2. Device Access/Control via Flask+GUnicorn+Nginx
+       - get/set GPIOs, get/set RTC, get MAC address, reset device
+       - get IP/Subnet/Gateway addresses, write UART
     3. HTTPS/AMQPS/MQTTS Protocol Support
-       [client --HTTPS--> webserver <--AMQPS--> messagebroker <--MQTTS--> device]
+       [client --HTTPS--> webserver <--MQTTS (or AMQPS)--> msgbroker <--MQTTS (and AMQPS)--> device]
        A. HTTP over TLS: client app accessing REST APIs from webserver
        B. AMQP over TLS: webserver and messagebroker communication
        C. MQTT over TLS: messagebroker and device communication
-    4. Device examples
+    4. Device examples and simulators
        A. FT900 MCU device (LWIP-MQTT client)
-       B. Python Paho-MQTT client device simulator
-       C. Python Pika-AMQP client device simulator
-       D. NodeJS MQTT client device simulator
-    5. Email/SMS notifications
-       A. Using Amazon Pinpoint
-       B. Device-initiated: [device --> messagebroker --> notifmanager -> amazonpinpoint]
-       C. Client-initiated: [client --> webserver --> messagebroker --> device --> messagebroker --> notifmanager -> amazonpinpoint]
- 
-      
+       B. MQTT device simulators (Python Paho-MQTT and NodeJS)
+       C. AMQP device simulator (Python Pika-AMQP)
+    5. Deployment to AWS EC2 as microservices using Docker
+       - 5 microservices/docker containers [rabbitmq, mongodb, webapp, nginx, notification]
+       - with Dockerfiles and Docker-compose file
+
+
 ### REST APIs for User Sign-up/Sign-In
 
     1. sign_up
@@ -183,6 +189,7 @@ An alternative solution is using an AWS serverless solution wherein:
     4. Process the api with the given payload
     5. Publish answer to topic "server.deviceid.api"
 
+
 ### Email/SMS Notifications
 
     1. Device can trigger Notification Manager to send email/SMS via Amazon Pinpoint
@@ -192,8 +199,26 @@ An alternative solution is using an AWS serverless solution wherein:
     3. Web client application can also trigger device to send email/SMS notifications via the trigger_notification REST API.
        webclient -> webserver(rest api) -> messagebroker -> device -> messagebroker -> notificationmanager -> pinpoint
 
-# Instructions
 
+# Instructions (Docker)
+
+    0. Install Docker
+    1. Set AWS credentials + cognito/pinpoint IDs as environment variables
+       export AWS_ACCESS_KEY_ID=""
+       export AWS_SECRET_ACCESS_KEY=""
+       export AWS_COGNITO_CLIENT_ID=""
+       export AWS_COGNITO_USERPOOL_ID=""
+       export AWS_COGNITO_USERPOOL_REGION=""     
+       export AWS_PINPOINT_ID=""
+       export AWS_PINPOINT_REGION=""
+       export AWS_PINPOINT_EMAIL=""
+    2. Build and execute Docker-compose file
+       docker-compose build
+       docker-compose up
+    3. Test by browsing https://192.168.99.100 or https://<aws_ec2_hostname> or https://<aws_ec2_ip>
+    
+
+# Manual Instructions (non-Docker)
 
 ### Install Python 3.6.6 and Python libraries
 
@@ -336,11 +361,31 @@ An alternative solution is using an AWS serverless solution wherein:
        K. Click "Next step"
        L. Click "Create pool"
    
-       // Update web_server_cognito_config.py
-       A. CONFIG_USER_POOL_REGION = Region of Cognito User Pool ex. "ap-southeast-1"
-       B. CONFIG_USER_POOL_ID     = Copy from General settings/Pool Id
-       C. CONFIG_CLIENT_ID        = Copy from General settings/App clients/App client id
+       // Update environment variables
+       A. AWS_COGNITO_USERPOOL_REGION = Region of Cognito User Pool ex. "ap-southeast-1"
+       B. AWS_COGNITO_USERPOOL_ID     = Copy from General settings/Pool Id
+       C. AWS_COGNITO_CLIENT_ID       = Copy from General settings/App clients/App client id
 
+
+### Setup Amazon Pinpoint.
+    
+       // Amazon Pinpoint cloud setup
+       A. Click on "Create a project"
+       B. Under Settings, click on "Email". 
+          Under Identities tab, click Edit button.
+          Select "Verify a new email address" and input "Email address".
+          Check email and click on the link. 
+          Get back on AWS and click Save.
+       C. Under Settings, click on "SMS and voice". 
+          Under SMS settings tab, click Edit button.
+          Select "Enable the SMS channel for this project" and click "Save changes" button.
+       D. Copy the Project ID and region for the environment variables.   
+          
+       // Update environment variables
+       A. AWS_PINPOINT_REGION = Region of Cognito User Pool ex. "ap-southeast-1"
+       B. AWS_PINPOINT_ID     = Copy from "All projects"
+       C. AWS_PINPOINT_EMAIL  = Email registered to be used for email sender
+          
 
 ### Others
 
@@ -359,45 +404,325 @@ An alternative solution is using an AWS serverless solution wherein:
        C. Browse https://127.0.0.1 [or run client.bat for API testing]
 
 
+### Certificates
+
+       1. NGINX: rootca.pem rootca.pkey
+       2. RabbitMQ: rootca.pem, server_cert.pem, server_pkey.pem
+       3. WebApp: rootca.pem, server_cert.pem, server_pkey.pem
+       4. Notification: rootca.pem, notification_manager_cert.pem, notification_manager_pkey.pem
+       5. Device: rootca.pem, device_X.pem, device_X.pkey
+
+
 ### AWS EC2
 
        // AWS EC2 setup
-       A. Create a t2.micro instance of Ubuntu 16.04
+       A. Create a t2.micro instance of Amazon Linux (or Ubuntu 16.04 if not using Docker)
        B. Dowload "Private key file for authentication" for SSH access
        C. Copy the "IPv4 Public IP" address
        D. Enable ports: 22 (SSH), 8883 (MQTTS), 5671 (AMQPS), 443 (HTTPS)
 
        // PUTTY setup (for SSH console access)
-       A. Go to Category > Connection > SSH > Auth, then click Browse for "Private key file for authentication"    
-       B. Set "hostname (or IP address)" to "ubuntu@IPV4_PUBLIC_IP_ADDRESS"
+       A. Create PPK file from the PEM file downloaded from EC2 using PuttyGEN
+       B. Using Putty, go to Category > Connection > SSH > Auth, then click Browse for "Private key file for authentication"    
+       C. Set "hostname (or IP address)" to "ec2-user@IPV4_PUBLIC_IP_ADDRESS" (or "ubuntu@IPV4_PUBLIC_IP_ADDRESS" if using Ubuntu)
        
        // WINSCP setup (for SSH file transfer access)
        A. Create New Site
        B. Set "Host name:" to IPV4_PUBLIC_IP_ADDRESS
-       C. Set "User name:" to ubuntu
+       C. Set "User name:" to ec2-user (or ubuntu if using Ubuntu)
+
+       // Docker installation
+       sudo yum update -y
+       sudo yum install -y docker
+       sudo usermod -aG docker ec2-user
+       sudo curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+       sudo chmod +x /usr/local/bin/docker-compose
+       sudo service docker restart
+       
+       // Set the AWS environment variables
+       export AWS_ACCESS_KEY_ID=""
+       export AWS_SECRET_ACCESS_KEY=""
+       export AWS_COGNITO_CLIENT_ID=""
+       export AWS_COGNITO_USERPOOL_ID=""
+       export AWS_COGNITO_USERPOOL_REGION=""
+       export AWS_PINPOINT_ID=""
+       export AWS_PINPOINT_REGION=""       
+       export AWS_PINPOINT_EMAIL=""       
+
+       // Download the repository
+       via WinSCP or git
+       
+       // Docker run
+       docker-compose -f docker-compose.yml config
+       docker-compose build
+       docker-compose up
+        
+
+### AWS Credentials
+
+       1. AWS_ACCESS_KEY_ID
+       2. AWS_SECRET_ACCESS_KEY
+       3. AWS_COGNITO_CLIENT_ID
+       4. AWS_COGNITO_USERPOOL_ID
+       5. AWS_COGNITO_USERPOOL_REGION       
+       6. AWS_PINPOINT_ID
+       7. AWS_PINPOINT_REGION
+       8. AWS_PINPOINT_EMAIL
+
+### Docker
+
+        Overheads:
+        1. Networking: 100 microseconds slower which is neglible. 
+           [Not ideal for time-sensitive forex or stock trading market]
+        2. Size: Dockers is lightweight.
+        3. CPU/RAM: Virtually none on Linux.
+        4. Learning: its easier than i thought, many documentations available 
+           [Linux familiarity is the overhead]
+
+        Advantages:
+        1. Automates installation and deployment 
+           [abstracts Linux knowledge requirements for installations/running]
+        2. Automates developer/QA testing 
+           [anyone can reproduce and on their own Windows 7 machine using Docker Toolbox]
+        3. Simplifies maintenance and upgrade
+           Dockerfile and Docker-compose file are basically Linux bash scripts
+           But Dockerfile and Docker-compose file are very readable
+           Easy to add/replace microservices in case needed
+   
+### Dockerfiles
+
+1. The platform has been divided into 5 microservices: rabbitmq, mongodb, webapp, nginx, notification_manager
+2. Each microservice is contained in a separate docker container
+3. Each docker container has a dockerfile
+
+        // RABBITMQ Dockerfile
+        FROM rabbitmq:3.7
+        RUN rabbitmq-plugins enable --offline rabbitmq_management
+        RUN rabbitmq-plugins enable --offline rabbitmq_mqtt
+        COPY src/ /etc/rabbitmq/
+        EXPOSE 5671
+        EXPOSE 8883
+
+        // MONGODB Dockerfile
+        FROM mongo:latest
+        VOLUME ["/data/db"]
+        WORKDIR /data
+        EXPOSE 27017
+
+        // WEBAPP Dockerfile
+        FROM python:3.6.6
+        RUN mkdir -p /usr/src/app/libpyiotcloud
+        WORKDIR /usr/src/app/libpyiotcloud
+        COPY libpyiotcloud/ /usr/src/app/libpyiotcloud/
+        RUN pip install --no-cache-dir -r requirements.txt
+        CMD ["gunicorn", "--workers=1", "--bind=0.0.0.0:8000", "--forwarded-allow-ips='*'", "wsgi:app"]
+        EXPOSE 8000
+
+        // NGINX Dockerfile
+        FROM nginx:latest
+        RUN rm /etc/nginx/conf.d/default.conf
+        COPY src/ /etc/nginx/conf.d/
+        EXPOSE 443
+
+        // NOTIFICATION Dockerfile
+        FROM python:3.6.6
+        RUN mkdir -p /usr/src/app/notification_manager
+        WORKDIR /usr/src/app/notification_manager
+        COPY src/ /usr/src/app/notification_manager/
+        WORKDIR /usr/src/app/notification_manager/notification_manager
+        RUN pip install --no-cache-dir -r requirements.txt
+        CMD ["python", "-u", "notification_manager.py", "--USE_HOST", "172.18.0.2"]
+
+        // CREATE and RUN
+        docker network create --subnet=172.18.0.0/16 mydockernet
+        docker build -t rmq .
+        docker run --net mydockernet --ip 172.18.0.2 -d -p 8883:8883 -p 5671:5671 -p 15672:15672 --name rmq rmq
+        docker build -t mdb .
+        docker run --net mydockernet --ip 172.18.0.3 -d -p 27017:27017 -v /data:/data/db --name mdb mdb
+        docker build -t app .
+        docker run --net mydockernet --ip 172.18.0.4 -d -p 8000:8000 --name app app
+        docker build -t ngx .
+        docker run --net mydockernet --ip 172.18.0.5 -d -p 443:443 --name ngx ngx
+        docker build -t nmg .
+        docker run --net mydockernet --ip 172.18.0.6 -d --name nmg nmg
+
+        // STOP and REMOVE
+        docker ps
+        docker ps -a
+        docker stop rmq
+        docker stop mdb
+        docker stop app
+        docker stop ngx
+        docker stop nmg
+        docker rm rmq
+        docker rm mdb
+        docker rm app
+        docker rm ngx
+        docker rm nmg
+        docker network rm mydockernet
+
+
+### Dockercompose
+
+1. Internal network created for the docker containers
+
+        sudo docker network ls
+        sudo docker network inspect mydockernet
+    
+2. Persistent volume for mongodb database created
+
+        sudo docker volume ls
+        sudo docker volume inspect mydockervol // get the mountpoint
+        sudo ls <mountpoint>
+
+3. AWS credentials + cognito/pinpoint IDs are environment variables [no longer hardcoded in code]
+
+        Prerequisite: set the following environment variables
+        - AWS_ACCESS_KEY_ID
+        - AWS_SECRET_ACCESS_KEY
+        - AWS_COGNITO_CLIENT_ID
+        - AWS_COGNITO_USERPOOL_ID
+        - AWS_COGNITO_USERPOOL_REGION       
+        - AWS_PINPOINT_ID
+        - AWS_PINPOINT_REGION
+        - AWS_PINPOINT_EMAIL
+
+4. Docker-compose file
+
+        // docker-compose.yml
+        version: '3.7'
+        services:
+          rabbitmq:
+            build: ./rabbitmq
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.2
+            ports:
+              - "8883:8883"
+              - "5671:5671"
+            expose:
+              - "8883"
+              - "5671"
+          mongodb:
+            build: ./mongodb
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.3
+            ports:
+              - "27017:27017"
+            volumes:
+              - "mydockervol:/data/db"
+          webapp:
+            build: ./webapp
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.4
+            ports:
+              - "8000:8000"
+            depends_on:
+              - rabbitmq
+              - mongodb
+            environment:
+              - AWS_ACCESS_KEY_ID
+              - AWS_SECRET_ACCESS_KEY
+              - AWS_COGNITO_CLIENT_ID
+              - AWS_COGNITO_USERPOOL_ID
+              - AWS_COGNITO_USERPOOL_REGION
+          nginx:
+            build: ./nginx
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.5
+            ports:
+              - "443:443"
+            expose:
+              - "443"
+            depends_on:
+              - webapp
+          notification:
+            build: ./notification
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.6
+            depends_on:
+              - rabbitmq
+              - nginx
+              - webapp
+              - mongodb
+            environment:
+              - AWS_ACCESS_KEY_ID
+              - AWS_SECRET_ACCESS_KEY
+              - AWS_PINPOINT_ID
+              - AWS_PINPOINT_REGION              
+              - AWS_PINPOINT_EMAIL              
+        networks:
+          mydockernet:
+            driver: bridge
+            ipam:
+              config:
+                - subnet: 172.18.0.0/16
+                  gateway: 172.18.0.1
+        volumes:
+          mydockervol:
+            driver: local
+    
+        // test
+        https:// 192.168.99.100
+        mqtts:// 192.168.99.100:8883
+        amqps:// 192.168.99.100:5671
+
+5. Docker-compose commands
+
+        docker-compose -f docker-compose.yml config
+        docker-compose build
+        docker-compose up
+        docker-compose up -d // run as daemon
+        docker-compose ps
+        docker-compose down
 
 
 # Testing and Troubleshooting
 
-### MQTT/AMQP Device
+### Using FT900 (Currently tested with an FT900 RevC board-MM900EV1B only)
 
-- [FT900 MCU device (LWIP-MQTT over mbedTLS client)](https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_brtcloud)
+        1. Download the FT900 code from https://github.com/richmondu/FT900/tree/master/IoT/ft90x_iot_brtcloud
+        2. Update USE_DEVICE_ID in Includes/iot_config.h to match the generated ID of the registered device in the portal
+        3. Build and run FT900 code 
+        4. Access/control the device via the portal
 
-### MQTT/AMQP Device simulators
+### Using device simulators
 
-- [Python Paho-MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.py)
-- [Python Pika-AMQP client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.py)
-- [NodeJS MQTT client device simulator](https://github.com/richmondu/libpyiotcloud/tree/master/device_simulator/device_simulator.js)
+        1. Download the device simulators from https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
+           Choose from any of the 3: 
+           Python-MQTT device simulator
+           Python-AMQP device simulator
+           Javascript-MQTT device simulator
+        2. Update DEVICE_ID in the corresponding batch script to match the generated ID of the registered device in the portal
+        3. Run the updated batch script
+        4. Access/control the device via the portal
 
 ### Test utilities
 
-- web_server_database_viewer.bat - view registered devices (MongoDB) and registered users (Amazon Cognito)
+        web_server_database_viewer.bat 
+        - view registered devices (MongoDB) and registered users (Amazon Cognito)
 
 ### Troubleshooting
 
-- sudo service mongod status 
-- sudo systemctl status web_server
-- sudo systemctl status nginx
+        Dockerized:
+        - docker-compose ps
+        - docker ps
+        - docker network ls
+        - docker volume ls
+
+        Manual:
+        - sudo service mongod status 
+        - sudo systemctl status web_server
+        - sudo systemctl status nginx
 
 
 # Performance
@@ -419,8 +744,9 @@ In Linux, the total round trip time is only 1 second.
 
 # Action Items
 
-1. Support Docker containerization
-2. Support Kubernetes scalability
+1. Use Ionic front-end framework for cross-platform mobile, web, and desktop apps
+2. Add message counter for free-tier subscription
 3. Add manager/admin page in Web client (see all users and devices registered by each user)
 4. Add logging for debugging/troubleshooting
-5. Fix access key timeout issue
+5. Handle refreshing Cognito access key while user is still online
+6. Support Kubernetes orchestration
