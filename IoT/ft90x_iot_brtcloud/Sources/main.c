@@ -61,9 +61,15 @@
 
 
 
+///////////////////////////////////////////////////////////////////////////////////
+#define CONFIG_NOTIFICATION_UART_LISTEN "Hello World"
+#define CONFIG_NOTIFICATION_RECIPIENT "richmond.umagat@brtchip.com"
+#define CONFIG_NOTIFICATION_MESSAGE "Hi, How are you today?"
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
 #define PREPEND_REPLY_TOPIC "server/"
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////
 #define DEBUG
@@ -372,7 +378,7 @@ static char* parse_gpio_str( char* ptr, char* str, char end )
 static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 {
     char topic[80] = {0};
-    char payload[32] = {0};
+    char payload[128] = {0};
 
 
     char* ptr = user_generate_subscribe_topic();
@@ -566,20 +572,29 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         ptr = (char*)mqtt_subscribe_recv->payload;
 
         char* data = parse_gpio_str(ptr, "\"value\": ",  '}');
-        //DEBUG_PRINTF( "%s\r\n", status );
-
-        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-
         DEBUG_PRINTF( "%s\r\n", data );
+
+        // Trigger an Email/SMS notification when the UART message received contains a specific phrase!
+        if (strstr(data, CONFIG_NOTIFICATION_UART_LISTEN) != NULL) {
+			tfp_snprintf( topic, sizeof(topic), "%s%s/%s", PREPEND_REPLY_TOPIC, (char*)iot_utils_getdeviceid(), API_TRIGGER_NOTIFICATION );
+			tfp_snprintf( payload, sizeof(payload), "{\"recipient\": \"%s\", \"message\": \"%s\"}", CONFIG_NOTIFICATION_RECIPIENT, CONFIG_NOTIFICATION_MESSAGE );
+			iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+	        DEBUG_PRINTF( "%s\r\n", topic );
+	        DEBUG_PRINTF( "%s\r\n\r\n", payload );
+        }
+
+		tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+		tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
+		iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        DEBUG_PRINTF( "%s\r\n", topic );
+        DEBUG_PRINTF( "%s\r\n\r\n", payload );
     }
 
 
     ///////////////////////////////////////////////////////////////////////////////////
     // TRIGGER NOTIFICATIONS
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATIONS, len ) == 0 ) {
+    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATION, len ) == 0 ) {
 
         ptr = (char*)mqtt_subscribe_recv->payload;
 

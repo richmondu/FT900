@@ -54,7 +54,7 @@
 #define API_GET_STATUS              "get_status"
 #define API_SET_STATUS              "set_status"
 #define API_WRITE_UART              "write_uart"
-#define API_TRIGGER_NOTIFICATIONS   "trigger_notifications"
+#define API_TRIGGER_NOTIFICATION    "trigger_notification"
 #define API_STATUS_RESTART          "restart"
 #define API_STATUS_RUNNING          "running"
 #define API_STATUS_RESTARTING       "restarting"
