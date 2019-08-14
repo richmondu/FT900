@@ -62,7 +62,7 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-#define CONFIG_NOTIFICATION_UART_LISTEN "Hello World"
+#define CONFIG_NOTIFICATION_UART_KEYWORD "Hello World"
 #define CONFIG_NOTIFICATION_RECIPIENT "richmond.umagat@brtchip.com"
 #define CONFIG_NOTIFICATION_MESSAGE "Hi, How are you today?"
 ///////////////////////////////////////////////////////////////////////////////////
@@ -575,7 +575,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         DEBUG_PRINTF( "%s\r\n", data );
 
         // Trigger an Email/SMS notification when the UART message received contains a specific phrase!
-        if (strstr(data, CONFIG_NOTIFICATION_UART_LISTEN) != NULL) {
+        if (strstr(data, CONFIG_NOTIFICATION_UART_KEYWORD) != NULL) {
 			tfp_snprintf( topic, sizeof(topic), "%s%s/%s", PREPEND_REPLY_TOPIC, (char*)iot_utils_getdeviceid(), API_TRIGGER_NOTIFICATION );
 			tfp_snprintf( payload, sizeof(payload), "{\"recipient\": \"%s\", \"message\": \"%s\"}", CONFIG_NOTIFICATION_RECIPIENT, CONFIG_NOTIFICATION_MESSAGE );
 			iot_publish( g_handle, topic, payload, strlen(payload), 1 );
