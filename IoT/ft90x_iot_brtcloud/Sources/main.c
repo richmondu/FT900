@@ -221,6 +221,7 @@ static void iot_app_task( void *pvParameters )
     // MM900Ev1b (RevC) has an internal RTC
     // IoTBoard does not have internal RTC
     // When using IoTBoard, this must be disabled to prevent crash
+    // TODO: support external RTC to work on IoTBoard
 #if 1
     init_rtc();
 #endif
@@ -444,6 +445,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     // MM900Ev1b (RevC) has an internal RTC
     // IoTBoard does not have internal RTC
     // When using IoTBoard, this must be disabled to prevent crash
+    // TODO: support external RTC to work on IoTBoard
 #if 1
     ///////////////////////////////////////////////////////////////////////////////////
     // RTC
