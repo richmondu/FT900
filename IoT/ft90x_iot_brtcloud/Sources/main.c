@@ -217,7 +217,13 @@ static void iot_app_task( void *pvParameters )
 
     iot_utils_init();
 
+    /* Initialize rtc */
+    // MM900Ev1b (RevC) has an internal RTC
+    // IoTBoard does not have internal RTC
+    // When using IoTBoard, this must be disabled to prevent crash
+#if 1
     init_rtc();
+#endif
 
     while (1) {
         /*
@@ -434,6 +440,11 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
 
 
+    /* Process rtc */
+    // MM900Ev1b (RevC) has an internal RTC
+    // IoTBoard does not have internal RTC
+    // When using IoTBoard, this must be disabled to prevent crash
+#if 1
     ///////////////////////////////////////////////////////////////////////////////////
     // RTC
     ///////////////////////////////////////////////////////////////////////////////////
@@ -460,6 +471,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         iot_publish( g_handle, topic, payload, strlen(payload), 1 );
 
     }
+#endif
 
 
     ///////////////////////////////////////////////////////////////////////////////////
