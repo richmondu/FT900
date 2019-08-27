@@ -6,9 +6,7 @@ Simulators are also available at https://github.com/richmondu/libpyiotcloud/tree
 
 # libpyiotcloud
 
-libpyiotcloud is a dockerized IoT platform for secure remote access and control of an MCU-based smart device 
-from a mobile or desktop web application via REST APIs (<b>HTTP over TLS</b>) 
-with back-end <b>AMQP over TLS</b> connectivity and device-side <b>MQTT over TLS</b> connectivity.
+libpyiotcloud is a dockerized IoT platform for secure remote access and control of an MCU-based smart device from Android/iOS mobile apps and desktop web browser via backend HTTPS REST APIs with AMQPS connectivity and device-side MQTTS connectivity.
 
 
 # Background
@@ -26,37 +24,55 @@ Comparable IoT platforms for our use-case of remote device access and control in
     - Xiaomi (YeeLight mobile app) for Xiaomi's smart smart bulbs/smart plugs.
 
 However, these IoT platforms are tied up to their smart devices.
-Our IoT platform is generic for all smart devices and IoT devices that can be build on top of any MCU, but primarily using our in-house FT9XX MCUs.
+This IoT platform is generic for all smart devices and IoT devices that can be build on top of any MCU, but preferably using FT9XX MCUs.
 
 
 # Architecture
 
-This IoT platform is a server-based IoT cloud platform that leverages 
-Flask, GUnicorn, Nginx, RabbitMQ, MongoDB, Amazon Cognito, Amazon Pinpoint and Docker. 
+This IoT platform is a container-based IoT cloud platform that leverages 
+Flask, GUnicorn, Nginx, RabbitMQ, MongoDB, Ionic, Amazon Cognito, Amazon Pinpoint and Docker. 
 It can be deployed in a local PC or in the cloud - AWS EC2, Linode, Heroku, Rackspace, DigitalOcean or etc.
+The web app is made of Ionic framework so it can be compiled as Android and iOS mobile apps using 1 code base.
 
-- Nginx web server - https://www.nginx.com/
-- GUnicorn WSGI server - https://gunicorn.org/
-- Flask web framework (REST API) - http://flask.pocoo.org/
-- RabbitMQ message broker (MQTT, AMQP) - https://www.rabbitmq.com/
-- MongoDB NoSQL database - https://www.mongodb.com/
-- OpenSSL cryptography (X509 certificates) - https://www.openssl.org/
-- Amazon Cognito (user sign-up/sign-in) - https://aws.amazon.com/cognito/
-- Amazon Pinpoint (email/SMS notifications) - https://aws.amazon.com/pinpoint/
-- Amazon SNS (email/SMS notifications) - https://aws.amazon.com/sns/
-- Docker containerization (dockerfiles, docker-compose) - https://www.docker.com/
-- Ionic mobile/web frontend framework - https://ionicframework.com/
-- Postman (API testing tool) - https://www.getpostman.com/
+- <b>LucidChart</b> UML diagrams - https://www.lucidchart.com
+- <b>Nginx</b> web server - https://www.nginx.com/
+- <b>GUnicorn</b> WSGI server - https://gunicorn.org/
+- <b>Flask</b> web framework (REST API) - http://flask.pocoo.org/
+- <b>RabbitMQ</b> message broker (MQTT, AMQP) - https://www.rabbitmq.com/
+- <b>MongoDB</b> NoSQL database - https://www.mongodb.com/
+- <b>OpenSSL</b> cryptography (X509 certificates) - https://www.openssl.org/
+- <b>Amazon EC2</b> - https://aws.amazon.com/ec2/
+- <b>Amazon Cognito</b> (user sign-up/sign-in) - https://aws.amazon.com/cognito/
+- <b>Amazon Pinpoint</b> (email/SMS notifications) - https://aws.amazon.com/pinpoint/
+- <b>Amazon SNS</b> (email/SMS notifications) - https://aws.amazon.com/sns/
+- <b>Docker</b> containerization (dockerfiles, docker-compose) - https://www.docker.com/
+- <b>Ionic</b> mobile/web frontend framework - https://ionicframework.com/
+- <b>Ionic Creator</b> - https://creator.ionic.io
+- <b>Postman</b> (API testing tool) - https://www.getpostman.com/
+- <b>GoDaddy</b> domain and SSL certificate - https://godaddy.com
+- <b>Android Studio</b> (Building Ionic webapp to Androidapp) - https://developer.android.com/studio
+
 
 An alternative solution is using an AWS serverless solution wherein:
 
-- AWS API Gateway+AWS Lambda will replace Flask+Gunicorn+Nginx
-- AWS DynamoDB will replace MongoDB
-- AmazonMQ will replace RabbitMQ
+- <b>AWS API Gateway+AWS Lambda</b> will replace Flask+Gunicorn+Nginx
+- <b>AWS DynamoDB</b> will replace MongoDB
+- <b>AmazonMQ</b> will replace RabbitMQ
 
 
 ### High-level architecture diagram:
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/architecture.png" width="1000"/>
+
+7 docker containers and microservices
+
+1. <b>Webserver</b> - Nginx (contains SSL certificate; all requests go to NGINX; forwards HTTP requests to webapp or restapi)
+2. <b>Webapp</b> - Ionic (front-end web framework that can also be compiled for Android and iOS)
+3. <b>Restapi</b> - Flask with Gunicorn (back-end API called by web app and mobile apps)
+4. <b>Messaging</b> - RabbitMQ (device communicates w/RabbitMQ; web/mobile apps communicates to device via RabbitMQ)
+5. <b>Database</b> - MongoDB (database for storing device information for registered devices)
+6. <b>Notification</b> (handles sending of messages to email/SMS recipients)
+7. <b>Historian</b> (handles saving of device requests and responses for each devices of all users)
+
 
 ### UML Use case diagram:
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/usecase.png" width="800"/>
@@ -78,6 +94,12 @@ An alternative solution is using an AWS serverless solution wherein:
     4. Register device API will return deviceid, rootca, device certificate and device private key.
     5. Device shall use deviceid as MQTT client id and use the rootca, device certificate and device private key.
     6. The webserver has been tested on Linux Ubuntu 16.04 using GUnicorn and Nginx.
+    7. Web app: browser->nginx->ionic->gunicorn->flask ...
+    8. Mobile apps: app->nginx->gunicorn->flask ...
+    9. HTTPs requests from web and mobile apps goes thru NGINX which forwards requests to either Ionic web app or Gunicorn-Flask REST APIs.
+    10. SSL certificate bought from GoDaddy goes to NGINX.
+    11. SSL certificates are tied up with the website domain and/or subdomain.
+    12. DNS A record must be modified in GoDaddy to match the public IP address of the AWS EC2 instance.
 
 
 
@@ -103,60 +125,63 @@ An alternative solution is using an AWS serverless solution wherein:
        B. MQTT device simulators (Python Paho-MQTT and NodeJS)
        C. AMQP device simulator (Python Pika-AMQP)
     5. Deployment to AWS EC2 as microservices using Docker
-       - 5 microservices/docker containers [rabbitmq, mongodb, webapp, nginx, notification]
+       - 7 microservices/docker containers [rabbitmq, mongodb, webapp, restapi, nginx, notification, historian]
        - with Dockerfiles and Docker-compose file
-
+    6. Ionic web app can be compiled as iOS/Android mobile apps
+       - SSL certificate bought from GoDaddy.com registered on NGINX.
+       - Webapp compiled for Android using Ionic but requiring Android Studio/SDK 
+       
 
 ### REST APIs for User Sign-up/Sign-In
 
-    1. sign_up
+    1. /user/sign_up
        - requires username, password, email, firstname, lastname
        - confirmation code will be sent to email
-    2. confirm_sign_up
+    2. /user/confirm_sign_up
        - requires username, confirmation
-    3. login
+    3. /user/login
        - requires username, password
        - returns access_token
-    4. logout
+    4. /user/logout
        - requires username, access key
-    5. forgot_password
+    5. /user/forgot_password
        - requires email address
        - confirmation code will be sent to email
-    6. confirm_forgot_password
+    6. /user/confirm_forgot_password
        - requires username, new password, confirmation code
+
+User login returns an access token that must be used in succeeding API requests.
+
 
 ### REST APIs for Device Registration/Management
 
-    1. register_device
+Device registration APIs requires username and access token returned by login.
+
+    1. /devices/register_device
        - requires username, access_token, devicename
        - returns deviceid, rootca, devicecert, devicepkey
          which shall be used on the actual microcontroller device
-    2. unregister_device
+    2. /devices/unregister_device
        - requires username, access_token, devicename
-    3. get_device_list
+    3. /devices/get_device_list
        - requires username, access_token
        - returns device info [devicename, deviceid, rootca, devicecert, devicepkey for all devices registered by user]
-    4. get_device_list_count
+    4. /devices/get_device_list_count
        - requires username, access_token
        - returns length of device list
-    5. get_device_index
+    5. /devices/get_device_index
        - requires username, access_token, index
        - returns device info for device[index]
 
 ### REST APIs for Device Access/Control
 
-    1. get_gpio
-    2. set_GPIO
-    3. get_rtc
-    4. set_rtc
-    5. get_mac
-    6. get_ip
-    7. get_subnet
-    8. get_gateway
-    9. get_status
-    10. set_status (including reset device)
-    11. write_uart
-    12. trigger_notification
+Device access APIs requires username, devicename and access token returned by login.
+
+    1. /devices/device/gpio
+    2. /devices/device/rtc
+    3. /devices/device/ethernet
+    4. /devices/device/uart
+    5. /devices/device/notifications
 
 
 ### Device settings for MQTT/AMQP Connectivity
@@ -410,11 +435,68 @@ An alternative solution is using an AWS serverless solution wherein:
 
 ### Certificates
 
-       1. NGINX: rootca.pem rootca.pkey
-       2. RabbitMQ: rootca.pem, server_cert.pem, server_pkey.pem
-       3. WebApp: rootca.pem, server_cert.pem, server_pkey.pem
-       4. Notification: rootca.pem, notification_manager_cert.pem, notification_manager_pkey.pem
-       5. Device: rootca.pem, device_X.pem, device_X.pkey
+       // Notes: 
+       The rootca certificate stored in RabbitMQ is for MQTT/AMQP device authentication. 
+       This is different from the certificate stored in NGINX bought from GoDaddy.
+       1. RabbitMQ (self-signed) ca,cert,pkey - for MQTTS/AMQPS
+       2. NGINX (signed by trusted authority)cert,pkey - for HTTPS
+       The certificate in RabbitMQ can be self-signed.
+       But the certificate in NGINX should be signed by trusted authority for production because web browsers issues warning when server certificate is self-signed.
+
+
+       // Generating self-signed certificates using OpenSSL
+       A. RSA
+          1. openssl genrsa -out rootCA_pkey.pem 2048
+          2. openssl req -new -x509 -days 3650 -key rootCA_pkey.pem -out rootCA.pem
+             Example:
+             Country Name: SG
+             State or Province: Singapore
+             Locality: Paya Lebar
+             Organization Name: Bridgetek Pte Ltd
+             Organizational Unit Name: Engineering
+             Common Name: brtchip.com
+             Email Address: support.emea@brtchip.com
+
+       B. ECDSA
+          1. openssl ecparam -genkey -name prime256v1 -out rootCA_pkey.pem
+          2. openssl req -new -sha256 -key rootCA_pkey.pem -out rootCA_csr.csr
+             Example:
+             Country Name: SG
+             State or Province: Singapore
+             Locality: Paya Lebar
+             Organization Name: Bridgetek Pte Ltd
+             Organizational Unit Name: Engineering
+             Common Name: brtchip.com
+             Email Address: support.emea@brtchip.com
+          3. openssl req -x509 -sha256 -days 3650 -key rootCA_pkey.pem -in csr.csr -out rootCA_cert.pem
+
+
+       // Generating device certificates
+       A. RSA
+          1. openssl genrsa -out ft900device1_pkey.pem 2048
+          2. openssl req -new -out ft900device1.csr -key ft900device1_pkey.pem
+          3. openssl x509 -req -in ft900device1.csr -CA rootCA.pem -CAkey rootCA_pkey.pem -CAcreateserial -out ft900device1_cert.pem -days 3650
+
+       B. ECDSA
+          1. openssl ecparam -genkey -name prime256v1 -out ft900device1_pkey.pem
+          2. openssl req -new -out ft900device1.csr -key ft900device1_pkey.pem
+          3. openssl x509 -req -in ft900device1.csr -CA rootca_ecdsa_cert.pem -CAkey rootca_ecdsa_pkey.pem -CAcreateserial -out ft900device1_cert.pem -days 3650
+
+
+       // CA-certificate signed by trusted authority - Comodo, Verisign, etc.
+       0. ROOTCA.pem (with a secret ROOTCA_PKEY.pem)
+       
+       // Customer-facing
+       1. NGINX: ROOTCA.pem rootca.pkey
+       2. RabbitMQ: ROOTCA.pem, server_cert.pem, server_pkey.pem
+       
+       // Internal
+       3. WebApp: None
+       4. RestAPI: server_cert.pem, server_pkey.pem
+       5. Notification: ROOTCA.pem, notification_manager_cert.pem, notification_manager_pkey.pem
+       
+       // Device
+       6. Device: ROOTCA.pem, device_X.pem, device_X.pkey
 
 
 ### AWS EC2
@@ -459,8 +541,12 @@ An alternative solution is using an AWS serverless solution wherein:
        // Docker run
        docker-compose -f docker-compose.yml config
        docker-compose build
-       docker-compose up
-        
+       docker-compose up OR docker-compose up -d
+       
+       // Docker stop
+       docker-compose down
+       docker-compose rm
+       
 
 ### AWS Credentials
 
@@ -495,7 +581,7 @@ An alternative solution is using an AWS serverless solution wherein:
    
 ### Dockerfiles
 
-1. The platform has been divided into 5 microservices: rabbitmq, mongodb, webapp, nginx, notification_manager
+1. The platform has been divided into 7 microservices: rabbitmq, mongodb, restapi, webapp, nginx, notification_manager, history_manager
 2. Each microservice is contained in a separate docker container
 3. Each docker container has a dockerfile
 
@@ -513,7 +599,7 @@ An alternative solution is using an AWS serverless solution wherein:
         WORKDIR /data
         EXPOSE 27017
 
-        // WEBAPP Dockerfile
+        // RESTAPI Flask Dockerfile
         FROM python:3.6.6
         RUN mkdir -p /usr/src/app/libpyiotcloud
         WORKDIR /usr/src/app/libpyiotcloud
@@ -521,7 +607,18 @@ An alternative solution is using an AWS serverless solution wherein:
         RUN pip install --no-cache-dir -r requirements.txt
         CMD ["gunicorn", "--workers=1", "--bind=0.0.0.0:8000", "--forwarded-allow-ips='*'", "wsgi:app"]
         EXPOSE 8000
-
+        
+        // WEBAPP Ionic Dockerfile
+        FROM node:10.6-alpine
+        RUN npm install -g ionic gulp
+        RUN mkdir -p /usr/src/app/ionicapp
+        WORKDIR /usr/src/app/ionicapp
+        COPY src/ionicapp/ /usr/src/app/ionicapp/
+        RUN npm install -D -E @ionic/v1-toolkit
+        RUN npm rebuild node-sass
+        CMD ["ionic", "serve", "--address=172.18.0.5", "--port=8100", "--no-open", "--no-livereload", "--consolelogs", "--no-proxy"]
+        EXPOSE 8100        
+        
         // NGINX Dockerfile
         FROM nginx:latest
         RUN rm /etc/nginx/conf.d/default.conf
@@ -537,33 +634,50 @@ An alternative solution is using an AWS serverless solution wherein:
         RUN pip install --no-cache-dir -r requirements.txt
         CMD ["python", "-u", "notification_manager.py", "--USE_HOST", "172.18.0.2"]
 
+        // HISTORIAN Dockerfile
+        FROM python:3.6.6
+        RUN mkdir -p /usr/src/app/history_manager
+        WORKDIR /usr/src/app/history_manager
+        COPY src/ /usr/src/app/history_manager/
+        WORKDIR /usr/src/app/history_manager/history_manager
+        RUN pip install --no-cache-dir -r requirements.txt
+        CMD ["python", "-u", "history_manager.py", "--USE_HOST", "172.18.0.2"]
+
         // CREATE and RUN
         docker network create --subnet=172.18.0.0/16 mydockernet
         docker build -t rmq .
         docker run --net mydockernet --ip 172.18.0.2 -d -p 8883:8883 -p 5671:5671 -p 15672:15672 --name rmq rmq
         docker build -t mdb .
         docker run --net mydockernet --ip 172.18.0.3 -d -p 27017:27017 -v /data:/data/db --name mdb mdb
+        docker build -t api .
+        docker run --net mydockernet --ip 172.18.0.4 -d -p 8000:8000 --name api api
         docker build -t app .
-        docker run --net mydockernet --ip 172.18.0.4 -d -p 8000:8000 --name app app
+        docker run --net mydockernet --ip 172.18.0.5 -d -p 8100:8100 --name app app
         docker build -t ngx .
-        docker run --net mydockernet --ip 172.18.0.5 -d -p 443:443 --name ngx ngx
+        docker run --net mydockernet --ip 172.18.0.6 -d -p 443:443 --name ngx ngx
         docker build -t nmg .
-        docker run --net mydockernet --ip 172.18.0.6 -d --name nmg nmg
+        docker run --net mydockernet --ip 172.18.0.7 -d --name nmg nmg
+        docker build -t hst .
+        docker run --net mydockernet --ip 172.18.0.8 -d --name hst hst
 
         // STOP and REMOVE
         docker ps
         docker ps -a
         docker stop rmq
         docker stop mdb
+        docker stop api
         docker stop app
         docker stop ngx
         docker stop nmg
+        docker stop hst
         docker rm rmq
         docker rm mdb
+        docker rm api
         docker rm app
         docker rm ngx
         docker rm nmg
-        docker network rm mydockernet
+        docker rm hst
+        docker network prune OR docker network rm mydockernet
 
 
 ### Dockercompose
@@ -618,8 +732,8 @@ An alternative solution is using an AWS serverless solution wherein:
               - "27017:27017"
             volumes:
               - "mydockervol:/data/db"
-          webapp:
-            build: ./webapp
+          restapi:
+            build: ./restapi
             restart: always
             networks:
               mydockernet:
@@ -635,50 +749,67 @@ An alternative solution is using an AWS serverless solution wherein:
               - AWS_COGNITO_CLIENT_ID
               - AWS_COGNITO_USERPOOL_ID
               - AWS_COGNITO_USERPOOL_REGION
-          nginx:
-            build: ./nginx
+          webapp:
+            build: ./webapp
             restart: always
             networks:
               mydockernet:
                 ipv4_address: 172.18.0.5
             ports:
+              - "8100:8100"
+            depends_on:
+              - restapi
+          nginx:
+            build: ./nginx
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.6
+            ports:
               - "443:443"
             expose:
               - "443"
             depends_on:
+              - restapi
               - webapp
           notification:
             build: ./notification
             restart: always
             networks:
               mydockernet:
-                ipv4_address: 172.18.0.6
+                ipv4_address: 172.18.0.7
             depends_on:
-              - rabbitmq
               - nginx
-              - webapp
-              - mongodb
             environment:
               - AWS_ACCESS_KEY_ID
               - AWS_SECRET_ACCESS_KEY
               - AWS_PINPOINT_ID
-              - AWS_PINPOINT_REGION              
-              - AWS_PINPOINT_EMAIL              
+              - AWS_PINPOINT_REGION
+              - AWS_PINPOINT_EMAIL
+          history:
+            build: ./history
+            restart: always
+            networks:
+              mydockernet:
+                ipv4_address: 172.18.0.8
+            depends_on:
+              - rabbitmq
+              - mongodb              
         networks:
           mydockernet:
             driver: bridge
             ipam:
               config:
-                - subnet: 172.18.0.0/16
-                  gateway: 172.18.0.1
+              - subnet: 172.18.0.0/16
         volumes:
           mydockervol:
-            driver: local
+            driver: local 
     
         // test
         https:// 192.168.99.100
         mqtts:// 192.168.99.100:8883
         amqps:// 192.168.99.100:5671
+
 
 5. Docker-compose commands
 
@@ -688,6 +819,33 @@ An alternative solution is using an AWS serverless solution wherein:
         docker-compose up -d // run as daemon
         docker-compose ps
         docker-compose down
+
+
+### Ionic Web/Mobile apps
+
+        // Web app
+        I utilized Ionic Creator in building the web app (that can be built as Android or iOS mobile application).
+
+        // Android app
+        To build Android mobile app using the Ionic web app requires the following:
+        - Installation of [Java SE Development Kit 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+        - Installation of Android Studio (with Android SDK)
+        - Accepting of Android SDK license
+          cd %LOCALAPPDATA%\Android\sdk\tools\bin
+          sdkmanager.bat --licenses
+        - Build using 
+          'ionic cordova build android'
+        - Run on an Android emulator, 
+          'ionic cordova emulate android --target=Nexus_5X_API_29_x86'
+          target can be checked using %LOCALAPPDATA%\Android\sdk\tools\bin\avdmanager list avd
+        - Run on an Android device
+          Copy platforms\android\app\build\outputs\apk\debug\app-debug.apk
+          
+        // iOS app
+        To build iOS mobile app using the Ionic web app requires the following:
+        - MacOS
+        - xcode
+        - TODO
 
 
 # Testing and Troubleshooting
@@ -719,8 +877,13 @@ An alternative solution is using an AWS serverless solution wherein:
 
         Dockerized:
         - docker-compose ps
+        - docker-compose down
+        - docker-compose rm
         - docker ps
+        - docker stop <container ID>
+        - docker rm <container ID>
         - docker network ls
+        - docker network prune
         - docker volume ls
 
         Manual:
@@ -748,9 +911,27 @@ In Linux, the total round trip time is only 1 second.
 
 # Action Items
 
-1. Use Ionic front-end framework for cross-platform mobile, web, and desktop apps
-2. Add message counter for free-tier subscription
-3. Add manager/admin page in Web client (see all users and devices registered by each user)
-4. Add logging for debugging/troubleshooting
-5. Handle refreshing Cognito access key while user is still online
-6. Support Kubernetes orchestration
+1. Add signup/login using Facebook account
+2. Add feature to enable MFA (Multi factor authentication via email/SMS).
+3. Add Twitter integration to notification manager.
+4. Add mobile app push notification integration to notification manager.
+5. Add message counter for free-tier subscription
+6. Handle refreshing Cognito access key while user is online for a long time
+7. [Low] Add file logging of microservices for easier debugging/troubleshooting
+8. [Low] Add manager/admin page in Web client (see all users and devices registered by each user)
+9. [Low] Support an online device emulator. (Each user can run 1 online device emulator.)
+10. [Low] Support Kubernetes orchestration
+
+
+# Reminders
+
+1. The private key for rootca is not committed in restapi/src/cert/ [for security purposes].
+2. The value of rest_api variable in webapp/src/ionicapp/www/js/server.js should correspond to the GoDaddy domain name or AWS EC2 public IP address.
+   [this may be changed to an environment variable if possible]
+   When using local machine, 192.168.99.100 is the default docker ip.
+3. When using self-signed certificate on NGINX,
+   The Ionic iOS/Android mobile simulators can be viewed online at https://creator.ionic.io/share/xxxASKMExxx but requires the following
+   - "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --ignore-certificate-errors
+   - OR chrome://flags/#allow-insecure-localhost
+   - OR install the following [certificate](https://raw.githubusercontent.com/richmondu/libpyiotcloud/master/nginx/src/ssl-cert-snakeoil.pem.crt)
+   [no longer needed after buying SSL certificates.
