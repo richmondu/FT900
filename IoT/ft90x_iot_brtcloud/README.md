@@ -1,5 +1,6 @@
 # FT900 client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
+Tested working on MM900EV1B (RevC) board and the new FT900 IoT Board.
 Simulators are also available at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
 
 
