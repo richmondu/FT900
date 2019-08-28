@@ -8,6 +8,7 @@ How To Guide:
 1. Create an account and login.
 2. Register a device (Registering a device will return a <b>unique device ID</b>).
 3. Update the device ID in the <b>configuration file, iot_config.h</b> then compile and run. (For production, update both <b>device certificate and private key</b> as well).
+4. Access and control the device via the IoT portal. (GPIO, RTC, UART, etc)
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
 If you do not have an FT900 board, you can use any of the device simulators [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
