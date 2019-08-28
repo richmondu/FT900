@@ -3,9 +3,9 @@
 Tested working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
 How To Guide:
-1. Create an account on the IoT Portal, https://richmondu.com
-2. Register a device (Registering a device will return a unique device ID)
-3. Update the <b>device ID</b> in the <b>configuration file, iot_config.h</b> (For production, the <b>device certificate and device private key</b> should also be modified.)
+1. Create an account on the [IoT Portal](https://richmondu.com).
+2. Register a device (Registering a device will return a <b>unique device ID</b>).
+3. Update the device ID in the <b>configuration file, iot_config.h</b> (For production, the <b>device certificate and device private key</b> should also be modified).
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
 If you do not have an FT900 board, you can use the device simulators at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
