@@ -222,7 +222,7 @@ static void iot_app_task( void *pvParameters )
     // IoTBoard does not have internal RTC
     // When using IoTBoard, this must be disabled to prevent crash
     // TODO: support external RTC to work on IoTBoard
-#if 1
+#if 0 // TEMPORARILY DISABLED FOR THE NEW FT900 IOT BOARD
     init_rtc();
 #endif
 
@@ -446,7 +446,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     // IoTBoard does not have internal RTC
     // When using IoTBoard, this must be disabled to prevent crash
     // TODO: support external RTC to work on IoTBoard
-#if 1
+#if 0 // TEMPORARILY DISABLED FOR THE NEW FT900 IOT BOARD
     ///////////////////////////////////////////////////////////////////////////////////
     // RTC
     ///////////////////////////////////////////////////////////////////////////////////
