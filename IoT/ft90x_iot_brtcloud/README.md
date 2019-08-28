@@ -1,6 +1,6 @@
 # FT900 client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
-Working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
+This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
 How To Guide:
 1. Create an account on the [IoT Portal](https://richmondu.com).
