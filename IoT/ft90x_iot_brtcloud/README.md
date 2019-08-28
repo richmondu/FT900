@@ -1,8 +1,11 @@
 # FT900 client for [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
-Tested working on MM900EV1B (RevC) board and the new FT900 IoT Board.
+Tested working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
-Simulators are also available at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
+Simply update the device ID in the configuration file, iot_config.h.
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
+
+If you do not have an FT900 board, you can use the device simulators at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
 
 
 # libpyiotcloud
@@ -105,6 +108,22 @@ An alternative solution is using an AWS serverless solution wherein:
 
 
 # Design
+
+### User Interface
+
+User signup and login
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/ui_loginsignup.png" width="800"/>
+
+Device registration
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/ui_deviceregistration.png" width="800"/>
+
+Device access and control
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/ui_deviceaccess.png" width="800"/>
+
+Menu, account, history
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/ui_menuaccounthistory.png" width="800"/>
+
+
 
 ### Features
 
@@ -228,6 +247,8 @@ Device access APIs requires username, devicename and access token returned by lo
        Once it receives a message on this topic, it will trigger Amazon Pinpoint to send the email or SMS.
     3. Web client application can also trigger device to send email/SMS notifications via the trigger_notification REST API.
        webclient -> webserver(rest api) -> messagebroker -> device -> messagebroker -> notificationmanager -> pinpoint
+
+
 
 
 # Instructions (Docker)
@@ -525,6 +546,7 @@ Device access APIs requires username, devicename and access token returned by lo
        sudo curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
        sudo chmod +x /usr/local/bin/docker-compose
        sudo service docker restart
+       restart putty
        
        // Set the AWS environment variables
        export AWS_ACCESS_KEY_ID=""
@@ -847,6 +869,8 @@ Device access APIs requires username, devicename and access token returned by lo
         - MacOS
         - xcode
         - TODO
+
+<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/ui_androidemulator.png" width="1000"/>
 
 
 # Testing and Troubleshooting
