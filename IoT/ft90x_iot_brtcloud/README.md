@@ -8,10 +8,10 @@ How To Guide:
 3. Update the device ID in the <b>configuration file, iot_config.h</b> (For production, the <b>device certificate and device private key</b> should also be modified).
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
-If you do not have an FT900 board, you can use the device simulators at https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator
+If you do not have an FT900 board, you can use any of the device simulators [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
 
 
-# libpyiotcloud
+# [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
 
 libpyiotcloud is a dockerized IoT platform for secure remote access and control of an MCU-based smart device from Android/iOS mobile apps and desktop web browser via backend HTTPS REST APIs with AMQPS connectivity and device-side MQTTS connectivity.
 
