@@ -3,7 +3,9 @@
 This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
 How To Guide:
-1. Create an account on the web portal [IoT Portal](https://richmondu.com) or on [Mobile App Simulator](https://creator.ionic.io/share/8f86e2005ba5).
+
+0. Access the IoT portal [here](https://richmondu.com). (iOS/Android app simulators are also available [here](https://creator.ionic.io/share/8f86e2005ba5).)
+1. Create an account and login.
 2. Register a device (Registering a device will return a <b>unique device ID</b>).
 3. Update the device ID in the <b>configuration file, iot_config.h</b> (For production, the <b>device certificate and device private key</b> should also be modified).
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
