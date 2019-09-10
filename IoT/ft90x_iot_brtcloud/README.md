@@ -11,7 +11,7 @@ How To Guide:
 4. Access and control the device via the IoT portal. (GPIO, RTC, UART, etc)
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
-If you do not have an FT900 board, you can use any of the device simulators [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
+If you do not have an FT900 board, you can use any of the <b>device simulators</b> [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
 
 
 # [libpyiotcloud](https://github.com/richmondu/libpyiotcloud)
