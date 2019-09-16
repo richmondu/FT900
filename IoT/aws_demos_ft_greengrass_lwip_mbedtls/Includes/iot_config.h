@@ -34,6 +34,7 @@
 #define CIPHERSUITE_OPTION_1 1 // strong:    RSA_AES128_CBC_SHA, RSA_AES256_CBC_SHA
 #define CIPHERSUITE_OPTION_2 2 // stronger:  RSA_AES128_GCM_SHA256, RSA_AES256_GCM_SHA384
 #define CIPHERSUITE_OPTION_3 3 // strongest: ECDHE_RSA_AES128_CBC_SHA, ECDHE_RSA_AES256_CBC_SHA
+#define CIPHERSUITE_OPTION_4 4 // strongest: ECDHE_ECDSA_AES128_CBC_SHA256, ECDHE_ECDSA_AES128_GCM_SHA256
 #define IOT_CONFIG_USE_CIPHERSUITE CIPHERSUITE_OPTION_1
 
 
@@ -44,7 +45,7 @@
  * However, note that the client certificate and private key are still verified.
  * For production release, this must be enabled for two-way authentication.
  */
-#define IOT_CONFIG_USE_ROOTCA 0 // optional for demo; highly recommended for production
+#define IOT_CONFIG_USE_ROOTCA 1 // optional for demo; highly recommended for production
 
 
 /*

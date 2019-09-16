@@ -20,6 +20,11 @@
 #elif (IOT_CONFIG_USE_CIPHERSUITE == CIPHERSUITE_OPTION_3)
     #define USE_GCM_OVER_CBC         0
     #define USE_ECC_CIPHERSUITE      1
+    #define USE_ECDSA_OVER_RSA       0
+#elif (IOT_CONFIG_USE_CIPHERSUITE == CIPHERSUITE_OPTION_4)
+    #define USE_GCM_OVER_CBC         0
+    #define USE_ECC_CIPHERSUITE      1
+    #define USE_ECDSA_OVER_RSA       1
 #endif // IOT_CONFIG_USE_CIPHERSUITE
 
 /*-----------------------------------------------------------*/
@@ -40,8 +45,17 @@
 // AWS IoT also supports these ciphersuites
 #if USE_ECC_CIPHERSUITE
     #if USE_GCM_OVER_CBC
+        #if USE_ECDSA_OVER_RSA
+            #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        #else
+            #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+        #endif
     #else
-        #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+        #if USE_ECDSA_OVER_RSA
+            #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+        #else
+            #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+        #endif
     #endif
 #else
     #if USE_GCM_OVER_CBC
@@ -55,21 +69,28 @@
 
 // Key exchange-related configurations
 #if USE_ECC_CIPHERSUITE
-#define MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED // required by our chosen ciphersuites
-#define MBEDTLS_ECDH_C               // required by our chosen ciphersuites
-#define MBEDTLS_ECP_C                // required by MBEDTLS_ECDH_C
-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
+	// ECDSA-related configurations
+	#if USE_ECDSA_OVER_RSA
+		#define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+		#define MBEDTLS_ECDSA_C
+		#define MBEDTLS_ASN1_WRITE_C
+		// ECC optimizations
+		#define MBEDTLS_ECP_NIST_OPTIM
+		#define MBEDTLS_ECP_FIXED_POINT_OPTIM		0
+		#define MBEDTLS_ECP_WINDOW_SIZE				2
+		#define MBEDTLS_ECP_MAX_BITS 				256
+	#else
+		#define MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED // required by our chosen ciphersuites
+	#endif
+	#define MBEDTLS_ECDH_C               // required by our chosen ciphersuites
+	#define MBEDTLS_ECP_C                // required by MBEDTLS_ECDH_C
+	#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 #else // USE_ECC_CIPHERSUITE
-#define MBEDTLS_KEY_EXCHANGE_RSA_ENABLED // required by our chosen ciphersuites
+	// RSA-related configurations
+	#define MBEDTLS_KEY_EXCHANGE_RSA_ENABLED	// required by our chosen ciphersuites
+	#define MBEDTLS_RSA_C                		// required by our chosen ciphersuites
+	#define MBEDTLS_PKCS1_V15            		// required by MBEDTLS_RSA_C
 #endif // USE_ECC_CIPHERSUITE
-
-/*-----------------------------------------------------------*/
-
-// RSA-related configurations
-#define MBEDTLS_RSA_C                // required by our chosen ciphersuites
-#define MBEDTLS_OID_C                // required by MBEDTLS_RSA_C
-#define MBEDTLS_PKCS1_V15            // required by MBEDTLS_RSA_C
-#define MBEDTLS_BIGNUM_C             // required by MBEDTLS_RSA_C
 
 /*-----------------------------------------------------------*/
 
@@ -81,6 +102,8 @@
 #define MBEDTLS_PK_C                 // required by MBEDTLS_PK_PARSE_C
 #define MBEDTLS_PEM_PARSE_C          // required by format of our given X509 certificates
 #define MBEDTLS_BASE64_C             // required by MBEDTLS_PEM_PARSE_C
+#define MBEDTLS_OID_C                // required by MBEDTLS_X509_USE_C
+#define MBEDTLS_BIGNUM_C             // required by MBEDTLS_X509_USE_C
 
 /*-----------------------------------------------------------*/
 
@@ -103,7 +126,7 @@
 
 // Optimization related configuration
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-    #define MBEDTLS_SSL_MAX_CONTENT_LEN     (1536)
+    #define MBEDTLS_SSL_MAX_CONTENT_LEN     (1024+512)
 #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
     #if USE_ECC_CIPHERSUITE
         #define MBEDTLS_SSL_MAX_CONTENT_LEN (3072+320)
