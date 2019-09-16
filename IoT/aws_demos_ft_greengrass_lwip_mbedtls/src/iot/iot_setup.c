@@ -194,7 +194,7 @@ static inline void setupUART()
     sys_enable(sys_device_uart0);
     gpio_function(48, pad_func_3);
     gpio_function(49, pad_func_3);
-    uart_open(UART0, 1, UART_DIVIDER_115200_BAUD, 8, 0, 0);
+    uart_open(UART0, 1, UART_DIVIDER_19200_BAUD, 8, 0, 0);
     /* Enable tfp_printf() functionality... */
     init_printf(UART0, myputc);
 }
