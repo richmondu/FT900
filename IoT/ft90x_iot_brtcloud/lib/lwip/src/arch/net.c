@@ -414,7 +414,7 @@ void net_status_cb(struct netif *netif)
 	NET_DEBUG_PRINTF("  gw = %s\r\n", ipaddr_ntoa(&netif->gw));
 	NET_DEBUG_PRINTF("  mask = %s\r\n", ipaddr_ntoa(&netif->netmask));
 #if INCLUDE_uxTaskGetStackHighWaterMark
-	NET_DEBUG_PRINTF("  "NET_ETHERNET_INPUT_TASK" = %ld\r\n", uxTaskGetStackHighWaterMark(g_task_ethernet_input) * sizeof(StackType_t));
+	//NET_DEBUG_PRINTF("  "NET_ETHERNET_INPUT_TASK" = %ld\r\n", uxTaskGetStackHighWaterMark(g_task_ethernet_input) * sizeof(StackType_t));
 #endif // INCLUDE_uxTaskGetStackHighWaterMark
 #if NET_USE_EEPROM
 	if (net_is_ready())
