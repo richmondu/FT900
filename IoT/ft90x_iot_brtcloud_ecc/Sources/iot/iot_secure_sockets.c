@@ -81,9 +81,9 @@
 
 #ifdef DEBUG
 #define DEBUG_CONNECT(...)
-//#define DEBUG_CONNECT_VERBOSE(...)
+#define DEBUG_CONNECT_VERBOSE(...)
 //#define DEBUG_CONNECT             DEBUG_MINIMAL
-#define DEBUG_CONNECT_VERBOSE     DEBUG_MINIMAL
+//#define DEBUG_CONNECT_VERBOSE     DEBUG_MINIMAL
 #define DEBUG_SEND(...)
 #define DEBUG_RECV(...)
 #else
@@ -135,7 +135,7 @@ static int _TLS_send(void *ctx, const unsigned char *ptr, size_t size)
 {
     sslclient_context *ssl_client = xSockets[0].sslCtx;
 
-tfp_printf("lwip_send size=%d\r\n", size);
+//tfp_printf("lwip_send size=%d\r\n", size);
     int ret = lwip_send(ssl_client->socket, ptr, size, 0);
     if (ret != size) {
         DEBUG_SEND("_TLS_send lwip_send failed! %d\r\n", ret);
@@ -148,7 +148,7 @@ static int _TLS_recv(void *ctx, unsigned char *ptr, size_t size)
 {
     sslclient_context *ssl_client = xSockets[0].sslCtx;
 
-tfp_printf("lwip_recv size=%d\r\n", size);
+//tfp_printf("lwip_recv size=%d\r\n", size);
     int ret = lwip_recv(ssl_client->socket, ptr, size, 0);
     if (ret <= 0) {
         DEBUG_RECV("_TLS_recv lwip_recv failed! %d\r\n", ret);
@@ -304,8 +304,8 @@ int32_t SOCKETS_Connect(
     }
     memcpy_pm2dat(ca_cert, IOT_CLIENTCREDENTIAL_CA_CERTIFICATE, ret-1);
     ca_cert[ret-1] = '\0';
-    //tfp_printf("ret=%d %d\r\n", ret, strlen(ca_cert));
-    tfp_printf("%s\r\n", ca_cert);
+    //DEBUG_CONNECT_VERBOSE("ret=%d %d\r\n", ret, strlen(ca_cert));
+    DEBUG_CONNECT_VERBOSE("%s\r\n", ca_cert);
 #else // IOT_CONFIG_USE_CERT_OPTIMIZATION
     const char *ca_cert = IOT_CLIENTCREDENTIAL_CA_CERTIFICATE;
 #endif // IOT_CONFIG_USE_CERT_OPTIMIZATION
@@ -325,8 +325,8 @@ int32_t SOCKETS_Connect(
     }
     memcpy_pm2dat(cli_cert, IOT_CLIENTCREDENTIAL_CERTIFICATE, ret-1);
     cli_cert[ret-1] = '\0';
-    //tfp_printf("ret=%d %d\r\n", ret, strlen(cli_cert));
-    tfp_printf("%s\r\n", cli_cert);
+    //DEBUG_CONNECT_VERBOSE("ret=%d %d\r\n", ret, strlen(cli_cert));
+    DEBUG_CONNECT_VERBOSE("%s\r\n", cli_cert);
 
     ret = IOT_CLIENTCREDENTIAL_PRIVATEKEY_END - IOT_CLIENTCREDENTIAL_PRIVATEKEY + 1;
     char *cli_key = pvPortMalloc(ret);// + 1);
@@ -335,8 +335,8 @@ int32_t SOCKETS_Connect(
     }
     memcpy_pm2dat(cli_key, IOT_CLIENTCREDENTIAL_PRIVATEKEY, ret-1);
     cli_key[ret-1] = '\0';
-    //tfp_printf("ret=%d %d\r\n", ret, strlen(cli_key));
-    tfp_printf("%s\r\n", cli_key);
+    //DEBUG_CONNECT_VERBOSE("ret=%d %d\r\n", ret, strlen(cli_key));
+    DEBUG_CONNECT_VERBOSE("%s\r\n", cli_key);
 #else // IOT_CONFIG_USE_CERT_OPTIMIZATION
     const char *cli_cert = IOT_CLIENTCREDENTIAL_CERTIFICATE;
     const char *cli_key = IOT_CLIENTCREDENTIAL_PRIVATEKEY;
