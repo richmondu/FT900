@@ -1776,6 +1776,9 @@ static inline void prvProcessReceivedPublish( MQTTContext_t * pxMQTTContext )
         {
             prvReturnBuffer( pxMQTTContext, pxMQTTContext->xRxBuffer );
         }
+        else {
+        	prvReturnBuffer( pxMQTTContext, pxMQTTContext->xRxBuffer ); // fix memory leak
+        }
     }
     else
     {
