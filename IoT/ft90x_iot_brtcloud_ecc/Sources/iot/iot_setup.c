@@ -58,7 +58,7 @@
 
 /* Macro Definitions ---------------------------------------------------------*/
 
-#define TASK_SYSTEM_STACK_SIZE      (512)
+#define TASK_SYSTEM_STACK_SIZE      (512+256)
 #define TASK_SYSTEM_PRIORITY        2
 
 /* Private variables ---------------------------------------------------------*/

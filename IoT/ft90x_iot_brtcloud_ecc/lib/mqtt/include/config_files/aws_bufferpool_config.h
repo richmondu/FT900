@@ -43,11 +43,7 @@
  * Note that this buffer is for sending MQTT packets only
  * This buffer size has been reduced for memory footprint purposes
  */
-#if 1
-#define bufferpoolconfigBUFFER_DATA_SIZE    ( 100 )
-#else
 #define bufferpoolconfigBUFFER_DATA_SIZE    ( 256 )
-#endif
 
 /**
  * @brief The size of each buffer in the static buffer pool.
