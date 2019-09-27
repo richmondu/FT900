@@ -1564,12 +1564,11 @@ static inline void prvInitiateMQTTPublish( MQTTEventData_t * const pxEventData )
 
     /* In case of QoS0 successful publish, inform and unblock the task that
      * initiated the publish operation as no PUBACK is expected. */
-    if( ( xStatus == pdPASS ) && ( pxEventData->u.pxPublishParams->xQoS == eMQTTQoS0 ) )
+    if( xStatus == pdPASS )
     {
         prvNotifyRequestingTask( &( pxEventData->xNotificationData ), eMQTTPUBSent, pdPASS );
     }
-
-    if( xStatus == pdFAIL )
+    else
     {
         /* The Publish was not successful.  Inform the task that initiated
          * the Publish operation. */
@@ -1754,7 +1753,7 @@ static void prvMQTTTask( void * pvParameters )
 
 #if !mqttconfigDISABLE_SUBSCRIBE
                     case eMQTTSubscribeRequest:
-                        tfp_printf("eMQTTSubscribeRequest \r\n");
+                        //tfp_printf("eMQTTSubscribeRequest \r\n");
                         prvInitiateMQTTSubscribe( &( xMQTTCommand ) );
                         break;
 
