@@ -127,4 +127,25 @@ inline iot_status iot_subscribe( const iot_subscribe_params_t* param )
 #endif
 }
 
+/*-----------------------------------------------------------*/
 
+inline iot_status iot_unsubscribe( const iot_subscribe_params_t* param )
+{
+#if !mqttconfigDISABLE_SUBSCRIBE
+    MQTTAgentReturnCode_t xReturned;
+
+
+	xReturned = MQTT_AGENT_Unsubscribe( xMQTTHandle, (MQTTAgentUnsubscribeParams_t*)param, MQTT_TIMEOUT );
+	if ( xReturned != eMQTTAgentSuccess ) {
+		DEBUG_PRINTF( "ERROR: Failed to unsubscribe.\r\n");
+		return pdFAIL;
+	}
+
+	DEBUG_PRINTF( "MQTT app unsubscribed.\r\n\r\n" );
+	return pdPASS;
+#else
+    return pdFAIL;
+#endif
+}
+
+/*-----------------------------------------------------------*/

@@ -82,6 +82,7 @@ iot_status iot_connect( const iot_connect_params_t* param );
 iot_status iot_disconnect( void );
 iot_status iot_publish( const iot_publish_params_t* param );
 iot_status iot_subscribe( const iot_subscribe_params_t* param );
+iot_status iot_unsubscribe( const iot_subscribe_params_t* param );
 
 
 
