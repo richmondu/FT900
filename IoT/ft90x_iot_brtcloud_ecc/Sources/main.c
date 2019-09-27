@@ -58,6 +58,10 @@
 //#define IOT_APP_TERMINATE         { int x=1/0; } // force a crash
 #define PREPEND_REPLY_TOPIC         "server/"
 
+#define MAX_TOPIC_SIZE 80
+#define MAX_PAYLOAD_SIZE 128
+extern TaskHandle_t g_hSystemTask;
+
 /*-----------------------------------------------------------*/
 
 static inline void display_network_info()
@@ -134,18 +138,20 @@ static char* parse_gpio_str( char* ptr, char* str, char end )
 
 MQTTBool_t user_subscribe_receive_cb( void * pvContext, const MQTTPublishData_t * const pxPublishData )
 {
-    char topic[80] = {0};
-    char payload[80] = {0};
-	iot_publish_params_t xPublishParam = {topic, sizeof(topic)-1, 1, payload, sizeof(payload)-1 };
+	iot_publish_params_t* pxPublishParam = (iot_publish_params_t*)pvContext;
 
 
     DEBUG_MINIMAL( "callback [%s] [%s]\r\n", (char*)pxPublishData->pucTopic, (char*)pxPublishData->pvData );
+
+	memset((char*)pxPublishParam->pucTopic, 0, MAX_TOPIC_SIZE);
+	memset((char*)pxPublishParam->pvData, 0, MAX_PAYLOAD_SIZE);
 
     char* ptr = user_generate_subscribe_topic();
     char* ptr2 = strrchr(ptr,  '/');
     int len = ptr2 - ptr;
 
     if (strncmp(ptr, (char*)pxPublishData->pucTopic, len)!=0) {
+        DEBUG_MINIMAL( "invalid topic\r\n");
         return eMQTTTrue;
     }
 
@@ -230,26 +236,21 @@ MQTTBool_t user_subscribe_receive_cb( void * pvContext, const MQTTPublishData_t 
     //else
     if ( strncmp( ptr, API_GET_STATUS, len ) == 0 ) {
 
-
-        tfp_snprintf( (uint8_t*)xPublishParam.pucTopic, xPublishParam.usTopicLength+1, "%s%s", PREPEND_REPLY_TOPIC, (char*)pxPublishData->pucTopic);
-        tfp_snprintf( (uint8_t*)xPublishParam.pvData, xPublishParam.ulDataLength+1, "{\"value\": \"%s\"}", API_STATUS_RUNNING);
-        iot_publish( &xPublishParam );
-        DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
+    	pxPublishParam->usTopicLength = tfp_snprintf( (char*)pxPublishParam->pucTopic, MAX_TOPIC_SIZE, "%s%s", PREPEND_REPLY_TOPIC, (char*)pxPublishData->pucTopic);
+    	pxPublishParam->ulDataLength = tfp_snprintf( (char*)pxPublishParam->pvData, MAX_PAYLOAD_SIZE, "{\"value\": \"%s\"}", API_STATUS_RUNNING);
+    	xTaskNotify(g_hSystemTask, 0, eNoAction );
     }
     else if ( strncmp( ptr, API_SET_STATUS, len ) == 0 ) {
 
         ptr = (char*)pxPublishData->pvData;
 
         char* status = parse_gpio_str(ptr, "\"value\": ",  '}');
-        //DEBUG_PRINTF( "%s\r\n", status );
-
         if ( strncmp( status, API_STATUS_RESTART, strlen(API_STATUS_RESTART)) == 0 ) {
-            tfp_snprintf( xPublishParam.pucTopic, xPublishParam.usTopicLength+1, "%s%s", PREPEND_REPLY_TOPIC, (char*)pxPublishData->pucTopic );
-            tfp_snprintf( xPublishParam.pvData, xPublishParam.ulDataLength+1, "{\"value\": \"%s\"}", API_STATUS_RESTARTING );
-            iot_publish( &xPublishParam );
-            //xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
+        	pxPublishParam->usTopicLength = tfp_snprintf( (char*)pxPublishParam->pucTopic, MAX_TOPIC_SIZE, "%s%s", PREPEND_REPLY_TOPIC, (char*)pxPublishData->pucTopic );
+            pxPublishParam->ulDataLength = tfp_snprintf( (char*)pxPublishParam->pvData, MAX_PAYLOAD_SIZE, "{\"value\": \"%s\"}", API_STATUS_RESTARTING );
+            xTaskNotify(g_hSystemTask, 0, eNoAction );
+            xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
         }
-
     }
 
 #if 0
@@ -388,9 +389,12 @@ void iot_app_task( void * pvParameters )
 {
     ( void ) pvParameters;
     BaseType_t xReturned;
-
     DEBUG_MINIMAL( "iot_app_task\r\n" );
-
+    iot_subscribe_params_t xSubscribeParam = {0};
+	uint32_t ulNotifiedValue = 0;
+    char topic[MAX_TOPIC_SIZE] = {0};
+    char payload[MAX_PAYLOAD_SIZE] = {0};
+	iot_publish_params_t xPublishParam = {topic, sizeof(topic)-1, 1, payload, sizeof(payload)-1 };
 
 
     while (1) {
@@ -431,24 +435,49 @@ void iot_app_task( void * pvParameters )
 		xReturned = iot_connect( &xConnectParam );
 		if ( xReturned != pdPASS ) {
 			DEBUG_MINIMAL( "IOT APP connect fail!\r\n" );
-			continue;//goto exit;
+			goto exit;
 		}
 
-		iot_subscribe_params_t xSubscribeParam = {
-			(uint8_t *)user_generate_subscribe_topic(), IOT_APP_TOPIC_LENGTH-1, 1, NULL, user_subscribe_receive_cb };
-		iot_subscribe( &xSubscribeParam );
+		xSubscribeParam.pucTopic = (uint8_t *)user_generate_subscribe_topic();
+		xSubscribeParam.usTopicLength = IOT_APP_TOPIC_LENGTH-1;
+		xSubscribeParam.xQoS = 1;
+		xSubscribeParam.pvPublishCallbackContext = &xPublishParam;
+		xSubscribeParam.pxPublishCallback = user_subscribe_receive_cb;
+
+		/*
+		 * Subscribe messages from iot broker
+		 */
+		if (iot_subscribe( &xSubscribeParam ) != pdPASS ) {
+			DEBUG_MINIMAL( "IOT APP subscribe fail!\r\n" );
+			goto exit;
+		}
 
 		do  {
+			if (xTaskNotifyWait(0, 0, NULL, pdMS_TO_TICKS(1000))) {
+				if (iot_publish( &xPublishParam ) != pdPASS ) {
+					DEBUG_MINIMAL( "IOT APP publish fail!\r\n" );
+				}
+			}
 			vTaskDelay( pdMS_TO_TICKS(1000) );
 		} while ( net_is_ready() );
+		DEBUG_MINIMAL( "Loop exited!\r\n" );
 
-		/* Release memory for iot packet */
-		vPortFree( ( char* )xSubscribeParam.pucTopic );
+		/*
+		 * Unsubscribe messages from iot broker
+		 */
+		if (iot_unsubscribe( &xSubscribeParam ) != pdPASS ) {
+			DEBUG_MINIMAL( "IOT APP unsubscribe fail!\r\n" );
+			goto exit;
+		}
 
 exit:
 		/* Disconnect from iot broker */
 		iot_disconnect();
     }
+
+
+	/* Release memory for iot packet */
+	vPortFree( ( char* )xSubscribeParam.pucTopic );
 
     DEBUG_MINIMAL( "IOT APP ended.\r\n" );
     IOT_APP_TERMINATE;
