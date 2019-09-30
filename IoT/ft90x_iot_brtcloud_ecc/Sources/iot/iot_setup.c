@@ -70,33 +70,8 @@ TaskHandle_t g_hSystemTask = NULL;
 
 /*-----------------------------------------------------------*/
 
-static inline void display_network_info()
-{
-    uint8_t* mac = net_get_mac();
-    DEBUG_MINIMAL( "MAC=%02X:%02X:%02X:%02X:%02X:%02X\r\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5] );
-
-    ip_addr_t addr = net_get_ip();
-    DEBUG_MINIMAL( "IP=%s\r\n", inet_ntoa(addr) );
-    addr = net_get_gateway();
-    DEBUG_MINIMAL( "GW=%s\r\n", inet_ntoa(addr) );
-    addr = net_get_netmask();
-    DEBUG_MINIMAL( "MA=%s\r\n", inet_ntoa(addr) );
-    vTaskDelay( pdMS_TO_TICKS(1000) );
-}
-
 static void vTaskSystem(void* params)
 {
-	/* Default network configuration. */
-	#define USE_DHCP 1       // 1: Dynamic IP, 0: Static IP
-	ip_addr_t ip      = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-	ip_addr_t gateway = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-	ip_addr_t mask    = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-	ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
-
-    /* Initialize network */
-    net_init( ip, gateway, mask, USE_DHCP, dns, NULL, NULL );
-
     BaseType_t xResult = MQTT_AGENT_Init();
     if ( xResult == pdPASS ) {
         xResult = BUFFERPOOL_Init();

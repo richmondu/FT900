@@ -43,11 +43,12 @@
  * Note that this buffer is for sending MQTT packets only
  * This buffer size has been reduced for memory footprint purposes
  */
-#define bufferpoolconfigBUFFER_DATA_SIZE    ( 128+64+32 )
+#define bufferpoolconfigBUFFER_DATA_SIZE    ( 512 )
 
 /**
  * @brief The size of each buffer in the static buffer pool.
  */
-#define bufferpoolconfigBUFFER_SIZE    ( bufferpoolconfigBUFFER_DATA_SIZE + 64 )
+#include "../private/aws_mqtt_buffer.h"
+#define bufferpoolconfigBUFFER_SIZE    ( bufferpoolconfigBUFFER_DATA_SIZE + sizeof(MQTTBufferMetadata_t) )
 
 #endif /* _AWS_BUFFER_POOL_CONFIG_H_ */
