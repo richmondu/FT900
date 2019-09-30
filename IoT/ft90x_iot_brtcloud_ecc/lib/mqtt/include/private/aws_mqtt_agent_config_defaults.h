@@ -160,7 +160,7 @@
  */
 #ifndef mqttconfigRX_BUFFER_SIZE
 #if !mqttconfigDISABLE_SUBSCRIBE
-    #define mqttconfigRX_BUFFER_SIZE    ( 1024 )
+    #define mqttconfigRX_BUFFER_SIZE    ( 256 )
 #else
     #define mqttconfigRX_BUFFER_SIZE    ( 16 )
 #endif
