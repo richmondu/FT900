@@ -58,7 +58,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#if 0
+
 int get_gpio( int number )
 {
     uint8_t state;
@@ -82,6 +82,7 @@ void set_gpio( int number, int value )
     gpio_write((uint8_t)number, value?1:0);
 }
 
+#if 0
 void init_rtc( void )
 {
     // Initialise the RTC to run indefinitely...
@@ -133,6 +134,7 @@ uint32_t get_rtc( void )
     uint32_t secs = mktime(&time_tm);
     return secs;
 }
+#endif
 
 void get_mac( uint8_t* mac )
 {
@@ -158,7 +160,7 @@ void set_mac( uint8_t* mac_str )
 
     net_set_mac_eeprom(mac);
 }
-#endif
+
 void restart_task( void *param )
 {
     vTaskDelay( pdMS_TO_TICKS(1000) );
