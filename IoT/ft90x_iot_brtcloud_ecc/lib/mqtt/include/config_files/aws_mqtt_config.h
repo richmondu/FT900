@@ -45,7 +45,7 @@
  * manager.
  */
 #if !mqttconfigDISABLE_SUBSCRIBE
-#define mqttconfigSUBSCRIPTION_MANAGER_MAX_TOPIC_LENGTH     ( 64 )
+#define mqttconfigSUBSCRIPTION_MANAGER_MAX_TOPIC_LENGTH     ( 64+32 )
 #endif
 
 /**
