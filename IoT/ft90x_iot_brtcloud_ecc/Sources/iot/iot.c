@@ -42,7 +42,7 @@
 /*-----------------------------------------------------------*/
 
 #define MQTT_TLS_NEGOTIATION_TIMEOUT  pdMS_TO_TICKS( 12000 )
-#define MQTT_TIMEOUT                  pdMS_TO_TICKS( 2500 )
+#define MQTT_TIMEOUT                  pdMS_TO_TICKS( 5000 )
 
 
 static MQTTAgentHandle_t xMQTTHandle = NULL;
