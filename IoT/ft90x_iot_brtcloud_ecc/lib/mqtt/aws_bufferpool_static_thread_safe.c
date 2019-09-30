@@ -112,7 +112,7 @@ typedef struct BufferMetadata
  * @note Each buffer in the buffer pool allocates additional the space required
  * to store the metadata and to ensure alignment.
  */
-static uint8_t ucBufferPool[ bufferpoolconfigNUM_BUFFERS ][ sizeof( BufferMetadata_t ) + bufferpoolconfigBUFFER_SIZE + ( portBYTE_ALIGNMENT - 1 ) ];
+static uint8_t* ucBufferPool[ bufferpoolconfigNUM_BUFFERS ] = {0};//[ sizeof( BufferMetadata_t ) + bufferpoolconfigBUFFER_SIZE + ( portBYTE_ALIGNMENT - 1 ) ];
 /*-----------------------------------------------------------*/
 
 BaseType_t BUFFERPOOL_Init( void )
@@ -123,6 +123,12 @@ BaseType_t BUFFERPOOL_Init( void )
      * and hence no thread safety is ensured. */
     for( x = 0; x < bufferpoolconfigNUM_BUFFERS; x++ )
     {
+        ucBufferPool[ x ] = pvPortMalloc(bufferpoolconfigBUFFER_SIZE);
+        if ( ucBufferPool[ x ] == NULL ) {
+        	tfp_printf("BUFFERPOOL_Init pvPortMalloc fail\r\n");
+        	break;
+        }
+        memset(&ucBufferPool[ x ][0], 0, bufferpoolconfigBUFFER_SIZE);
         /* Mark all the buffers as free. */
         bufferpoolstaticBUFFER_IN_USE( ucBufferPool[ x ] ) = 0;
     }
