@@ -1567,6 +1567,12 @@ static inline void prvInitiateMQTTPublish( MQTTEventData_t * const pxEventData )
     if( xStatus == pdPASS )
     {
         prvNotifyRequestingTask( &( pxEventData->xNotificationData ), eMQTTPUBSent, pdPASS );
+
+        /* If a buffer was used to store notification data, return it. */
+        if( pxNotificationData != NULL )
+        {
+            pxNotificationData->xTaskToNotify = NULL;
+        }
     }
     else
     {
