@@ -3418,7 +3418,6 @@ int mbedtls_ssl_handshake_client_step( mbedtls_ssl_context *ssl )
         */
        case MBEDTLS_SSL_CLIENT_HELLO:
            ret = ssl_write_client_hello( ssl );
-           tfp_printf("MBEDTLS_SSL_CLIENT_HELLO %d %x\r\n", ret, -ret);
            break;
 
        /*
@@ -3430,27 +3429,22 @@ int mbedtls_ssl_handshake_client_step( mbedtls_ssl_context *ssl )
         */
        case MBEDTLS_SSL_SERVER_HELLO:
            ret = ssl_parse_server_hello( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_HELLO %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_SERVER_CERTIFICATE:
            ret = mbedtls_ssl_parse_certificate( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_CERTIFICATE %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_SERVER_KEY_EXCHANGE:
            ret = ssl_parse_server_key_exchange( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_KEY_EXCHANGE %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_CERTIFICATE_REQUEST:
            ret = ssl_parse_certificate_request( ssl );
-           tfp_printf("MBEDTLS_SSL_CERTIFICATE_REQUEST %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_SERVER_HELLO_DONE:
            ret = ssl_parse_server_hello_done( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_HELLO_DONE %d %x\r\n", ret, -ret);
            break;
 
        /*
@@ -3462,27 +3456,22 @@ int mbedtls_ssl_handshake_client_step( mbedtls_ssl_context *ssl )
         */
        case MBEDTLS_SSL_CLIENT_CERTIFICATE:
            ret = mbedtls_ssl_write_certificate( ssl );
-           tfp_printf("MBEDTLS_SSL_CLIENT_CERTIFICATE %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_CLIENT_KEY_EXCHANGE:
            ret = ssl_write_client_key_exchange( ssl );
-           tfp_printf("MBEDTLS_SSL_CLIENT_KEY_EXCHANGE %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_CERTIFICATE_VERIFY:
            ret = ssl_write_certificate_verify( ssl );
-           tfp_printf("MBEDTLS_SSL_CERTIFICATE_VERIFY %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_CLIENT_CHANGE_CIPHER_SPEC:
            ret = mbedtls_ssl_write_change_cipher_spec( ssl );
-           tfp_printf("MBEDTLS_SSL_CLIENT_CHANGE_CIPHER_SPEC %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_CLIENT_FINISHED:
            ret = mbedtls_ssl_write_finished( ssl );
-           tfp_printf("MBEDTLS_SSL_CLIENT_FINISHED %d %x\r\n", ret, -ret);
            break;
 
        /*
@@ -3498,23 +3487,19 @@ int mbedtls_ssl_handshake_client_step( mbedtls_ssl_context *ssl )
 
        case MBEDTLS_SSL_SERVER_CHANGE_CIPHER_SPEC:
            ret = mbedtls_ssl_parse_change_cipher_spec( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_CHANGE_CIPHER_SPEC %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_SERVER_FINISHED:
            ret = mbedtls_ssl_parse_finished( ssl );
-           tfp_printf("MBEDTLS_SSL_SERVER_FINISHED %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_FLUSH_BUFFERS:
            MBEDTLS_SSL_DEBUG_MSG( 2, ( "handshake: done" ) );
            ssl->state = MBEDTLS_SSL_HANDSHAKE_WRAPUP;
-           tfp_printf("MBEDTLS_SSL_FLUSH_BUFFERS %d %x\r\n", ret, -ret);
            break;
 
        case MBEDTLS_SSL_HANDSHAKE_WRAPUP:
            mbedtls_ssl_handshake_wrapup( ssl );
-           tfp_printf("MBEDTLS_SSL_HANDSHAKE_WRAPUP %d %x\r\n", ret, -ret);
            break;
 
        default:
