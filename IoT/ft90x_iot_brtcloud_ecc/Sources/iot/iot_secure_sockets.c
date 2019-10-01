@@ -101,14 +101,14 @@ typedef struct sslclient_context {
 
 #if IOT_CONFIG_USE_TLS
     mbedtls_ssl_context ssl_ctx;
-    mbedtls_ssl_config ssl_conf;
-    mbedtls_ctr_drbg_context drbg_ctx;
+    mbedtls_ssl_config conf;
+    mbedtls_ctr_drbg_context ctr_drbg;
 
-    mbedtls_entropy_context entropy_ctx;
+    mbedtls_entropy_context entropy;
 
-    mbedtls_x509_crt ca_cert;
-    mbedtls_x509_crt client_cert;
-    mbedtls_pk_context client_key;
+    mbedtls_x509_crt ca;
+    mbedtls_x509_crt cert;
+    mbedtls_pk_context pkey;
 #endif // IOT_CONFIG_USE_TLS
 
 } sslclient_context;
@@ -360,14 +360,14 @@ int32_t SOCKETS_Connect(
         int flags = 0;
 
 
-        mbedtls_ssl_config_init(&ssl_client->ssl_conf);
-        mbedtls_entropy_init(&ssl_client->entropy_ctx);
-        mbedtls_ctr_drbg_init(&ssl_client->drbg_ctx);
+        mbedtls_ssl_config_init(&ssl_client->conf);
+        mbedtls_entropy_init(&ssl_client->entropy);
+        mbedtls_ctr_drbg_init(&ssl_client->ctr_drbg);
 
         DEBUG_CONNECT_VERBOSE("Seeding the random number generator\r\n");
 
-        ret = mbedtls_ctr_drbg_seed(&ssl_client->drbg_ctx, mbedtls_entropy_func,
-                                    &ssl_client->entropy_ctx, (const unsigned char *) pers, strlen(pers));
+        ret = mbedtls_ctr_drbg_seed(&ssl_client->ctr_drbg, mbedtls_entropy_func,
+                                    &ssl_client->entropy, (const unsigned char *) pers, strlen(pers));
         if (ret < 0) {
             DEBUG_PRINTF("mbedtls_ctr_drbg_seed failed! %d\r\n", ret);
             return SOCKETS_SOCKET_ERROR;
@@ -375,7 +375,7 @@ int32_t SOCKETS_Connect(
 
         DEBUG_CONNECT_VERBOSE("Setting up the SSL/TLS structure...\r\n");
 
-        if ((ret = mbedtls_ssl_config_defaults(&ssl_client->ssl_conf,
+        if ((ret = mbedtls_ssl_config_defaults(&ssl_client->conf,
                                                MBEDTLS_SSL_IS_CLIENT,
                                                MBEDTLS_SSL_TRANSPORT_STREAM,
                                                MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
@@ -383,19 +383,19 @@ int32_t SOCKETS_Connect(
             return SOCKETS_SOCKET_ERROR;
         }
 
-        mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED);
-        mbedtls_ssl_conf_rng(&ssl_client->ssl_conf, mbedtls_ctr_drbg_random, &ssl_client->drbg_ctx);
+        mbedtls_ssl_conf_authmode(&ssl_client->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+        mbedtls_ssl_conf_rng(&ssl_client->conf, mbedtls_ctr_drbg_random, &ssl_client->ctr_drbg);
 
 #if IOT_CONFIG_USE_ROOTCA
         if (ca_cert != NULL) {
             DEBUG_CONNECT_VERBOSE("Loading CA cert %d\r\n", strlen(ca_cert));
-            mbedtls_x509_crt_init(&ssl_client->ca_cert);
+            mbedtls_x509_crt_init(&ssl_client->ca);
 
-            ret = mbedtls_x509_crt_parse(&ssl_client->ca_cert, (const unsigned char *)ca_cert, strlen(ca_cert) + 1);
+            ret = mbedtls_x509_crt_parse(&ssl_client->ca, (const unsigned char *)ca_cert, strlen(ca_cert) + 1);
 #if IOT_CONFIG_USE_CERT_OPTIMIZATION
             vPortFree(ca_cert);
 #endif // IOT_CONFIG_USE_CERT_OPTIMIZATION
-            mbedtls_ssl_conf_ca_chain(&ssl_client->ssl_conf, &ssl_client->ca_cert, NULL);
+            mbedtls_ssl_conf_ca_chain(&ssl_client->conf, &ssl_client->ca, NULL);
             if (ret < 0) {
                 DEBUG_PRINTF("mbedtls_x509_crt_parse failed! %d\r\n", ret);
                 return SOCKETS_SOCKET_ERROR;
@@ -403,20 +403,20 @@ int32_t SOCKETS_Connect(
         }
         else
         {
-            mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_NONE);
+            mbedtls_ssl_conf_authmode(&ssl_client->conf, MBEDTLS_SSL_VERIFY_NONE);
             //DEBUG_PRINTF("WARNING: Verify server certificate to prevent man-in-the-middle attacks!\r\n");
         }
 #else // USE_ROOTCA
-        mbedtls_ssl_conf_authmode(&ssl_client->ssl_conf, MBEDTLS_SSL_VERIFY_NONE);
+        mbedtls_ssl_conf_authmode(&ssl_client->conf, MBEDTLS_SSL_VERIFY_NONE);
 #endif // USE_ROOTCA
 
         if (cli_cert != NULL && cli_key != NULL) {
-            mbedtls_x509_crt_init(&ssl_client->client_cert);
-            mbedtls_pk_init(&ssl_client->client_key);
+            mbedtls_x509_crt_init(&ssl_client->cert);
+            mbedtls_pk_init(&ssl_client->pkey);
 
             DEBUG_CONNECT_VERBOSE("Loading CRT cert %d\r\n", strlen(cli_cert));
 
-            ret = mbedtls_x509_crt_parse(&ssl_client->client_cert, (const unsigned char *)cli_cert, strlen(cli_cert) + 1);
+            ret = mbedtls_x509_crt_parse(&ssl_client->cert, (const unsigned char *)cli_cert, strlen(cli_cert) + 1);
 #if IOT_CONFIG_USE_CERT_OPTIMIZATION
             vPortFree(cli_cert);
 #endif // IOT_CONFIG_USE_CERT_OPTIMIZATION
@@ -428,7 +428,7 @@ int32_t SOCKETS_Connect(
 
             DEBUG_CONNECT_VERBOSE("Loading private key %d\r\n", strlen(cli_key));
 
-            ret = mbedtls_pk_parse_key(&ssl_client->client_key, (const unsigned char *)cli_key, strlen(cli_key) + 1, NULL, 0);
+            ret = mbedtls_pk_parse_key(&ssl_client->pkey, (const unsigned char *)cli_key, strlen(cli_key) + 1, NULL, 0);
 #if IOT_CONFIG_USE_CERT_OPTIMIZATION
             vPortFree(cli_key);
 #endif // IOT_CONFIG_USE_CERT_OPTIMIZATION
@@ -438,7 +438,7 @@ int32_t SOCKETS_Connect(
                 goto cleanup;
             }
 
-            ret = mbedtls_ssl_conf_own_cert(&ssl_client->ssl_conf, &ssl_client->client_cert, &ssl_client->client_key);
+            ret = mbedtls_ssl_conf_own_cert(&ssl_client->conf, &ssl_client->cert, &ssl_client->pkey);
             if (ret != 0) {
                 DEBUG_PRINTF("mbedtls_ssl_conf_own_cert failed! %d\r\n", ret);
                 lRetVal = SOCKETS_SOCKET_ERROR;
@@ -447,7 +447,7 @@ int32_t SOCKETS_Connect(
         }
 
         mbedtls_ssl_init(&ssl_client->ssl_ctx);
-        if ((ret = mbedtls_ssl_setup(&ssl_client->ssl_ctx, &ssl_client->ssl_conf)) != 0) {
+        if ((ret = mbedtls_ssl_setup(&ssl_client->ssl_ctx, &ssl_client->conf)) != 0) {
             DEBUG_PRINTF("mbedtls_ssl_setup failed! %d\r\n", ret);
             lRetVal = SOCKETS_SOCKET_ERROR;
             goto cleanup;
@@ -487,9 +487,9 @@ int32_t SOCKETS_Connect(
 
 cleanup:
 		//mbedtls_ssl_free(&ssl_client->ssl_ctx);
-		//mbedtls_ssl_config_free(&ssl_client->ssl_conf);
-		//mbedtls_ctr_drbg_free(&ssl_client->drbg_ctx);
-		//mbedtls_entropy_free(&ssl_client->entropy_ctx);
+		//mbedtls_ssl_config_free(&ssl_client->conf);
+		//mbedtls_ctr_drbg_free(&ssl_client->ctr_drbg);
+		//mbedtls_entropy_free(&ssl_client->entropy);
 
 		if (ca_cert)
 			vPortFree(ca_cert);
@@ -500,13 +500,13 @@ cleanup:
 
         /* Free some unused resource */
         if (ca_cert) {
-            mbedtls_x509_crt_free(&ssl_client->ca_cert);
+            mbedtls_x509_crt_free(&ssl_client->ca);
         }
         if (cli_cert) {
-            mbedtls_x509_crt_free(&ssl_client->client_cert);
+            mbedtls_x509_crt_free(&ssl_client->cert);
         }
         if (cli_key) {
-            mbedtls_pk_free(&ssl_client->client_key);
+            mbedtls_pk_free(&ssl_client->pkey);
         }
         if (lRetVal != SOCKETS_ERROR_NONE) {
             SOCKETS_Close( xSocket );
@@ -636,9 +636,9 @@ int32_t SOCKETS_Close( Socket_t xSocket )
 
 #if IOT_CONFIG_USE_TLS
         mbedtls_ssl_free(&ssl_client->ssl_ctx);
-        mbedtls_ssl_config_free(&ssl_client->ssl_conf);
-        mbedtls_ctr_drbg_free(&ssl_client->drbg_ctx);
-        mbedtls_entropy_free(&ssl_client->entropy_ctx);
+        mbedtls_ssl_config_free(&ssl_client->conf);
+        mbedtls_ctr_drbg_free(&ssl_client->ctr_drbg);
+        mbedtls_entropy_free(&ssl_client->entropy);
 #endif // IOT_CONFIG_USE_TLS
 
         vPortFree(xSockets[( uint32_t ) xSocket].sslCtx);
