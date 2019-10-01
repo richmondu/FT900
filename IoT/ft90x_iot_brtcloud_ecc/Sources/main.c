@@ -46,20 +46,18 @@
 
 /*-----------------------------------------------------------*/
 
-#if 1
 #define CONFIG_NOTIFICATION_UART_KEYWORD 	"Hello World"
 #define CONFIG_NOTIFICATION_RECIPIENT 		"richmond.umagat@brtchip.com"
 #define CONFIG_NOTIFICATION_MESSAGE 		"Hi, How are you today?"
-#endif
 
 #define IOT_APP_PAYLOAD_LENGTH      iot_MAX_BUFFER_SIZE
 #define IOT_APP_TOPIC_LENGTH        43
 #define IOT_APP_TERMINATE           { for (;;) ; }
-//#define IOT_APP_TERMINATE         { int x=1/0; } // force a crash
 #define PREPEND_REPLY_TOPIC         "server/"
 
-#define MAX_TOPIC_SIZE 80
-#define MAX_PAYLOAD_SIZE 128
+#define MAX_TOPIC_SIZE              80
+#define MAX_PAYLOAD_SIZE            128
+
 extern TaskHandle_t g_hSystemTask;
 
 /*-----------------------------------------------------------*/
@@ -152,9 +150,10 @@ void notify_task( void *pvContext )
 			"%s%s/%s", PREPEND_REPLY_TOPIC, IOT_CLIENTCREDENTIAL_CLIENT_ID, API_TRIGGER_NOTIFICATION );
 	pxPublishParam->ulDataLength = tfp_snprintf( (char*)pxPublishParam->pvData, MAX_PAYLOAD_SIZE,
 			"{\"recipient\": \"%s\", \"message\": \"%s\"}", CONFIG_NOTIFICATION_RECIPIENT, CONFIG_NOTIFICATION_MESSAGE );
+
 	tfp_printf("notify %s\r\n", pxPublishParam->pucTopic);
 	xTaskNotify(g_hSystemTask, 0, eNoAction );
-	tfp_printf("notify %s\r\n", pxPublishParam->pvData);
+	tfp_printf("notify %s\r\n", (char*)pxPublishParam->pvData);
 }
 
 MQTTBool_t user_subscribe_receive_cb( void * pvContext, const MQTTPublishData_t * const pxPublishData )
