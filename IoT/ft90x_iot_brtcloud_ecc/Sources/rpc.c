@@ -163,7 +163,7 @@ void set_mac( uint8_t* mac_str )
 
 void restart_task( void *param )
 {
-    vTaskDelay( pdMS_TO_TICKS(1000) );
+    vTaskDelay( pdMS_TO_TICKS(2000) );
     chip_reboot();
 }
 
