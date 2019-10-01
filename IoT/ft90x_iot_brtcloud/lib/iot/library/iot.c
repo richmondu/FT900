@@ -109,6 +109,7 @@ static inline err_t mqtt_connect_async(
     struct hostent *host = NULL;
 
 
+#if LWIP_DNS
     /* Get IP address given host name */
     int trials = 0;
     do {
@@ -136,6 +137,15 @@ static inline err_t mqtt_connect_async(
         DEBUG_PRINTF( "gethostbyname invalid\r\n" );
         return -1;
     }
+#else
+    /* assumes the broker provided is an ip address */
+    inet_pton(AF_INET, broker, &host_addr);
+    err = mqtt_client_connect(
+        client, &host_addr, port, mqtt_connect_callback, info->tls_config, info );
+    if (err != ERR_OK) {
+        DEBUG_PRINTF( "mqtt_client_connect failed! %d\r\n", err );
+    }
+#endif
 
     return err;
 }
