@@ -135,7 +135,7 @@ extern const struct altcp_functions altcp_tcp_functions;
 struct altcp_pcb *
 altcp_alloc(void)
 {
-  struct altcp_pcb *ret = (struct altcp_pcb *)memp_malloc(MEMP_ALTCP_PCB);
+  struct altcp_pcb *ret = (struct altcp_pcb *)memp_malloc(MEMP_NUM_ALTCP_PCB);
   if (ret != NULL) {
     memset(ret, 0, sizeof(struct altcp_pcb));
   }
@@ -152,7 +152,7 @@ altcp_free(struct altcp_pcb *conn)
     if (conn->fns && conn->fns->dealloc) {
       conn->fns->dealloc(conn);
     }
-    memp_free(MEMP_ALTCP_PCB, conn);
+    memp_free(MEMP_NUM_ALTCP_PCB, conn);
   }
 }
 

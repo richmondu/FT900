@@ -106,10 +106,11 @@ static inline err_t mqtt_connect_async(
 {
     err_t err = 0;
     ip_addr_t host_addr = {0};
-    struct hostent *host = NULL;
 
 
 #if LWIP_DNS
+    struct hostent *host = NULL;
+
     /* Get IP address given host name */
     int trials = 0;
     do {
