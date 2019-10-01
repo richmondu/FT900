@@ -26,7 +26,12 @@
  */
 #if IOT_CONFIG_USE_TLS
     #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
-        static const char IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT[] = "3.86.65.191"; //"richmondu.com"; // local Greengrass server
+        #include "lwipopts.h"
+        #if LWIP_DNS
+            static const char IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT[] = "richmondu.com";
+        #else
+            static const char IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT[] = "3.86.65.191";
+        #endif
     #elif (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
         static const char IOT_CLIENTCREDENTIAL_BROKER_ENDPOINT[] = "amasgua12bmkv.iot.us-east-1.amazonaws.com";
     #elif (USE_MQTT_BROKER == MQTT_BROKER_MOSQUITTO)
@@ -68,13 +73,13 @@
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
     // CA certificate must be named ggca.crt and placed at certificates folder
     // Compiler will implicitly define this strings as markers in the object file
-    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_NAME     "_binary____Certificates_ggca_crt_start"
-    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END_NAME "_binary____Certificates_ggca_crt_end"
+    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_NAME     "_binary____Certificates_rootca_pem_start"
+    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END_NAME "_binary____Certificates_rootca_pem_end"
 #else
     // CA certificate must be named ca.crt and placed at certificates folder
     // Compiler will implicitly define this strings as markers in the object file
-    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_NAME     "_binary____Certificates_ca_crt_start"
-    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END_NAME "_binary____Certificates_ca_crt_end"
+    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_NAME     "_binary____Certificates_rootca_pem_start"
+    #define IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END_NAME "_binary____Certificates_rootca_pem_end"
 #endif
 #else // IOT_CONFIG_USE_CERT_OPTIMIZATION
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_GREENGRASS)
@@ -173,8 +178,8 @@
 #if IOT_CONFIG_USE_CERT_OPTIMIZATION
     // Certificate must be named cert.crt and placed at certificates folder
     // Compiler will implicitly define these strings as markers in the object file
-    #define IOT_CLIENTCREDENTIAL_CERTIFICATE_NAME     "_binary____Certificates_cert_crt_start"
-    #define IOT_CLIENTCREDENTIAL_CERTIFICATE_END_NAME "_binary____Certificates_cert_crt_end"
+    #define IOT_CLIENTCREDENTIAL_CERTIFICATE_NAME     "_binary____Certificates_ft900device1_cert_pem_start"
+    #define IOT_CLIENTCREDENTIAL_CERTIFICATE_END_NAME "_binary____Certificates_ft900device1_cert_pem_end"
 #else // IOT_CONFIG_USE_CERT_OPTIMIZATION
     static const char IOT_CLIENTCREDENTIAL_CERTIFICATE[] =
     "-----BEGIN CERTIFICATE-----\n"
@@ -206,8 +211,8 @@
 #if IOT_CONFIG_USE_CERT_OPTIMIZATION
     // Certificate must be named cert.key and placed at certificates folder
     // Compiler will implicitly define these strings as markers in the object file
-    #define IOT_CLIENTCREDENTIAL_PRIVATEKEY_NAME     "_binary____Certificates_cert_key_start"
-    #define IOT_CLIENTCREDENTIAL_PRIVATEKEY_END_NAME "_binary____Certificates_cert_key_end"
+    #define IOT_CLIENTCREDENTIAL_PRIVATEKEY_NAME     "_binary____Certificates_ft900device1_pkey_pem_start"
+    #define IOT_CLIENTCREDENTIAL_PRIVATEKEY_END_NAME "_binary____Certificates_ft900device1_pkey_pem_end"
 #else // IOT_CONFIG_USE_CERT_OPTIMIZATION
     static const char IOT_CLIENTCREDENTIAL_PRIVATEKEY[] =
     "-----BEGIN RSA PRIVATE KEY-----\n"
