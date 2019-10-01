@@ -50,7 +50,7 @@ uint8_t* read_file(__flash__ uint8_t* data, __flash__ uint8_t* data_end, size_t*
     uint8_t *buf = NULL;
     size_t buf_len;
 
-    buf_len = (data_end - data) + 1;
+    buf_len = data_end - data;
     buf = pvPortMalloc(buf_len);
     if (buf == NULL)
     {
@@ -61,13 +61,31 @@ uint8_t* read_file(__flash__ uint8_t* data, __flash__ uint8_t* data_end, size_t*
     buf[buf_len-1] = '\0';
     *len = buf_len;
 
+    //tfp_printf("len=%d %d\r\n", buf_len, strlen(buf));
     return buf;
 }
 
 const uint8_t* iot_certificate_getca(size_t* len)
 {
 #if USE_ROOT_CA
+#if 0
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_CA_CERTIFICATE[]      asm("_binary____Certificates_rootca_pem_start");
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END[]  asm("_binary____Certificates_rootca_pem_end");
+
+    int ret = IOT_CLIENTCREDENTIAL_CA_CERTIFICATE_END - IOT_CLIENTCREDENTIAL_CA_CERTIFICATE + 1;
+    char *ca_cert = pvPortMalloc(ret);// + 1);
+    if (!ca_cert) {
+        return NULL;
+    }
+    memcpy_pm2dat(ca_cert, IOT_CLIENTCREDENTIAL_CA_CERTIFICATE, ret-1);
+    ca_cert[ret-1] = '\0';
+    tfp_printf("ret=%d %d\r\n", ret, strlen(ca_cert));
+    tfp_printf("%s\r\n", ca_cert);
+    *len = ret;
+    return ca_cert;
+#else
     return read_file(ca_data, ca_data_end, len);
+#endif
 #else
     *len = 0;
     return NULL;
@@ -77,7 +95,24 @@ const uint8_t* iot_certificate_getca(size_t* len)
 const uint8_t* iot_certificate_getcert(size_t* len)
 {
 #if (USE_MQTT_BROKER != MQTT_BROKER_UNKNOWN)
-    return read_file(cert_data, cert_data_end, len);
+#if 0
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_DEVICE_CERTIFICATE[]      asm("_binary____Certificates_ft900device1_cert_pem_start");
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_DEVICE_CERTIFICATE_END[]  asm("_binary____Certificates_ft900device1_cert_pem_end");
+
+    int ret = IOT_CLIENTCREDENTIAL_DEVICE_CERTIFICATE_END - IOT_CLIENTCREDENTIAL_DEVICE_CERTIFICATE + 1;
+    char *cert_data = pvPortMalloc(ret);// + 1);
+    if (!cert_data) {
+        return NULL;
+    }
+    memcpy_pm2dat(cert_data, IOT_CLIENTCREDENTIAL_DEVICE_CERTIFICATE, ret-1);
+    cert_data[ret-1] = '\0';
+    tfp_printf("ret=%d %d\r\n", ret, strlen(cert_data));
+    tfp_printf("%s\r\n", cert_data);
+    *len = ret;
+    return cert_data;
+#else
+	return read_file(cert_data, cert_data_end, len);
+#endif
 #else
     *len = 0;
     return NULL;
@@ -87,7 +122,24 @@ const uint8_t* iot_certificate_getcert(size_t* len)
 const uint8_t* iot_certificate_getpkey(size_t* len)
 {
 #if (USE_MQTT_BROKER != MQTT_BROKER_UNKNOWN)
+#if 0
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_DEVICE_PRIVATEKEY[]      asm("_binary____Certificates_ft900device1_pkey_pem_start");
+    extern __flash__ uint8_t IOT_CLIENTCREDENTIAL_DEVICE_PRIVATEKEY_END[]  asm("_binary____Certificates_ft900device1_pkey_pem_end");
+
+    int ret = IOT_CLIENTCREDENTIAL_DEVICE_PRIVATEKEY_END - IOT_CLIENTCREDENTIAL_DEVICE_PRIVATEKEY + 1;
+    char *pkey_data = pvPortMalloc(ret);// + 1);
+    if (!pkey_data) {
+        return NULL;
+    }
+    memcpy_pm2dat(pkey_data, IOT_CLIENTCREDENTIAL_DEVICE_PRIVATEKEY, ret-1);
+    pkey_data[ret-1] = '\0';
+    tfp_printf("ret=%d %d\r\n", ret, strlen(pkey_data));
+    tfp_printf("%s\r\n", pkey_data);
+    *len = ret;
+    return pkey_data;
+#else
     return read_file(pkey_data, pkey_data_end, len);
+#endif
 #else
     *len = 0;
     return NULL;
