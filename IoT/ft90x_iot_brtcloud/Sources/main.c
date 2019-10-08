@@ -61,15 +61,10 @@
 
 
 
-///////////////////////////////////////////////////////////////////////////////////
-#define CONFIG_NOTIFICATION_UART_KEYWORD "Hello World"
-#define CONFIG_NOTIFICATION_RECIPIENT "richmond.umagat@brtchip.com"
-#define CONFIG_NOTIFICATION_MESSAGE "Hi, How are you today?"
-///////////////////////////////////////////////////////////////////////////////////
+#define ENABLE_USECASE_NEW 0
+#define ENABLE_USECASE_OLD 1
 
 
-
-#define PREPEND_REPLY_TOPIC "server/"
 
 ///////////////////////////////////////////////////////////////////////////////////
 #define DEBUG
@@ -108,13 +103,15 @@ static ip_addr_t dns     = IPADDR4_INIT_BYTES( 0, 0, 0, 0 );
         #define IOT_APP_TASK_STACK_SIZE          (1024 + 64)
     #endif
 #else
-#define IOT_APP_TASK_STACK_SIZE                  (512)
+#define IOT_APP_TASK_STACK_SIZE                  (768)
 #endif
 ///////////////////////////////////////////////////////////////////////////////////
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////
+static TaskHandle_t iot_app_handle;
+
 /* IoT application function */
 static void iot_app_task(void *pvParameters);
 
@@ -129,6 +126,18 @@ static void user_subscribe_receive_cb(
 
 ///////////////////////////////////////////////////////////////////////////////////
 static iot_handle g_handle = NULL;
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////////////////
+#define PREPEND_REPLY_TOPIC "server/"
+
+#if ENABLE_USECASE_OLD
+#define CONFIG_NOTIFICATION_UART_KEYWORD "Hello World"
+#define CONFIG_NOTIFICATION_RECIPIENT "richmond.umagat@brtchip.com"
+#define CONFIG_NOTIFICATION_MESSAGE "Hi, How are you today?"
+#endif ENABLE_USECASE_OLD
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -162,12 +171,360 @@ static inline void ethernet_setup()
     net_setup();
 }
 
+
+#if ENABLE_USECASE_NEW
+//////////////////////////////////////////////////////////////////////////
+// STAND-ALONE Use-case (No web/mobile app)
+//////////////////////////////////////////////////////////////////////////
+//
+// Test #1: send by specifying message and recipient everytime
+// iot send message "hello world" recipient "richmond.umagat@gmail.com"
+//
+//////////////////////////////////////////////////////////////////////////
+//
+// Test #2: set message and recipient once, then send anytime
+// iot set message "hello world" recipient "richmond.umagat@gmail.com"
+// iot send
+// ...
+// iot send
+//
+//////////////////////////////////////////////////////////////////////////
+//
+// Test #3: set recipient once, then send message anytime
+// iot set recipient "richmond.umagat@gmail.com"
+// iot send message "hi, world"
+// ...
+// iot send message "hello, world"
+//
+//////////////////////////////////////////////////////////////////////////
+//
+// Test #4: set recipient and message and enable gpio to monitor, then toggle gpio anytime
+// iot set message "hello world" recipient "richmond.umagat@gmail.com"
+// iot gpio 18 enable dir 1 pull 1 edge 0
+//
+// iot gpio 18 write 1
+// iot gpio 18 write 0 // edge falling
+// ...
+// iot gpio 18 write 1
+// iot gpio 18 write 0 // edge falling
+//
+// iot gpio 18 disable
+//
+//////////////////////////////////////////////////////////////////////////
+
+#define COMMAND_IOT                 "iot"
+#define COMMAND_SET                 "set"
+#define COMMAND_SEND                "send"
+#define COMMAND_RECIPIENT           "recipient"
+#define COMMAND_MESSAGE             "message"
+#define COMMAND_QUOTATION           '\"'
+#define COMMAND_SPACE               ' '
+#define COMMAND_TERMINATOR          '\0'
+
+#define COMMAND_ACTION_UNKNOWN      0
+#define COMMAND_ACTION_SET          1
+#define COMMAND_ACTION_SEND         2
+#define COMMAND_ACTION_GPIO_ENABLE  3
+#define COMMAND_ACTION_GPIO_DISABLE 4
+#define COMMAND_ACTION_GPIO_WRITE   5
+
+#define COMMAND_GPIO                "gpio"
+#define COMMAND_GPIO_ENABLE         "enable"
+#define COMMAND_GPIO_DISABLE        "disable"
+#define COMMAND_GPIO_WRITE          "write"
+#define COMMAND_GPIO_DIR            "dir"
+#define COMMAND_GPIO_PULL           "pull"
+#define COMMAND_GPIO_EDGE           "edge"
+
+
+static uint8_t g_aucCommand[128] = {0};
+static uint8_t g_ucOffset = 0;
+static uint8_t g_ucAvailable = 1;
+static uint8_t g_ucGPIOpin = 0;
+
+
+static inline void command_reset()
+{
+    memset(g_aucCommand, 0, sizeof(g_aucCommand));
+    g_ucOffset = 0;
+}
+
+static inline int command_parse_gpio(char *ptr)
+{
+    int action = COMMAND_ACTION_UNKNOWN;
+    int pin = 0;
+    int dir = 1;
+    int pull = 1;
+    int edge = 0;
+    int state = 0;
+
+    char* end = ptr;
+    while (*end != COMMAND_SPACE) {
+        end++;
+    }
+    pin = strtol(ptr, &end, 10);
+    ptr += end-ptr+1;
+
+    while (ptr) {
+        if (strncmp(ptr, COMMAND_GPIO_ENABLE, strlen(COMMAND_GPIO_ENABLE)) == 0) {
+            ptr += strlen(COMMAND_GPIO_ENABLE) + 1;
+            action = COMMAND_ACTION_GPIO_ENABLE;
+        }
+        else if (strncmp(ptr, COMMAND_GPIO_DISABLE, strlen(COMMAND_GPIO_DISABLE)) == 0) {
+            ptr += strlen(COMMAND_GPIO_DISABLE) + 1;
+            action = COMMAND_ACTION_GPIO_DISABLE;
+        }
+        else if (strncmp(ptr, COMMAND_GPIO_WRITE, strlen(COMMAND_GPIO_WRITE)) == 0) {
+            ptr += strlen(COMMAND_GPIO_WRITE) + 1;
+            action = COMMAND_ACTION_GPIO_WRITE;
+
+            end = ptr;
+            while (*end != COMMAND_TERMINATOR) {
+                end++;
+            }
+            state = strtol(ptr, &end, 10);
+            //tfp_printf("write %d\r\n", state);
+            ptr += end-ptr+1;
+        }
+        else if (strncmp(ptr, COMMAND_GPIO_DIR, strlen(COMMAND_GPIO_DIR)) == 0) {
+            ptr += strlen(COMMAND_GPIO_DIR) + 1;
+
+            end = ptr;
+            while (*end != COMMAND_TERMINATOR && *end != COMMAND_SPACE) {
+                end++;
+            }
+            dir = strtol(ptr, &end, 10);
+            //tfp_printf("dir %d\r\n", dir);
+            ptr += end-ptr+1;
+        }
+        else if (strncmp(ptr, COMMAND_GPIO_PULL, strlen(COMMAND_GPIO_PULL)) == 0) {
+            ptr += strlen(COMMAND_GPIO_PULL) + 1;
+
+            end = ptr;
+            while (*end != COMMAND_TERMINATOR && *end != COMMAND_SPACE) {
+                end++;
+            }
+            pull = strtol(ptr, &end, 10);
+            //tfp_printf("pull %d\r\n", pull);
+            ptr += end-ptr+1;
+        }
+        else if (strncmp(ptr, COMMAND_GPIO_EDGE, strlen(COMMAND_GPIO_EDGE)) == 0) {
+            ptr += strlen(COMMAND_GPIO_EDGE) + 1;
+
+            end = ptr;
+            while (*end != COMMAND_TERMINATOR && *end != COMMAND_SPACE) {
+                end++;
+            }
+            edge = strtol(ptr, &end, 10);
+            //tfp_printf("edge %d\r\n", edge);
+            ptr += end-ptr+1;
+        }
+        else {
+            if (*ptr == 0x00) {
+                break;
+            }
+            ptr++;
+        }
+    }
+
+    if (action == COMMAND_ACTION_GPIO_ENABLE) {
+        //tfp_printf("gpio %d enable dir %d pull %d edge 0\r\n\r\n", pin, dir, pull, edge);
+        gpio_dir(pin, dir);
+        gpio_pull(pin, pull);
+        gpio_interrupt_enable(pin, edge);
+        g_ucGPIOpin = pin;
+    }
+    else if (action == COMMAND_ACTION_GPIO_DISABLE) {
+        //tfp_printf("gpio %d disable \r\n\r\n", pin);
+        gpio_interrupt_disable(pin);
+        g_ucGPIOpin = 0;
+    }
+    else if (action == COMMAND_ACTION_GPIO_WRITE) {
+        //tfp_printf("gpio %d write %d\r\n\r\n", pin, state);
+        //gpio_write(pin, !state);
+        gpio_write(pin, state);
+    }
+
+    return action;
+}
+
+static inline int command_parse(char* pcRecipient, int lRecipientSize, char* pcMessage, int lMessageSize)
+{
+    char *ptr = g_aucCommand;
+    int action = COMMAND_ACTION_UNKNOWN;
+
+    if (strncmp(ptr, COMMAND_IOT, strlen(COMMAND_IOT)) != 0) {
+        return COMMAND_ACTION_UNKNOWN;
+    }
+    ptr += strlen(COMMAND_IOT) + 1;
+
+    if (strncmp(ptr, COMMAND_GPIO, strlen(COMMAND_GPIO)) == 0) {
+        ptr += strlen(COMMAND_GPIO) + 1;
+        return command_parse_gpio(ptr);
+    }
+
+    while (ptr) {
+        if (strncmp(ptr, COMMAND_SET, strlen(COMMAND_SET)) == 0) {
+            ptr += strlen(COMMAND_SET) + 1;
+            action = COMMAND_ACTION_SET;
+        }
+        else if (strncmp(ptr, COMMAND_SEND, strlen(COMMAND_SEND)) == 0) {
+            ptr += strlen(COMMAND_SEND) + 1;
+            action = COMMAND_ACTION_SEND;
+        }
+        else if (strncmp(ptr, COMMAND_RECIPIENT, strlen(COMMAND_RECIPIENT)) == 0) {
+            ptr += strlen(COMMAND_RECIPIENT) + 1;
+            if (*ptr != COMMAND_QUOTATION) {
+                return COMMAND_ACTION_UNKNOWN;
+            }
+            ptr++;
+            char* end = ptr;
+            while (*end != COMMAND_QUOTATION) {
+                end++;
+            }
+            int len = end-ptr;
+            if (len > lRecipientSize-1) {
+                len = lRecipientSize-1;
+            }
+            memcpy(pcRecipient, ptr, len);
+            pcRecipient[len] = '\0';
+            ptr += len+1+1;
+        }
+        else if (strncmp(ptr, COMMAND_MESSAGE, strlen(COMMAND_MESSAGE)) == 0) {
+            ptr += strlen(COMMAND_MESSAGE) + 1;
+            if (*ptr != COMMAND_QUOTATION) {
+                return COMMAND_ACTION_UNKNOWN;
+            }
+            ptr++;
+            char* end = ptr;
+            while (*end != COMMAND_QUOTATION) {
+                end++;
+            }
+            int len = end-ptr;
+            if (len > lMessageSize-1) {
+                len = lMessageSize-1;
+            }
+            memcpy(pcMessage, ptr, len);
+            pcMessage[len] = '\0';
+            ptr += len+1+1;
+        }
+        else {
+            if (*ptr == 0x00) {
+                break;
+            }
+            ptr++;
+        }
+    }
+
+    return action;
+}
+
+static inline void command_process()
+{
+    static char recipient[64] = {0};
+    static char message[64] = {0};
+
+    g_ucAvailable = 0;
+
+    DEBUG_PRINTF("command: %s [%d]\r\n", g_aucCommand, g_ucOffset);
+    if (g_ucOffset == 0) {
+        // gpio isr seems to have a different copy of global variable g_aucCommand
+        tfp_snprintf(g_aucCommand, sizeof(g_aucCommand), "iot send");
+        g_ucOffset = strlen(g_aucCommand);
+    }
+    int action = command_parse(recipient, sizeof(recipient), message, sizeof(message));
+    if (action == 2) {
+        //tfp_printf("%d %s %s\r\n", action, recipient, message);
+        char topic[80] = {0};
+        char payload[128] = {0};
+        tfp_snprintf( topic, sizeof(topic), "%s%s/%s", PREPEND_REPLY_TOPIC, (char*)iot_utils_getdeviceid(), API_TRIGGER_NOTIFICATION );
+        tfp_snprintf( payload, sizeof(payload), "{\"recipient\": \"%s\", \"message\": \"%s\"}", recipient, message );
+        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        DEBUG_PRINTF("publish: %s %s\r\n\r\n", topic, payload);
+    }
+
+    command_reset();
+
+    g_ucAvailable = 1;
+}
+
+void uart0_isr()
+{
+    static uint8_t c;
+
+    if (uart_is_interrupted(UART0, uart_interrupt_rx))
+    {
+        if (g_ucAvailable == 0) {
+            return;
+        }
+
+        // read input from UART and store to array
+        uart_read(UART0, &c);
+        g_aucCommand[g_ucOffset++] = c;
+        uart_write(UART0, c);
+
+        // check if command exceeds buffer
+        if (g_ucOffset == sizeof(g_aucCommand)) {
+            DEBUG_PRINTF("\r\nCommand should be less than %d bytes\r\n", sizeof(g_aucCommand));
+            command_reset();
+            return;
+        }
+
+        // process the command when enter is pressed
+        if (c == 0x0D) {
+            g_aucCommand[g_ucOffset-1] = '\0'; // Remove the enter key
+            g_ucOffset--;
+            xTaskNotifyFromISR(iot_app_handle, 0, eNoAction, NULL);
+        }
+    }
+}
+
+static inline void uart_interrupt_setup()
+{
+    interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uart0_isr);
+    uart_enable_interrupt(UART0, uart_interrupt_rx);
+    uart_enable_interrupts_globally(UART0);
+}
+
+
+
+
+void gpio_isr()
+{
+    if (!g_ucGPIOpin) {
+        return;
+    }
+
+    if (gpio_is_interrupted(g_ucGPIOpin))
+    {
+        tfp_snprintf(g_aucCommand, sizeof(g_aucCommand), "iot send"); // Remove the enter key
+        g_ucOffset = strlen(g_aucCommand);
+        //tfp_printf("g_aucCommand=%s g_ucOffset=%d\r\n", g_aucCommand, g_ucOffset);
+
+        xTaskNotifyFromISR(iot_app_handle, 0, eNoAction, NULL);
+    }
+}
+
+static inline void gpio_interrupt_setup()
+{
+    interrupt_attach(interrupt_gpio, (uint8_t)interrupt_gpio, gpio_isr);
+}
+
+#endif // ENABLE_USECASE_NEW
+
+
+
 int main( void )
 {
     sys_reset_all();
     interrupt_disable_globally();
     uart_setup();
     ethernet_setup();
+#if ENABLE_USECASE_NEW
+    uart_interrupt_setup();
+    gpio_interrupt_setup();
+#endif // ENABLE_USECASE_NEW
+    interrupt_enable_globally();
 
     uart_puts( UART0,
             "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
@@ -183,7 +540,7 @@ int main( void )
             IOT_APP_TASK_STACK_SIZE,
             NULL,
             IOT_APP_TASK_PRIORITY,
-            NULL ) != pdTRUE ) {
+            &iot_app_handle ) != pdTRUE ) {
         DEBUG_PRINTF( "xTaskCreate failed\r\n" );
     }
 
@@ -276,7 +633,16 @@ static void iot_app_task( void *pvParameters )
         g_handle = handle;
 
         do  {
+#if ENABLE_USECASE_NEW
+            uint32_t ulNotificationValue = 0;
+            if (xTaskNotifyWait(0, 0, &ulNotificationValue, pdMS_TO_TICKS(1000)) == pdTRUE) {
+                command_process();
+            }
+#endif // ENABLE_USECASE_NEW
+#if ENABLE_USECASE_OLD
             vTaskDelay( pdMS_TO_TICKS(1000) );
+#endif // ENABLE_USECASE_OLD
+
         } while ( net_is_ready() && iot_is_connected( handle ) == 0 );
 
         iot_unsubscribe( handle, topic_sub );
@@ -409,9 +775,36 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
 
     ///////////////////////////////////////////////////////////////////////////////////
+    // STATUS
+    ///////////////////////////////////////////////////////////////////////////////////
+    if ( strncmp( ptr, API_GET_STATUS, len ) == 0 ) {
+
+        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic);
+        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RUNNING);
+        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
+    }
+    else if ( strncmp( ptr, API_SET_STATUS, len ) == 0 ) {
+
+        ptr = (char*)mqtt_subscribe_recv->payload;
+
+        char* status = parse_gpio_str(ptr, "\"value\": ",  '}');
+        //DEBUG_PRINTF( "%s\r\n", status );
+
+        if ( strncmp( status, API_STATUS_RESTART, strlen(API_STATUS_RESTART)) == 0 ) {
+            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+            tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RESTARTING );
+            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+            xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
+        }
+    }
+
+
+#if ENABLE_USECASE_OLD
+    ///////////////////////////////////////////////////////////////////////////////////
     // GPIO
     ///////////////////////////////////////////////////////////////////////////////////
-    if ( strncmp( ptr, API_GET_GPIO, len ) == 0 ) {
+    else if ( strncmp( ptr, API_GET_GPIO, len ) == 0 ) {
 
         ptr = (char*)mqtt_subscribe_recv->payload;
 
@@ -474,33 +867,6 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
     }
 #endif
-
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // STATUS
-    ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_GET_STATUS, len ) == 0 ) {
-
-        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic);
-        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RUNNING);
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-        DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
-    }
-    else if ( strncmp( ptr, API_SET_STATUS, len ) == 0 ) {
-
-        ptr = (char*)mqtt_subscribe_recv->payload;
-
-        char* status = parse_gpio_str(ptr, "\"value\": ",  '}');
-        //DEBUG_PRINTF( "%s\r\n", status );
-
-        if ( strncmp( status, API_STATUS_RESTART, strlen(API_STATUS_RESTART)) == 0 ) {
-            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-            tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", API_STATUS_RESTARTING );
-            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-            xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
-        }
-
-    }
 
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -590,16 +956,16 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
         // Trigger an Email/SMS notification when the UART message received contains a specific phrase!
         if (strstr(data, CONFIG_NOTIFICATION_UART_KEYWORD) != NULL) {
-			tfp_snprintf( topic, sizeof(topic), "%s%s/%s", PREPEND_REPLY_TOPIC, (char*)iot_utils_getdeviceid(), API_TRIGGER_NOTIFICATION );
-			tfp_snprintf( payload, sizeof(payload), "{\"recipient\": \"%s\", \"message\": \"%s\"}", CONFIG_NOTIFICATION_RECIPIENT, CONFIG_NOTIFICATION_MESSAGE );
-			iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-	        DEBUG_PRINTF( "%s\r\n", topic );
-	        DEBUG_PRINTF( "%s\r\n\r\n", payload );
+            tfp_snprintf( topic, sizeof(topic), "%s%s/%s", PREPEND_REPLY_TOPIC, (char*)iot_utils_getdeviceid(), API_TRIGGER_NOTIFICATION );
+            tfp_snprintf( payload, sizeof(payload), "{\"recipient\": \"%s\", \"message\": \"%s\"}", CONFIG_NOTIFICATION_RECIPIENT, CONFIG_NOTIFICATION_MESSAGE );
+            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+            DEBUG_PRINTF( "%s\r\n", topic );
+            DEBUG_PRINTF( "%s\r\n\r\n", payload );
         }
 
-		tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-		tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
-		iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+        tfp_snprintf( payload, sizeof(payload), "{\"value\": \"%s\"}", data );
+        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         DEBUG_PRINTF( "%s\r\n", topic );
         DEBUG_PRINTF( "%s\r\n\r\n", payload );
     }
@@ -617,6 +983,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
         //DEBUG_PRINTF( "%s\r\n", ptr );
     }
+#endif // ENABLE_USECASE_OLD
+
 
     iot_subscribe( g_handle, user_generate_subscribe_topic(), user_subscribe_receive_cb, 1 );
 }
