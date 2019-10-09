@@ -179,6 +179,8 @@ static inline void ethernet_setup()
 //
 // Test #1: send by specifying message and recipient everytime
 // iot send message "hello world" recipient "richmond.umagat@gmail.com"
+// iot send message "hello world" recipient "+639175900612"
+// iot send message "hello world 83f58e3f7e284892f6da7b020e5c982a6ea16dee" recipient "1fbc6613eb4013eca32524d2f3646f786da9bbf9"
 //
 //////////////////////////////////////////////////////////////////////////
 //
