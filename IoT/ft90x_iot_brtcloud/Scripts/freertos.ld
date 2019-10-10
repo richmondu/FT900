@@ -37,6 +37,7 @@ SECTIONS
   } > ram
   .data	  :
   {
+  	. = 0x04;
   	. = ALIGN(4);
     __data = .;
     *(.data)
