@@ -802,6 +802,26 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
 
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    // TRIGGER NOTIFICATIONS
+    ///////////////////////////////////////////////////////////////////////////////////
+    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATION, len ) == 0 ) {
+
+        ptr = (char*)mqtt_subscribe_recv->payload;
+
+        char* recipient = parse_gpio_str(ptr, "\"recipient\": ",  '}');
+
+        if ( strncmp( recipient, iot_utils_getdeviceid(), strlen(iot_utils_getdeviceid())) == 0 ) {
+            DEBUG_PRINTF( "%s\r\n", ptr );
+        }
+        else {
+            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+            iot_publish( g_handle, topic, ptr, strlen(ptr), 1 );
+        }
+
+        //DEBUG_PRINTF( "%s\r\n", ptr );
+    }
+
 #if ENABLE_USECASE_OLD
     ///////////////////////////////////////////////////////////////////////////////////
     // GPIO
@@ -970,20 +990,6 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         DEBUG_PRINTF( "%s\r\n", topic );
         DEBUG_PRINTF( "%s\r\n\r\n", payload );
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // TRIGGER NOTIFICATIONS
-    ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATION, len ) == 0 ) {
-
-        ptr = (char*)mqtt_subscribe_recv->payload;
-
-        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-        iot_publish( g_handle, topic, ptr, strlen(ptr), 1 );
-
-        //DEBUG_PRINTF( "%s\r\n", ptr );
     }
 #endif // ENABLE_USECASE_OLD
 
