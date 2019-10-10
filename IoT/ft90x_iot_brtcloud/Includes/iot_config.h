@@ -42,7 +42,7 @@
     #define USE_ROOT_CA               1
 #else
     #define USE_ROOT_CA               1
-    #define USE_MBEDTLS_MAX_SIZES     0
+    #define USE_MBEDTLS_MAX_SIZES     3 // set to 0 if RSA
     #define USE_MQTT_SUBSCRIBE        1
 #endif
 
