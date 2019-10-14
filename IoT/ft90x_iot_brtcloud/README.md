@@ -32,6 +32,8 @@ Comparable IoT platforms for our use-case of remote device access and control in
 
     - TP-Link (with Kasa mobile application) for TPLink smart bulbs/smart plugs, and 
     - Xiaomi (YeeLight mobile app) for Xiaomi's smart smart bulbs/smart plugs.
+    - Tuya IoT platform
+    - Blynk IoT platform
 
 However, these IoT platforms are tied up to their smart devices.
 This IoT platform is generic for all smart devices and IoT devices that can be build on top of any MCU, but preferably using FT9XX MCUs.
@@ -42,7 +44,7 @@ This IoT platform is generic for all smart devices and IoT devices that can be b
 This IoT platform is a container-based IoT cloud platform that leverages 
 Flask, GUnicorn, Nginx, RabbitMQ, MongoDB, Ionic, Amazon Cognito, Amazon Pinpoint and Docker. 
 It can be deployed in a local PC or in the cloud - AWS EC2, Linode, Heroku, Rackspace, DigitalOcean or etc.
-The web app is made of Ionic framework so it can be compiled as Android and iOS mobile apps using 1 code base.
+The web app is made of Ionic framework so it can be compiled as Android and iOS mobile apps using one code base.
 
 - <b>LucidChart</b> UML diagrams - https://www.lucidchart.com
 - <b>Nginx</b> web server - https://www.nginx.com/
@@ -61,13 +63,14 @@ The web app is made of Ionic framework so it can be compiled as Android and iOS 
 - <b>Postman</b> (API testing tool) - https://www.getpostman.com/
 - <b>GoDaddy</b> domain and SSL certificate - https://godaddy.com
 - <b>Android Studio</b> (Building Ionic webapp to Androidapp) - https://developer.android.com/studio
-
+- <b>Paypal</b> payment gateway - https://developer.paypal.com
+- <b>Jenkins</b> automation server for CI/CD - https://jenkins.io/
 
 An alternative solution is using an AWS serverless solution wherein:
 
 - <b>AWS API Gateway+AWS Lambda</b> will replace Flask+Gunicorn+Nginx
 - <b>AWS DynamoDB</b> will replace MongoDB
-- <b>AmazonMQ</b> will replace RabbitMQ
+- <b>AWS IoT</b> or <b>AmazonMQ</b> will replace RabbitMQ
 
 
 ### High-level architecture diagram:
@@ -110,6 +113,7 @@ An alternative solution is using an AWS serverless solution wherein:
     10. SSL certificate bought from GoDaddy goes to NGINX.
     11. SSL certificates are tied up with the website domain and/or subdomain.
     12. DNS A record must be modified in GoDaddy to match the public IP address of the AWS EC2 instance.
+    13. Customers can directly use the (Flask) REST APIs. They can create their own front-end web/mobile apps that calls our REST APIs.
 
 
 
@@ -135,7 +139,7 @@ Menu, account, history
 
     1. User sign-up/sign-in, Device Registration, Email/SMS Notifications
        A. Amazon Cognito for user sign-up and sign-in
-       B. MongoDB NoSQL database for storing registered device information
+       B. MongoDB NoSQL database for storing registered device information and device requests/responses
        C. OpenSSL for generating certificates on-demand for registered devices
        D. Email/SMS notifications using AmazonPinpoint (device-initiated, client-initiated)
     2. Device Access/Control via Flask+GUnicorn+Nginx
@@ -244,8 +248,13 @@ Device access APIs requires username, devicename and access token returned by lo
     4. Process the api with the given payload
     5. Publish answer to topic "server.deviceid.api"
 
-
-### Email/SMS Notifications
+### Email/SMS Notifications (NEW)
+    1. STAND-ALONE use-case:
+       User can trigger SMS/Email/Device notification via UART or GPIO
+    2. APP-RELATED use-case:
+       User can update the device notification recipient and message from the web/mobile apps
+       
+### Email/SMS Notifications (OLD)
 
     1. Device can trigger Notification Manager to send email/SMS via Amazon Pinpoint
        device -> messagebroker -> notificationmanager -> pinpoint
@@ -269,6 +278,7 @@ Device access APIs requires username, devicename and access token returned by lo
        export AWS_PINPOINT_ID=""
        export AWS_PINPOINT_REGION=""
        export AWS_PINPOINT_EMAIL=""
+       export CONFIG_USE_ECC=1 or 0
     2. Build and execute Docker-compose file
        docker-compose build
        docker-compose up
@@ -372,7 +382,8 @@ Device access APIs requires username, devicename and access token returned by lo
                           {keyfile,    "server_pkey.pem"},
                           {verify,     verify_peer},
                           {fail_if_no_peer_cert, false},
-                          {ciphers,  ["RSA-AES128-SHA", "RSA-AES256-SHA"]} ]}
+                          {ciphers,  ["RSA-AES128-SHA", "RSA-AES256-SHA"]}  ]} // RSA
+                          {ciphers,  ["ECDHE-ECDSA-AES128-SHA256", "ECDHE-ECDSA-AES128-GCM-SHA256"]}  ]} // ECC
            {allow_anonymous, true},
            {tcp_listeners, []},
            {ssl_listeners, [8883]}
@@ -384,6 +395,14 @@ Device access APIs requires username, devicename and access token returned by lo
            >> rabbitmq-service.bat start
         H. Copy certificates to %APPDATA%\RabbitMQ 
            rootca.pem, server_cert.pem, server_pkey.pem
+ 
+        // Ciphersuites
+        I. On RabbitMQ (server)
+           "RSA-AES128-SHA", "RSA-AES256-SHA" - for RSA
+           "ECDHE-ECDSA-AES128-SHA256", "ECDHE-ECDSA-AES128-GCM-SHA256" - for ECC
+        J. On Device (client)
+           MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA - for RSA
+           MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 - for ECC
 
 
 ### Install MongoDB database.
@@ -444,6 +463,17 @@ Device access APIs requires username, devicename and access token returned by lo
        C. AWS_PINPOINT_EMAIL  = Email registered to be used for email sender
           
 
+### Jenkins
+    
+       A. Install Jenkins using Docker
+       docker run -idt --name jenkins -v jenkins_home:/var/jenkins_home  -v /var/run/docker.sock:/var/run/docker.sock  -p 8080:8080 -p 50000:50000 jenkins/jenkins:2.178-slim
+       docker start jenkins
+       browse http://192.168.99.100:8080
+       docker logs jenkins // to get the password
+       docker stop jenkins
+
+       
+
 ### Others
 
        A. Run web_server.bat
@@ -462,6 +492,14 @@ Device access APIs requires username, devicename and access token returned by lo
 
 
 ### Certificates
+
+       // Ciphersuites
+       On RabbitMQ (server)
+          "RSA-AES128-SHA", "RSA-AES256-SHA" - for RSA
+          "ECDHE-ECDSA-AES128-SHA256", "ECDHE-ECDSA-AES128-GCM-SHA256" - for ECC
+       On Device (client)
+          MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA,MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA - for RSA
+          MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 - for ECC
 
        // Notes: 
        The rootca certificate stored in RabbitMQ is for MQTT/AMQP device authentication. 
@@ -496,7 +534,7 @@ Device access APIs requires username, devicename and access token returned by lo
              Organizational Unit Name: Engineering
              Common Name: brtchip.com
              Email Address: support.emea@brtchip.com
-          3. openssl req -x509 -sha256 -days 3650 -key rootCA_pkey.pem -in csr.csr -out rootCA_cert.pem
+          3. openssl req -x509 -sha256 -days 3650 -key rootCA_pkey.pem -in rootCA_csr.csr -out rootCA_cert.pem
 
 
        // Generating device certificates
@@ -506,9 +544,9 @@ Device access APIs requires username, devicename and access token returned by lo
           3. openssl x509 -req -in ft900device1.csr -CA rootCA.pem -CAkey rootCA_pkey.pem -CAcreateserial -out ft900device1_cert.pem -days 3650
 
        B. ECDSA
-          1. openssl ecparam -genkey -name prime256v1 -out ft900device1_pkey.pem
+          1. openssl ecparam -genkey -name prime256v1 -out ft900device1_pkey.pem --noout
           2. openssl req -new -out ft900device1.csr -key ft900device1_pkey.pem
-          3. openssl x509 -req -in ft900device1.csr -CA rootca_ecdsa_cert.pem -CAkey rootca_ecdsa_pkey.pem -CAcreateserial -out ft900device1_cert.pem -days 3650
+          3. openssl x509 -req -in ft900device1.csr -CA rootca_cert.pem -CAkey rootca_pkey.pem -CAcreateserial -out ft900device1_cert.pem -days 3650
 
 
        // CA-certificate signed by trusted authority - Comodo, Verisign, etc.
@@ -562,7 +600,8 @@ Device access APIs requires username, devicename and access token returned by lo
        export AWS_COGNITO_USERPOOL_REGION=""
        export AWS_PINPOINT_ID=""
        export AWS_PINPOINT_REGION=""       
-       export AWS_PINPOINT_EMAIL=""       
+       export AWS_PINPOINT_EMAIL=""
+       export CONFIG_USE_ECC=1 or 0
 
        // Download the repository
        via WinSCP or git
@@ -715,12 +754,17 @@ Device access APIs requires username, devicename and access token returned by lo
 
         sudo docker network ls
         sudo docker network inspect mydockernet
+        
+        sudo docker network prune
     
 2. Persistent volume for mongodb database created
 
         sudo docker volume ls
         sudo docker volume inspect mydockervol // get the mountpoint
         sudo ls <mountpoint>
+
+        sudo docker volume rm $(docker volume ls -qf dangling=true)
+        sudo docker volume ls -qf dangling=true
 
 3. AWS credentials + cognito/pinpoint IDs are environment variables [no longer hardcoded in code]
 
@@ -733,6 +777,7 @@ Device access APIs requires username, devicename and access token returned by lo
         - AWS_PINPOINT_ID
         - AWS_PINPOINT_REGION
         - AWS_PINPOINT_EMAIL
+        - CONFIG_USE_ECC=1 or 0
 
 4. Docker-compose file
 
@@ -751,6 +796,8 @@ Device access APIs requires username, devicename and access token returned by lo
             expose:
               - "8883"
               - "5671"
+            environment:
+              - CONFIG_USE_ECC              
           mongodb:
             build: ./mongodb
             restart: always
@@ -778,6 +825,7 @@ Device access APIs requires username, devicename and access token returned by lo
               - AWS_COGNITO_CLIENT_ID
               - AWS_COGNITO_USERPOOL_ID
               - AWS_COGNITO_USERPOOL_REGION
+              - CONFIG_USE_ECC              
           webapp:
             build: ./webapp
             restart: always
@@ -815,6 +863,7 @@ Device access APIs requires username, devicename and access token returned by lo
               - AWS_PINPOINT_ID
               - AWS_PINPOINT_REGION
               - AWS_PINPOINT_EMAIL
+              - CONFIG_USE_ECC              
           history:
             build: ./history
             restart: always
@@ -824,6 +873,8 @@ Device access APIs requires username, devicename and access token returned by lo
             depends_on:
               - rabbitmq
               - mongodb              
+            environment:
+              - CONFIG_USE_ECC              
         networks:
           mydockernet:
             driver: bridge
@@ -904,6 +955,13 @@ Device access APIs requires username, devicename and access token returned by lo
         web_server_database_viewer.bat 
         - view registered devices (MongoDB) and registered users (Amazon Cognito)
 
+### Testing on Windows
+
+        Note: RabbitMQ and MongoDB should have already been installed.
+        1. Run restapi\src\web_server.bat
+        2. Update rest_api to 'https://localhost' in webapp\src\ionicapp\www\js\server.js
+        3. Run "ionic serve" in webapp\src\ionicapp
+
 ### Troubleshooting
 
         Dockerized:
@@ -913,10 +971,15 @@ Device access APIs requires username, devicename and access token returned by lo
         - docker ps
         - docker stop <container ID>
         - docker rm <container ID>
+        
+        https://stackoverflow.com/questions/31909979/docker-machine-no-space-left-on-device
         - docker network ls
         - docker network prune
         - docker volume ls
-
+        - docker volume rm $(docker volume ls -qf dangling=true)
+        - docker volume ls -qf dangling=true
+        - docker system prune
+        
         Manual:
         - sudo service mongod status 
         - sudo systemctl status web_server
@@ -951,11 +1014,18 @@ In Linux, the total round trip time is only 1 second.
 7. [Low] Add file logging of microservices for easier debugging/troubleshooting
 8. [Low] Add manager/admin page in Web client (see all users and devices registered by each user)
 9. [Low] Support an online device emulator. (Each user can run 1 online device emulator.)
-10. [Low] Support Kubernetes orchestration
+10.[Low] Support Kubernetes orchestration
 
 
 # Reminders
 
+0. List of files to change: 
+
+    - webapp\src\ionicapp\www\js\server.js 
+    - nginx\src\cert.pem
+    - nginx\src\pkey.pem
+    - rabbitmq\src\rabbitmq.config (for RSA) or rabbitmq_ecc.config (for ECC)
+    
 1. The private key for rootca is not committed in restapi/src/cert/ [for security purposes].
 2. The value of rest_api variable in webapp/src/ionicapp/www/js/server.js should correspond to the GoDaddy domain name or AWS EC2 public IP address.
    [this may be changed to an environment variable if possible]
@@ -963,6 +1033,9 @@ In Linux, the total round trip time is only 1 second.
 3. When using self-signed certificate on NGINX,
    The Ionic iOS/Android mobile simulators can be viewed online at https://creator.ionic.io/share/xxxASKMExxx but requires the following
    - "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --ignore-certificate-errors
-   - OR chrome://flags/#allow-insecure-localhost
-   - OR install the following [certificate](https://raw.githubusercontent.com/richmondu/libpyiotcloud/master/nginx/src/ssl-cert-snakeoil.pem.crt)
-   [no longer needed after buying SSL certificates.
+   - OR type in browser chrome://flags/#allow-insecure-localhost
+4. The certificate bought from GoDaddy is different from the self-signed certificate for RabbitMQ.
+   - RABBITMQ: Uses the self-signed rootca; for MQTTS/AMQPS device connectivity
+   - NGINX: Uses the trusted certificate bought from GoDaddy; for HTTPS web/mobile connectivity; currently tied up to richmondu.com
+5. Customers can directly use the (Flask) REST APIs. They can create their own front-end web/mobile apps that calls our REST APIs.
+
