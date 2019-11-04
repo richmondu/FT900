@@ -2,7 +2,8 @@
 
 This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
-How To Guide:
+
+### How To Guide
 
 0. Access the IoT portal [here](https://richmondu.com). (iOS/Android app simulators are also available [here](https://creator.ionic.io/share/8f86e2005ba5).)
 
@@ -18,6 +19,8 @@ How To Guide:
 
 <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
+
+### Device Simulator
 
 If you do not have an FT900 board, you can use any of the <b>device simulators</b> [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
 
