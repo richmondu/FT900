@@ -174,10 +174,10 @@ static inline void ethernet_setup()
 
 #if ENABLE_USECASE_NEW
 //////////////////////////////////////////////////////////////////////////
-// STAND-ALONE Use-case (No web/mobile app)
+// Sending Notification. STAND-ALONE Use-case (No web/mobile app. All done via UART.)
 //////////////////////////////////////////////////////////////////////////
 //
-// Test #1: send by specifying message and recipient everytime
+// Test #1: send by specifying message and recipient everytime - email, SMS or DeviceID
 // iot send message "hello world" recipient "richmond.umagat@gmail.com"
 // iot send message "hello world" recipient "+639175900612"
 // iot send message "hello world 83f58e3f7e284892f6da7b020e5c982a6ea16dee" recipient "1fbc6613eb4013eca32524d2f3646f786da9bbf9"
@@ -200,7 +200,7 @@ static inline void ethernet_setup()
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Test #4: set recipient and message and enable gpio to monitor, then toggle gpio anytime
+// Test #4: set recipient and message once, enable gpio interrupt once, then toggle gpio anytime
 // iot set message "hello world" recipient "richmond.umagat@gmail.com"
 // iot gpio 18 enable dir 1 pull 1 edge 0
 //
