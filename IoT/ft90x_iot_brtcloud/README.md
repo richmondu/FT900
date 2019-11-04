@@ -13,7 +13,7 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
 3. Set the DEVICE_ID on the device.
 
-4. Run the device.
+4. Compile code and load the binary.
 
 5. Access and control the device via the IoT portal. (GPIO, RTC, UART, IP/MAC, etc)
 
