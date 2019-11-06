@@ -3,7 +3,7 @@
 This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
 
-### How To Guide
+# How To Guide:
 
 0. Access the IoT portal [here](https://richmondu.com). (iOS/Android app simulators are also available [here](https://creator.ionic.io/share/8f86e2005ba5).)
 
@@ -11,16 +11,33 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
 2. Register a device (Registering a device will return a unique DEVICE_ID).
 
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_adddevice.png" width="600"/>
+    
+    To add a device, click on the "+" button on the top right of the window.
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_adddevice_2.png" width="600"/>
+
+    Type a name for the device. Ex. "Smart Device 1"
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_adddevice_3.png" width="600"/>
+    
+    Wait for the device to be registered. A popup up window will appear that the device has been registered.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_adddevice_4.png" width="600"/>
+
+    Copy the DEVICE ID by double clicking on it and typing Ctrl+C.
+
 3. Set the DEVICE_ID on the device.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
 4. Compile code and load the binary.
 
 5. Access and control the device via the IoT portal. (GPIO, RTC, UART, IP/MAC, etc)
 
-<img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
 
-### Device Simulator
+# Device Simulator:
 
 If you do not have an FT900 board, you can use any of the <b>device simulators</b> [here](https://github.com/richmondu/libpyiotcloud/tree/master/_device_simulator).
 
