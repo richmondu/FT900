@@ -11,7 +11,7 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
     Via <b>iOS/Android app simulators</b> https://creator.ionic.io/share/8f86e2005ba5
  
-    Via <b>Ionic Creator mobile app</b> from Apple App Store or Google Play - Use code: B26EB3
+    Via <b>Ionic Creator mobile app</b> from Apple App Store or Google Play Store - Use code: B26EB3
 
 
 
