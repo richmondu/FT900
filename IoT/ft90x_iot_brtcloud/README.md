@@ -33,6 +33,8 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
 4. Compile code and load the binary.
 
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/device_bootup.png" width="700"/>
+    
 5. Access and control the device via the IoT portal. (GPIO, RTC, UART, IP/MAC, etc)
 
 
