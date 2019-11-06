@@ -766,7 +766,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
     DEBUG_PRINTF( "\r\nRECV: %s [%d]\r\n",
         mqtt_subscribe_recv->topic, (unsigned int)mqtt_subscribe_recv->payload_len );
-    DEBUG_PRINTF( "%s\r\n", mqtt_subscribe_recv->payload );
+    DEBUG_PRINTF( "%s [%d]\r\n", mqtt_subscribe_recv->payload, strlen(mqtt_subscribe_recv->payload) );
 
     iot_unsubscribe( g_handle, ptr );
 
@@ -816,7 +816,9 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         else {
             tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-            iot_publish( g_handle, topic, ptr, strlen(ptr), 1 );
+            tfp_snprintf( payload, sizeof(payload), "%s\"}", ptr );
+        	//DEBUG_PRINTF( "%s [%d]\r\n", payload, strlen(payload));
+            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         }
 
         //DEBUG_PRINTF( "%s\r\n", ptr );
