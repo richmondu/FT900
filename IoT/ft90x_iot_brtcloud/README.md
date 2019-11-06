@@ -9,6 +9,23 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
 1. Create an account and login.
 
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin.png" width="600"/>
+    
+    Click on No account yet to create an account.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_2.png" width="600"/>
+    
+    Input the details. Username can be same as email.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_3.png" width="600"/>
+    
+    Input the 6-digit code sent to your email.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_4.png" width="600"/>
+    
+    You can now login using your specified username and password.
+
+
 2. Register a device (Registering a device will return a unique DEVICE_ID).
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_adddevice.png" width="600"/>
@@ -36,6 +53,39 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/device_bootup.png" width="700"/>
     
 5. Access and control the device via the IoT portal. (GPIO, RTC, UART, IP/MAC, etc)
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice.png" width="600"/>
+
+    Click on the top right button to check if device is RUNNING or NOT RUNNING. Make sure device is RUNNING before proceeding.
+
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_2.png" width="600"/>
+    
+    Select Ethernet. Click on Get to retrieve the network-related information of the device.
+
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_3.png" width="600"/>
+    
+    Select UART. Type "hello world" on the message box then click "Submit" button to be displayed on the device.
+
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_4.png" width="600"/>
+
+    Select GPIO. Type "10" on GPIO Number then click "Get" button to get the value of the GPIO.
+
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_5.png" width="600"/>
+
+    Select Notifications. Select Email. Type your email address and the message then click "Submit" button. You should receive the email. 
+    
+    Note that your email must first be registered in AWS Notifications. Contact me to registered your email address. This a limitation of AWS Pinpoint in Sandbox mode.
+    
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_6.png" width="600"/>
+
+    Select Notifications. Select SMS. Choose country, input phone number and the message. Then click Submit. You should receive the SMS. 
+    
+    Note AWS Pinpoint in Sandbox mode has limit in the number of SMS messages that can be sent. So test wisely. You can also select the source of SMS - AWS Pinpoint, Twilio or Nexmo.
 
 
 
