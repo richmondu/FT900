@@ -634,6 +634,8 @@ static void iot_app_task( void *pvParameters )
         }
         g_handle = handle;
 
+        DEBUG_PRINTF( "Device is now ready! Control this device from IoT Portal https://richmondu.com\r\n\r\n" );
+
         do  {
 #if ENABLE_USECASE_NEW
             uint32_t ulNotificationValue = 0;
