@@ -7,12 +7,9 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
 0. Access the IoT portal.
     
-    Via <b>webapp</b> https://richmondu.com
-
-    Via <b>iOS/Android app simulators</b> https://creator.ionic.io/share/8f86e2005ba5
- 
-    Via <b>Ionic Creator mobile app</b> from Apple App Store or Google Play Store - Use code: B26EB3
-
+    - Via <b>webapp</b> https://richmondu.com
+    - Via <b>iOS/Android app simulators</b> https://creator.ionic.io/share/8f86e2005ba5
+    - Via <b>Ionic Creator mobile app</b> from Apple App Store or Google Play Store - Use code: B26EB3
 
 
 1. Create an account and login.
@@ -69,33 +66,65 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_2.png" width="600"/>
     
-    Select Ethernet. Click on Get to retrieve the network-related information of the device.
+    Select <b>Ethernet</b>. Click on Get to retrieve the network-related information of the device.
 
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_3.png" width="600"/>
     
-    Select UART. Type "hello world" on the message box then click "Submit" button to be displayed on the device.
+    Select <b>UART</b>. Type "hello world" on the message box then click "Submit" button to be displayed on the device.
 
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_4.png" width="600"/>
 
-    Select GPIO. Type "10" on GPIO Number then click "Get" button to get the value of the GPIO.
+    Select <b>GPIO</b>. Type "10" on GPIO Number then click "Get" button to get the value of the GPIO.
 
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_5.png" width="600"/>
 
-    Select Notifications. Select Email. Type your email address and the message then click "Submit" button. You should receive the email. 
+    Select <b>Notifications</b>. Select Email. Type your email address and the message then click "Submit" button. You should receive the email. 
     
     Note that your email must first be registered in AWS Notifications. Contact me to registered your email address. This a limitation of AWS Pinpoint in Sandbox mode.
     
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_testdevice_6.png" width="600"/>
 
-    Select Notifications. Select SMS. Choose country, input phone number and the message. Then click Submit. You should receive the SMS. 
+    Select <b>Notifications</b>. Select SMS. Choose country, input phone number and the message. Then click Submit. You should receive the SMS. 
     
     Note AWS Pinpoint in Sandbox mode has limit in the number of SMS messages that can be sent. So test wisely. You can also select the source of SMS - AWS Pinpoint, Twilio or Nexmo.
 
 
+6. Test buying credits using Paypal.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits.png" width="600"/>
+    
+    Go to Account Page. Click on "Buy credits" button.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits_2.png" width="600"/>
+    
+    Select package. Click on "Pay via Paypal" button.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits_3.png" width="600"/>
+
+    A Paypal window appears. Login using the following test account: username-iotportal@bridgetek.com password-BrtIoTPortal
+    
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits_4.png" width="600"/>
+    
+    Click on "Continue" button to approve the payment.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits_5.png" width="600"/>
+    
+    A confirmation page appears indicating that the payment transaction was successful.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_buycredits_6.png" width="600"/>
+
+    You'll be redirected back to the original window with a popup indicating the new credit balance.
+    
+    
 
 # Device Simulator:
 
