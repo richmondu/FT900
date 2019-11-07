@@ -18,13 +18,16 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
     
     Click on No account yet to create an account.
 
+
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_2.png" width="600"/>
     
-    Input the details. Username can be same as email.
+    Input the details. Username can be same as email. Note that a confirmation code will be sent to your email.
+
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_3.png" width="600"/>
     
     Input the 6-digit code sent to your email.
+
 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_signuplogin_4.png" width="600"/>
     
@@ -98,6 +101,11 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_checkhistory.png" width="600"/>
 
     Go to History Page. This will display the transaction received and sent by each of the devices in descending order.
+
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_checkhistory_2.png" width="600"/>
+
+    Select a device from the list to filter transactions for that specific device.
     
     
 7. Test buying credits using Paypal.
@@ -152,6 +160,23 @@ This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_forgotpassword_4.png" width="600"/>
 
     You can now login with your username and new password.
+
+
+9. Test deleting a device.
+
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_deletedevice.png" width="600"/>
+    
+    Swipe the device to the right. The View and Delete buttons will appear. Click on the "Delete" button.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_deletedevice_2.png" width="600"/>
+    
+    A confirmation popup will appear to delete the device.
+    
+    
+    <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/tutorial_deletedevice_3.png" width="600"/>
+
+    The list of devices will automatically be updated to remove the deleted device.
 
 
 
