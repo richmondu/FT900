@@ -3,7 +3,9 @@
 This code is working on both <b>MM900EV1B (RevC) board</b> and the new <b>FT900 IoT Board</b>.
 
 
-# How To Guide:
+# Step-by-step User Guide:
+
+This page contains a step-by-step tutorial on how to use the IoT Portal including how to use the device simulators or FT900 device module. If you have questions, comments and suggestions, please contact me at Skype. My ID is ftdi.richmond.umagat.
 
 0. Access the IoT portal.
     
