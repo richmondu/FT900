@@ -55,8 +55,10 @@ This page contains a step-by-step tutorial on how to use the IoT Portal includin
 
     Copy the DEVICE ID by double clicking on it and typing Ctrl+C.
 
-3. Set the DEVICE_ID on the device.
+3. Set the USE_DEVICE_ID, MQTT_CLIENT_USER and MQTT_CLIENT_PASS on the device.
 
+    <b> NOTE: After implementing additional security measures in the backend, device also needs to provide the MQTT username and MQTT password with the UUID and SerialNumber, respectively. </b>
+    
     <img src="https://github.com/richmondu/libpyiotcloud/blob/master/_images/code_ft90Xiotbrtcloud.png" width="800"/>
 
 4. Compile code and load the binary.
