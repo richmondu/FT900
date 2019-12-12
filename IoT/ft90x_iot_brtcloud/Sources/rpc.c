@@ -41,6 +41,7 @@
 #include <ft900.h>
 #include "tinyprintf.h"
 #include "FreeRTOS.h"
+#if 0
 #include "net.h"
 #include "rpc.h"
 #include <stdio.h>
@@ -158,6 +159,7 @@ void set_mac( uint8_t* mac_str )
 
     net_set_mac_eeprom(mac);
 }
+#endif
 
 void restart_task( void *param )
 {

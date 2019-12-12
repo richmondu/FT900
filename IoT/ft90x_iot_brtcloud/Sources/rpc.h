@@ -41,6 +41,17 @@
 #ifndef SOURCES_RPC_H_
 #define SOURCES_RPC_H_
 
+#if 0
+#define API_GET_STATUS              "get_status"
+#define API_SET_STATUS              "set_status"
+
+#define API_STATUS_RESTART          "restart"
+#define API_STATUS_RUNNING          "running"
+#define API_STATUS_RESTARTING       "restarting"
+
+
+#define API_TRIGGER_NOTIFICATION    "trigger_notification"
+
 
 #define API_GET_GPIO                "get_gpio"
 #define API_SET_GPIO                "set_gpio"
@@ -51,13 +62,7 @@
 #define API_GET_SUBNET              "get_subnet"
 #define API_GET_GATEWAY             "get_gateway"
 #define API_SET_MAC                 "set_mac"
-#define API_GET_STATUS              "get_status"
-#define API_SET_STATUS              "set_status"
 #define API_WRITE_UART              "write_uart"
-#define API_TRIGGER_NOTIFICATION    "trigger_notification"
-#define API_STATUS_RESTART          "restart"
-#define API_STATUS_RUNNING          "running"
-#define API_STATUS_RESTARTING       "restarting"
 
 int      get_gpio( int number );
 void     set_gpio( int number, int value );
@@ -66,7 +71,7 @@ void     set_rtc ( uint32_t secs );
 uint32_t get_rtc ( void );
 void     get_mac ( uint8_t* mac );
 void     set_mac ( uint8_t* mac );
-
+#endif
 void     restart_task( void *param );
 
 #endif /* SOURCES_RPC_H_ */
