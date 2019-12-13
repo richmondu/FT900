@@ -4,8 +4,16 @@
 
 
 #define ENABLE_UART 1
+#if ENABLE_UART
+#define ENABLE_UART_ATCOMMANDS 1
+#endif // ENABLE_UART
 #define ENABLE_GPIO 0
 #define ENABLE_I2C  0
+
+
+
+#define PREPEND_REPLY_TOPIC "server/"
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -94,5 +102,61 @@ typedef enum _DEVICE_STATUS {
 #define PAYLOAD_API_GET_I2CS            "{\"value\":{\"i2cs\":[{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d}]}}"
 #endif // ENABLE_I2C
 
+
+////////////////////////////////////////////////////////////////////////////////////
+// UART Commands
+////////////////////////////////////////////////////////////////////////////////////
+
+#define UART_ATCOMMANDS_NUM 15
+
+#define UART_ATCOMMAND_MOBILE        "AT+M"
+#define UART_ATCOMMAND_EMAIL         "AT+E"
+#define UART_ATCOMMAND_NOTIFY        "AT+N"
+#define UART_ATCOMMAND_MODEM         "AT+O"
+#define UART_ATCOMMAND_STORAGE       "AT+S"
+#define UART_ATCOMMAND_DEFAULT       "AT+D"
+#define UART_ATCOMMAND_CONTINUE      "ATC"
+#define UART_ATCOMMAND_ECHO          "ATE"
+#define UART_ATCOMMAND_HELP          "ATH"
+#define UART_ATCOMMAND_INFO          "ATI"
+#define UART_ATCOMMAND_MORE          "ATM"
+#define UART_ATCOMMAND_PAUSE         "ATP"
+#define UART_ATCOMMAND_RESET         "ATR"
+#define UART_ATCOMMAND_UPDATE        "ATU"
+#define UART_ATCOMMAND_STATUS        "AT"
+
+#define UART_ATCOMMAND_DESC_MOBILE   "Send message as SMS to verified mobile number"
+#define UART_ATCOMMAND_DESC_EMAIL    "Send message as email to verified email address"
+#define UART_ATCOMMAND_DESC_NOTIFY   "Send message as mobile app notification to verified user"
+#define UART_ATCOMMAND_DESC_MODEM    "Send message to other IoT modem devices"
+#define UART_ATCOMMAND_DESC_STORAGE  "Send message to storage"
+#define UART_ATCOMMAND_DESC_DEFAULT  "Send default message to configured endpoints"
+#define UART_ATCOMMAND_DESC_CONTINUE "Continue device functions"
+#define UART_ATCOMMAND_DESC_ECHO     "Echo on/off (toggle)"
+#define UART_ATCOMMAND_DESC_HELP     "Display help information on commands"
+#define UART_ATCOMMAND_DESC_INFO     "Display device information"
+#define UART_ATCOMMAND_DESC_MORE     "Display more information on error"
+#define UART_ATCOMMAND_DESC_PAUSE    "Pause/Resume (toggle)"
+#define UART_ATCOMMAND_DESC_RESET    "Reset device"
+#define UART_ATCOMMAND_DESC_UPDATE   "Enter firmware update (UART entry point inside bootloader)"
+#define UART_ATCOMMAND_DESC_STATUS   "Display device status"
+
+#define UART_ATCOMMAND_PLUS          '+'
+
+
+#define UART_PROPERTIES_BAUDRATE_COUNT 16
+
+typedef struct _UART_PROPERTIES {
+	uint8_t m_ucBaudrate;    // g_uwBaudrates
+	uint8_t m_ucParity;      // ft900_uart_simple.h uart_parity_t
+	uint8_t m_ucFlowcontrol; // ft900_uart_simple.h uart_flow_t
+	uint8_t m_ucStopbits;    // ft900_uart_simple.h uart_stop_bits_t
+	uint8_t m_ucDatabits;    // ft900_uart_simple.h uart_data_bits_t
+} UART_PROPERTIES;
+
+void iot_modem_uart_enable(UART_PROPERTIES* properties, int enable, int disable);
+void iot_modem_uart_isr();
+void iot_modem_uart_command_process();
+void iot_modem_uart_command_help();
 
 #endif /* _IOT_MODEM_H_ */

@@ -46,6 +46,9 @@ char* json_parse_str( const char* ptr, char* key, int* len )
         return NULL; // terminator character not found
     }
 
+    if (len) {
+    	*len = stop-start;
+    }
     return start;
 }
 
