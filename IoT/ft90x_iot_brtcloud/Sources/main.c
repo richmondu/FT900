@@ -318,14 +318,51 @@ static void iot_app_task( void *pvParameters )
         g_handle = handle;
 
         DEBUG_PRINTF( "Device is now ready! Control this device from IoT Portal https://%s\r\n\r\n", MQTT_BROKER );
+
+        /* set device status to running */
         g_ulDeviceStatus = DEVICE_STATUS_RUNNING;
+
+        /* display the UART commands */
         iot_modem_uart_command_help();
 
         do  {
 #if ENABLE_UART_ATCOMMANDS
             uint32_t ulNotificationValue = 0;
-            if (xTaskNotifyWait(0, 0, &ulNotificationValue, pdMS_TO_TICKS(1000)) == pdTRUE) {
-                iot_modem_uart_command_process();
+            if (xTaskNotifyWait(0, TASK_NOTIFY_CLEAR_BITS, &ulNotificationValue, pdMS_TO_TICKS(1000)) == pdTRUE) {
+            	DEBUG_PRINTF( "xTaskNotifyWait %d\r\n", ulNotificationValue );
+
+            	/* process UART */
+            	if (TASK_NOTIFY_FROM_UART(ulNotificationValue)) {
+            		iot_modem_uart_command_process();
+            	}
+
+            	/* process GPIO */
+            	if (TASK_NOTIFY_FROM_GPIO0(ulNotificationValue)) {
+            		iot_modem_gpio_process(1);
+            	}
+            	if (TASK_NOTIFY_FROM_GPIO1(ulNotificationValue)) {
+            		iot_modem_gpio_process(2);
+            	}
+            	if (TASK_NOTIFY_FROM_GPIO2(ulNotificationValue)) {
+            		iot_modem_gpio_process(3);
+            	}
+            	if (TASK_NOTIFY_FROM_GPIO3(ulNotificationValue)) {
+            		iot_modem_gpio_process(4);
+            	}
+
+            	/* process I2C */
+            	if (TASK_NOTIFY_FROM_I2C0(ulNotificationValue)) {
+            		// TODO
+            	}
+            	if (TASK_NOTIFY_FROM_I2C1(ulNotificationValue)) {
+            		// TODO
+            	}
+            	if (TASK_NOTIFY_FROM_I2C2(ulNotificationValue)) {
+            		// TODO
+            	}
+            	if (TASK_NOTIFY_FROM_I2C3(ulNotificationValue)) {
+            		// TODO
+            	}
             }
 #endif // ENABLE_UART_ATCOMMANDS
             vTaskDelay( pdMS_TO_TICKS(1000) );
@@ -609,8 +646,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( strncmp( ptr, API_GET_GPIO_PROPERTIES, len ) == 0 ) {
         uint8_t ucNumber = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         DEBUG_PRINTF( "ucNumber=%d\r\n", ucNumber );
-
-        if (ucNumber < 4) {
+        if (ucNumber < GPIO_COUNT) {
             tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
             tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIO_PROPERTIES,
                 g_oGpioProperties[ucNumber].m_ucDirection,
@@ -639,7 +675,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         DEBUG_PRINTF( "ucNumber=%d ucDirection=%d ucMode=%d, ucAlert=%d, ulAlertperiod=%d ucPolarity=%d ulWidth=%d ulMark=%d ulSpace=%d\r\n",
             ucNumber, ucDirection, ucMode, ucAlert, ulAlertperiod, ucPolarity, ulWidth, ulMark, ulSpace );
 
-        if (ucNumber < 4) {
+        if (ucNumber < GPIO_COUNT) {
             g_oGpioProperties[ucNumber].m_ucDirection   = ucDirection;
             g_oGpioProperties[ucNumber].m_ucMode        = ucMode;
             g_oGpioProperties[ucNumber].m_ucAlert       = ucAlert;
@@ -656,9 +692,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( strncmp( ptr, API_ENABLE_GPIO, len ) == 0 ) {
         uint8_t ucNumber = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "enable");
-        //DEBUG_PRINTF( "ucEnabled=%d ucNumber=%d\r\n", ucEnabled, ucNumber );
-
-        if (ucNumber < 4 && ucEnabled < 2) {
+        if (ucNumber < GPIO_COUNT && ucEnabled < 2) {
             if ( g_ucGpioEnabled[ucNumber] != ucEnabled ) {
                 iot_modem_gpio_enable(&g_oGpioProperties, ucNumber, ucEnabled);
                 g_ucGpioEnabled[ucNumber] = ucEnabled;

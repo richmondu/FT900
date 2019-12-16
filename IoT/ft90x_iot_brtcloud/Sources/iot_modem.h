@@ -44,6 +44,47 @@ typedef enum _DEVICE_STATUS {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
+// Notifications
+////////////////////////////////////////////////////////////////////////////////////
+
+#define MENOS_MOBILE       "mobile"
+#define MENOS_EMAIL        "email"
+#define MENOS_NOTIFICATION "notification"
+#define MENOS_MODEM        "modem"
+#define MENOS_STORAGE      "storage"
+#define MENOS_DEFAULT      "default"
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// Task notify
+////////////////////////////////////////////////////////////////////////////////////
+
+typedef enum _TASK_NOTIFY_BIT {
+	TASK_NOTIFY_BIT_UART,
+	TASK_NOTIFY_BIT_GPIO0,
+	TASK_NOTIFY_BIT_GPIO1,
+	TASK_NOTIFY_BIT_GPIO2,
+	TASK_NOTIFY_BIT_GPIO3,
+	TASK_NOTIFY_BIT_I2C0,
+	TASK_NOTIFY_BIT_I2C1,
+	TASK_NOTIFY_BIT_I2C2,
+	TASK_NOTIFY_BIT_I2C3,
+} TASK_NOTIFY_BIT;
+
+#define TASK_NOTIFY_BIT(x) ( 1 << (x) )
+#define TASK_NOTIFY_FROM_UART(y)  ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART) )
+#define TASK_NOTIFY_FROM_GPIO0(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0) )
+#define TASK_NOTIFY_FROM_GPIO1(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO1) )
+#define TASK_NOTIFY_FROM_GPIO2(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO2) )
+#define TASK_NOTIFY_FROM_GPIO3(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO3) )
+#define TASK_NOTIFY_FROM_I2C0(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0) )
+#define TASK_NOTIFY_FROM_I2C1(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C1) )
+#define TASK_NOTIFY_FROM_I2C2(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C2) )
+#define TASK_NOTIFY_FROM_I2C3(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C3) )
+#define TASK_NOTIFY_CLEAR_BITS 0xFFFFFFFF
+
+
+////////////////////////////////////////////////////////////////////////////////////
 // APIs
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -93,19 +134,23 @@ typedef enum _DEVICE_STATUS {
 #define PAYLOAD_API_SET_STATUS          "{\"value\":{\"status\":%d}}"
 
 #if ENABLE_UART
+#define TOPIC_UART                      "%s%s/trigger_notification/uart/%s"
 #define PAYLOAD_API_GET_UARTS           "{\"value\":{\"uarts\":[{\"enabled\":%d}]}}"
 #define PAYLOAD_API_GET_UART_PROPERTIES "{\"value\":{\"baudrate\":%d,\"parity\":%d,\"flowcontrol\":%d,\"stopbits\":%d,\"databits\":%d}}"
 #endif // ENABLE_UART
 
 #if ENABLE_GPIO
+#define TOPIC_GPIO                      "%s%s/trigger_notification/gpio%d/%s"
 #define PAYLOAD_API_GET_GPIOS           "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
 #define PAYLOAD_API_GET_GPIO_VOLTAGE    "{\"value\":{\"voltage\":%d}}"
 #define PAYLOAD_API_GET_GPIO_PROPERTIES "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
 #endif // ENABLE_GPIO
 
 #if ENABLE_I2C
+#define TOPIC_I2C                       "%s%s/trigger_notification/i2c%d/%s"
 #define PAYLOAD_API_GET_I2CS            "{\"value\":{\"i2cs\":[{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d}]}}"
 #endif // ENABLE_I2C
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +194,10 @@ typedef enum _DEVICE_STATUS {
 #define UART_ATCOMMAND_PLUS          '+'
 
 
+////////////////////////////////////////////////////////////////////////////////////
+// UART Properties
+////////////////////////////////////////////////////////////////////////////////////
+
 #define UART_PROPERTIES_BAUDRATE_COUNT 16
 
 typedef struct _UART_PROPERTIES {
@@ -160,6 +209,22 @@ typedef struct _UART_PROPERTIES {
 } UART_PROPERTIES;
 
 
+////////////////////////////////////////////////////////////////////////////////////
+// GPIO Properties
+////////////////////////////////////////////////////////////////////////////////////
+
+#define GPIO_COUNT 4
+#define GPIO_INPUT_PIN_0   12 // Input pins: 12,13,14,15
+#define GPIO_OUTPUT_PIN_0   8 // Output pins: 8,9,10,11
+#define GPIO_VOLTAGE_PIN_0 16
+#define GPIO_VOLTAGE_PIN_1 17
+
+typedef enum _GPIO_MODES_INPUT {
+	GPIO_MODES_INPUT_HIGH_LEVEL,
+	GPIO_MODES_INPUT_LOW_LEVEL,
+	GPIO_MODES_INPUT_HIGH_EDGE,
+	GPIO_MODES_INPUT_LOW_EDGE,
+} GPIO_MODES_INPUT;
 
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;   // ["Input", "Output"]
@@ -172,22 +237,26 @@ typedef struct _GPIO_PROPERTIES {
     uint32_t m_ulSpace;
 } GPIO_PROPERTIES;
 
-#define GPIO_INPUT_PIN_0   12 // Input pins: 12,13,14,15
-#define GPIO_OUTPUT_PIN_0   8 // Output pins: 8,9,10,11
-#define GPIO_VOLTAGE_PIN_0 16
-#define GPIO_VOLTAGE_PIN_1 17
 
-
+////////////////////////////////////////////////////////////////////////////////////
+// UART Functions
+////////////////////////////////////////////////////////////////////////////////////
 
 void iot_modem_uart_enable_interrupt();
 void iot_modem_uart_enable(UART_PROPERTIES* properties, int enable, int disable);
 void iot_modem_uart_command_process();
 void iot_modem_uart_command_help();
 
+
+////////////////////////////////////////////////////////////////////////////////////
+// GPIO Functions
+////////////////////////////////////////////////////////////////////////////////////
+
 void iot_modem_gpio_init(int voltage);
 void iot_modem_gpio_set_voltage(int voltage);
 void iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
 void iot_modem_gpio_get_status(uint8_t* status, uint8_t* direction, uint8_t* enabled);
+void iot_modem_gpio_process(int number);
 
 
 

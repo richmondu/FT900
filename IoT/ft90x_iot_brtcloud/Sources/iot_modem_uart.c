@@ -38,8 +38,8 @@
 
 #if ENABLE_UART_ATCOMMANDS
 
-extern TaskHandle_t g_iot_app_handle; // used by iot_modem_uart_isr
-extern iot_handle g_handle;
+extern TaskHandle_t g_iot_app_handle; // used by iot_modem_uart_command_process
+extern iot_handle g_handle; // used to publish packets
 
 
 typedef struct _UART_ATCOMMANDS {
@@ -119,13 +119,13 @@ static inline void uart_publish(char* pcMenos, char* pcRecipient, int lRecipient
 {
     char topic[64] = {0};
     char payload[160] = {0};
-    tfp_snprintf( topic, sizeof(topic), "%s%s/trigger_notification/uart/%s", PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), pcMenos);
+    tfp_snprintf( topic, sizeof(topic), TOPIC_UART, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), pcMenos);
 
     if (lRecipientLen && lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\",\"message\":\"%s\"}", pcRecipient, pcMessage);
     }
     else if (!lRecipientLen && !lMessageLen) {
-    	tfp_snprintf( payload, sizeof(payload), "{}");
+    	tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY);
     }
     else if (lRecipientLen && !lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\"}", pcRecipient);
@@ -240,33 +240,33 @@ static inline void uart_cmdhdl_common(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen
 
 static void uart_cmdhdl_mobile(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "mobile");
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, MENOS_MOBILE);
 }
 
 static void uart_cmdhdl_email(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "email");
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, MENOS_EMAIL);
 }
 
 static void uart_cmdhdl_notification(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "notification");
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, MENOS_NOTIFICATION);
 }
 
 static void uart_cmdhdl_mOdem(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "modem");
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, MENOS_MODEM);
 }
 
 static void uart_cmdhdl_storage(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "storage");
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, MENOS_STORAGE);
 }
 
 static void uart_cmdhdl_default(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
     if (lCmdLen == strlen(g_acUartCommands[ucCmdIdx].m_pcCmd)) {
-    	uart_publish("default", NULL, 0, NULL, 0);
+    	uart_publish(MENOS_DEFAULT, NULL, 0, NULL, 0);
     	return;
     }
 
@@ -373,7 +373,7 @@ static void ISR_uart0()
         	// process enter/carriage return
             g_acUartCommandBuffer[g_ucUartCommandBufferOffset-1] = '\0'; // Remove the enter key
             g_ucUartCommandBufferOffset--;
-            xTaskNotifyFromISR(g_iot_app_handle, 0, eNoAction, NULL);
+            xTaskNotifyFromISR(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART), eSetBits, NULL);
         }
         else if (c == 0x08) {
         	// process backspace
