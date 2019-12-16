@@ -41,6 +41,7 @@
 extern TaskHandle_t g_iot_app_handle; // used by iot_modem_uart_isr
 extern iot_handle g_handle;
 
+
 typedef struct _UART_ATCOMMANDS {
 	char* m_pcCmd;
 	void (*m_pcFxn)(uint8_t ucCmdIdx, char *pcCmd, int lCmdLen);
@@ -114,129 +115,162 @@ static uint16_t g_uwBaudrates[UART_PROPERTIES_BAUDRATE_COUNT] = {
 
 #if ENABLE_UART_ATCOMMANDS
 
-static inline void uart_publish(char* pcMenos, char* pcRecipient, char* pcMessage)
+static inline void uart_publish(char* pcMenos, char* pcRecipient, int lRecipientLen, char* pcMessage, int lMessageLen)
 {
     char topic[64] = {0};
     char payload[160] = {0};
     tfp_snprintf( topic, sizeof(topic), "%s%s/trigger_notification/uart/%s", PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), pcMenos);
-    if (pcRecipient && pcMessage) {
+
+    if (lRecipientLen && lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\",\"message\":\"%s\"}", pcRecipient, pcMessage);
     }
-    else if (!pcRecipient && !pcMessage) {
+    else if (!lRecipientLen && !lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), "{}");
+    }
+    else if (lRecipientLen && !lMessageLen) {
+    	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\"}", pcRecipient);
+    }
+    else {
+    	tfp_snprintf( payload, sizeof(payload), "{\"message\":\"%s\"}", pcMessage);
     }
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     DEBUG_PRINTF("PUB %s %s\r\n\r\n", topic, payload);
 }
 
-static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRecipientSize, char* message, int lMessageSize)
+static inline int uart_parse_ex(char* dst, char* src, int* len)
+{
+	if (*src == '\"') {
+		if (*(src+(*len-1) ) != '\"') {
+			DEBUG_PRINTF("%s 8\r\n", WRONG_SYNTAX);
+			return 0;
+		}
+		strncpy(dst, src+1, *len-2);
+		*len -= 2;
+		return 1;
+	}
+	else if (*src == '\'') {
+		if (*(src+(*len-1) ) != '\'') {
+			DEBUG_PRINTF("%s 9\r\n", WRONG_SYNTAX);
+			return 0;
+		}
+		strncpy(dst, src+1, *len-2);
+		*len -= 2;
+		return 1;
+	}
+
+	strncpy(dst, src, *len);
+	return 1;
+}
+
+static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRecipientSize, int* lRecipientLen, char* message, int lMessageSize, int* lMessageLen)
 {
     char* pcRecipient = pcCmd;
     if (*pcRecipient != '+') {
-        DEBUG_PRINTF("wrong syntax 1\r\n");
+        DEBUG_PRINTF("%s 1\r\n", WRONG_SYNTAX);
         return 0;
     }
     pcRecipient++;
     if (*pcRecipient == '\0') {
-        DEBUG_PRINTF("wrong syntax 2\r\n");
+        DEBUG_PRINTF("%s 2 (ix)\r\n", WRONG_SYNTAX);
+        return 0;
+    }
+    if (*pcRecipient == '+' && *(pcRecipient+1) == '\0') {
+        DEBUG_PRINTF("%s 3 (viii)\r\n", WRONG_SYNTAX);
         return 0;
     }
 
     char* pcMessage = strchr(pcRecipient, '+');
     if (!pcMessage) {
-        DEBUG_PRINTF("wrong syntax 3\r\n");
-        return 0;
+    	// recipient only, no message
+    	*lRecipientLen = strlen(pcRecipient);
+        if (*lRecipientLen >= lRecipientSize) {
+            DEBUG_PRINTF("recipient length is too big\r\n");
+            return 0;
+        }
+    	return uart_parse_ex(recipient, pcRecipient, lRecipientLen);
     }
     pcMessage++;
     if (*pcMessage == '\0') {
-        DEBUG_PRINTF("wrong syntax 4\r\n");
+        DEBUG_PRINTF("%s 4\r\n", WRONG_SYNTAX);
         return 0;
     }
 
-    if (pcMessage-pcRecipient-1 >= lRecipientSize) {
+    *lRecipientLen = pcMessage-pcRecipient-1;
+    *lMessageLen = strlen(pcMessage);
+
+    if (*lRecipientLen >= lRecipientSize) {
         DEBUG_PRINTF("recipient length is too big\r\n");
         return 0;
     }
-    if (lCmdLen-(pcMessage-pcCmd) >= lMessageSize) {
+    if (*lMessageLen >= lMessageSize) {
         DEBUG_PRINTF("message length is too big\r\n");
         return 0;
     }
+    if (*lRecipientLen == 0) {
+    	// no recipient, message only
+        return uart_parse_ex(message, pcMessage, lMessageLen);
+    }
 
-    strncpy(recipient, pcRecipient, pcMessage-pcRecipient-1);
-    //DEBUG_PRINTF("%s\r\n", recipient);
-    strncpy(message, pcMessage, lCmdLen-(pcMessage-pcCmd));
-    //DEBUG_PRINTF("%s\r\n", message);
-
+    // both recipient and message
+    if (!uart_parse_ex(recipient, pcRecipient, lRecipientLen)){
+    	return 0;
+    }
+    if (!uart_parse_ex(message, pcMessage, lMessageLen)) {
+    	return 0;
+    }
     return 1;
+}
+
+static inline void uart_cmdhdl_common(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen, char* pcStr)
+{
+	int lCmdLenLocal = strlen(g_acUartCommands[ucCmdIdx].m_pcCmd);
+    if (lCmdLen == lCmdLenLocal) {
+    	uart_publish(pcStr, NULL, 0, NULL, 0);
+    	return;
+    }
+
+    char acRecipient[32] = {0};
+    char acMessage[64] = {0};
+    int lRecipientLen = 0;
+    int lMessageLen = 0;
+    if (uart_parse(pcCmd+lCmdLenLocal, lCmdLen, acRecipient, sizeof(acRecipient), &lRecipientLen, acMessage, sizeof(acMessage), &lMessageLen)) {
+    	uart_publish(pcStr, acRecipient, lRecipientLen, acMessage, lMessageLen);
+    }
 }
 
 static void uart_cmdhdl_mobile(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	int lCmdLenLocal = strlen(g_acUartCommands[ucCmdIdx].m_pcCmd);
-    if (lCmdLen == lCmdLenLocal) {
-    	uart_publish("mobile", NULL, NULL);
-    	return;
-    }
-
-    char recipient[32] = {0};
-    char message[64] = {0};
-    if (uart_parse(pcCmd+lCmdLenLocal, lCmdLen, recipient, sizeof(recipient), message, sizeof(message))) {
-    	uart_publish("mobile", recipient, message);
-    }
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "mobile");
 }
 
 static void uart_cmdhdl_email(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	int lCmdLenLocal = strlen(g_acUartCommands[ucCmdIdx].m_pcCmd);
-    if (lCmdLen == lCmdLenLocal) {
-    	uart_publish("email", NULL, NULL);
-    	return;
-    }
-
-    char recipient[32] = {0};
-    char message[64] = {0};
-    if (uart_parse(pcCmd+lCmdLenLocal, lCmdLen, recipient, sizeof(recipient), message, sizeof(message))) {
-    	uart_publish("email", recipient, message);
-    }
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "email");
 }
 
 static void uart_cmdhdl_notification(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    if (lCmdLen == strlen(g_acUartCommands[ucCmdIdx].m_pcCmd)) {
-    	uart_publish("notification", NULL, NULL);
-    	return;
-    }
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "notification");
 }
 
 static void uart_cmdhdl_mOdem(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-	int lCmdLenLocal = strlen(g_acUartCommands[ucCmdIdx].m_pcCmd);
-    if (lCmdLen == lCmdLenLocal) {
-    	uart_publish("mOdem", NULL, NULL);
-    	return;
-    }
-
-    char recipient[32] = {0};
-    char message[64] = {0};
-    if (uart_parse(pcCmd+lCmdLenLocal, lCmdLen, recipient, sizeof(recipient), message, sizeof(message))) {
-    	uart_publish("mOdem", recipient, message);
-    }
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "modem");
 }
 
 static void uart_cmdhdl_storage(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    if (lCmdLen == strlen(g_acUartCommands[ucCmdIdx].m_pcCmd)) {
-    	uart_publish("storage", NULL, NULL);
-    	return;
-    }
+	uart_cmdhdl_common(ucCmdIdx, pcCmd, lCmdLen, "storage");
 }
 
 static void uart_cmdhdl_default(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
     if (lCmdLen == strlen(g_acUartCommands[ucCmdIdx].m_pcCmd)) {
-    	uart_publish("default", NULL, NULL);
+    	uart_publish("default", NULL, 0, NULL, 0);
     	return;
     }
+
+    DEBUG_PRINTF("%s\r\n", WRONG_SYNTAX);
 }
 
 static void uart_cmdhdl_continue(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
@@ -311,7 +345,7 @@ void iot_modem_uart_command_process()
     g_ucUartCommandBufferAvailable = 1;
 }
 
-void iot_modem_uart_isr()
+static void ISR_uart0()
 {
     static uint8_t c;
 
@@ -357,7 +391,7 @@ void iot_modem_uart_enable(UART_PROPERTIES* properties, int enable, int disable)
 {
 	if (disable) {
         uart_close(UART0);
-        uart_soft_reset(UART0);
+        uart_soft_reset(UART0); // needed to avoid distorted data when changing databits or parity
 	}
 
 	if (enable) {
@@ -368,7 +402,17 @@ void iot_modem_uart_enable(UART_PROPERTIES* properties, int enable, int disable)
 			properties->m_ucParity,
 			properties->m_ucStopbits
 			);
+		iot_modem_uart_enable_interrupt(); // needed because uart_soft_reset clears the interrupt
 	}
+}
+
+void iot_modem_uart_enable_interrupt()
+{
+#if ENABLE_UART_ATCOMMANDS
+    interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, ISR_uart0);
+    uart_enable_interrupt(UART0, uart_interrupt_rx);
+    uart_enable_interrupts_globally(UART0);
+#endif // ENABLE_UART_ATCOMMANDS
 }
 
 

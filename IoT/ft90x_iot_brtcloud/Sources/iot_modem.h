@@ -7,12 +7,14 @@
 #if ENABLE_UART
 #define ENABLE_UART_ATCOMMANDS 1
 #endif // ENABLE_UART
-#define ENABLE_GPIO 0
+#define ENABLE_GPIO 1
 #define ENABLE_I2C  0
+#define ENABLE_NOTIFICATIONS 1
 
 
 
 #define PREPEND_REPLY_TOPIC "server/"
+#define WRONG_SYNTAX "wrong syntax"
 
 
 
@@ -76,7 +78,10 @@ typedef enum _DEVICE_STATUS {
 #endif // ENABLE_I2C
 
 // notification
+#if ENABLE_NOTIFICATIONS
 #define API_TRIGGER_NOTIFICATION      "trigger_notification"
+#define API_RECEIVE_NOTIFICATION      "recv_notification"
+#endif // ENABLE_NOTIFICATIONS
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +98,7 @@ typedef enum _DEVICE_STATUS {
 #endif // ENABLE_UART
 
 #if ENABLE_GPIO
-#define PAYLOAD_API_GET_GPIOS           "{\"value\":{\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
+#define PAYLOAD_API_GET_GPIOS           "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
 #define PAYLOAD_API_GET_GPIO_VOLTAGE    "{\"value\":{\"voltage\":%d}}"
 #define PAYLOAD_API_GET_GPIO_PROPERTIES "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
 #endif // ENABLE_GPIO
@@ -154,9 +159,36 @@ typedef struct _UART_PROPERTIES {
 	uint8_t m_ucDatabits;    // ft900_uart_simple.h uart_data_bits_t
 } UART_PROPERTIES;
 
+
+
+typedef struct _GPIO_PROPERTIES {
+    uint8_t  m_ucDirection;   // ["Input", "Output"]
+    uint8_t  m_ucMode;        // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
+    uint8_t  m_ucAlert;       // ["Once", "Continuously"]
+    uint32_t m_ulAlertperiod;
+    uint8_t  m_ucPolarity;    // ["Positive", "Negative"]
+    uint32_t m_ulWidth;
+    uint32_t m_ulMark;
+    uint32_t m_ulSpace;
+} GPIO_PROPERTIES;
+
+#define GPIO_INPUT_PIN_0   12 // Input pins: 12,13,14,15
+#define GPIO_OUTPUT_PIN_0   8 // Output pins: 8,9,10,11
+#define GPIO_VOLTAGE_PIN_0 16
+#define GPIO_VOLTAGE_PIN_1 17
+
+
+
+void iot_modem_uart_enable_interrupt();
 void iot_modem_uart_enable(UART_PROPERTIES* properties, int enable, int disable);
-void iot_modem_uart_isr();
 void iot_modem_uart_command_process();
 void iot_modem_uart_command_help();
+
+void iot_modem_gpio_init(int voltage);
+void iot_modem_gpio_set_voltage(int voltage);
+void iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
+void iot_modem_gpio_get_status(uint8_t* status, uint8_t* direction, uint8_t* enabled);
+
+
 
 #endif /* _IOT_MODEM_H_ */

@@ -70,7 +70,7 @@
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(48 * 1024))
 #else
-#define configTOTAL_HEAP_SIZE                       ((size_t)(46 * 1024))
+#define configTOTAL_HEAP_SIZE                       ((size_t)(44 * 1024))
 #endif
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))
