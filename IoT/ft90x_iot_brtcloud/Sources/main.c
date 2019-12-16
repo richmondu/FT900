@@ -154,13 +154,11 @@ static uint8_t g_ucUartEnabled = 1;
 //
 
 #if ENABLE_GPIO
-GPIO_PROPERTIES g_oGpioProperties[4] = { {0,0,0,0,0,0,0,0}, {0,3,1,100,0,0,0,0}, {1,0,0,0,1,100,0,0}, {1,2,0,0,2,0,100,200} };
-
-uint8_t g_ucGpioDirection[4] = {1, 1, 1, 1}; // ["Input", "Output"]
-uint8_t g_ucGpioStatus[4] = {1, 1, 1, 1};    // ["Low", "High"]
-uint8_t g_ucGpioVoltage = 0;                 // ["3.3 V", "5 V"]
-
-uint8_t g_ucGpioEnabled[4] = {0, 0, 0, 0};
+GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = { {0,0,0,0,0,0,0,0}, {0,3,1,100,0,0,0,0}, {1,0,0,0,1,100,0,0}, {1,2,0,0,2,0,100,200} };
+uint8_t g_ucGpioEnabled[GPIO_COUNT] = {0, 0, 0, 0};
+static uint8_t g_ucGpioDirection[GPIO_COUNT] = {1, 1, 1, 1}; // ["Input", "Output"]
+static uint8_t g_ucGpioStatus[GPIO_COUNT] = {1, 1, 1, 1};    // ["Low", "High"]
+static uint8_t g_ucGpioVoltage = 0;                 // ["3.3 V", "5 V"]
 #endif // ENABLE_GPIO
 
 
@@ -439,8 +437,8 @@ void restart_task( void *param )
 
 static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 {
-    char topic[48] = {0};
-    char payload[256] = {0};
+    char topic[MQTT_MAX_TOPIC_SIZE] = {0};
+    char payload[MQTT_MAX_PAYLOAD_SIZE] = {0};
 
 
     char* ptr = user_generate_subscribe_topic();
@@ -782,7 +780,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         char* pcParam = NULL;
 
         pcParam = json_parse_str(mqtt_subscribe_recv->payload, "message", &iParamLen);
-        char message[48] = {0};
+        char message[UART_ATCOMMAND_MAX_MESSAGE_SIZE] = {0};
         strncpy(message, pcParam, iParamLen);
 
         pcParam = json_parse_str(mqtt_subscribe_recv->payload, "sender", &iParamLen);

@@ -85,8 +85,8 @@ UART_ATCOMMANDS g_acUartCommands[UART_ATCOMMANDS_NUM] = {
 	{ UART_ATCOMMAND_STATUS,   uart_cmdhdl_status,       UART_ATCOMMAND_DESC_STATUS   },// OK if all is good, ERROR if device is in error state" },
 };
 
-static char g_acUartCommandBuffer[64] = {0};
-static uint8_t g_ucUartCommandBufferOffset = 0;
+static char g_acUartCommandBuffer[UART_ATCOMMAND_MAX_BUFFER_SIZE] = {0};
+static int g_lUartCommandBufferOffset = 0;
 static uint8_t g_ucUartCommandBufferAvailable = 1;
 
 #endif // ENABLE_UART_ATCOMMANDS
@@ -117,15 +117,15 @@ static uint16_t g_uwBaudrates[UART_PROPERTIES_BAUDRATE_COUNT] = {
 
 static inline void uart_publish(char* pcMenos, char* pcRecipient, int lRecipientLen, char* pcMessage, int lMessageLen)
 {
-    char topic[64] = {0};
-    char payload[160] = {0};
+    char topic[MQTT_MAX_TOPIC_SIZE] = {0};
+    char payload[MQTT_MAX_PAYLOAD_SIZE] = {0};
     tfp_snprintf( topic, sizeof(topic), TOPIC_UART, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), pcMenos);
 
-    if (lRecipientLen && lMessageLen) {
-    	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\",\"message\":\"%s\"}", pcRecipient, pcMessage);
-    }
-    else if (!lRecipientLen && !lMessageLen) {
+    if (!lRecipientLen && !lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY);
+    }
+    else if (lRecipientLen && lMessageLen) {
+    	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\",\"message\":\"%s\"}", pcRecipient, pcMessage);
     }
     else if (lRecipientLen && !lMessageLen) {
     	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\"}", pcRecipient);
@@ -134,7 +134,7 @@ static inline void uart_publish(char* pcMenos, char* pcRecipient, int lRecipient
     	tfp_snprintf( payload, sizeof(payload), "{\"message\":\"%s\"}", pcMessage);
     }
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-    DEBUG_PRINTF("PUB %s %s\r\n\r\n", topic, payload);
+    DEBUG_PRINTF("PUB %s (%d) %s (%d) - %d %d\r\n\r\n", topic, strlen(topic), payload, strlen(payload), lRecipientLen, lMessageLen);
 }
 
 static inline int uart_parse_ex(char* dst, char* src, int* len)
@@ -199,11 +199,11 @@ static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRec
     *lMessageLen = strlen(pcMessage);
 
     if (*lRecipientLen >= lRecipientSize) {
-        DEBUG_PRINTF("recipient length is too big\r\n");
+        DEBUG_PRINTF("recipient length is too big (%d)\r\n", *lRecipientLen);
         return 0;
     }
     if (*lMessageLen >= lMessageSize) {
-        DEBUG_PRINTF("message length is too big\r\n");
+        DEBUG_PRINTF("message length is too big (%d)\r\n", *lMessageLen);
         return 0;
     }
     if (*lRecipientLen == 0) {
@@ -229,8 +229,8 @@ static inline void uart_cmdhdl_common(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen
     	return;
     }
 
-    char acRecipient[32] = {0};
-    char acMessage[64] = {0};
+    char acRecipient[UART_ATCOMMAND_MAX_RECIPIENT_SIZE] = {0};
+    char acMessage[UART_ATCOMMAND_MAX_MESSAGE_SIZE] = {0};
     int lRecipientLen = 0;
     int lMessageLen = 0;
     if (uart_parse(pcCmd+lCmdLenLocal, lCmdLen, acRecipient, sizeof(acRecipient), &lRecipientLen, acMessage, sizeof(acMessage), &lMessageLen)) {
@@ -331,17 +331,17 @@ void iot_modem_uart_command_help()
 void iot_modem_uart_command_process()
 {
     g_ucUartCommandBufferAvailable = 0;
-    DEBUG_PRINTF("command: %s [%d]\r\n", g_acUartCommandBuffer, g_ucUartCommandBufferOffset);
+    DEBUG_PRINTF("command: %s [%d]\r\n", g_acUartCommandBuffer, g_lUartCommandBufferOffset);
 
     for ( int i=0; i<UART_ATCOMMANDS_NUM; i++ ) {
     	if (strncmp(g_acUartCommandBuffer, g_acUartCommands[i].m_pcCmd, strlen(g_acUartCommands[i].m_pcCmd))==0) {
-            g_acUartCommands[i].m_pcFxn(i, g_acUartCommandBuffer, (int)g_ucUartCommandBufferOffset);
+            g_acUartCommands[i].m_pcFxn(i, g_acUartCommandBuffer, g_lUartCommandBufferOffset);
 			break;
     	}
 	}
 
     memset(g_acUartCommandBuffer, 0, sizeof(g_acUartCommandBuffer));
-    g_ucUartCommandBufferOffset = 0;
+    g_lUartCommandBufferOffset = 0;
     g_ucUartCommandBufferAvailable = 1;
 }
 
@@ -357,29 +357,29 @@ static void ISR_uart0()
 
         // read input from UART and store to array
         uart_read(UART0, &c);
-        g_acUartCommandBuffer[g_ucUartCommandBufferOffset++] = c;
+        g_acUartCommandBuffer[g_lUartCommandBufferOffset++] = c;
         uart_write(UART0, c);
 
         // check if command exceeds buffer
-        if (g_ucUartCommandBufferOffset == sizeof(g_acUartCommandBuffer)) {
+        if (g_lUartCommandBufferOffset == sizeof(g_acUartCommandBuffer)) {
             DEBUG_PRINTF("\r\nCommand should be less than %d bytes\r\n", sizeof(g_acUartCommandBuffer));
             memset(g_acUartCommandBuffer, 0, sizeof(g_acUartCommandBuffer));
-            g_ucUartCommandBufferOffset = 0;
+            g_lUartCommandBufferOffset = 0;
             return;
         }
 
         // process the command when enter is pressed
         if (c == 0x0D) {
         	// process enter/carriage return
-            g_acUartCommandBuffer[g_ucUartCommandBufferOffset-1] = '\0'; // Remove the enter key
-            g_ucUartCommandBufferOffset--;
+            g_acUartCommandBuffer[g_lUartCommandBufferOffset-1] = '\0'; // Remove the enter key
+            g_lUartCommandBufferOffset--;
             xTaskNotifyFromISR(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART), eSetBits, NULL);
         }
         else if (c == 0x08) {
         	// process backspace
-            g_acUartCommandBuffer[g_ucUartCommandBufferOffset-1] = '\0'; // Remove the backspace
-            g_acUartCommandBuffer[g_ucUartCommandBufferOffset-2] = '\0'; // Remove the other character
-            g_ucUartCommandBufferOffset -= 2;
+            g_acUartCommandBuffer[g_lUartCommandBufferOffset-1] = '\0'; // Remove the backspace
+            g_acUartCommandBuffer[g_lUartCommandBufferOffset-2] = '\0'; // Remove the other character
+            g_lUartCommandBufferOffset -= 2;
         }
     }
 }

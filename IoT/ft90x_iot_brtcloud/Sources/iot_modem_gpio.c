@@ -196,11 +196,11 @@ void iot_modem_gpio_enable_interrupt()
 
 void iot_modem_gpio_process(int number)
 {
-    char topic[64] = {0};
+    char topic[MQTT_MAX_TOPIC_SIZE] = {0};
     char payload[3] = {0};
     tfp_snprintf( topic, sizeof(topic), TOPIC_GPIO, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), number, MENOS_DEFAULT);
    	tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY);
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-    DEBUG_PRINTF("PUB %s %s\r\n\r\n", topic, payload);
+    DEBUG_PRINTF("PUB %s (%d) %s (%d)\r\n\r\n", topic, strlen(topic), payload, strlen(payload));
 }
 
