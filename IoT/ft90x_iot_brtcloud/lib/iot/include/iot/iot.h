@@ -89,6 +89,11 @@ typedef int ( *iot_credentials_cb    )( iot_credentials*  mqtt_credentials     )
 typedef void ( *iot_subscribe_cb     )( iot_subscribe_rcv* mqtt_subscribe_recv );
 
 
+/** @brief Initialize dynamic memory allocations to lessen reallocations during reconnection
+ *  @returns Returns 0 if success, negative value err_t otherwise
+ */
+int iot_init( void );
+
 /** @brief Establish secure IoT connectivity using TLS certificates and MQTT credentials
  *  @param certificates_cb Callback function for specifying the TLS certificates
  *  @param credentials_cb Callback function for specifying the MQTT credentials

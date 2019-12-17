@@ -184,7 +184,7 @@ static void mqtt_pubsub_callback( void *arg, err_t result )
 
 #if USE_MQTT_SUBSCRIBE
 
-static iot_subscribe_rcv* subscribe_recv = NULL;
+static iot_subscribe_rcv* g_subscribe_recv = NULL;
 
 static inline err_t mqtt_subscribe_async(
     mqtt_client_t *client, const char* topic, iot_subscribe_cb subscribe_cb, u8_t qos )
@@ -198,8 +198,6 @@ static inline err_t mqtt_subscribe_async(
             DEBUG_PRINTF( "\r\nmqtt_subscribe failed! %d\r\n", err );
         }
         else {
-            subscribe_recv = pvPortMalloc( sizeof(iot_subscribe_rcv) );
-            memset( subscribe_recv, 0, sizeof(iot_subscribe_rcv) );
             mqtt_set_inpub_callback(
                 client, mqtt_subscribe_recv_topic, mqtt_subscribe_recv_payload, subscribe_cb );
         }
@@ -215,35 +213,35 @@ static void mqtt_subscribe_recv_topic(
     void *arg, const char *topic, u32_t tot_len )
 {
     //DEBUG_PRINTF( "\r\nMQTT RECEIVE: %s [%d]\r\n", topic, (unsigned int)tot_len );
-    if ( !subscribe_recv ) {
+    if ( !g_subscribe_recv ) {
         return;
     }
-    if ( subscribe_recv->topic ) {
-        if ( strncmp(subscribe_recv->topic, topic, strlen(subscribe_recv->topic))!=0 ) {
-            vPortFree( (char*)subscribe_recv->topic );
-            subscribe_recv->topic = NULL;
+    if ( g_subscribe_recv->topic ) {
+        if ( strncmp(g_subscribe_recv->topic, topic, strlen(g_subscribe_recv->topic))!=0 ) {
+            vPortFree( (char*)g_subscribe_recv->topic );
+            g_subscribe_recv->topic = NULL;
         }
-        if ( subscribe_recv->payload_size < tot_len + 1 ) {
-            vPortFree( (char*)subscribe_recv->payload );
-            subscribe_recv->payload_size = tot_len + 1 + 10;
-            subscribe_recv->payload = pvPortMalloc( subscribe_recv->payload_size );
+        if ( g_subscribe_recv->payload_size < tot_len + 1 ) {
+            vPortFree( (char*)g_subscribe_recv->payload );
+            g_subscribe_recv->payload_size = tot_len + 1 + 10;
+            g_subscribe_recv->payload = pvPortMalloc( g_subscribe_recv->payload_size );
         }
-        subscribe_recv->payload_len = tot_len;
-        subscribe_recv->payload_off = 0;
-        memset( (char*)subscribe_recv->payload, 0, subscribe_recv->payload_size );
+        g_subscribe_recv->payload_len = tot_len;
+        g_subscribe_recv->payload_off = 0;
+        memset( (char*)g_subscribe_recv->payload, 0, g_subscribe_recv->payload_size );
     }
-    if ( !subscribe_recv->topic ) {
+    if ( !g_subscribe_recv->topic ) {
         int len = strlen(topic);
-        subscribe_recv->topic = pvPortMalloc( len + 1 );
-        strncpy( (char*)subscribe_recv->topic, topic, len );
-        ((char*)subscribe_recv->topic)[len] = '\0';
+        g_subscribe_recv->topic = pvPortMalloc( len + 1 );
+        strncpy( (char*)g_subscribe_recv->topic, topic, len );
+        ((char*)g_subscribe_recv->topic)[len] = '\0';
 
-        subscribe_recv->payload_len = tot_len;
-        subscribe_recv->payload_off = 0;
-        if ( subscribe_recv->payload == NULL ) {
-            subscribe_recv->payload_size = tot_len + 1 + 10;
-            subscribe_recv->payload = pvPortMalloc( subscribe_recv->payload_size );
-            memset( (char*)subscribe_recv->payload, 0, subscribe_recv->payload_size );
+        g_subscribe_recv->payload_len = tot_len;
+        g_subscribe_recv->payload_off = 0;
+        if ( g_subscribe_recv->payload == NULL ) {
+            g_subscribe_recv->payload_size = tot_len + 1 + 10;
+            g_subscribe_recv->payload = pvPortMalloc( g_subscribe_recv->payload_size );
+            memset( (char*)g_subscribe_recv->payload, 0, g_subscribe_recv->payload_size );
         }
     }
 }
@@ -251,13 +249,13 @@ static void mqtt_subscribe_recv_topic(
 static void mqtt_subscribe_recv_payload(
     void *arg, const u8_t *data, u16_t len, u8_t flags )
 {
-    if ( subscribe_recv ) {
-        if (subscribe_recv->payload) {
-            memcpy( (char*)subscribe_recv->payload + subscribe_recv->payload_off, data, len );
-            subscribe_recv->payload_off += len;
-            if ( subscribe_recv->payload_off == subscribe_recv->payload_len ) {
-                //DEBUG_PRINTF( "%s\r\n\r\n", subscribe_recv->payload );
-                ((iot_subscribe_cb)arg)(subscribe_recv);
+    if ( g_subscribe_recv ) {
+        if (g_subscribe_recv->payload) {
+            memcpy( (char*)g_subscribe_recv->payload + g_subscribe_recv->payload_off, data, len );
+            g_subscribe_recv->payload_off += len;
+            if ( g_subscribe_recv->payload_off == g_subscribe_recv->payload_len ) {
+                //DEBUG_PRINTF( "%s\r\n\r\n", g_subscribe_recv->payload );
+                ((iot_subscribe_cb)arg)(g_subscribe_recv);
             }
         }
     }
@@ -300,6 +298,32 @@ typedef struct _iot_context {
     mqtt_client_t mqtt;
 } iot_context;
 
+static iot_context* g_handle = NULL;
+
+
+/** @brief Initialize dynamic memory allocations to lessen reallocations during reconnection
+ *  @returns Returns 0 if success, negative value err_t otherwise
+ */
+int iot_init( void )
+{
+	if ( !g_handle ) {
+		g_handle = pvPortMalloc( sizeof( iot_context ) );
+		if ( !g_handle ) {
+			return -1;
+		}
+	}
+
+	if ( !g_subscribe_recv ) {
+		g_subscribe_recv = pvPortMalloc( sizeof(iot_subscribe_rcv) );
+		if ( !g_subscribe_recv ) {
+			return -1;
+		}
+        memset( g_subscribe_recv, 0, sizeof(iot_subscribe_rcv) );
+	}
+
+    return 0;
+}
+
 /** @brief Establish secure IoT connectivity using TLS certificates and MQTT credentials
  *  @param certificates_cb Callback function for specifying the TLS certificates
  *  @param credentials_cb Callback function for specifying the MQTT credentials
@@ -308,7 +332,7 @@ typedef struct _iot_context {
 void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb credentials_cb )
 {
     struct mqtt_connect_client_info_t mqtt_info = {0};
-    iot_context* handle = NULL;
+    iot_context* handle = g_handle;
     err_t err = ERR_OK;
     iot_certificates tls_certificates = {0};
     iot_credentials mqtt_credentials = {0};
@@ -319,10 +343,6 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
     }
 
     memset( &mqtt_info, 0, sizeof( mqtt_info ) );
-    handle = pvPortMalloc(sizeof( iot_context ));
-    if (!handle) {
-        return NULL;
-    }
     memset( handle, 0, sizeof( iot_context ) );
 
     certificates_cb( &tls_certificates );
@@ -341,7 +361,6 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
     vPortFree( (u8_t*)tls_certificates.pkey );
     if ( mqtt_info.tls_config == NULL ) {
         DEBUG_PRINTF( "altcp_tls_create_config_client failed!\r\n" );
-        vPortFree(handle);
         return NULL;
     }
 
@@ -379,7 +398,6 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
     if ( err != ERR_OK ) {
         DEBUG_PRINTF( "mqtt_connect_async failed! %d\r\n", err );
         altcp_tls_free_config( mqtt_info.tls_config );
-        vPortFree( handle );
         return NULL;
     }
 
@@ -394,7 +412,6 @@ void* iot_connect( iot_certificates_cb certificates_cb, iot_credentials_cb crede
         mqtt_connect_callback_err = 0;
         altcp_tls_free_config( mqtt_info.tls_config );
         mqtt_disconnect( &handle->mqtt );
-        vPortFree( handle );
         return NULL;
     }
     vTaskDelay( pdMS_TO_TICKS(1000) );
@@ -414,22 +431,6 @@ void iot_disconnect(void* handle)
     if ( _handle ) {
         mqtt_disconnect( &_handle->mqtt );
         altcp_tls_free_config( _handle->tls_config );
-        vPortFree( _handle );
-
-#if USE_MQTT_SUBSCRIBE
-        if ( subscribe_recv ) {
-            if ( subscribe_recv->topic ) {
-                vPortFree( (char*)subscribe_recv->topic );
-                subscribe_recv->topic = NULL;
-            }
-            if ( subscribe_recv->payload ) {
-                vPortFree( (char*)subscribe_recv->payload );
-                subscribe_recv->payload = NULL;
-            }
-            vPortFree( subscribe_recv );
-            subscribe_recv = NULL;
-        }
-#endif // USE_MQTT_SUBSCRIBE
     }
 }
 
