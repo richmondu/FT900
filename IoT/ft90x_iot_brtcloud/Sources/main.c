@@ -254,6 +254,8 @@ static void iot_app_task( void *pvParameters )
     /* Initialize network */
     net_init( ip, gateway, mask, USE_DHCP, dns, NULL, NULL );
 
+    /* Initialize IoT library */
+    iot_init();
     iot_utils_init();
 
     /* Initialize rtc */
@@ -324,46 +326,37 @@ static void iot_app_task( void *pvParameters )
         iot_modem_uart_command_help();
 
         do  {
-#if ENABLE_UART_ATCOMMANDS
             uint32_t ulNotificationValue = 0;
             if (xTaskNotifyWait(0, TASK_NOTIFY_CLEAR_BITS, &ulNotificationValue, pdMS_TO_TICKS(1000)) == pdTRUE) {
-            	DEBUG_PRINTF( "xTaskNotifyWait %d\r\n", ulNotificationValue );
+            	//DEBUG_PRINTF( "xTaskNotifyWait %d\r\n", ulNotificationValue );
 
+#if ENABLE_UART_ATCOMMANDS
             	/* process UART */
             	if (TASK_NOTIFY_FROM_UART(ulNotificationValue)) {
             		iot_modem_uart_command_process();
             	}
-
-            	/* process GPIO */
-            	if (TASK_NOTIFY_FROM_GPIO0(ulNotificationValue)) {
-            		iot_modem_gpio_process(1);
-            	}
-            	if (TASK_NOTIFY_FROM_GPIO1(ulNotificationValue)) {
-            		iot_modem_gpio_process(2);
-            	}
-            	if (TASK_NOTIFY_FROM_GPIO2(ulNotificationValue)) {
-            		iot_modem_gpio_process(3);
-            	}
-            	if (TASK_NOTIFY_FROM_GPIO3(ulNotificationValue)) {
-            		iot_modem_gpio_process(4);
-            	}
-
-            	/* process I2C */
-            	if (TASK_NOTIFY_FROM_I2C0(ulNotificationValue)) {
-            		// TODO
-            	}
-            	if (TASK_NOTIFY_FROM_I2C1(ulNotificationValue)) {
-            		// TODO
-            	}
-            	if (TASK_NOTIFY_FROM_I2C2(ulNotificationValue)) {
-            		// TODO
-            	}
-            	if (TASK_NOTIFY_FROM_I2C3(ulNotificationValue)) {
-            		// TODO
-            	}
-            }
 #endif // ENABLE_UART_ATCOMMANDS
-            vTaskDelay( pdMS_TO_TICKS(1000) );
+
+#if ENABLE_GPIO
+            	/* process GPIO */
+            	for (i=0; i<GPIO_COUNT; i++) {
+					if (TASK_NOTIFY_FROM_GPIO(ulNotificationValue, i)) {
+						iot_modem_gpio_process(i+1);
+					}
+            	}
+#endif // ENABLE_GPIO
+
+#if ENABLE_I2C
+            	/* process I2C */
+            	for (i=0; i<4; i++) {
+					if (TASK_NOTIFY_FROM_I2C(ulNotificationValue, i)) {
+						// TODO
+					}
+            	}
+#endif // ENABLE_I2C
+
+            }
+//            vTaskDelay( pdMS_TO_TICKS(1000) );
         } while ( net_is_ready() && iot_is_connected( handle ) == 0 && !g_exit );
 
         g_exit = 0;
@@ -435,48 +428,41 @@ void restart_task( void *param )
 // PROCESS MQTT SUBSCRIBED PACKETS
 ///////////////////////////////////////////////////////////////////////////////////
 
+#define IS_API(api) (strncmp( ptr, api, len ) == 0)
+
 static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 {
     char topic[MQTT_MAX_TOPIC_SIZE] = {0};
     char payload[MQTT_MAX_PAYLOAD_SIZE] = {0};
+    int ret = 0;
 
-
-    char* ptr = user_generate_subscribe_topic();
-    char* ptr2 = strrchr(ptr,  '/');
-    int len = ptr2 - ptr;
-
-    if (strncmp(ptr, mqtt_subscribe_recv->topic, len)!=0) {
-        return;
-    }
 
     DEBUG_PRINTF( "\r\nRECV: %s [%d]\r\n",
         mqtt_subscribe_recv->topic, (unsigned int)mqtt_subscribe_recv->payload_len );
     DEBUG_PRINTF( "%s [%d]\r\n", mqtt_subscribe_recv->payload, strlen(mqtt_subscribe_recv->payload) );
 
-    iot_unsubscribe( g_handle, ptr );
-
     // get api
-    ptr = (char*)mqtt_subscribe_recv->topic + len + 1;
-    len = strlen(ptr);
+    char* ptr = strrchr(mqtt_subscribe_recv->topic, '/') + 1;
+    int len = strlen(ptr);
 
 
     ///////////////////////////////////////////////////////////////////////////////////
     // STATUS
     ///////////////////////////////////////////////////////////////////////////////////
-    if ( strncmp( ptr, API_GET_STATUS, len ) == 0 ) {
+    if ( IS_API(API_GET_STATUS) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic);
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_STATUS, g_ulDeviceStatus, VERSION_MAJOR, VERSION_MINOR);
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
     }
-    else if ( strncmp( ptr, API_SET_STATUS, len ) == 0 ) {
+    else if ( IS_API(API_SET_STATUS) ) {
         uint32_t ulDeviceStatus = json_parse_int(mqtt_subscribe_recv->payload, "status");
         switch (ulDeviceStatus) {
             case DEVICE_STATUS_RESTART: {
                 g_ulDeviceStatus = DEVICE_STATUS_RESTARTING;
                 tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_SET_STATUS, g_ulDeviceStatus );
-                iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                 //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
                 xTaskCreate( restart_task, "restart_task", 64, NULL, 3, NULL );
                 //DEBUG_PRINTF( "DEVICE_STATUS_RESTARTING\r\n" );
@@ -487,7 +473,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                     g_ulDeviceStatus = DEVICE_STATUS_STOPPING;
                     tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
                     tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_SET_STATUS, g_ulDeviceStatus );
-                    iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                    ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                     //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
                     // TODO
                     g_ulDeviceStatus = DEVICE_STATUS_STOPPED;
@@ -500,7 +486,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                     g_ulDeviceStatus = DEVICE_STATUS_STARTING;
                     tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
                     tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_SET_STATUS, g_ulDeviceStatus );
-                    iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                    ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                     //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
                     // TODO
                     g_ulDeviceStatus = DEVICE_STATUS_RUNNING;
@@ -511,7 +497,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             default: {
                 tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_SET_STATUS, g_ulDeviceStatus );
-                iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                 break;
             }
         }
@@ -522,13 +508,13 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // UART
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_GET_UARTS, len ) == 0 ) {
+    else if ( IS_API(API_GET_UARTS) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_UARTS, g_ucUartEnabled);
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
     }
-    else if ( strncmp( ptr, API_GET_UART_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_GET_UART_PROPERTIES) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_UART_PROPERTIES,
             g_oUartProperties.m_ucBaudrate,
@@ -540,10 +526,10 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                // only uart_data_bits_7 and uart_data_bits_8 are exposed
             g_oUartProperties.m_ucDatabits - uart_data_bits_7 // subtract offset
             );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
     }
-    else if ( strncmp( ptr, API_SET_UART_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_SET_UART_PROPERTIES) ) {
         // get the parameter values
         uint8_t ucDatabits    = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "databits");
         uint8_t ucStopbits    = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "stopbits");
@@ -593,13 +579,13 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
 
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
 
         // configure UART with the new values, uart_soft_reset is needed to avoid distorted text when changing databits or parity
         iot_modem_uart_enable(&g_oUartProperties, 1, 1);
     }
-    else if ( strncmp( ptr, API_ENABLE_UART, len ) == 0 ) {
+    else if ( IS_API(API_ENABLE_UART) ) {
         uint8_t ucEnabled = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "enable");
         //DEBUG_PRINTF( "ucEnabled=%d\r\n", ucEnabled );
 
@@ -616,7 +602,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         //DEBUG_PRINTF( "PUB:  %s %s\r\n", topic, payload );
     }
 #endif // ENABLE_UART
@@ -627,7 +613,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // GPIO
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_GET_GPIOS, len ) == 0 ) {
+    else if ( IS_API(API_GET_GPIOS) ) {
         // TODO: make sure g_ucGpioDirection is updated
         iot_modem_gpio_get_status(g_ucGpioStatus, g_ucGpioDirection, g_ucGpioEnabled);
 
@@ -638,10 +624,10 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             g_ucGpioEnabled[2], g_ucGpioDirection[2], g_ucGpioStatus[2],
             g_ucGpioEnabled[3], g_ucGpioDirection[3], g_ucGpioStatus[3]
             );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         DEBUG_PRINTF( "PUB:  %s[%d] %s[%d]\r\n", topic, strlen(topic), payload, strlen(payload));
     }
-    else if ( strncmp( ptr, API_GET_GPIO_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_GET_GPIO_PROPERTIES) ) {
         uint8_t ucNumber = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         DEBUG_PRINTF( "ucNumber=%d\r\n", ucNumber );
         if (ucNumber < GPIO_COUNT) {
@@ -656,11 +642,11 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 g_oGpioProperties[ucNumber].m_ulMark,
                 g_oGpioProperties[ucNumber].m_ulSpace
                 );
-            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+            ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
             DEBUG_PRINTF( "PUB:  %s[%d] %s[%d]\r\n", topic, strlen(topic), payload, strlen(payload));
         }
     }
-    else if ( strncmp( ptr, API_SET_GPIO_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_SET_GPIO_PROPERTIES) ) {
         uint8_t  ucNumber      = (uint8_t) json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         uint32_t ulSpace       = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "space");
         uint32_t ulMark        = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "mark");
@@ -685,9 +671,9 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
-    else if ( strncmp( ptr, API_ENABLE_GPIO, len ) == 0 ) {
+    else if ( IS_API(API_ENABLE_GPIO) ) {
         uint8_t ucNumber = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "enable");
         if (ucNumber < GPIO_COUNT && ucEnabled < 2) {
@@ -698,14 +684,14 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
-    else if ( strncmp( ptr, API_GET_GPIO_VOLTAGE, len ) == 0 ) {
+    else if ( IS_API(API_GET_GPIO_VOLTAGE) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIO_VOLTAGE, g_ucGpioVoltage);
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
-    else if ( strncmp( ptr, API_SET_GPIO_VOLTAGE, len ) == 0 ) {
+    else if ( IS_API(API_SET_GPIO_VOLTAGE) ) {
         uint8_t ucVoltage = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "voltage");
         if (ucVoltage < 2) {
             if ( g_ucGpioVoltage != ucVoltage ) {
@@ -715,7 +701,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
 #endif // ENABLE_GPIO
 
@@ -725,20 +711,20 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // I2C
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_GET_I2CS, len ) == 0 ) {
+    else if ( IS_API(API_GET_I2CS) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2CS,
             g_ucI2cEnabled[0], g_ucI2cEnabled[1], g_ucI2cEnabled[2], g_ucI2cEnabled[3]
             );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
-    else if ( strncmp( ptr, API_GET_I2C_DEVICE_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_GET_I2C_DEVICE_PROPERTIES) ) {
         DEBUG_PRINTF( "NOT YET SUPPORTED\r\n" );
     }
-    else if ( strncmp( ptr, API_SET_I2C_DEVICE_PROPERTIES, len ) == 0 ) {
+    else if ( IS_API(API_SET_I2C_DEVICE_PROPERTIES) ) {
         DEBUG_PRINTF( "NOT YET SUPPORTED\r\n" );
     }
-    else if ( strncmp( ptr, API_ENABLE_I2C, len ) == 0 ) {
+    else if ( IS_API(API_ENABLE_I2C) ) {
         ptr = (char*)mqtt_subscribe_recv->payload;
 
         DEBUG_PRINTF( "%s\r\n", ptr );
@@ -759,7 +745,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             }
             tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
             tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-            iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+            ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         }
     }
 #endif // ENABLE_I2C
@@ -770,12 +756,12 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // NOTIFICATIONS
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( strncmp( ptr, API_TRIGGER_NOTIFICATION, len ) == 0 ) {
+    else if ( IS_API(API_TRIGGER_NOTIFICATION) ) {
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), "%s", mqtt_subscribe_recv->payload );
-        iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     }
-    else if ( strncmp( ptr, API_RECEIVE_NOTIFICATION, len ) == 0 ) {
+    else if ( IS_API(API_RECEIVE_NOTIFICATION) ) {
         int iParamLen = 0;
         char* pcParam = NULL;
 
@@ -798,11 +784,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         DEBUG_PRINTF( "UNKNOWN\r\n" );
     }
 
-    if (iot_subscribe( g_handle, user_generate_subscribe_topic(), user_subscribe_receive_cb, 1 ) == -1) {
+    if (ret < 0) {
         g_exit = 1;
-    }
-    else {
-        sleep(1);
     }
 }
 

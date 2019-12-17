@@ -13,11 +13,6 @@
 
 
 
-#define PREPEND_REPLY_TOPIC "server/"
-#define WRONG_SYNTAX "wrong syntax"
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Firmware version
 ////////////////////////////////////////////////////////////////////////////////////
@@ -47,20 +42,22 @@ typedef enum _DEVICE_STATUS {
 // MQTT BUFFER SIZES
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define MQTT_MAX_TOPIC_SIZE   64
-#define MQTT_MAX_PAYLOAD_SIZE 256
+#define MQTT_MAX_TOPIC_SIZE                64
+#define MQTT_MAX_PAYLOAD_SIZE              256
+#define PREPEND_REPLY_TOPIC                "server/"
+#define WRONG_SYNTAX                       "wrong syntax"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Notifications
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define MENOS_MOBILE       "mobile"
-#define MENOS_EMAIL        "email"
-#define MENOS_NOTIFICATION "notification"
-#define MENOS_MODEM        "modem"
-#define MENOS_STORAGE      "storage"
-#define MENOS_DEFAULT      "default"
+#define MENOS_MOBILE                       "mobile"
+#define MENOS_EMAIL                        "email"
+#define MENOS_NOTIFICATION                 "notification"
+#define MENOS_MODEM                        "modem"
+#define MENOS_STORAGE                      "storage"
+#define MENOS_DEFAULT                      "default"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -79,17 +76,11 @@ typedef enum _TASK_NOTIFY_BIT {
 	TASK_NOTIFY_BIT_I2C3,
 } TASK_NOTIFY_BIT;
 
-#define TASK_NOTIFY_BIT(x) ( 1 << (x) )
-#define TASK_NOTIFY_FROM_UART(y)  ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART) )
-#define TASK_NOTIFY_FROM_GPIO0(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0) )
-#define TASK_NOTIFY_FROM_GPIO1(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO1) )
-#define TASK_NOTIFY_FROM_GPIO2(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO2) )
-#define TASK_NOTIFY_FROM_GPIO3(y) ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO3) )
-#define TASK_NOTIFY_FROM_I2C0(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0) )
-#define TASK_NOTIFY_FROM_I2C1(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C1) )
-#define TASK_NOTIFY_FROM_I2C2(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C2) )
-#define TASK_NOTIFY_FROM_I2C3(y)   ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C3) )
-#define TASK_NOTIFY_CLEAR_BITS 0xFFFFFFFF
+#define TASK_NOTIFY_BIT(x)                 ( 1 << (x) )
+#define TASK_NOTIFY_FROM_UART(y)           ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART) )
+#define TASK_NOTIFY_FROM_GPIO(y,z)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0+(z)) )
+#define TASK_NOTIFY_FROM_I2C(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0+(z)) )
+#define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -97,39 +88,39 @@ typedef enum _TASK_NOTIFY_BIT {
 ////////////////////////////////////////////////////////////////////////////////////
 
 // device status
-#define API_GET_STATUS                "get_status"
-#define API_SET_STATUS                "set_status"
+#define API_GET_STATUS                     "get_status"
+#define API_SET_STATUS                     "set_status"
 
 // uart
 #if ENABLE_UART
-#define API_GET_UARTS                 "get_uarts"
-#define API_GET_UART_PROPERTIES       "get_uart_prop"
-#define API_SET_UART_PROPERTIES       "set_uart_prop"
-#define API_ENABLE_UART               "enable_uart"
+#define API_GET_UARTS                      "get_uarts"
+#define API_GET_UART_PROPERTIES            "get_uart_prop"
+#define API_SET_UART_PROPERTIES            "set_uart_prop"
+#define API_ENABLE_UART                    "enable_uart"
 #endif // ENABLE_UART
 
 // gpio
 #if ENABLE_GPIO
-#define API_GET_GPIOS                 "get_gpios"
-#define API_GET_GPIO_PROPERTIES       "get_gpio_prop"
-#define API_SET_GPIO_PROPERTIES       "set_gpio_prop"
-#define API_ENABLE_GPIO               "enable_gpio"
-#define API_GET_GPIO_VOLTAGE          "get_gpio_voltage"
-#define API_SET_GPIO_VOLTAGE          "set_gpio_voltage"
+#define API_GET_GPIOS                      "get_gpios"
+#define API_GET_GPIO_PROPERTIES            "get_gpio_prop"
+#define API_SET_GPIO_PROPERTIES            "set_gpio_prop"
+#define API_ENABLE_GPIO                    "enable_gpio"
+#define API_GET_GPIO_VOLTAGE               "get_gpio_voltage"
+#define API_SET_GPIO_VOLTAGE               "set_gpio_voltage"
 #endif // ENABLE_UART
 
 // i2c
 #if ENABLE_I2C
-#define API_GET_I2CS                  "get_i2cs"
-#define API_GET_I2C_DEVICE_PROPERTIES "get_i2c_dev_prop"
-#define API_SET_I2C_DEVICE_PROPERTIES "set_i2c_dev_prop"
-#define API_ENABLE_I2C                "enable_i2c"
+#define API_GET_I2CS                       "get_i2cs"
+#define API_GET_I2C_DEVICE_PROPERTIES      "get_i2c_dev_prop"
+#define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
+#define API_ENABLE_I2C                     "enable_i2c"
 #endif // ENABLE_I2C
 
 // notification
 #if ENABLE_NOTIFICATIONS
-#define API_TRIGGER_NOTIFICATION      "trigger_notification"
-#define API_RECEIVE_NOTIFICATION      "recv_notification"
+#define API_TRIGGER_NOTIFICATION           "trigger_notification"
+#define API_RECEIVE_NOTIFICATION           "recv_notification"
 #endif // ENABLE_NOTIFICATIONS
 
 
@@ -137,26 +128,26 @@ typedef enum _TASK_NOTIFY_BIT {
 // Publish payload strings
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define PAYLOAD_EMPTY                   "{}"
-#define PAYLOAD_API_GET_STATUS          "{\"value\":{\"status\":%d,\"version\":\"%d.%d\"}}"
-#define PAYLOAD_API_SET_STATUS          "{\"value\":{\"status\":%d}}"
+#define PAYLOAD_EMPTY                      "{}"
+#define PAYLOAD_API_GET_STATUS             "{\"value\":{\"status\":%d,\"version\":\"%d.%d\"}}"
+#define PAYLOAD_API_SET_STATUS             "{\"value\":{\"status\":%d}}"
 
 #if ENABLE_UART
-#define TOPIC_UART                      "%s%s/trigger_notification/uart/%s"
-#define PAYLOAD_API_GET_UARTS           "{\"value\":{\"uarts\":[{\"enabled\":%d}]}}"
-#define PAYLOAD_API_GET_UART_PROPERTIES "{\"value\":{\"baudrate\":%d,\"parity\":%d,\"flowcontrol\":%d,\"stopbits\":%d,\"databits\":%d}}"
+#define TOPIC_UART                         "%s%s/trigger_notification/uart/%s"
+#define PAYLOAD_API_GET_UARTS              "{\"value\":{\"uarts\":[{\"enabled\":%d}]}}"
+#define PAYLOAD_API_GET_UART_PROPERTIES    "{\"value\":{\"baudrate\":%d,\"parity\":%d,\"flowcontrol\":%d,\"stopbits\":%d,\"databits\":%d}}"
 #endif // ENABLE_UART
 
 #if ENABLE_GPIO
-#define TOPIC_GPIO                      "%s%s/trigger_notification/gpio%d/%s"
-#define PAYLOAD_API_GET_GPIOS           "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
-#define PAYLOAD_API_GET_GPIO_VOLTAGE    "{\"value\":{\"voltage\":%d}}"
-#define PAYLOAD_API_GET_GPIO_PROPERTIES "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
+#define TOPIC_GPIO                         "%s%s/trigger_notification/gpio%d/%s"
+#define PAYLOAD_API_GET_GPIOS              "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
+#define PAYLOAD_API_GET_GPIO_VOLTAGE       "{\"value\":{\"voltage\":%d}}"
+#define PAYLOAD_API_GET_GPIO_PROPERTIES    "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
 #endif // ENABLE_GPIO
 
 #if ENABLE_I2C
-#define TOPIC_I2C                       "%s%s/trigger_notification/i2c%d/%s"
-#define PAYLOAD_API_GET_I2CS            "{\"value\":{\"i2cs\":[{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d}]}}"
+#define TOPIC_I2C                          "%s%s/trigger_notification/i2c%d/%s"
+#define PAYLOAD_API_GET_I2CS               "{\"value\":{\"i2cs\":[{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d}]}}"
 #endif // ENABLE_I2C
 
 
@@ -171,39 +162,37 @@ typedef enum _TASK_NOTIFY_BIT {
 
 #define UART_ATCOMMANDS_NUM                15
 
-#define UART_ATCOMMAND_MOBILE        "AT+M"
-#define UART_ATCOMMAND_EMAIL         "AT+E"
-#define UART_ATCOMMAND_NOTIFY        "AT+N"
-#define UART_ATCOMMAND_MODEM         "AT+O"
-#define UART_ATCOMMAND_STORAGE       "AT+S"
-#define UART_ATCOMMAND_DEFAULT       "AT+D"
-#define UART_ATCOMMAND_CONTINUE      "ATC"
-#define UART_ATCOMMAND_ECHO          "ATE"
-#define UART_ATCOMMAND_HELP          "ATH"
-#define UART_ATCOMMAND_INFO          "ATI"
-#define UART_ATCOMMAND_MORE          "ATM"
-#define UART_ATCOMMAND_PAUSE         "ATP"
-#define UART_ATCOMMAND_RESET         "ATR"
-#define UART_ATCOMMAND_UPDATE        "ATU"
-#define UART_ATCOMMAND_STATUS        "AT"
+#define UART_ATCOMMAND_MOBILE              "AT+M"
+#define UART_ATCOMMAND_EMAIL               "AT+E"
+#define UART_ATCOMMAND_NOTIFY              "AT+N"
+#define UART_ATCOMMAND_MODEM               "AT+O"
+#define UART_ATCOMMAND_STORAGE             "AT+S"
+#define UART_ATCOMMAND_DEFAULT             "AT+D"
+#define UART_ATCOMMAND_CONTINUE            "ATC"
+#define UART_ATCOMMAND_ECHO                "ATE"
+#define UART_ATCOMMAND_HELP                "ATH"
+#define UART_ATCOMMAND_INFO                "ATI"
+#define UART_ATCOMMAND_MORE                "ATM"
+#define UART_ATCOMMAND_PAUSE               "ATP"
+#define UART_ATCOMMAND_RESET               "ATR"
+#define UART_ATCOMMAND_UPDATE              "ATU"
+#define UART_ATCOMMAND_STATUS              "AT"
 
-#define UART_ATCOMMAND_DESC_MOBILE   "Send message as SMS to verified mobile number"
-#define UART_ATCOMMAND_DESC_EMAIL    "Send message as email to verified email address"
-#define UART_ATCOMMAND_DESC_NOTIFY   "Send message as mobile app notification to verified user"
-#define UART_ATCOMMAND_DESC_MODEM    "Send message to other IoT modem devices"
-#define UART_ATCOMMAND_DESC_STORAGE  "Send message to storage"
-#define UART_ATCOMMAND_DESC_DEFAULT  "Send default message to configured endpoints"
-#define UART_ATCOMMAND_DESC_CONTINUE "Continue device functions"
-#define UART_ATCOMMAND_DESC_ECHO     "Echo on/off (toggle)"
-#define UART_ATCOMMAND_DESC_HELP     "Display help information on commands"
-#define UART_ATCOMMAND_DESC_INFO     "Display device information"
-#define UART_ATCOMMAND_DESC_MORE     "Display more information on error"
-#define UART_ATCOMMAND_DESC_PAUSE    "Pause/Resume (toggle)"
-#define UART_ATCOMMAND_DESC_RESET    "Reset device"
-#define UART_ATCOMMAND_DESC_UPDATE   "Enter firmware update (UART entry point inside bootloader)"
-#define UART_ATCOMMAND_DESC_STATUS   "Display device status"
-
-#define UART_ATCOMMAND_PLUS          '+'
+#define UART_ATCOMMAND_DESC_MOBILE         "Send message as SMS to verified mobile number"
+#define UART_ATCOMMAND_DESC_EMAIL          "Send message as email to verified email address"
+#define UART_ATCOMMAND_DESC_NOTIFY         "Send message as mobile app notification to verified user"
+#define UART_ATCOMMAND_DESC_MODEM          "Send message to other IoT modem devices"
+#define UART_ATCOMMAND_DESC_STORAGE        "Send message to storage"
+#define UART_ATCOMMAND_DESC_DEFAULT        "Send default message to configured endpoints"
+#define UART_ATCOMMAND_DESC_CONTINUE       "Continue device functions"
+#define UART_ATCOMMAND_DESC_ECHO           "Echo on/off (toggle)"
+#define UART_ATCOMMAND_DESC_HELP           "Display help information on commands"
+#define UART_ATCOMMAND_DESC_INFO           "Display device information"
+#define UART_ATCOMMAND_DESC_MORE           "Display more information on error"
+#define UART_ATCOMMAND_DESC_PAUSE          "Pause/Resume (toggle)"
+#define UART_ATCOMMAND_DESC_RESET          "Reset device"
+#define UART_ATCOMMAND_DESC_UPDATE         "Enter firmware update (UART entry point inside bootloader)"
+#define UART_ATCOMMAND_DESC_STATUS         "Display device status"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -225,11 +214,11 @@ typedef struct _UART_PROPERTIES {
 // GPIO Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define GPIO_COUNT 4
-#define GPIO_INPUT_PIN_0   12 // Input pins: 12,13,14,15
-#define GPIO_OUTPUT_PIN_0   8 // Output pins: 8,9,10,11
-#define GPIO_VOLTAGE_PIN_0 16
-#define GPIO_VOLTAGE_PIN_1 17
+#define GPIO_COUNT           4
+#define GPIO_INPUT_PIN_0     12 // Input pins: 12,13,14,15
+#define GPIO_OUTPUT_PIN_0    8  // Output pins: 8,9,10,11
+#define GPIO_VOLTAGE_PIN_0   16
+#define GPIO_VOLTAGE_PIN_1   17
 
 typedef enum _GPIO_MODES_INPUT {
 	GPIO_MODES_INPUT_HIGH_LEVEL,
@@ -237,6 +226,12 @@ typedef enum _GPIO_MODES_INPUT {
 	GPIO_MODES_INPUT_HIGH_EDGE,
 	GPIO_MODES_INPUT_LOW_EDGE,
 } GPIO_MODES_INPUT;
+
+typedef enum _GPIO_MODES_OUTPUT {
+	GPIO_MODES_OUTPUT_LEVEL,
+	GPIO_MODES_OUTPUT_PULSE,
+	GPIO_MODES_OUTPUT_CLOCK,
+} GPIO_MODES_OUTPUT;
 
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;   // ["Input", "Output"]
@@ -265,8 +260,9 @@ void iot_modem_uart_command_help();
 ////////////////////////////////////////////////////////////////////////////////////
 
 void iot_modem_gpio_init(int voltage);
-void iot_modem_gpio_set_voltage(int voltage);
+void iot_modem_gpio_enable_interrupt();
 void iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
+void iot_modem_gpio_set_voltage(int voltage);
 void iot_modem_gpio_get_status(uint8_t* status, uint8_t* direction, uint8_t* enabled);
 void iot_modem_gpio_process(int number);
 

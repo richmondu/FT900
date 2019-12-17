@@ -157,9 +157,8 @@ void ISR_gpio()
 
 	for (int i=0; i<GPIO_COUNT; i++) {
 		if (g_oGpioEnabled[i]) {
-			// INPUT direction and HIGH-EDGE/LOW-EDGE
+			// INPUT direction
 			if (g_oGpioProperties[i].m_ucDirection == pad_dir_input) {
-				// HIGH-EDGE/LOW-EDGE
 				if (g_oGpioProperties[i].m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL) {
 					if (gpio_read(pin+i /*TODO*/) != 0) {
 						xTaskNotifyFromISR(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0), eSetBits, NULL);
