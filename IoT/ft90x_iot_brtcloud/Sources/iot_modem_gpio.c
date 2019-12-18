@@ -37,15 +37,13 @@
 
 
 
+extern TaskHandle_t g_iot_app_handle; // used by iot_modem_gpio_process()
+extern iot_handle g_handle;           // used to publish packets
 extern GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT];
 extern uint8_t g_ucGpioEnabled[GPIO_COUNT];
 
-extern TaskHandle_t g_iot_app_handle; // used by iot_modem_gpio_process()
-extern iot_handle g_handle;           // used to publish packets
-
 static uint8_t g_aucGpioIndex[GPIO_COUNT] = { 0, 1, 2, 3 };
 static TimerHandle_t g_oGpioTimer[GPIO_COUNT] = { NULL, NULL, NULL, NULL };
-
 static void ISR_gpio();
 
 
