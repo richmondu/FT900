@@ -154,9 +154,8 @@ static uint8_t g_ucUartEnabled = 1;
 //
 
 #if ENABLE_GPIO
-GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = { {0,0,0,0,0,0,0,0}, {0,3,1,100,0,0,0,0}, {1,0,0,0,1,100,0,0}, {1,2,0,0,2,0,100,200} };
+GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} };
 uint8_t g_ucGpioEnabled[GPIO_COUNT] = {0, 0, 0, 0};
-static uint8_t g_ucGpioDirection[GPIO_COUNT] = {1, 1, 1, 1}; // ["Input", "Output"]
 static uint8_t g_ucGpioStatus[GPIO_COUNT] = {1, 1, 1, 1};    // ["Low", "High"]
 static uint8_t g_ucGpioVoltage = 0;                 // ["3.3 V", "5 V"]
 #endif // ENABLE_GPIO
@@ -205,7 +204,7 @@ int main( void )
     ethernet_setup();
     iot_modem_uart_enable_interrupt();
     iot_modem_gpio_init(g_ucGpioVoltage);
-    //iot_modem_gpio_enable_interrupt();
+    iot_modem_gpio_enable_interrupt();
     interrupt_enable_globally();
 
     uart_puts( UART0,
@@ -437,9 +436,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     int ret = 0;
 
 
-    DEBUG_PRINTF( "\r\nRECV: %s [%d]\r\n",
-        mqtt_subscribe_recv->topic, (unsigned int)mqtt_subscribe_recv->payload_len );
-    DEBUG_PRINTF( "%s [%d]\r\n", mqtt_subscribe_recv->payload, strlen(mqtt_subscribe_recv->payload) );
+    //DEBUG_PRINTF( "\r\nRECV: %s [%d]\r\n", mqtt_subscribe_recv->topic, (unsigned int)mqtt_subscribe_recv->payload_len );
+    //DEBUG_PRINTF( "%s [%d]\r\n", mqtt_subscribe_recv->payload, strlen(mqtt_subscribe_recv->payload) );
 
     // get api
     char* ptr = strrchr(mqtt_subscribe_recv->topic, '/') + 1;
@@ -615,14 +613,14 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     else if ( IS_API(API_GET_GPIOS) ) {
         // TODO: make sure g_ucGpioDirection is updated
-        iot_modem_gpio_get_status(g_ucGpioStatus, g_ucGpioDirection, g_ucGpioEnabled);
+        iot_modem_gpio_get_status(g_ucGpioStatus, &g_oGpioProperties, g_ucGpioEnabled);
 
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIOS, g_ucGpioVoltage,
-            g_ucGpioEnabled[0], g_ucGpioDirection[0], g_ucGpioStatus[0],
-            g_ucGpioEnabled[1], g_ucGpioDirection[1], g_ucGpioStatus[1],
-            g_ucGpioEnabled[2], g_ucGpioDirection[2], g_ucGpioStatus[2],
-            g_ucGpioEnabled[3], g_ucGpioDirection[3], g_ucGpioStatus[3]
+            g_ucGpioEnabled[0], g_oGpioProperties[0].m_ucDirection, g_ucGpioStatus[0],
+            g_ucGpioEnabled[1], g_oGpioProperties[1].m_ucDirection, g_ucGpioStatus[1],
+            g_ucGpioEnabled[2], g_oGpioProperties[2].m_ucDirection, g_ucGpioStatus[2],
+            g_ucGpioEnabled[3], g_oGpioProperties[3].m_ucDirection, g_ucGpioStatus[3]
             );
         ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
         DEBUG_PRINTF( "PUB:  %s[%d] %s[%d]\r\n", topic, strlen(topic), payload, strlen(payload));
@@ -668,6 +666,10 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             g_oGpioProperties[ucNumber].m_ulWidth       = ulWidth;
             g_oGpioProperties[ucNumber].m_ulMark        = ulMark;
             g_oGpioProperties[ucNumber].m_ulSpace       = ulSpace;
+
+            // When user sets the configuration, it will be disabled by default
+            // User has to explicitly enable it
+            g_ucGpioEnabled[ucNumber] = 0;
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
@@ -678,8 +680,16 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucEnabled = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "enable");
         if (ucNumber < GPIO_COUNT && ucEnabled < 2) {
             if ( g_ucGpioEnabled[ucNumber] != ucEnabled ) {
-                iot_modem_gpio_enable(&g_oGpioProperties, ucNumber, ucEnabled);
-                g_ucGpioEnabled[ucNumber] = ucEnabled;
+            	// order matters
+            	if (ucEnabled) {
+                    if (iot_modem_gpio_enable(g_oGpioProperties, (int)ucNumber, (int)ucEnabled)) {
+                    	g_ucGpioEnabled[ucNumber] = ucEnabled;
+                    }
+            	}
+            	else {
+            		g_ucGpioEnabled[ucNumber] = ucEnabled;
+                    iot_modem_gpio_enable(g_oGpioProperties, (int)ucNumber, (int)ucEnabled);
+            	}
             }
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
@@ -775,6 +785,15 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
         DEBUG_PRINTF( "From %s:\r\n", sender );
         DEBUG_PRINTF( "%s\r\n\r\n", message );
+    }
+    else if ( IS_API(API_STATUS_NOTIFICATION) ) {
+        int iParamLen = 0;
+        char* pcParam = NULL;
+
+        pcParam = json_parse_str(mqtt_subscribe_recv->payload, "status", &iParamLen);
+        char status[UART_ATCOMMAND_MAX_STATUS_SIZE] = {0};
+        strncpy(status, pcParam, iParamLen);
+        DEBUG_PRINTF( "\r\n%s\r\n\r\n", status );
     }
 #endif // ENABLE_NOTIFICATIONS
 

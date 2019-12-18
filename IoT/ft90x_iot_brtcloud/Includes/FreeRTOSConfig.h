@@ -122,8 +122,8 @@
 
 /* These must be defined when configUSE_TIMERS==1. */
 #if (configUSE_TIMERS == 1)
-#define configTIMER_TASK_PRIORITY                   (configMAX_PRIORITIES)
-#define configTIMER_QUEUE_LENGTH                    (3)
+#define configTIMER_TASK_PRIORITY                   (configMAX_PRIORITIES-1)
+#define configTIMER_QUEUE_LENGTH                    (4)
 #define configTIMER_TASK_STACK_DEPTH                (256)
 #endif
 

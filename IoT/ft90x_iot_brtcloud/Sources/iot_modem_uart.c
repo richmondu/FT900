@@ -134,14 +134,14 @@ static inline void uart_publish(char* pcMenos, char* pcRecipient, int lRecipient
     	tfp_snprintf( payload, sizeof(payload), "{\"message\":\"%s\"}", pcMessage);
     }
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-    DEBUG_PRINTF("PUB %s (%d) %s (%d) - %d %d\r\n\r\n", topic, strlen(topic), payload, strlen(payload), lRecipientLen, lMessageLen);
+    //DEBUG_PRINTF("PUB %s (%d) %s (%d) - %d %d\r\n\r\n", topic, strlen(topic), payload, strlen(payload), lRecipientLen, lMessageLen);
 }
 
 static inline int uart_parse_ex(char* dst, char* src, int* len)
 {
 	if (*src == '\"') {
 		if (*(src+(*len-1) ) != '\"') {
-			DEBUG_PRINTF("%s 8\r\n", WRONG_SYNTAX);
+			DEBUG_PRINTF("%s 8\r\n\r\n", WRONG_SYNTAX);
 			return 0;
 		}
 		strncpy(dst, src+1, *len-2);
@@ -150,7 +150,7 @@ static inline int uart_parse_ex(char* dst, char* src, int* len)
 	}
 	else if (*src == '\'') {
 		if (*(src+(*len-1) ) != '\'') {
-			DEBUG_PRINTF("%s 9\r\n", WRONG_SYNTAX);
+			DEBUG_PRINTF("%s 9\r\n\r\n", WRONG_SYNTAX);
 			return 0;
 		}
 		strncpy(dst, src+1, *len-2);
@@ -166,16 +166,16 @@ static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRec
 {
     char* pcRecipient = pcCmd;
     if (*pcRecipient != '+') {
-        DEBUG_PRINTF("%s 1\r\n", WRONG_SYNTAX);
+        DEBUG_PRINTF("%s 1\r\n\r\n", WRONG_SYNTAX);
         return 0;
     }
     pcRecipient++;
     if (*pcRecipient == '\0') {
-        DEBUG_PRINTF("%s 2 (ix)\r\n", WRONG_SYNTAX);
+        DEBUG_PRINTF("%s 2 (ix)\r\n\r\n", WRONG_SYNTAX);
         return 0;
     }
     if (*pcRecipient == '+' && *(pcRecipient+1) == '\0') {
-        DEBUG_PRINTF("%s 3 (viii)\r\n", WRONG_SYNTAX);
+        DEBUG_PRINTF("%s 3 (viii)\r\n\r\n", WRONG_SYNTAX);
         return 0;
     }
 
@@ -184,14 +184,14 @@ static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRec
     	// recipient only, no message
     	*lRecipientLen = strlen(pcRecipient);
         if (*lRecipientLen >= lRecipientSize) {
-            DEBUG_PRINTF("recipient length is too big\r\n");
+            DEBUG_PRINTF("recipient length is too big\r\n\r\n");
             return 0;
         }
     	return uart_parse_ex(recipient, pcRecipient, lRecipientLen);
     }
     pcMessage++;
     if (*pcMessage == '\0') {
-        DEBUG_PRINTF("%s 4\r\n", WRONG_SYNTAX);
+        DEBUG_PRINTF("%s 4\r\n\r\n", WRONG_SYNTAX);
         return 0;
     }
 
@@ -199,11 +199,11 @@ static inline int uart_parse(char* pcCmd, int lCmdLen, char* recipient, int lRec
     *lMessageLen = strlen(pcMessage);
 
     if (*lRecipientLen >= lRecipientSize) {
-        DEBUG_PRINTF("recipient length is too big (%d)\r\n", *lRecipientLen);
+        DEBUG_PRINTF("recipient length is too big (%d)\r\n\r\n", *lRecipientLen);
         return 0;
     }
     if (*lMessageLen >= lMessageSize) {
-        DEBUG_PRINTF("message length is too big (%d)\r\n", *lMessageLen);
+        DEBUG_PRINTF("message length is too big (%d)\r\n\r\n", *lMessageLen);
         return 0;
     }
     if (*lRecipientLen == 0) {
@@ -270,17 +270,17 @@ static void uart_cmdhdl_default(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
     	return;
     }
 
-    DEBUG_PRINTF("%s\r\n", WRONG_SYNTAX);
+    DEBUG_PRINTF("%s\r\n\r\n", WRONG_SYNTAX);
 }
 
 static void uart_cmdhdl_continue(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_echo(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_help(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
@@ -294,32 +294,32 @@ static void uart_cmdhdl_help(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 
 static void uart_cmdhdl_info(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_more(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_pause(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_reset(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_update(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 static void uart_cmdhdl_status(uint8_t ucCmdIdx, char* pcCmd, int lCmdLen)
 {
-    DEBUG_PRINTF("%d\r\n", ucCmdIdx);
+    DEBUG_PRINTF("%s\r\n\r\n", TODO_STRING);
 }
 
 
@@ -331,7 +331,7 @@ void iot_modem_uart_command_help()
 void iot_modem_uart_command_process()
 {
     g_ucUartCommandBufferAvailable = 0;
-    DEBUG_PRINTF("command: %s [%d]\r\n", g_acUartCommandBuffer, g_lUartCommandBufferOffset);
+    //DEBUG_PRINTF("command: %s [%d]\r\n\r\n", g_acUartCommandBuffer, g_lUartCommandBufferOffset);
 
     for ( int i=0; i<UART_ATCOMMANDS_NUM; i++ ) {
     	if (strncmp(g_acUartCommandBuffer, g_acUartCommands[i].m_pcCmd, strlen(g_acUartCommands[i].m_pcCmd))==0) {
@@ -362,7 +362,7 @@ static void ISR_uart0()
 
         // check if command exceeds buffer
         if (g_lUartCommandBufferOffset == sizeof(g_acUartCommandBuffer)) {
-            DEBUG_PRINTF("\r\nCommand should be less than %d bytes\r\n", sizeof(g_acUartCommandBuffer));
+            DEBUG_PRINTF("\r\nCommand should be less than %d bytes\r\n\r\n", sizeof(g_acUartCommandBuffer));
             memset(g_acUartCommandBuffer, 0, sizeof(g_acUartCommandBuffer));
             g_lUartCommandBufferOffset = 0;
             return;

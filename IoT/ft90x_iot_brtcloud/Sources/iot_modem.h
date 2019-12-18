@@ -46,6 +46,7 @@ typedef enum _DEVICE_STATUS {
 #define MQTT_MAX_PAYLOAD_SIZE              256
 #define PREPEND_REPLY_TOPIC                "server/"
 #define WRONG_SYNTAX                       "wrong syntax"
+#define TODO_STRING                        "todo"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +82,11 @@ typedef enum _TASK_NOTIFY_BIT {
 #define TASK_NOTIFY_FROM_GPIO(y,z)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0+(z)) )
 #define TASK_NOTIFY_FROM_I2C(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0+(z)) )
 #define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
+
+typedef enum _ALERT_TYPE {
+	ALERT_TYPE_ONCE,
+	ALERT_TYPE_CONTINUOUS,
+} ALERT_TYPE;
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +126,7 @@ typedef enum _TASK_NOTIFY_BIT {
 // notification
 #if ENABLE_NOTIFICATIONS
 #define API_TRIGGER_NOTIFICATION           "trigger_notification"
+#define API_STATUS_NOTIFICATION            "status_notification"
 #define API_RECEIVE_NOTIFICATION           "recv_notification"
 #endif // ENABLE_NOTIFICATIONS
 
@@ -159,6 +166,7 @@ typedef enum _TASK_NOTIFY_BIT {
 #define UART_ATCOMMAND_MAX_BUFFER_SIZE     256
 #define UART_ATCOMMAND_MAX_RECIPIENT_SIZE  64
 #define UART_ATCOMMAND_MAX_MESSAGE_SIZE    192
+#define UART_ATCOMMAND_MAX_STATUS_SIZE     64
 
 #define UART_ATCOMMANDS_NUM                15
 
@@ -233,6 +241,7 @@ typedef enum _GPIO_MODES_OUTPUT {
 	GPIO_MODES_OUTPUT_CLOCK,
 } GPIO_MODES_OUTPUT;
 
+
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;   // ["Input", "Output"]
     uint8_t  m_ucMode;        // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
@@ -261,9 +270,9 @@ void iot_modem_uart_command_help();
 
 void iot_modem_gpio_init(int voltage);
 void iot_modem_gpio_enable_interrupt();
-void iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
+int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
 void iot_modem_gpio_set_voltage(int voltage);
-void iot_modem_gpio_get_status(uint8_t* status, uint8_t* direction, uint8_t* enabled);
+void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled);
 void iot_modem_gpio_process(int number);
 
 
