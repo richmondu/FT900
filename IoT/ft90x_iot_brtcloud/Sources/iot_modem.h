@@ -3,13 +3,13 @@
 
 
 
-#define ENABLE_UART 1
+#define ENABLE_UART                        1
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS 1
+#define ENABLE_UART_ATCOMMANDS             1
 #endif // ENABLE_UART
-#define ENABLE_GPIO 1
-#define ENABLE_I2C  0
-#define ENABLE_NOTIFICATIONS 1
+#define ENABLE_GPIO                        1
+#define ENABLE_I2C                         0
+#define ENABLE_NOTIFICATIONS               1
 
 
 
@@ -207,14 +207,14 @@ typedef enum _ALERT_TYPE {
 // UART Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define UART_PROPERTIES_BAUDRATE_COUNT 16
+#define UART_PROPERTIES_BAUDRATE_COUNT     16
 
 typedef struct _UART_PROPERTIES {
-	uint8_t m_ucBaudrate;    // g_uwBaudrates
-	uint8_t m_ucParity;      // ft900_uart_simple.h uart_parity_t
-	uint8_t m_ucFlowcontrol; // ft900_uart_simple.h uart_flow_t
-	uint8_t m_ucStopbits;    // ft900_uart_simple.h uart_stop_bits_t
-	uint8_t m_ucDatabits;    // ft900_uart_simple.h uart_data_bits_t
+	uint8_t m_ucBaudrate;                  // g_uwBaudrates
+	uint8_t m_ucParity;                    // ft900_uart_simple.h uart_parity_t
+	uint8_t m_ucFlowcontrol;               // ft900_uart_simple.h uart_flow_t
+	uint8_t m_ucStopbits;                  // ft900_uart_simple.h uart_stop_bits_t
+	uint8_t m_ucDatabits;                  // ft900_uart_simple.h uart_data_bits_t
 } UART_PROPERTIES;
 
 
@@ -222,11 +222,16 @@ typedef struct _UART_PROPERTIES {
 // GPIO Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define GPIO_COUNT           4
-#define GPIO_INPUT_PIN_0     12 // Input pins: 12,13,14,15
-#define GPIO_OUTPUT_PIN_0    8  // Output pins: 8,9,10,11
-#define GPIO_VOLTAGE_PIN_0   16
-#define GPIO_VOLTAGE_PIN_1   17
+#define UART_ATCOMMAND_DESC_STATUS         "Display device status"
+#define GPIO_VOLTAGE_PIN_0                 16
+#define GPIO_VOLTAGE_PIN_1                 17
+
+#define GPIO_COUNT                         4
+#define GPIO_INPUT_PIN_0                   12 // Input pins: 12,13,14,15
+#define GPIO_OUTPUT_CONTROL_PIN_0          36 // Output control pins: 36, 37, 38, 39
+#define GPIO_OUTPUT_PIN_0                  56 // Output pins: 56, 57, 58, 11
+#define GPIO_OUTPUT_PIN_3                  11
+
 
 typedef enum _GPIO_MODES_INPUT {
 	GPIO_MODES_INPUT_HIGH_LEVEL,
@@ -241,13 +246,12 @@ typedef enum _GPIO_MODES_OUTPUT {
 	GPIO_MODES_OUTPUT_CLOCK,
 } GPIO_MODES_OUTPUT;
 
-
 typedef struct _GPIO_PROPERTIES {
-    uint8_t  m_ucDirection;   // ["Input", "Output"]
-    uint8_t  m_ucMode;        // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
-    uint8_t  m_ucAlert;       // ["Once", "Continuously"]
+    uint8_t  m_ucDirection;                // ["Input", "Output"]
+    uint8_t  m_ucMode;                     // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
+    uint8_t  m_ucAlert;                    // ["Once", "Continuously"]
     uint32_t m_ulAlertperiod;
-    uint8_t  m_ucPolarity;    // ["Positive", "Negative"]
+    uint8_t  m_ucPolarity;                 // ["Positive", "Negative"]
     uint32_t m_ulWidth;
     uint32_t m_ulMark;
     uint32_t m_ulSpace;
