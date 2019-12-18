@@ -324,6 +324,7 @@ static void iot_app_task( void *pvParameters )
         /* display the UART commands */
         iot_modem_uart_command_help();
 
+        /* process publishing of notification messages */
         do  {
             uint32_t ulNotificationValue = 0;
             if (xTaskNotifyWait(0, TASK_NOTIFY_CLEAR_BITS, &ulNotificationValue, pdMS_TO_TICKS(1000)) == pdTRUE) {
