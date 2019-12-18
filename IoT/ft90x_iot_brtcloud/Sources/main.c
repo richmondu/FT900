@@ -340,7 +340,12 @@ static void iot_app_task( void *pvParameters )
             	/* process GPIO */
             	for (i=0; i<GPIO_COUNT; i++) {
 					if (TASK_NOTIFY_FROM_GPIO(ulNotificationValue, i)) {
-						iot_modem_gpio_process(i+1);
+						if (TASK_NOTIFY_ACTIVATION(ulNotificationValue)) {
+							iot_modem_gpio_process(i+1, 1);
+						}
+						else {
+							iot_modem_gpio_process(i+1, 0);
+						}
 					}
             	}
 #endif // ENABLE_GPIO
@@ -355,7 +360,7 @@ static void iot_app_task( void *pvParameters )
 #endif // ENABLE_I2C
 
             }
-//            vTaskDelay( pdMS_TO_TICKS(1000) );
+
         } while ( net_is_ready() && iot_is_connected( handle ) == 0 && !g_exit );
 
         g_exit = 0;

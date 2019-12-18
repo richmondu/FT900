@@ -97,18 +97,19 @@ void iot_modem_gpio_set_voltage(int voltage)
     }
 }
 
-void iot_modem_gpio_process(int number)
+void iot_modem_gpio_process(int number, int activate)
 {
     // This is called by the main task after receiving notification from timer
     char topic[MQTT_MAX_TOPIC_SIZE] = {0};
     char payload[3] = {0};
 
     tfp_snprintf( topic, sizeof(topic), TOPIC_GPIO, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), number, MENOS_DEFAULT);
-       tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY);
+       tfp_snprintf( payload, sizeof(payload), PAYLOAD_TRIGGER_GPIO_NOTIFICATION, activate);
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     DEBUG_PRINTF("PUB %s (%d) %s (%d)\r\n\r\n", topic, strlen(topic), payload, strlen(payload));
 }
 
+// Need to copy the structure here in order to get the pvTimerID parameter
 typedef struct tmrTimerControl /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     const char                *pcTimerName;        /*<< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
@@ -137,8 +138,8 @@ static void gpio_timer( TimerHandle_t xTimer )
     	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
     	}
     	else {
-    		// Set bit for GPIO X and bit for deactivation
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION), eSetBits);
+    		// Set bit for GPIO X
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
     	}
     }
     else if (g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL ||
@@ -148,8 +149,8 @@ static void gpio_timer( TimerHandle_t xTimer )
     	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
     	}
     	else {
-    		// Set bit for GPIO X and bit for deactivation
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION), eSetBits);
+    		// Set bit for GPIO X
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
     	}
     }
 }

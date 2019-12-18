@@ -76,7 +76,6 @@ typedef enum _TASK_NOTIFY_BIT {
 	TASK_NOTIFY_BIT_I2C2,
 	TASK_NOTIFY_BIT_I2C3,
 	TASK_NOTIFY_BIT_ACTIVATION,
-	TASK_NOTIFY_BIT_DEACTIVATION,
 } TASK_NOTIFY_BIT;
 
 #define TASK_NOTIFY_BIT(x)                 ( 1 << (x) )
@@ -84,7 +83,6 @@ typedef enum _TASK_NOTIFY_BIT {
 #define TASK_NOTIFY_FROM_GPIO(y,z)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0+(z)) )
 #define TASK_NOTIFY_FROM_I2C(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0+(z)) )
 #define TASK_NOTIFY_ACTIVATION(y)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION) )
-#define TASK_NOTIFY_DEACTIVATION(y)        ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION) )
 #define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
 
 typedef enum _ALERT_TYPE {
@@ -154,6 +152,7 @@ typedef enum _ALERT_TYPE {
 #define PAYLOAD_API_GET_GPIOS              "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
 #define PAYLOAD_API_GET_GPIO_VOLTAGE       "{\"value\":{\"voltage\":%d}}"
 #define PAYLOAD_API_GET_GPIO_PROPERTIES    "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
+#define PAYLOAD_TRIGGER_GPIO_NOTIFICATION  "{\"activate\":%d}"
 #endif // ENABLE_GPIO
 
 #if ENABLE_I2C
@@ -281,7 +280,7 @@ void iot_modem_gpio_enable_interrupt();
 int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
 void iot_modem_gpio_set_voltage(int voltage);
 void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled);
-void iot_modem_gpio_process(int number);
+void iot_modem_gpio_process(int number, int activate);
 
 
 
