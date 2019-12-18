@@ -116,16 +116,16 @@ typedef struct tmrTimerControl /* The old naming convention is used to prevent b
 	uint8_t 				ucStatus;			/*<< Holds bits to say if the timer was statically allocated or not, and if it is active or not. */
 } xTIMER;
 
-static void iot_modem_gpio_timer( TimerHandle_t xTimer )
+static void gpio_timer( TimerHandle_t xTimer )
 {
 	// Inform the main task to publish the notification packet
 	uint8_t index = *((uint8_t*)xTimer->pvTimerID);
 
 	DEBUG("GPIO timer %d\r\n", index);
-	xTaskNotifyFromISR(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits, NULL);
+	xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
 }
 
-static inline void iot_modem_gpio_create_timer(int index)
+static inline void gpio_create_timer(int index)
 {
 	// Create the timer given the alert type and alert period
 	char acTimerName[8] = {0};
@@ -135,18 +135,18 @@ static inline void iot_modem_gpio_create_timer(int index)
 		pdMS_TO_TICKS(g_oGpioProperties[index].m_ulAlertperiod),
 		(BaseType_t)g_oGpioProperties[index].m_ucAlert,
 		&g_aucGpioIndex[index],
-		iot_modem_gpio_timer
+		gpio_timer
 		);
 }
 
-static inline void iot_modem_gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_int_edge_t edge)
+static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_int_edge_t edge)
 {
 	if (edge == gpio_int_edge_raising) {
 		// If already high, start the timer
 		// Else, run an ISR to wait until it goes high
 		if (gpio_read(pin)) {
 			DEBUG("GPIO timer %d ENABLE\r\n", index);
-			iot_modem_gpio_create_timer(index);
+			gpio_create_timer(index);
 			DEBUG("GPIO timer %d ENABLED\r\n", index);
 		}
 		else {
@@ -158,7 +158,7 @@ static inline void iot_modem_gpio_create_timer_or_interrupt(int index, uint8_t p
 		// Else, run an ISR to wait until it goes low
 		if (gpio_read(pin) == 0) {
 			DEBUG("GPIO timer %d ENABLE\r\n", index);
-			iot_modem_gpio_create_timer(index);
+			gpio_create_timer(index);
 			DEBUG("GPIO timer %d ENABLED\r\n", index);
 		}
 		else {
@@ -182,12 +182,12 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
 			// HIGH LEVEL/EDGE
 			if (properties->m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL ||
 				properties->m_ucMode == GPIO_MODES_INPUT_HIGH_EDGE) {
-				iot_modem_gpio_create_timer_or_interrupt(index, pin, gpio_int_edge_raising);
+				gpio_create_timer_or_interrupt(index, pin, gpio_int_edge_raising);
 			}
 			// LOW LEVEL/EDGE
 			else if (properties->m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL ||
 					 properties->m_ucMode == GPIO_MODES_INPUT_LOW_EDGE) {
-				iot_modem_gpio_create_timer_or_interrupt(index, pin, gpio_int_edge_falling);
+				gpio_create_timer_or_interrupt(index, pin, gpio_int_edge_falling);
 			}
 			DEBUG("GPIO %d ENABLED\r\n", index);
 		}
@@ -252,7 +252,7 @@ static void ISR_gpio()
 						delayms(5);
 						if (gpio_read(pin+i) != 0) {
 							gpio_interrupt_disable(pin+i);
-							iot_modem_gpio_create_timer(i);
+							gpio_create_timer(i);
 						}
 					}
 				}
@@ -262,7 +262,7 @@ static void ISR_gpio()
 						delayms(5);
 						if (gpio_read(pin+i) == 0) {
 							gpio_interrupt_disable(pin+i);
-							iot_modem_gpio_create_timer(i);
+							gpio_create_timer(i);
 						}
 					}
 				}
@@ -270,7 +270,7 @@ static void ISR_gpio()
 				else if (g_oGpioProperties[i].m_ucMode >= GPIO_MODES_INPUT_HIGH_EDGE) {
 					if (gpio_is_interrupted(pin+1)) {
 						gpio_interrupt_disable(pin+1);
-						iot_modem_gpio_create_timer(i);
+						gpio_create_timer(i);
 					}
 				}
 			}
