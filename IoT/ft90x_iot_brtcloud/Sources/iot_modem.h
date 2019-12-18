@@ -75,12 +75,16 @@ typedef enum _TASK_NOTIFY_BIT {
 	TASK_NOTIFY_BIT_I2C1,
 	TASK_NOTIFY_BIT_I2C2,
 	TASK_NOTIFY_BIT_I2C3,
+	TASK_NOTIFY_BIT_ACTIVATION,
+	TASK_NOTIFY_BIT_DEACTIVATION,
 } TASK_NOTIFY_BIT;
 
 #define TASK_NOTIFY_BIT(x)                 ( 1 << (x) )
 #define TASK_NOTIFY_FROM_UART(y)           ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART) )
 #define TASK_NOTIFY_FROM_GPIO(y,z)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0+(z)) )
 #define TASK_NOTIFY_FROM_I2C(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0+(z)) )
+#define TASK_NOTIFY_ACTIVATION(y)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION) )
+#define TASK_NOTIFY_DEACTIVATION(y)        ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION) )
 #define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
 
 typedef enum _ALERT_TYPE {
@@ -228,7 +232,7 @@ typedef struct _UART_PROPERTIES {
 
 #define GPIO_COUNT                         4
 #define GPIO_INPUT_PIN_0                   12 // Input pins: 12,13,14,15
-#define GPIO_OUTPUT_CONTROL_PIN_0          36 // Output control pins: 36, 37, 38, 39
+#define GPIO_OUTPUT_ENABLE_PIN_0           36 // Output enable pins: 36, 37, 38, 39
 #define GPIO_OUTPUT_PIN_0                  56 // Output pins: 56, 57, 58, 11
 #define GPIO_OUTPUT_PIN_3                  11
 

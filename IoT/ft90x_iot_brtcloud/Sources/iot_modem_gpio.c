@@ -59,8 +59,10 @@ void iot_modem_gpio_init(int voltage)
 
     // Initialize the GPIO Output pins
     for (int i=0; i<GPIO_COUNT; i++) {
-        gpio_dir(GPIO_OUTPUT_CONTROL_PIN_0 + i, pad_dir_output);
-        gpio_write(GPIO_OUTPUT_CONTROL_PIN_0 + i, 0);
+        gpio_dir(GPIO_OUTPUT_ENABLE_PIN_0 + i, pad_dir_output);
+
+        // disable output enable pins at initialization
+        gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + i, 0);
 
         if (i < 3) {
             gpio_dir(GPIO_OUTPUT_PIN_0 + i, pad_dir_output);
@@ -126,7 +128,30 @@ static void gpio_timer( TimerHandle_t xTimer )
     uint8_t index = *((uint8_t*)xTimer->pvTimerID);
 
     DEBUG("GPIO timer %d\r\n", index);
-    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
+
+    uint8_t status = gpio_read(GPIO_INPUT_PIN_0 + index);
+    if (g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL ||
+    	g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_HIGH_EDGE) {
+    	if (status) {
+    		// Set bit for GPIO X and bit for activation
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
+    	}
+    	else {
+    		// Set bit for GPIO X and bit for deactivation
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION), eSetBits);
+    	}
+    }
+    else if (g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL ||
+      		 g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_EDGE) {
+    	if (!status) {
+    		// Set bit for GPIO X and bit for activation
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
+    	}
+    	else {
+    		// Set bit for GPIO X and bit for deactivation
+    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_DEACTIVATION), eSetBits);
+    	}
+    }
 }
 
 static inline void gpio_create_timer(int index)
@@ -174,6 +199,7 @@ static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_i
 int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
 {
     uint8_t pin = 0;
+    uint8_t control_pin = GPIO_OUTPUT_ENABLE_PIN_0 + index;
 
     if (properties->m_ucDirection == pad_dir_input) {
         // If INPUT pin, use GPIO_INPUT_PIN_0 as base address
@@ -184,6 +210,9 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
                 // invalid parameter
                 return 0;
             }
+
+            // disable the output enable pin
+            gpio_write(control_pin, 0);
 
             DEBUG("GPIO %d ENABLE\r\n", index);
             // HIGH LEVEL/EDGE
@@ -211,7 +240,6 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
         }
     }
     else {
-        uint8_t control_pin = GPIO_OUTPUT_CONTROL_PIN_0 + index;
 
         // If INPUT pin, use GPIO_INPUT_PIN_0 as base address
         pin = GPIO_OUTPUT_PIN_0 + index;
@@ -221,13 +249,12 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
 
         if (enable) {
             // ENABLE
-        	gpio_write(control_pin, 1);
+            // enable the output enable pin
+            gpio_write(control_pin, 1);
 
         	// TODO
         }
         else {
-            // DISABLE
-        	gpio_write(control_pin, 0);
         }
     }
 
@@ -259,8 +286,6 @@ void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uin
         }
     }
 }
-
-
 
 static void ISR_gpio()
 {
