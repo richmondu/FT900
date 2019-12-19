@@ -250,8 +250,8 @@ typedef enum _GPIO_MODES_OUTPUT {
 } GPIO_MODES_OUTPUT;
 
 typedef enum _GPIO_POLARITY {
-	GPIO_POLARITY_POSITIVE,
 	GPIO_POLARITY_NEGATIVE,
+	GPIO_POLARITY_POSITIVE,
 } GPIO_POLARITY;
 
 typedef struct _GPIO_PROPERTIES {
@@ -259,7 +259,7 @@ typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucMode;                     // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
     uint8_t  m_ucAlert;                    // ["Once", "Continuously"]
     uint32_t m_ulAlertperiod;
-    uint8_t  m_ucPolarity;                 // ["Positive", "Negative"]
+    uint8_t  m_ucPolarity;                 // ["Negative", "Positive"]
     uint32_t m_ulWidth;
     uint32_t m_ulMark;
     uint32_t m_ulSpace;

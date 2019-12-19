@@ -229,6 +229,29 @@ static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_i
     }
 }
 
+static inline void gpio_output_set_level(uint8_t pin, uint8_t state)
+{
+	gpio_write(pin, state);
+}
+
+static inline void gpio_output_set_pulse(uint8_t pin, uint8_t state, uint32_t width)
+{
+    gpio_write(pin, state);
+    delayms(width);
+    gpio_write(pin, !state);
+
+}
+
+static inline void gpio_output_set_clock(uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count)
+{
+    for (int i=0; i<count; i++) {
+        gpio_write(pin, 1);
+        delayms(mark);
+        gpio_write(pin, 0);
+        delayms(space);
+    }
+}
+
 int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
 {
     uint8_t pin = 0;
@@ -269,52 +292,19 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
         if (enable) {
             // The data (level/pulse/clock) is written to the dedicated output pin while the configuration is enabled
             if (properties->m_ucMode == GPIO_MODES_OUTPUT_LEVEL) {
-                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
-                    gpio_write(pin, 1);
-                }
-                else { // GPIO_POLARITY_NEGATIVE
-                    gpio_write(pin, 0);
-                }
+               	gpio_output_set_level(pin, properties->m_ucPolarity);
             }
             else if (properties->m_ucMode == GPIO_MODES_OUTPUT_PULSE) {
-                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
-                    gpio_write(pin, 1);
-                    delayms(properties->m_ulWidth);
-                    gpio_write(pin, 0);
-                }
-                else { // GPIO_POLARITY_NEGATIVE
-                    gpio_write(pin, 0);
-                    delayms(properties->m_ulWidth);
-                    gpio_write(pin, 1);
-                }
+               	gpio_output_set_pulse(pin, properties->m_ucPolarity, properties->m_ulWidth);
             }
             else if (properties->m_ucMode == GPIO_MODES_OUTPUT_CLOCK) {
-                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
-                    for (int i=0; i<properties->m_ulCount; i++) {
-                        gpio_write(pin, 1);
-                        delayms(properties->m_ulMark);
-                        gpio_write(pin, 0);
-                        delayms(properties->m_ulSpace);
-                    }
-                }
-                else { // GPIO_POLARITY_NEGATIVE
-                    for (int i=0; i<properties->m_ulCount; i++) {
-                        gpio_write(pin, 0);
-                        delayms(properties->m_ulWidth);
-                        gpio_write(pin, 1);
-                        delayms(properties->m_ulSpace);
-                    }
-                }
+            	// TODO: this might need to be run in a task
+               	gpio_output_set_clock(pin, properties->m_ucPolarity, properties->m_ulMark, properties->m_ulSpace, properties->m_ulCount);
             }
         }
         else {
             // The pin state is returned to inactive state when the configuration is disabled.
-              if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
-                   gpio_write(pin, 0);
-               }
-               else { // GPIO_POLARITY_NEGATIVE
-                   gpio_write(pin, 1);
-               }
+           	gpio_output_set_level(pin, !properties->m_ucPolarity);
         }
     }
 
