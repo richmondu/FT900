@@ -225,7 +225,6 @@ static inline void gpio_output_set_pulse(uint8_t pin, uint8_t state, uint32_t wi
     gpio_write(pin, state);
     delayms(width);
     gpio_write(pin, !state);
-
 }
 
 static inline void gpio_output_set_clock(uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count)
@@ -247,7 +246,7 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
         pin = GPIO_INPUT_PIN_0 + index;
 
         if (enable) {
-            if (properties->m_ulAlertperiod == 0) {
+            if (!properties->m_ulAlertperiod) {
                 // invalid parameter
                 return 0;
             }
@@ -302,15 +301,13 @@ void iot_modem_gpio_set_properties(int index, int direction, int polarity)
     // For a pin configured as output, the output_enable is enabled
     // and remains enabled throughout until the configuration is changed to input.
     // The output_enable is not altered during configuration enable/disable operations.
-    if (direction == pad_dir_input) {
-        // disable the output enable pin
-        gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, 0);
-    }
-    else {
-        // enable the output enable pin
-        gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, 1);
 
-        // set output pin to inactive state
+    // if input, disable the output enable pin
+    // if output, enable the output enable pin
+    gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, direction);
+
+    // if output, set pin to inactive state (opposite of polarity)
+    if (direction == pad_dir_output) {
         gpio_write(GPIO_OUTPUT_PIN(index), !polarity);
     }
 }
