@@ -327,12 +327,7 @@ void iot_modem_gpio_set_properties(int index, int direction, int polarity)
         gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, 1);
 
         // set output pin to inactive state
-        if (polarity == GPIO_POLARITY_POSITIVE) {
-            gpio_write(GPIO_OUTPUT_PIN(index), 0);
-        }
-        else {
-            gpio_write(GPIO_OUTPUT_PIN(index), 1);
-        }
+        gpio_write(GPIO_OUTPUT_PIN(index), !polarity);
     }
 }
 
