@@ -316,7 +316,7 @@ static void ISR_gpio()
 
                 pin = GPIO_INPUT_PIN_0 + i;
 
-                // For HIGH-LEVEL and LOW-LEVEL
+                // For HIGH-LEVEL
                 if (g_oGpioProperties[i].m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL) {
                     if (gpio_read(pin) != 0) {
                         // debounce
@@ -327,6 +327,7 @@ static void ISR_gpio()
                         }
                     }
                 }
+                // For LOW-LEVEL
                 else if (g_oGpioProperties[i].m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL) {
                     if (gpio_read(pin) == 0) {
                         // debounce
@@ -344,9 +345,6 @@ static void ISR_gpio()
                         gpio_create_timer(i);
                     }
                 }
-            }
-            // OUTPUT direction
-            else { //if (g_oGpioProperties[i].m_ucDirection == pad_dir_output) {
             }
         }
     }
