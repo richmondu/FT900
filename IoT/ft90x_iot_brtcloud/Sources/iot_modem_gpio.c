@@ -104,7 +104,7 @@ void iot_modem_gpio_process(int number, int activate)
     char payload[3] = {0};
 
     tfp_snprintf( topic, sizeof(topic), TOPIC_GPIO, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), number, MENOS_DEFAULT);
-       tfp_snprintf( payload, sizeof(payload), PAYLOAD_TRIGGER_GPIO_NOTIFICATION, activate);
+    tfp_snprintf( payload, sizeof(payload), PAYLOAD_TRIGGER_GPIO_NOTIFICATION, activate);
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     DEBUG_PRINTF("PUB %s (%d) %s (%d)\r\n\r\n", topic, strlen(topic), payload, strlen(payload));
 }
@@ -131,27 +131,42 @@ static void gpio_timer( TimerHandle_t xTimer )
     DEBUG("GPIO timer %d\r\n", index);
 
     uint8_t status = gpio_read(GPIO_INPUT_PIN_0 + index);
+
+    // If status is still high, send activation, otherwise send deactivation
     if (g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL ||
-    	g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_HIGH_EDGE) {
-    	if (status) {
-    		// Set bit for GPIO X and bit for activation
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
-    	}
-    	else {
-    		// Set bit for GPIO X
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
-    	}
+        g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_HIGH_EDGE) {
+        if (status) {
+            // Set bit for GPIO X and bit for activation
+            xTaskNotify(
+                g_iot_app_handle,
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) |
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION),
+                eSetBits);
+        }
+        else {
+            // Set bit for GPIO X
+            xTaskNotify(g_iot_app_handle,
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index),
+                eSetBits);
+        }
     }
+    // If status is still low, send activation, otherwise send deactivation
     else if (g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL ||
-      		 g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_EDGE) {
-    	if (!status) {
-    		// Set bit for GPIO X and bit for activation
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) | TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION), eSetBits);
-    	}
-    	else {
-    		// Set bit for GPIO X
-    	    xTaskNotify(g_iot_app_handle, TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index), eSetBits);
-    	}
+               g_oGpioProperties[index].m_ucMode == GPIO_MODES_INPUT_LOW_EDGE) {
+        if (!status) {
+            // Set bit for GPIO X and bit for activation
+            xTaskNotify(
+                g_iot_app_handle,
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index) |
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION),
+                eSetBits);
+        }
+        else {
+            // Set bit for GPIO X
+            xTaskNotify(g_iot_app_handle,
+                TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0 + index),
+                eSetBits);
+        }
     }
 }
 
@@ -242,7 +257,7 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
     }
     else {
 
-        // If INPUT pin, use GPIO_INPUT_PIN_0 as base address
+        // If OUTPUT pin, use GPIO_OUTPUT_PIN_0 as base address
         pin = GPIO_OUTPUT_PIN_0 + index;
         if (index == 3) {
             pin = GPIO_OUTPUT_PIN_3;
@@ -253,7 +268,7 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
             // enable the output enable pin
             gpio_write(control_pin, 1);
 
-        	// TODO
+            // TODO
         }
         else {
         }
@@ -266,19 +281,19 @@ void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uin
 {
     for (int i=0; i<GPIO_COUNT; i++) {
         if (properties[i].m_ucDirection == pad_dir_input) {
-        	// input
+            // input
             status[i] = gpio_read(GPIO_INPUT_PIN_0 + i);
         }
         else {
-        	// output
+            // output
             if (!enabled[i]) {
                 // if output and disabled, read gpio status
-            	if (i<3) {
-            		status[i] = gpio_read(GPIO_OUTPUT_PIN_0 + i);
-            	}
-            	else {
-            		status[i] = gpio_read(GPIO_OUTPUT_PIN_3);
-            	}
+                if (i<3) {
+                    status[i] = gpio_read(GPIO_OUTPUT_PIN_0 + i);
+                }
+                else {
+                    status[i] = gpio_read(GPIO_OUTPUT_PIN_3);
+                }
             }
             else {
                 // if output and enabled, just set to 0
@@ -297,39 +312,39 @@ static void ISR_gpio()
             // INPUT direction
             if (g_oGpioProperties[i].m_ucDirection == pad_dir_input) {
 
-            	pin = GPIO_INPUT_PIN_0 + i;
+                pin = GPIO_INPUT_PIN_0 + i;
 
                 // For HIGH-LEVEL and LOW-LEVEL
                 if (g_oGpioProperties[i].m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL) {
-                    if (gpio_read(pin+i) != 0) {
+                    if (gpio_read(pin) != 0) {
                         // debounce
                         delayms(5);
-                        if (gpio_read(pin+i) != 0) {
-                            gpio_interrupt_disable(pin+i);
+                        if (gpio_read(pin) != 0) {
+                            gpio_interrupt_disable(pin);
                             gpio_create_timer(i);
                         }
                     }
                 }
                 else if (g_oGpioProperties[i].m_ucMode == GPIO_MODES_INPUT_LOW_LEVEL) {
-                    if (gpio_read(pin+i) == 0) {
+                    if (gpio_read(pin) == 0) {
                         // debounce
                         delayms(5);
-                        if (gpio_read(pin+i) == 0) {
-                            gpio_interrupt_disable(pin+i);
+                        if (gpio_read(pin) == 0) {
+                            gpio_interrupt_disable(pin);
                             gpio_create_timer(i);
                         }
                     }
                 }
                 // For HIGH-EDGE and LOW-EDGE
                 else if (g_oGpioProperties[i].m_ucMode >= GPIO_MODES_INPUT_HIGH_EDGE) {
-                    if (gpio_is_interrupted(pin+1)) {
-                        gpio_interrupt_disable(pin+1);
+                    if (gpio_is_interrupted(pin)) {
+                        gpio_interrupt_disable(pin);
                         gpio_create_timer(i);
                     }
                 }
             }
             // OUTPUT direction
-            else if (g_oGpioProperties[i].m_ucDirection == pad_dir_output) {
+            else { //if (g_oGpioProperties[i].m_ucDirection == pad_dir_output) {
             }
         }
     }
