@@ -167,8 +167,8 @@
 
 // Optimization related configuration
 #if (USE_MBEDTLS_MAX_SIZES==3)
-#define MBEDTLS_SSL_MAX_CONTENT_LEN  (1024+512) // Support AWS IoT ATS
-#define MBEDTLS_MPI_MAX_SIZE         (256)      // Support AWS IoT ATS
+#define MBEDTLS_SSL_MAX_CONTENT_LEN  (1536)     // Support for ECC
+#define MBEDTLS_MPI_MAX_SIZE         (32)       // Support for ECC
 #elif (USE_MBEDTLS_MAX_SIZES==2)
 #define MBEDTLS_SSL_MAX_CONTENT_LEN  (4096+910) // Support AWS IoT ATS
 #define MBEDTLS_MPI_MAX_SIZE         (256)      // Support AWS IoT ATS
