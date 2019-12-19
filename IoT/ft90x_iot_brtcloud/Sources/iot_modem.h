@@ -286,7 +286,7 @@ void iot_modem_gpio_enable_interrupt();
 int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable);
 void iot_modem_gpio_set_properties(int index, int direction, int polarity);
 void iot_modem_gpio_set_voltage(int voltage);
-void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled);
+uint8_t iot_modem_gpio_get_status(GPIO_PROPERTIES* properties, int index);
 void iot_modem_gpio_process(int number, int activate);
 
 

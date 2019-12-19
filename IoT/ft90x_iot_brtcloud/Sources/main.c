@@ -618,9 +618,9 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     // GPIO
     ///////////////////////////////////////////////////////////////////////////////////
     else if ( IS_API(API_GET_GPIOS) ) {
-        // TODO: make sure g_ucGpioDirection is updated
-        iot_modem_gpio_get_status(g_ucGpioStatus, &g_oGpioProperties, g_ucGpioEnabled);
-
+    	for (int i=0; i<GPIO_COUNT; i++) {
+    		g_ucGpioStatus[i] = iot_modem_gpio_get_status(&g_oGpioProperties[i], i);
+    	}
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIOS, g_ucGpioVoltage,
             g_ucGpioEnabled[0], g_oGpioProperties[0].m_ucDirection, g_ucGpioStatus[0],
@@ -676,10 +676,13 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             g_oGpioProperties[ucNumber].m_ulSpace       = ulSpace;
             g_oGpioProperties[ucNumber].m_ulCount       = ulCount;
 
-            iot_modem_gpio_set_properties(ucNumber, ucDirection, ucPolarity);
             // When user sets the configuration, it will be disabled by default
             // User has to explicitly enable it
+            // Disable to ensure first
             g_ucGpioEnabled[ucNumber] = 0;
+            iot_modem_gpio_enable(&g_oGpioProperties[ucNumber], (int)ucNumber, 0);
+
+            iot_modem_gpio_set_properties(ucNumber, ucDirection, ucPolarity);
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
         tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
@@ -692,13 +695,13 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             if ( g_ucGpioEnabled[ucNumber] != ucEnabled ) {
             	// order matters
             	if (ucEnabled) {
-                    if (iot_modem_gpio_enable(g_oGpioProperties, (int)ucNumber, (int)ucEnabled)) {
+                    if (iot_modem_gpio_enable(&g_oGpioProperties[ucNumber], (int)ucNumber, (int)ucEnabled)) {
                     	g_ucGpioEnabled[ucNumber] = ucEnabled;
                     }
             	}
             	else {
             		g_ucGpioEnabled[ucNumber] = ucEnabled;
-                    iot_modem_gpio_enable(g_oGpioProperties, (int)ucNumber, (int)ucEnabled);
+                    iot_modem_gpio_enable(&g_oGpioProperties[ucNumber], (int)ucNumber, (int)ucEnabled);
             	}
             }
         }

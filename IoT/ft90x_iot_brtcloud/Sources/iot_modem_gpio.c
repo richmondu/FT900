@@ -44,6 +44,7 @@ extern uint8_t g_ucGpioEnabled[GPIO_COUNT];
 
 static uint8_t g_aucGpioIndex[GPIO_COUNT] = { 0, 1, 2, 3 };
 static TimerHandle_t g_oGpioTimer[GPIO_COUNT] = { NULL, NULL, NULL, NULL };
+static TaskHandle_t g_oGpioTask[GPIO_COUNT] = { NULL, NULL, NULL, NULL };
 static void ISR_gpio();
 
 
@@ -217,23 +218,63 @@ static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_i
 
 static inline void gpio_output_set_level(uint8_t pin, uint8_t state)
 {
-	gpio_write(pin, state);
+    //DEBUG_PRINTF( "set_level GPIO %d %d\r\n", pin, state );
+    gpio_write(pin, state);
 }
 
 static inline void gpio_output_set_pulse(uint8_t pin, uint8_t state, uint32_t width)
 {
+    //DEBUG_PRINTF( "set_pulse GPIO %d %d %d\r\n", pin, state, width );
     gpio_write(pin, state);
     delayms(width);
     gpio_write(pin, !state);
 }
 
-static inline void gpio_output_set_clock(uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count)
+static inline void gpio_output_set_clock(uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count, uint8_t index)
 {
-    for (int i=0; i<count; i++) {
+    //DEBUG_PRINTF( "set_clock GPIO %d %d %d %d %d\r\n", pin, state, mark, space, count );
+    while (!g_ucGpioEnabled[index]) {
+        delayms(100);
+    }
+    for (int i=0; i<count && g_ucGpioEnabled[index]; i++) {
         gpio_write(pin, state);
         delayms(mark);
         gpio_write(pin, !state);
         delayms(space);
+        vTaskDelay(pdMS_TO_TICKS(1)); // allow context switch for DISABLE
+    }
+}
+
+static void gpio_task( void *param )
+{
+    uint8_t index = *((uint8_t*)param);
+
+    gpio_output_set_clock(GPIO_OUTPUT_PIN(index),
+        g_oGpioProperties[index].m_ucPolarity,
+        g_oGpioProperties[index].m_ulMark,
+        g_oGpioProperties[index].m_ulSpace,
+        g_oGpioProperties[index].m_ulCount,
+        index);
+
+    g_oGpioTask[index] = NULL;
+    vTaskDelete(NULL);
+}
+
+static inline void gpio_create_task(int index)
+{
+    char acTaskName[8] = {0};
+    tfp_snprintf( acTaskName, sizeof(acTaskName), "GPIO%d", index );
+
+    if (xTaskCreate( gpio_task, acTaskName, 64, &g_aucGpioIndex[index], configMAX_PRIORITIES, &g_oGpioTask[index] ) != pdTRUE ) {
+        DEBUG_PRINTF( "xTaskCreate GPIO %d failed\r\n", index );
+    }
+}
+
+static inline void gpio_delete_task(int index)
+{
+    if (g_oGpioTask[index] != NULL) {
+        vTaskDelete(g_oGpioTask[index]);
+        g_oGpioTask[index] = NULL;
     }
 }
 
@@ -275,19 +316,24 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
         if (enable) {
             // The data (level/pulse/clock) is written to the dedicated output pin while the configuration is enabled
             if (properties->m_ucMode == GPIO_MODES_OUTPUT_LEVEL) {
-               	gpio_output_set_level(pin, properties->m_ucPolarity);
+                gpio_output_set_level(pin, properties->m_ucPolarity);
             }
             else if (properties->m_ucMode == GPIO_MODES_OUTPUT_PULSE) {
-               	gpio_output_set_pulse(pin, properties->m_ucPolarity, properties->m_ulWidth);
+                gpio_output_set_pulse(pin, properties->m_ucPolarity, properties->m_ulWidth);
             }
             else if (properties->m_ucMode == GPIO_MODES_OUTPUT_CLOCK) {
-            	// TODO: this might need to be run in a task
-               	gpio_output_set_clock(pin, properties->m_ucPolarity, properties->m_ulMark, properties->m_ulSpace, properties->m_ulCount);
+                // Run a task instead because it can take too long
+                gpio_create_task(index);
             }
         }
         else {
             // The pin state is returned to inactive state when the configuration is disabled.
-           	gpio_output_set_level(pin, !properties->m_ucPolarity);
+            gpio_output_set_level(pin, !properties->m_ucPolarity);
+
+            // Stop the task
+            if (properties->m_ucMode == GPIO_MODES_OUTPUT_CLOCK) {
+                gpio_delete_task(index);
+            }
         }
     }
 
@@ -312,18 +358,15 @@ void iot_modem_gpio_set_properties(int index, int direction, int polarity)
     }
 }
 
-void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled)
+uint8_t iot_modem_gpio_get_status(GPIO_PROPERTIES* properties, int index)
 {
     // With dedicated input pins, it is possible to read live status any time
     // regardless of whether configuration is enabled/disabled and whether a pin is input or output.
-    for (int i=0; i<GPIO_COUNT; i++) {
-        if (properties[i].m_ucDirection == pad_dir_input) {
-            status[i] = gpio_read(GPIO_INPUT_PIN_0 + i);
-        }
-        else {
-            status[i] = gpio_read(GPIO_OUTPUT_PIN(i));
-        }
+    if (properties->m_ucDirection == pad_dir_input) {
+        return gpio_read(GPIO_INPUT_PIN_0 + index);
     }
+
+    return gpio_read(GPIO_OUTPUT_PIN(index));
 }
 
 static void ISR_gpio()

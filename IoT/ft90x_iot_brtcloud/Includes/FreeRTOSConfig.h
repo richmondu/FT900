@@ -70,7 +70,7 @@
 #if (USE_MQTT_BROKER == MQTT_BROKER_AWS_IOT)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(48 * 1024))
 #else
-#define configTOTAL_HEAP_SIZE                       ((size_t)(30 * 1024))
+#define configTOTAL_HEAP_SIZE                       ((size_t)(32 * 1024))
 #endif
 #elif defined(__FT930__)
 #define configTOTAL_HEAP_SIZE                       ((size_t)(26 * 1024))
@@ -143,7 +143,7 @@
 /* Mandatory. */
 #define INCLUDE_vTaskPrioritySet                    0
 #define INCLUDE_uxTaskPriorityGet                   0
-#define INCLUDE_vTaskDelete                         0
+#define INCLUDE_vTaskDelete                         1
 #define INCLUDE_vTaskSuspend                        0
 #define INCLUDE_vTaskDelayUntil                     0
 #define INCLUDE_vTaskDelay                          1
