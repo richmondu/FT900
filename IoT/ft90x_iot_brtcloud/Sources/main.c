@@ -644,7 +644,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 g_oGpioProperties[ucNumber].m_ucPolarity,
                 g_oGpioProperties[ucNumber].m_ulWidth,
                 g_oGpioProperties[ucNumber].m_ulMark,
-                g_oGpioProperties[ucNumber].m_ulSpace
+                g_oGpioProperties[ucNumber].m_ulSpace,
+                g_oGpioProperties[ucNumber].m_ulCount
                 );
             ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
             DEBUG_PRINTF( "PUB:  %s[%d] %s[%d]\r\n", topic, strlen(topic), payload, strlen(payload));
@@ -652,6 +653,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
     else if ( IS_API(API_SET_GPIO_PROPERTIES) ) {
         uint8_t  ucNumber      = (uint8_t) json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
+        uint32_t ulCount       = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "count");
         uint32_t ulSpace       = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "space");
         uint32_t ulMark        = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "mark");
         uint32_t ulWidth       = (uint32_t)json_parse_int(mqtt_subscribe_recv->payload, "width");
@@ -660,8 +662,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t  ucAlert       = (uint8_t) json_parse_int(mqtt_subscribe_recv->payload, "alert");
         uint8_t  ucMode        = (uint8_t) json_parse_int(mqtt_subscribe_recv->payload, "mode");
         uint8_t  ucDirection   = (uint8_t) json_parse_int(mqtt_subscribe_recv->payload, "direction");
-        DEBUG_PRINTF( "ucNumber=%d ucDirection=%d ucMode=%d, ucAlert=%d, ulAlertperiod=%d ucPolarity=%d ulWidth=%d ulMark=%d ulSpace=%d\r\n",
-            ucNumber, ucDirection, ucMode, ucAlert, ulAlertperiod, ucPolarity, ulWidth, ulMark, ulSpace );
+        DEBUG_PRINTF( "ucNumber=%d ucDirection=%d ucMode=%d, ucAlert=%d, ulAlertperiod=%d ucPolarity=%d ulWidth=%d ulMark=%d ulSpace=%d ulCount=%d\r\n",
+            ucNumber, ucDirection, ucMode, ucAlert, ulAlertperiod, ucPolarity, ulWidth, ulMark, ulSpace, ulCount );
 
         if (ucNumber < GPIO_COUNT) {
             g_oGpioProperties[ucNumber].m_ucDirection   = ucDirection;
@@ -672,7 +674,9 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             g_oGpioProperties[ucNumber].m_ulWidth       = ulWidth;
             g_oGpioProperties[ucNumber].m_ulMark        = ulMark;
             g_oGpioProperties[ucNumber].m_ulSpace       = ulSpace;
+            g_oGpioProperties[ucNumber].m_ulCount       = ulCount;
 
+            iot_modem_gpio_set_properties(ucNumber, ucDirection, ucPolarity);
             // When user sets the configuration, it will be disabled by default
             // User has to explicitly enable it
             g_ucGpioEnabled[ucNumber] = 0;

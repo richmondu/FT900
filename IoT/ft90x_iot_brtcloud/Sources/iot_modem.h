@@ -151,7 +151,7 @@ typedef enum _ALERT_TYPE {
 #define TOPIC_GPIO                         "%s%s/trigger_notification/gpio%d/%s"
 #define PAYLOAD_API_GET_GPIOS              "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
 #define PAYLOAD_API_GET_GPIO_VOLTAGE       "{\"value\":{\"voltage\":%d}}"
-#define PAYLOAD_API_GET_GPIO_PROPERTIES    "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d}}"
+#define PAYLOAD_API_GET_GPIO_PROPERTIES    "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d,\"count\":%d}}"
 #define PAYLOAD_TRIGGER_GPIO_NOTIFICATION  "{\"activate\":%d}"
 #endif // ENABLE_GPIO
 
@@ -249,6 +249,11 @@ typedef enum _GPIO_MODES_OUTPUT {
 	GPIO_MODES_OUTPUT_CLOCK,
 } GPIO_MODES_OUTPUT;
 
+typedef enum _GPIO_POLARITY {
+	GPIO_POLARITY_POSITIVE,
+	GPIO_POLARITY_NEGATIVE,
+} GPIO_POLARITY;
+
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;                // ["Input", "Output"]
     uint8_t  m_ucMode;                     // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
@@ -258,6 +263,7 @@ typedef struct _GPIO_PROPERTIES {
     uint32_t m_ulWidth;
     uint32_t m_ulMark;
     uint32_t m_ulSpace;
+    uint32_t m_ulCount;
 } GPIO_PROPERTIES;
 
 
@@ -277,7 +283,8 @@ void iot_modem_uart_command_help();
 
 void iot_modem_gpio_init(int voltage);
 void iot_modem_gpio_enable_interrupt();
-int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int number, int enable);
+int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable);
+void iot_modem_gpio_set_properties(int index, int direction, int polarity);
 void iot_modem_gpio_set_voltage(int voltage);
 void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled);
 void iot_modem_gpio_process(int number, int activate);
