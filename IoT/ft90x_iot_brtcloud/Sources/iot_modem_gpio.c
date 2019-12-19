@@ -110,7 +110,7 @@ void iot_modem_gpio_process(int number, int activate)
     tfp_snprintf( topic, sizeof(topic), TOPIC_GPIO, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), number, MENOS_DEFAULT);
     tfp_snprintf( payload, sizeof(payload), PAYLOAD_TRIGGER_GPIO_NOTIFICATION, activate);
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-    DEBUG_PRINTF("PUB %s (%d) %s (%d)\r\n\r\n", topic, strlen(topic), payload, strlen(payload));
+    //DEBUG_PRINTF("PUB %s (%d) %s (%d)\r\n\r\n", topic, strlen(topic), payload, strlen(payload));
 }
 
 // Need to copy the structure here in order to get the pvTimerID parameter
