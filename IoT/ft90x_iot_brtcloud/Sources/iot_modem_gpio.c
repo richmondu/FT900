@@ -203,29 +203,15 @@ static inline void gpio_delete_timer(int index)
 
 static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_int_edge_t edge)
 {
-    if (edge == gpio_int_edge_raising) {
-        // If already high, start the timer
-        // Else, run an ISR to wait until it goes high
-        if (gpio_read(pin)) {
-            DEBUG("GPIO timer %d ENABLE\r\n", index);
-            gpio_create_timer(index);
-            DEBUG("GPIO timer %d ENABLED\r\n", index);
-        }
-        else {
-            gpio_interrupt_enable(pin, edge);
-        }
+    // If already high, start the timer
+    // Else, run an ISR to wait until it goes high
+    // If already low, start the timer
+    // Else, run an ISR to wait until it goes low
+    if (gpio_read(pin) == edge) {
+        gpio_create_timer(index);
     }
     else {
-        // If already low, start the timer
-        // Else, run an ISR to wait until it goes low
-        if (gpio_read(pin) == 0) {
-            DEBUG("GPIO timer %d ENABLE\r\n", index);
-            gpio_create_timer(index);
-            DEBUG("GPIO timer %d ENABLED\r\n", index);
-        }
-        else {
-            gpio_interrupt_enable(pin, edge);
-        }
+        gpio_interrupt_enable(pin, edge);
     }
 }
 
@@ -245,9 +231,9 @@ static inline void gpio_output_set_pulse(uint8_t pin, uint8_t state, uint32_t wi
 static inline void gpio_output_set_clock(uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count)
 {
     for (int i=0; i<count; i++) {
-        gpio_write(pin, 1);
+        gpio_write(pin, state);
         delayms(mark);
-        gpio_write(pin, 0);
+        gpio_write(pin, !state);
         delayms(space);
     }
 }
@@ -266,7 +252,6 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
                 return 0;
             }
 
-            DEBUG("GPIO %d ENABLE\r\n", index);
             // HIGH LEVEL/EDGE
             if (properties->m_ucMode == GPIO_MODES_INPUT_HIGH_LEVEL ||
                 properties->m_ucMode == GPIO_MODES_INPUT_HIGH_EDGE) {
@@ -277,7 +262,6 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
                      properties->m_ucMode == GPIO_MODES_INPUT_LOW_EDGE) {
                 gpio_create_timer_or_interrupt(index, pin, gpio_int_edge_falling);
             }
-            DEBUG("GPIO %d ENABLED\r\n", index);
         }
         else {
             gpio_interrupt_disable(pin);
