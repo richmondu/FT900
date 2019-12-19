@@ -50,6 +50,14 @@ static void ISR_gpio();
 
 
 
+static inline uint8_t GPIO_OUTPUT_PIN(int index)
+{
+    if (index < 3) {
+    	return GPIO_OUTPUT_PIN_0 + index;
+    }
+    return GPIO_OUTPUT_PIN_3;
+}
+
 void iot_modem_gpio_init(int voltage)
 {
     // Initialize the GPIO Input pins
@@ -64,12 +72,7 @@ void iot_modem_gpio_init(int voltage)
         // disable output enable pins at initialization
         gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + i, 0);
 
-        if (i < 3) {
-            gpio_dir(GPIO_OUTPUT_PIN_0 + i, pad_dir_output);
-        }
-        else { // i==3
-            gpio_dir(GPIO_OUTPUT_PIN_3, pad_dir_output);
-        }
+        gpio_dir(GPIO_OUTPUT_PIN(i), pad_dir_output);
     }
 
     // Initialize the GPIO voltage pins
@@ -85,6 +88,7 @@ void iot_modem_gpio_enable_interrupt()
 
 void iot_modem_gpio_set_voltage(int voltage)
 {
+    // TODO: wait for correction from Sree
     if (!voltage) {
         // Set to 3.3 V
         gpio_write(GPIO_VOLTAGE_PIN_0, 0);
@@ -182,6 +186,19 @@ static inline void gpio_create_timer(int index)
         &g_aucGpioIndex[index],
         gpio_timer
         );
+    if (!g_oGpioTimer[index]) {
+        DEBUG_PRINTF( "xTimerCreate GPIO %d failed\r\n", index );
+    }
+}
+
+static inline void gpio_delete_timer(int index)
+{
+    if (g_oGpioTimer[index] != NULL) {
+        if ( xTimerDelete( g_oGpioTimer[index], pdMS_TO_TICKS(1000)) != pdTRUE ) {
+            DEBUG_PRINTF( "xTimerDelete GPIO %d failed\r\n", index );
+        }
+        g_oGpioTimer[index] = NULL;
+    }
 }
 
 static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_int_edge_t edge)
@@ -244,24 +261,14 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
             DEBUG("GPIO %d ENABLED\r\n", index);
         }
         else {
-            DEBUG("GPIO timer %d DISABLE\r\n", index);
             gpio_interrupt_disable(pin);
-            if (g_oGpioTimer[index] != NULL) {
-                if ( xTimerDelete( g_oGpioTimer[index], pdMS_TO_TICKS(1000)) != pdTRUE ) {
-                    DEBUG_PRINTF( "xTimerDelete GPIO %d failed\r\n", index );
-                }
-                g_oGpioTimer[index] = NULL;
-                DEBUG("GPIO timer %d DISABLED\r\n", index);
-            }
+            gpio_delete_timer(index);
         }
     }
     else {
 
         // If OUTPUT pin, use GPIO_OUTPUT_PIN_0 as base address
-        pin = GPIO_OUTPUT_PIN_0 + index;
-        if (index == 3) {
-            pin = GPIO_OUTPUT_PIN_3;
-        }
+        pin = GPIO_OUTPUT_PIN(index);
 
         if (enable) {
             // ENABLE
@@ -288,12 +295,7 @@ void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uin
             // output
             if (!enabled[i]) {
                 // if output and disabled, read gpio status
-                if (i<3) {
-                    status[i] = gpio_read(GPIO_OUTPUT_PIN_0 + i);
-                }
-                else {
-                    status[i] = gpio_read(GPIO_OUTPUT_PIN_3);
-                }
+                status[i] = gpio_read(GPIO_OUTPUT_PIN(i));
             }
             else {
                 // if output and enabled, just set to 0
