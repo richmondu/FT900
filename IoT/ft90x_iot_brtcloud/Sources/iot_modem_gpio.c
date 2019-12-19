@@ -105,7 +105,7 @@ void iot_modem_gpio_process(int number, int activate)
 {
     // This is called by the main task after receiving notification from timer
     char topic[MQTT_MAX_TOPIC_SIZE] = {0};
-    char payload[3] = {0};
+    char payload[16] = {0};
 
     tfp_snprintf( topic, sizeof(topic), TOPIC_GPIO, PREPEND_REPLY_TOPIC, iot_utils_getdeviceid(), number, MENOS_DEFAULT);
     tfp_snprintf( payload, sizeof(payload), PAYLOAD_TRIGGER_GPIO_NOTIFICATION, activate);
