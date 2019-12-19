@@ -53,7 +53,7 @@ static void ISR_gpio();
 static inline uint8_t GPIO_OUTPUT_PIN(int index)
 {
     if (index < 3) {
-    	return GPIO_OUTPUT_PIN_0 + index;
+        return GPIO_OUTPUT_PIN_0 + index;
     }
     return GPIO_OUTPUT_PIN_3;
 }
@@ -232,7 +232,6 @@ static inline void gpio_create_timer_or_interrupt(int index, uint8_t pin, gpio_i
 int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
 {
     uint8_t pin = 0;
-    uint8_t control_pin = GPIO_OUTPUT_ENABLE_PIN_0 + index;
 
     if (properties->m_ucDirection == pad_dir_input) {
         // If INPUT pin, use GPIO_INPUT_PIN_0 as base address
@@ -243,9 +242,6 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
                 // invalid parameter
                 return 0;
             }
-
-            // disable the output enable pin
-            gpio_write(control_pin, 0);
 
             DEBUG("GPIO %d ENABLE\r\n", index);
             // HIGH LEVEL/EDGE
@@ -271,36 +267,95 @@ int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable)
         pin = GPIO_OUTPUT_PIN(index);
 
         if (enable) {
-            // ENABLE
-            // enable the output enable pin
-            gpio_write(control_pin, 1);
-
-            // TODO
+            // The data (level/pulse/clock) is written to the dedicated output pin while the configuration is enabled
+            if (properties->m_ucMode == GPIO_MODES_OUTPUT_LEVEL) {
+                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
+                    gpio_write(pin, 1);
+                }
+                else { // GPIO_POLARITY_NEGATIVE
+                    gpio_write(pin, 0);
+                }
+            }
+            else if (properties->m_ucMode == GPIO_MODES_OUTPUT_PULSE) {
+                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
+                    gpio_write(pin, 1);
+                    delayms(properties->m_ulWidth);
+                    gpio_write(pin, 0);
+                }
+                else { // GPIO_POLARITY_NEGATIVE
+                    gpio_write(pin, 0);
+                    delayms(properties->m_ulWidth);
+                    gpio_write(pin, 1);
+                }
+            }
+            else if (properties->m_ucMode == GPIO_MODES_OUTPUT_CLOCK) {
+                if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
+                    for (int i=0; i<properties->m_ulCount; i++) {
+                        gpio_write(pin, 1);
+                        delayms(properties->m_ulMark);
+                        gpio_write(pin, 0);
+                        delayms(properties->m_ulSpace);
+                    }
+                }
+                else { // GPIO_POLARITY_NEGATIVE
+                    for (int i=0; i<properties->m_ulCount; i++) {
+                        gpio_write(pin, 0);
+                        delayms(properties->m_ulWidth);
+                        gpio_write(pin, 1);
+                        delayms(properties->m_ulSpace);
+                    }
+                }
+            }
         }
         else {
+            // The pin state is returned to inactive state when the configuration is disabled.
+              if (properties->m_ucPolarity == GPIO_POLARITY_POSITIVE) {
+                   gpio_write(pin, 0);
+               }
+               else { // GPIO_POLARITY_NEGATIVE
+                   gpio_write(pin, 1);
+               }
         }
     }
 
     return 1;
 }
 
+void iot_modem_gpio_set_properties(int index, int direction, int polarity)
+{
+    // When a pin is configured as input, firmware will disable the output_enable
+    // and remains disabled regardless of enable/disable configuration operation.
+    // For a pin configured as output, the output_enable is enabled
+    // and remains enabled throughout until the configuration is changed to input.
+    // The output_enable is not altered during configuration enable/disable operations.
+    if (direction == pad_dir_input) {
+        // disable the output enable pin
+        gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, 0);
+    }
+    else {
+        // enable the output enable pin
+        gpio_write(GPIO_OUTPUT_ENABLE_PIN_0 + index, 1);
+
+        // set output pin to inactive state
+        if (polarity == GPIO_POLARITY_POSITIVE) {
+            gpio_write(GPIO_OUTPUT_PIN(index), 0);
+        }
+        else {
+            gpio_write(GPIO_OUTPUT_PIN(index), 1);
+        }
+    }
+}
+
 void iot_modem_gpio_get_status(uint8_t* status, GPIO_PROPERTIES* properties, uint8_t* enabled)
 {
+    // With dedicated input pins, it is possible to read live status any time
+    // regardless of whether configuration is enabled/disabled and whether a pin is input or output.
     for (int i=0; i<GPIO_COUNT; i++) {
         if (properties[i].m_ucDirection == pad_dir_input) {
-            // input
             status[i] = gpio_read(GPIO_INPUT_PIN_0 + i);
         }
         else {
-            // output
-            if (!enabled[i]) {
-                // if output and disabled, read gpio status
-                status[i] = gpio_read(GPIO_OUTPUT_PIN(i));
-            }
-            else {
-                // if output and enabled, just set to 0
-                status[i] = 0;
-            }
+            status[i] = gpio_read(GPIO_OUTPUT_PIN(i));
         }
     }
 }
