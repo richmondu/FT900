@@ -254,6 +254,11 @@ typedef enum _GPIO_POLARITY {
 	GPIO_POLARITY_POSITIVE,
 } GPIO_POLARITY;
 
+typedef enum _GPIO_VOLTAGE {
+	GPIO_VOLTAGE_3_3,
+	GPIO_VOLTAGE_5,
+} GPIO_VOLTAGE;
+
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;                // ["Input", "Output"]
     uint8_t  m_ucMode;                     // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]

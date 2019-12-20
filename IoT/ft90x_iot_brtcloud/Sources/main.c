@@ -162,7 +162,7 @@ GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = {
 };
 uint8_t g_ucGpioEnabled[GPIO_COUNT] = { 0, 0, 0, 0 };
 static uint8_t g_ucGpioStatus[GPIO_COUNT] = { 1, 1, 1, 1 }; // ["Low", "High"]
-static uint8_t g_ucGpioVoltage = 0;                         // ["3.3 V", "5 V"]
+static uint8_t g_ucGpioVoltage = GPIO_VOLTAGE_3_3;          // ["3.3 V", "5 V"]
 #endif // ENABLE_GPIO
 
 
@@ -623,6 +623,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     // GPIO
     ///////////////////////////////////////////////////////////////////////////////////
     else if ( IS_API(API_GET_GPIOS) ) {
+    	// Get the actual GPIO status
     	for (int i=0; i<GPIO_COUNT; i++) {
     		g_ucGpioStatus[i] = iot_modem_gpio_get_status(&g_oGpioProperties[i], i);
     	}

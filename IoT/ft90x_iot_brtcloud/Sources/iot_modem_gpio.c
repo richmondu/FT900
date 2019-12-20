@@ -90,7 +90,7 @@ void iot_modem_gpio_enable_interrupt()
 void iot_modem_gpio_set_voltage( int voltage )
 {
     // TODO: wait for correction from Sree
-    if ( !voltage ) {
+    if ( voltage == GPIO_VOLTAGE_3_3 ) {
         // Set to 3.3 V
         gpio_write( GPIO_VOLTAGE_PIN_0, 0 );
         gpio_write( GPIO_VOLTAGE_PIN_1, 1 );
