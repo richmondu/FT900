@@ -697,6 +697,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( IS_API(API_ENABLE_GPIO) ) {
         uint8_t ucNumber = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "number") - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int(mqtt_subscribe_recv->payload, "enable");
+        DEBUG_PRINTF( "GPIO %d\r\nucEnabled=%d\r\n", ucNumber, ucEnabled );
+
         if (ucNumber < GPIO_COUNT && ucEnabled < 2) {
             if ( g_ucGpioEnabled[ucNumber] != ucEnabled ) {
             	// order matters

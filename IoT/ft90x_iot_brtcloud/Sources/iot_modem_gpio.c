@@ -227,13 +227,13 @@ static inline void gpio_create_timer_or_interrupt( int index, uint8_t pin, gpio_
 
 static inline void gpio_output_set_level( uint8_t pin, uint8_t state )
 {
-    //DEBUG_PRINTF( "set_level GPIO %d %d\r\n", pin, state );
+    DEBUG_PRINTF( "set_level GPIO %d %d\r\n", pin, state );
     gpio_write( pin, state );
 }
 
 static inline void gpio_output_set_pulse( uint8_t pin, uint8_t state, uint32_t width )
 {
-    //DEBUG_PRINTF( "set_pulse GPIO %d %d %d\r\n", pin, state, width );
+    DEBUG_PRINTF( "set_pulse GPIO %d %d %d\r\n", pin, state, width );
     gpio_write( pin, state );
     delayms( width );
     gpio_write( pin, !state );
@@ -241,7 +241,7 @@ static inline void gpio_output_set_pulse( uint8_t pin, uint8_t state, uint32_t w
 
 static inline void gpio_output_set_clock( uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count, uint8_t index )
 {
-    //DEBUG_PRINTF( "set_clock GPIO %d %d %d %d %d\r\n", pin, state, mark, space, count );
+    DEBUG_PRINTF( "set_clock GPIO %d %d %d %d %d\r\n", pin, state, mark, space, count );
     while ( !g_ucGpioEnabled[index] ) {
         delayms( 100 );
     }
@@ -250,7 +250,36 @@ static inline void gpio_output_set_clock( uint8_t pin, uint8_t state, uint32_t m
         delayms( mark );
         gpio_write( pin, !state );
         delayms( space );
+        DEBUG_PRINTF( "set_clock GPIO %d [%d]\r\n", index, i );
         vTaskDelay( pdMS_TO_TICKS(1) ); // allow context switch for DISABLE
+    }
+}
+
+static void gpio_task( void *param );
+
+static inline void gpio_create_task(int index)
+{
+    DEBUG_PRINTF( "create_task GPIO %d\r\n", index );
+    char acTaskName[8] = {0};
+    tfp_snprintf( acTaskName, sizeof(acTaskName), "GPIO%d", index );
+
+    if ( xTaskCreate( gpio_task, acTaskName, 64, &g_aucGpioIndex[index], configMAX_PRIORITIES, &g_oGpioTask[index] ) != pdTRUE ) {
+        DEBUG_PRINTF( "xTaskCreate GPIO %d failed\r\n", index );
+    }
+}
+
+static inline void gpio_delete_task( int index, int self )
+{
+    if ( g_oGpioTask[index] != NULL ) {
+        DEBUG_PRINTF( "delete_task GPIO %d\r\n", index );
+        if (self) {
+            g_oGpioTask[index] = NULL;
+            vTaskDelete( NULL );
+        }
+        else {
+            vTaskDelete( g_oGpioTask[index] );
+            g_oGpioTask[index] = NULL;
+        }
     }
 }
 
@@ -265,26 +294,7 @@ static void gpio_task( void *param )
         g_oGpioProperties[index].m_ulCount,
         index );
 
-    g_oGpioTask[index] = NULL;
-    vTaskDelete( NULL );
-}
-
-static inline void gpio_create_task(int index)
-{
-    char acTaskName[8] = {0};
-    tfp_snprintf( acTaskName, sizeof(acTaskName), "GPIO%d", index );
-
-    if ( xTaskCreate( gpio_task, acTaskName, 64, &g_aucGpioIndex[index], configMAX_PRIORITIES, &g_oGpioTask[index] ) != pdTRUE ) {
-        DEBUG_PRINTF( "xTaskCreate GPIO %d failed\r\n", index );
-    }
-}
-
-static inline void gpio_delete_task( int index )
-{
-    if ( g_oGpioTask[index] != NULL ) {
-        vTaskDelete( g_oGpioTask[index] );
-        g_oGpioTask[index] = NULL;
-    }
+    gpio_delete_task( index, 1 );
 }
 
 int iot_modem_gpio_enable( GPIO_PROPERTIES* properties, int index, int enable )
@@ -344,7 +354,7 @@ int iot_modem_gpio_enable( GPIO_PROPERTIES* properties, int index, int enable )
 
             // Stop the task
             if ( properties->m_ucMode == GPIO_MODES_OUTPUT_CLOCK ) {
-                gpio_delete_task( index );
+                gpio_delete_task( index, 0 );
             }
         }
     }
