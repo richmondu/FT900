@@ -271,7 +271,7 @@ static inline void gpio_create_task(int index)
 static inline void gpio_delete_task( int index, int self )
 {
     if ( g_oGpioTask[index] != NULL ) {
-        DEBUG_PRINTF( "delete_task GPIO %d\r\n", index );
+        DEBUG_PRINTF( "delete_task GPIO %d\r\n\r\n", index );
         if (self) {
             g_oGpioTask[index] = NULL;
             vTaskDelete( NULL );
