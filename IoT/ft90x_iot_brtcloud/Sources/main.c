@@ -154,10 +154,15 @@ static uint8_t g_ucUartEnabled = 1;
 //
 
 #if ENABLE_GPIO
-GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} };
-uint8_t g_ucGpioEnabled[GPIO_COUNT] = {0, 0, 0, 0};
-static uint8_t g_ucGpioStatus[GPIO_COUNT] = {1, 1, 1, 1};    // ["Low", "High"]
-static uint8_t g_ucGpioVoltage = 0;                 // ["3.3 V", "5 V"]
+GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT] = {
+	{ pad_dir_input, GPIO_MODES_INPUT_HIGH_LEVEL, ALERT_TYPE_ONCE, 0, GPIO_POLARITY_NEGATIVE, 0, 0, 0, 0 },
+	{ pad_dir_input, GPIO_MODES_INPUT_HIGH_LEVEL, ALERT_TYPE_ONCE, 0, GPIO_POLARITY_NEGATIVE, 0, 0, 0, 0 },
+	{ pad_dir_input, GPIO_MODES_INPUT_HIGH_LEVEL, ALERT_TYPE_ONCE, 0, GPIO_POLARITY_NEGATIVE, 0, 0, 0, 0 },
+	{ pad_dir_input, GPIO_MODES_INPUT_HIGH_LEVEL, ALERT_TYPE_ONCE, 0, GPIO_POLARITY_NEGATIVE, 0, 0, 0, 0 }
+};
+uint8_t g_ucGpioEnabled[GPIO_COUNT] = { 0, 0, 0, 0 };
+static uint8_t g_ucGpioStatus[GPIO_COUNT] = { 1, 1, 1, 1 }; // ["Low", "High"]
+static uint8_t g_ucGpioVoltage = 0;                         // ["3.3 V", "5 V"]
 #endif // ENABLE_GPIO
 
 
