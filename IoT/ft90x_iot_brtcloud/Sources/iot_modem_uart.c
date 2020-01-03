@@ -65,7 +65,7 @@ static void uart_cmdhdl_reset( uint8_t ucCmdIdx, char* pcCmd, int lCmdLen );
 static void uart_cmdhdl_update( uint8_t ucCmdIdx, char* pcCmd, int lCmdLen );
 static void uart_cmdhdl_status( uint8_t ucCmdIdx, char* pcCmd, int lCmdLen );
 
-UART_ATCOMMANDS g_acUartCommands[UART_ATCOMMANDS_NUM] = {
+UART_ATCOMMANDS g_acUartCommands[UART_ATCOMMANDS_COUNT] = {
 	{ UART_ATCOMMAND_MOBILE,   uart_cmdhdl_mobile,       UART_ATCOMMAND_DESC_MOBILE  },
 	{ UART_ATCOMMAND_EMAIL,    uart_cmdhdl_email,        UART_ATCOMMAND_DESC_EMAIL   },
 	{ UART_ATCOMMAND_NOTIFY,   uart_cmdhdl_notification, UART_ATCOMMAND_DESC_NOTIFY  },
@@ -129,13 +129,13 @@ static inline void uart_publish(
     	tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
     }
     else if ( lRecipientLen && lMessageLen ) {
-    	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\",\"message\":\"%s\"}", pcRecipient, pcMessage );
+    	tfp_snprintf( payload, sizeof(payload), "{\"%s\":\"%s\",\"%s\":\"%s\"}", MENOS_RECIPIENT, pcRecipient, MENOS_MESSAGE, pcMessage );
     }
     else if ( lRecipientLen && !lMessageLen ) {
-    	tfp_snprintf( payload, sizeof(payload), "{\"recipient\":\"%s\"}", pcRecipient );
+    	tfp_snprintf( payload, sizeof(payload), "{\"%s\":\"%s\"}", MENOS_RECIPIENT, pcRecipient );
     }
     else {
-    	tfp_snprintf( payload, sizeof(payload), "{\"message\":\"%s\"}", pcMessage );
+    	tfp_snprintf( payload, sizeof(payload), "{\"%s\":\"%s\"}", MENOS_MESSAGE, pcMessage );
     }
     iot_publish( g_handle, topic, payload, strlen(payload), 1 );
     //DEBUG_PRINTF("PUB %s (%d) %s (%d) - %d %d\r\n\r\n", topic, strlen(topic), payload, strlen(payload), lRecipientLen, lMessageLen);
@@ -296,7 +296,7 @@ static void uart_cmdhdl_echo( uint8_t ucCmdIdx, char* pcCmd, int lCmdLen )
 static void uart_cmdhdl_help( uint8_t ucCmdIdx, char* pcCmd, int lCmdLen )
 {
 	DEBUG_PRINTF( "\r\nUART Commands:\r\n" );
-    for ( int i=0; i<UART_ATCOMMANDS_NUM; i++ ) {
+    for ( int i=0; i<UART_ATCOMMANDS_COUNT; i++ ) {
         DEBUG_PRINTF( "%s\t%s\r\n", g_acUartCommands[i].m_pcCmd, g_acUartCommands[i].m_pcHelp );
     }
 	DEBUG_PRINTF( "\r\n" );
@@ -343,7 +343,7 @@ void iot_modem_uart_command_process()
     g_ucUartCommandBufferAvailable = 0;
     //DEBUG_PRINTF("command: %s [%d]\r\n\r\n", g_acUartCommandBuffer, g_lUartCommandBufferOffset);
 
-    for ( int i=0; i<UART_ATCOMMANDS_NUM; i++ ) {
+    for ( int i=0; i<UART_ATCOMMANDS_COUNT; i++ ) {
     	if ( strncmp( g_acUartCommandBuffer, g_acUartCommands[i].m_pcCmd, strlen( g_acUartCommands[i].m_pcCmd ) ) == 0 ) {
             g_acUartCommands[i].m_pcFxn( i, g_acUartCommandBuffer, g_lUartCommandBufferOffset );
 			break;

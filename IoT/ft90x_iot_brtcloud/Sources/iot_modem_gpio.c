@@ -36,7 +36,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
+#if ENABLE_GPIO
 extern TaskHandle_t g_iot_app_handle; // used by iot_modem_gpio_process()
 extern iot_handle g_handle;           // used to publish packets
 extern GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT];
@@ -181,7 +181,7 @@ static inline void gpio_create_timer( int index )
     char acTimerName[8] = {0};
     tfp_snprintf( acTimerName, sizeof(acTimerName), "GPIO%d", index );
 
-	DEBUG_PRINTF( "gpio_create_timer %d %d\r\n", index, g_oGpioProperties[index].m_ulAlertperiod );
+	DEBUG_PRINTF( "gpio_create_timer %d %d\r\n", index, (int)g_oGpioProperties[index].m_ulAlertperiod );
     g_oGpioTimer[index] = xTimerCreate( acTimerName,
         pdMS_TO_TICKS( g_oGpioProperties[index].m_ulAlertperiod ),
         (BaseType_t)g_oGpioProperties[index].m_ucAlert,
@@ -233,7 +233,7 @@ static inline void gpio_output_set_level( uint8_t pin, uint8_t state )
 
 static inline void gpio_output_set_pulse( uint8_t pin, uint8_t state, uint32_t width )
 {
-    DEBUG_PRINTF( "set_pulse GPIO %d %d %d\r\n", pin, state, width );
+    DEBUG_PRINTF( "set_pulse GPIO %d %d %d\r\n", pin, state, (int)width );
     gpio_write( pin, state );
     delayms( width );
     gpio_write( pin, !state );
@@ -241,7 +241,7 @@ static inline void gpio_output_set_pulse( uint8_t pin, uint8_t state, uint32_t w
 
 static inline void gpio_output_set_clock( uint8_t pin, uint8_t state, uint32_t mark, uint32_t space, uint32_t count, uint8_t index )
 {
-    DEBUG_PRINTF( "set_clock GPIO %d %d %d %d %d\r\n", pin, state, mark, space, count );
+    DEBUG_PRINTF( "set_clock GPIO %d %d %d %d %d\r\n", pin, state, (int)mark, (int)space, (int)count );
     while ( !g_ucGpioEnabled[index] ) {
         delayms( 100 );
     }
@@ -442,5 +442,6 @@ static void ISR_gpio()
         }
     }
 }
+#endif // ENABLE_GPIO
 
 
