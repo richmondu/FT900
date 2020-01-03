@@ -3,12 +3,12 @@
 
 
 
-#define ENABLE_UART                        1
+#define ENABLE_UART                        0
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS             1
+#define ENABLE_UART_ATCOMMANDS             0
 #endif // ENABLE_UART
-#define ENABLE_GPIO                        1
-#define ENABLE_I2C                         0
+#define ENABLE_GPIO                        0
+#define ENABLE_I2C                         1
 #define ENABLE_NOTIFICATIONS               1
 
 
@@ -27,14 +27,14 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 typedef enum _DEVICE_STATUS {
-	DEVICE_STATUS_STARTING,
-	DEVICE_STATUS_RUNNING,
-	DEVICE_STATUS_RESTART,
-	DEVICE_STATUS_RESTARTING,
-	DEVICE_STATUS_STOP,
-	DEVICE_STATUS_STOPPING,
-	DEVICE_STATUS_STOPPED,
-	DEVICE_STATUS_START,
+    DEVICE_STATUS_STARTING,
+    DEVICE_STATUS_RUNNING,
+    DEVICE_STATUS_RESTART,
+    DEVICE_STATUS_RESTARTING,
+    DEVICE_STATUS_STOP,
+    DEVICE_STATUS_STOPPING,
+    DEVICE_STATUS_STOPPED,
+    DEVICE_STATUS_START,
 } DEVICE_STATUS;
 
 
@@ -47,6 +47,10 @@ typedef enum _DEVICE_STATUS {
 #define PREPEND_REPLY_TOPIC                "server/"
 #define WRONG_SYNTAX                       "wrong syntax"
 #define TODO_STRING                        "todo"
+#define NUMBER_STRING                      "number"
+#define ENABLE_STRING                      "enable"
+#define ENABLED_STRING                     "enabled"
+#define STATUS_STRING                      "status"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -60,22 +64,26 @@ typedef enum _DEVICE_STATUS {
 #define MENOS_STORAGE                      "storage"
 #define MENOS_DEFAULT                      "default"
 
+#define MENOS_MESSAGE                      "message"
+#define MENOS_RECIPIENT                    "recipient"
+#define MENOS_SENDER                       "sender"
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Task notify
 ////////////////////////////////////////////////////////////////////////////////////
 
 typedef enum _TASK_NOTIFY_BIT {
-	TASK_NOTIFY_BIT_UART,
-	TASK_NOTIFY_BIT_GPIO0,
-	TASK_NOTIFY_BIT_GPIO1,
-	TASK_NOTIFY_BIT_GPIO2,
-	TASK_NOTIFY_BIT_GPIO3,
-	TASK_NOTIFY_BIT_I2C0,
-	TASK_NOTIFY_BIT_I2C1,
-	TASK_NOTIFY_BIT_I2C2,
-	TASK_NOTIFY_BIT_I2C3,
-	TASK_NOTIFY_BIT_ACTIVATION,
+    TASK_NOTIFY_BIT_UART,
+    TASK_NOTIFY_BIT_GPIO0,
+    TASK_NOTIFY_BIT_GPIO1,
+    TASK_NOTIFY_BIT_GPIO2,
+    TASK_NOTIFY_BIT_GPIO3,
+    TASK_NOTIFY_BIT_I2C0,
+    TASK_NOTIFY_BIT_I2C1,
+    TASK_NOTIFY_BIT_I2C2,
+    TASK_NOTIFY_BIT_I2C3,
+    TASK_NOTIFY_BIT_ACTIVATION,
 } TASK_NOTIFY_BIT;
 
 #define TASK_NOTIFY_BIT(x)                 ( 1 << (x) )
@@ -86,8 +94,8 @@ typedef enum _TASK_NOTIFY_BIT {
 #define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
 
 typedef enum _ALERT_TYPE {
-	ALERT_TYPE_ONCE,
-	ALERT_TYPE_CONTINUOUS,
+    ALERT_TYPE_ONCE,
+    ALERT_TYPE_CONTINUOUS,
 } ALERT_TYPE;
 
 
@@ -120,6 +128,10 @@ typedef enum _ALERT_TYPE {
 // i2c
 #if ENABLE_I2C
 #define API_GET_I2CS                       "get_i2cs"
+#define API_GET_I2C_DEVICES                "get_i2c_devs"
+#define API_ADD_I2C_DEVICE                 "add_i2c_dev"
+#define API_REMOVE_I2C_DEVICE              "remove_i2c_dev"
+#define API_ENABLE_I2C_DEVICE              "enable_i2c_dev"
 #define API_GET_I2C_DEVICE_PROPERTIES      "get_i2c_dev_prop"
 #define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
 #define API_ENABLE_I2C                     "enable_i2c"
@@ -134,32 +146,25 @@ typedef enum _ALERT_TYPE {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-// Publish payload strings
+// UART Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define PAYLOAD_EMPTY                      "{}"
-#define PAYLOAD_API_GET_STATUS             "{\"value\":{\"status\":%d,\"version\":\"%d.%d\"}}"
-#define PAYLOAD_API_SET_STATUS             "{\"value\":{\"status\":%d}}"
+#pragma pack(1)
+typedef struct _UART_PROPERTIES {
+    uint8_t m_ucBaudrate;                  // g_uwBaudrates
+    uint8_t m_ucParity;                    // ft900_uart_simple.h uart_parity_t
+    uint8_t m_ucFlowcontrol;               // ft900_uart_simple.h uart_flow_t
+    uint8_t m_ucStopbits;                  // ft900_uart_simple.h uart_stop_bits_t
+    uint8_t m_ucDatabits;                  // ft900_uart_simple.h uart_data_bits_t
+} UART_PROPERTIES;
+#pragma pack(reset)
 
-#if ENABLE_UART
-#define TOPIC_UART                         "%s%s/trigger_notification/uart/%s"
-#define PAYLOAD_API_GET_UARTS              "{\"value\":{\"uarts\":[{\"enabled\":%d}]}}"
-#define PAYLOAD_API_GET_UART_PROPERTIES    "{\"value\":{\"baudrate\":%d,\"parity\":%d,\"flowcontrol\":%d,\"stopbits\":%d,\"databits\":%d}}"
-#endif // ENABLE_UART
-
-#if ENABLE_GPIO
-#define TOPIC_GPIO                         "%s%s/trigger_notification/gpio%d/%s"
-#define PAYLOAD_API_GET_GPIOS              "{\"value\":{\"voltage\":%d,\"gpios\":[{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d},{\"enabled\":%d,\"direction\":%d,\"status\":%d}]}}"
-#define PAYLOAD_API_GET_GPIO_VOLTAGE       "{\"value\":{\"voltage\":%d}}"
-#define PAYLOAD_API_GET_GPIO_PROPERTIES    "{\"value\":{\"direction\":%d,\"mode\":%d,\"alert\":%d,\"alertperiod\":%d,\"polarity\":%d,\"width\":%d,\"mark\":%d,\"space\":%d,\"count\":%d}}"
-#define PAYLOAD_TRIGGER_GPIO_NOTIFICATION  "{\"activate\":%d}"
-#endif // ENABLE_GPIO
-
-#if ENABLE_I2C
-#define TOPIC_I2C                          "%s%s/trigger_notification/i2c%d/%s"
-#define PAYLOAD_API_GET_I2CS               "{\"value\":{\"i2cs\":[{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d},{\"enabled\":%d}]}}"
-#endif // ENABLE_I2C
-
+#define UART_PROPERTIES_BAUDRATE_COUNT     16
+#define UART_PROPERTIES_BAUDRATE           "baudrate"
+#define UART_PROPERTIES_PARITY             "parity"
+#define UART_PROPERTIES_FLOWCONTROL        "flowcontrol"
+#define UART_PROPERTIES_STOPBITS           "stopbits"
+#define UART_PROPERTIES_DATABITS           "databits"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -171,8 +176,7 @@ typedef enum _ALERT_TYPE {
 #define UART_ATCOMMAND_MAX_MESSAGE_SIZE    192
 #define UART_ATCOMMAND_MAX_STATUS_SIZE     64
 
-#define UART_ATCOMMANDS_NUM                15
-
+#define UART_ATCOMMANDS_COUNT              15
 #define UART_ATCOMMAND_MOBILE              "AT+M"
 #define UART_ATCOMMAND_EMAIL               "AT+E"
 #define UART_ATCOMMAND_NOTIFY              "AT+N"
@@ -207,25 +211,9 @@ typedef enum _ALERT_TYPE {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-// UART Properties
-////////////////////////////////////////////////////////////////////////////////////
-
-#define UART_PROPERTIES_BAUDRATE_COUNT     16
-
-typedef struct _UART_PROPERTIES {
-	uint8_t m_ucBaudrate;                  // g_uwBaudrates
-	uint8_t m_ucParity;                    // ft900_uart_simple.h uart_parity_t
-	uint8_t m_ucFlowcontrol;               // ft900_uart_simple.h uart_flow_t
-	uint8_t m_ucStopbits;                  // ft900_uart_simple.h uart_stop_bits_t
-	uint8_t m_ucDatabits;                  // ft900_uart_simple.h uart_data_bits_t
-} UART_PROPERTIES;
-
-
-////////////////////////////////////////////////////////////////////////////////////
 // GPIO Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define UART_ATCOMMAND_DESC_STATUS         "Display device status"
 #define GPIO_VOLTAGE_PIN_0                 16
 #define GPIO_VOLTAGE_PIN_1                 17
 
@@ -237,28 +225,29 @@ typedef struct _UART_PROPERTIES {
 
 
 typedef enum _GPIO_MODES_INPUT {
-	GPIO_MODES_INPUT_HIGH_LEVEL,
-	GPIO_MODES_INPUT_LOW_LEVEL,
-	GPIO_MODES_INPUT_HIGH_EDGE,
-	GPIO_MODES_INPUT_LOW_EDGE,
+    GPIO_MODES_INPUT_HIGH_LEVEL,
+    GPIO_MODES_INPUT_LOW_LEVEL,
+    GPIO_MODES_INPUT_HIGH_EDGE,
+    GPIO_MODES_INPUT_LOW_EDGE,
 } GPIO_MODES_INPUT;
 
 typedef enum _GPIO_MODES_OUTPUT {
-	GPIO_MODES_OUTPUT_LEVEL,
-	GPIO_MODES_OUTPUT_PULSE,
-	GPIO_MODES_OUTPUT_CLOCK,
+    GPIO_MODES_OUTPUT_LEVEL,
+    GPIO_MODES_OUTPUT_PULSE,
+    GPIO_MODES_OUTPUT_CLOCK,
 } GPIO_MODES_OUTPUT;
 
 typedef enum _GPIO_POLARITY {
-	GPIO_POLARITY_NEGATIVE,
-	GPIO_POLARITY_POSITIVE,
+    GPIO_POLARITY_NEGATIVE,
+    GPIO_POLARITY_POSITIVE,
 } GPIO_POLARITY;
 
 typedef enum _GPIO_VOLTAGE {
-	GPIO_VOLTAGE_3_3,
-	GPIO_VOLTAGE_5,
+    GPIO_VOLTAGE_3_3,
+    GPIO_VOLTAGE_5,
 } GPIO_VOLTAGE;
 
+#pragma pack(1)
 typedef struct _GPIO_PROPERTIES {
     uint8_t  m_ucDirection;                // ["Input", "Output"]
     uint8_t  m_ucMode;                     // ["High Level", "Low Level", "High Edge", "Low Edge"] , ["Level", "Clock", "Pulse"]
@@ -270,6 +259,163 @@ typedef struct _GPIO_PROPERTIES {
     uint32_t m_ulSpace;
     uint32_t m_ulCount;
 } GPIO_PROPERTIES;
+#pragma pack(reset)
+
+
+#define GPIO_PROPERTIES_DIRECTION          "direction"
+#define GPIO_PROPERTIES_MODE               "mode"
+#define GPIO_PROPERTIES_ALERT              "alert"
+#define GPIO_PROPERTIES_ALERTPERIOD        "period"
+#define GPIO_PROPERTIES_POLARITY           "polarity"
+#define GPIO_PROPERTIES_WIDTH              "width"
+#define GPIO_PROPERTIES_MARK               "mark"
+#define GPIO_PROPERTIES_SPACE              "space"
+#define GPIO_PROPERTIES_COUNT              "count"
+#define GPIO_PROPERTIES_VOLTAGE            "voltage"
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// I2C Properties
+////////////////////////////////////////////////////////////////////////////////////
+
+#define I2C_COUNT                          4
+
+typedef enum _I2C_DEVICE_CLASS {
+    I2C_DEVICE_CLASS_SPEAKER,
+    I2C_DEVICE_CLASS_DISPLAY,
+    I2C_DEVICE_CLASS_LIGHT,
+    I2C_DEVICE_CLASS_POTENTIOMETER,
+    I2C_DEVICE_CLASS_TEMPERATURE,
+	// add here
+	I2C_DEVICE_CLASS_COUNT
+} I2C_DEVICE_CLASS;
+
+
+#pragma pack(1)
+
+typedef struct _I2C_DEVICE_PROPERTIES {
+    uint8_t  m_ucSlot;
+    uint8_t  m_ucAddress;
+    uint8_t  m_ucEnabled;
+    uint8_t  m_ucClass;
+    void*    m_pvClassAttributes;
+} I2C_DEVICE_PROPERTIES;
+
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI {
+    uint32_t m_ulDuration;
+    uint32_t m_ulDelay;
+    uint8_t  m_ucPitch;
+} I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI;
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD {
+    uint32_t m_ulValue;
+    uint32_t m_ulMinimum;
+    uint32_t m_ulMaximum;
+    uint8_t  m_ucActivate;
+} I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD;
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_COMMON_ALERT {
+    uint8_t  m_ucType;
+    uint32_t m_ulPeriod;
+} I2C_DEVICE_ATTRIBUTES_COMMON_ALERT;
+
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_SPEAKER {
+    uint8_t  m_ucEndpoint;
+    uint8_t  m_ucType;
+    void*    m_pvValues;
+} I2C_DEVICE_ATTRIBUTES_SPEAKER;
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_DISPLAY {
+    uint8_t  m_ucEndpoint;
+    char*    m_pcText;
+} I2C_DEVICE_ATTRIBUTES_DISPLAY;
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_LIGHT {
+    uint8_t  m_ucEndpoint;
+    uint32_t m_ulColor;
+    uint32_t m_ulBrightness;
+    uint32_t m_ulTimeout;
+    char*    m_pcText;
+} I2C_DEVICE_ATTRIBUTES_LIGHT;
+
+typedef struct _I2C_DEVICE_ATTRIBUTES_POTENTIOMETER {
+    uint8_t  m_ucMode;
+    I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
+    I2C_DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+} I2C_DEVICE_ATTRIBUTES_POTENTIOMETER;
+
+typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
+    uint8_t  m_ucMode;
+    I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
+    I2C_DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+} I2C_DEVICE_ATTRIBUTES_TEMPERATURE;
+
+#pragma pack(reset)
+
+
+#define I2C_DEVICE_PROPERTIES_ADDRESS                       "address"
+#define I2C_DEVICE_PROPERTIES_CLASS                         "class"
+
+#define I2C_DEVICE_PROPERTIES_ENDPOINT                      "endpoint"
+
+#define I2C_DEVICE_PROPERTIES_TYPE                          "type"
+#define I2C_DEVICE_PROPERTIES_DURATION                      "duration"
+#define I2C_DEVICE_PROPERTIES_PITCH                         "pitch"
+#define I2C_DEVICE_PROPERTIES_DELAY                         "delay"
+
+#define I2C_DEVICE_PROPERTIES_TEXT                          "text"
+
+#define I2C_DEVICE_PROPERTIES_COLOR                         "color"
+#define I2C_DEVICE_PROPERTIES_BRIGHTNESS                    "brightness"
+#define I2C_DEVICE_PROPERTIES_TIMEOUT                       "timeout"
+
+#define I2C_DEVICE_PROPERTIES_MODE                          "mode"
+#define I2C_DEVICE_PROPERTIES_THRESHOLD                     "threshold"
+#define I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE               "value"
+#define I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM             "min"
+#define I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM             "max"
+#define I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE            "activate"
+#define I2C_DEVICE_PROPERTIES_ALERT                         "alert"
+#define I2C_DEVICE_PROPERTIES_ALERT_TYPE                    I2C_DEVICE_PROPERTIES_TYPE
+#define I2C_DEVICE_PROPERTIES_ALERT_PERIOD                  "period"
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// Publish payload strings
+////////////////////////////////////////////////////////////////////////////////////
+
+#define PAYLOAD_EMPTY                                       "{}"
+#define PAYLOAD_API_GET_STATUS                              "{\"value\":{\"%s\":%d,\"version\":\"%d.%d\"}}"
+#define PAYLOAD_API_SET_STATUS                              "{\"value\":{\"%s\":%d}}"
+
+#if ENABLE_UART
+#define TOPIC_UART                                          "%s%s/trigger_notification/uart/%s"
+#define PAYLOAD_API_GET_UARTS                               "{\"value\":{\"uarts\":[{\"%s\":%d}]}}"
+#define PAYLOAD_API_GET_UART_PROPERTIES                     "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d}}"
+#endif // ENABLE_UART
+
+#if ENABLE_GPIO
+#define TOPIC_GPIO                                          "%s%s/trigger_notification/gpio%d/%s"
+#define PAYLOAD_API_GET_GPIOS                               "{\"value\":{\"%s\":%d,\"gpios\":[{\"%s\":%d,\"%s\":%d,\"%s\":%d},{\"%s\":%d,\"%s\":%d,\"%s\":%d},{\"%s\":%d,\"%s\":%d,\"status\":%d},{\"%s\":%d,\"%s\":%d,\"%s\":%d}]}}"
+#define PAYLOAD_API_GET_GPIO_VOLTAGE                        "{\"value\":{\"%s\":%d}}"
+#define PAYLOAD_API_GET_GPIO_PROPERTIES                     "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d}}"
+#define PAYLOAD_TRIGGER_GPIO_NOTIFICATION                   "{\"activate\":%d}"
+#endif // ENABLE_GPIO
+
+#if ENABLE_I2C
+#define TOPIC_I2C                                           "%s%s/trigger_notification/i2c%d/%s"
+#define PAYLOAD_API_GET_I2CS                                "{\"value\":{\"i2cs\":[{\"%s\":%d},{\"%s\":%d},{\"%s\":%d},{\"%s\":%d}]}}"
+#define PAYLOAD_API_GET_I2C_DEVICES                         "{\"value\":{\"i2cdevices\":[%s]}}"
+#define PAYLOAD_API_GET_I2C_DEVICES_ITEM                    "{\"number\":%d,\"address\":%d,\"enabled\":%d}"
+#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE   PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER
+#endif // ENABLE_I2C
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -288,11 +434,17 @@ void iot_modem_uart_command_help();
 
 void iot_modem_gpio_init(int voltage);
 void iot_modem_gpio_enable_interrupt();
-int iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable);
+int  iot_modem_gpio_enable(GPIO_PROPERTIES* properties, int index, int enable);
 void iot_modem_gpio_set_properties(int index, int direction, int polarity);
 void iot_modem_gpio_set_voltage(int voltage);
 uint8_t iot_modem_gpio_get_status(GPIO_PROPERTIES* properties, int index);
 void iot_modem_gpio_process(int number, int activate);
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// I2C Functions
+////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
