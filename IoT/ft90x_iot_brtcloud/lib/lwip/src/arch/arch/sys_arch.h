@@ -64,7 +64,7 @@ typedef SemaphoreHandle_t * sys_sem_t;
 } sys_mbox_t;*/
 typedef QueueHandle_t * sys_mbox_t;
 typedef SemaphoreHandle_t * sys_mutex_t;
-typedef TaskHandle_t * sys_thread_t;
+typedef TaskHandle_t sys_thread_t;
 typedef char sys_prot_t;
 
 void *sys_mem_calloc(mem_size_t count, mem_size_t size);
