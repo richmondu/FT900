@@ -87,18 +87,27 @@ void iot_modem_gpio_enable_interrupt()
     interrupt_attach( interrupt_gpio, (uint8_t)interrupt_gpio, ISR_gpio );
 }
 
+//
+// GPIO16 GPIO17 33V 50V
+// 0      0      On  Off
+// 0      1      On  Off
+// 1      0      Off Off
+// 1      1      Off On
+//
 void iot_modem_gpio_set_voltage( int voltage )
 {
-    // TODO: wait for correction from Sree
+	// Turn off 3.3 V and 5.0 V
+    gpio_write( GPIO_VOLTAGE_PIN_0, 1 );
+    gpio_write( GPIO_VOLTAGE_PIN_1, 0 );
+
+    // Turn on 3.3 V or 5.0 V
     if ( voltage == GPIO_VOLTAGE_3_3 ) {
-        // Set to 3.3 V
         gpio_write( GPIO_VOLTAGE_PIN_0, 0 );
-        gpio_write( GPIO_VOLTAGE_PIN_1, 1 );
+        gpio_write( GPIO_VOLTAGE_PIN_1, 0 );
     }
     else {
-        // Set to 5 V
         gpio_write( GPIO_VOLTAGE_PIN_0, 1 );
-        gpio_write( GPIO_VOLTAGE_PIN_1, 0 );
+        gpio_write( GPIO_VOLTAGE_PIN_1, 1 );
     }
 }
 
