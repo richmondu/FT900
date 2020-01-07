@@ -11,6 +11,9 @@
 #define ENABLE_I2C                         1
 #define ENABLE_NOTIFICATIONS               1
 
+#define ENABLE_ADC                         0
+#define ENABLE_ONEWIRE                     0
+#define ENABLE_TPROBE                      0
 
 
 ////////////////////////////////////////////////////////////////////////////////////
