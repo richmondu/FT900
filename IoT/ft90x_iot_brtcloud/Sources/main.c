@@ -170,8 +170,38 @@ static uint8_t g_ucGpioVoltage = GPIO_VOLTAGE_3_3;          // ["3.3 V", "5 V"]
 #if ENABLE_I2C
 char* g_pI2CProperties = NULL;
 uint8_t g_ucI2CPropertiesCount = 5;
-uint8_t g_ucI2cEnabled[I2C_COUNT] = {1, 1, 1, 1};
 #endif // ENABLE_I2C
+
+
+//
+// ADC
+//
+
+#if ENABLE_ADC
+char* g_pADCProperties = NULL;
+uint8_t g_ucADCPropertiesCount = 2;
+#endif // ENABLE_ADC
+
+
+//
+// 1WIRE
+//
+
+#if ENABLE_ONEWIRE
+char* g_p1WIREProperties = NULL;
+uint8_t g_uc1WIREPropertiesCount = 1;
+#endif // ENABLE_ADC
+
+
+//
+// TPROBE
+//
+
+#if ENABLE_TPROBE
+char* g_pTPROBEProperties = NULL;
+uint8_t g_ucTPROBEPropertiesCount = 1;
+#endif // ENABLE_TPROBE
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -436,8 +466,20 @@ static inline char* user_generate_subscribe_topic()
 #endif // USE_MQTT_SUBSCRIBE
 
 
-#if ENABLE_I2C
-static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uint8_t ucAddress, uint8_t ucClass, iot_subscribe_rcv* mqtt_subscribe_recv )
+static int publish_default( char* topic, int topic_size, char* payload, int payload_size, iot_subscribe_rcv* mqtt_subscribe_recv )
+{
+    int ret;
+    tfp_snprintf( topic, topic_size, "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+    tfp_snprintf( payload, payload_size, PAYLOAD_EMPTY );
+    ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+    DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
+    return ret;
+}
+
+
+#if defined(ENABLE_I2C) || defined(ENABLE_ADC) || defined(ENABLE_ONEWIRE) || defined(ENABLE_TPROBE)
+
+static inline int set_props( DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uint8_t ucAddress, uint8_t ucClass, iot_subscribe_rcv* mqtt_subscribe_recv )
 {
     int ret = 0;
 
@@ -446,9 +488,9 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
     pProp->m_ucEnabled = 0;
     pProp->m_ucClass = ucClass;
 
-    if (ucClass == I2C_DEVICE_CLASS_SPEAKER) {
+    if (ucClass == DEVICE_CLASS_SPEAKER) {
         if ( !pProp->m_pvClassAttributes ) {
-            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_SPEAKER) );
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_SPEAKER) );
             if ( !pProp->m_pvClassAttributes ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
                 ret = -1;
@@ -459,12 +501,12 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         //
 		// Set endpoint, type
         //
-        I2C_DEVICE_ATTRIBUTES_SPEAKER* pAttributes = (I2C_DEVICE_ATTRIBUTES_SPEAKER*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucEndpoint = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ENDPOINT );
-        pAttributes->m_ucType = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_TYPE );
+        DEVICE_ATTRIBUTES_SPEAKER* pAttributes = (DEVICE_ATTRIBUTES_SPEAKER*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucEndpoint = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ENDPOINT );
+        pAttributes->m_ucType = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_TYPE );
         //DEBUG_PRINTF( "set_props endpoint=%d type=%d\r\n", pAttributes->m_ucEndpoint, pAttributes->m_ucType );
         if ( !pAttributes->m_pvValues ) {
-            pAttributes->m_pvValues = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI) );
+            pAttributes->m_pvValues = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_SPEAKER_MIDI) );
             if ( !pAttributes->m_pvValues ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 2\r\n" );
                 ret = -1;
@@ -476,16 +518,16 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
 		// Set duration, pitch, delay
         //
         if (pAttributes->m_ucType == 0) {
-            I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI* pMidi = (I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI*)pAttributes->m_pvValues;
-            pMidi->m_ulDuration = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_DURATION );
-            pMidi->m_ulDelay = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_DELAY );
-            pMidi->m_ucPitch = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_PITCH );
+            DEVICE_ATTRIBUTES_SPEAKER_MIDI* pMidi = (DEVICE_ATTRIBUTES_SPEAKER_MIDI*)pAttributes->m_pvValues;
+            pMidi->m_ulDuration = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_DURATION );
+            pMidi->m_ulDelay = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_DELAY );
+            pMidi->m_ucPitch = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_PITCH );
             //DEBUG_PRINTF( "set_props duration=%d pitch=%d delay=%d\r\n", (int)pMidi->m_ulDuration, (int)pMidi->m_ucPitch, (int)pMidi->m_ulDelay );
         }
     }
-    else if (ucClass == I2C_DEVICE_CLASS_DISPLAY) {
+    else if (ucClass == DEVICE_CLASS_DISPLAY) {
 		if ( !pProp->m_pvClassAttributes ) {
-            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_DISPLAY) );
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_DISPLAY) );
             if ( !pProp->m_pvClassAttributes ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
                 ret = -1;
@@ -494,7 +536,7 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         }
 
         int iParamLen = 0;
-        char* pcParam = json_parse_str( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_TEXT, &iParamLen );
+        char* pcParam = json_parse_str( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_TEXT, &iParamLen );
         if ( iParamLen == 0 ) {
             //DEBUG_PRINTF( "json_parse_str failed! 2\r\n" );
             ret = -1;
@@ -504,8 +546,8 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         //
 		// Set endpoint, text
         //
-        I2C_DEVICE_ATTRIBUTES_DISPLAY* pAttributes = (I2C_DEVICE_ATTRIBUTES_DISPLAY*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucEndpoint = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ENDPOINT );
+        DEVICE_ATTRIBUTES_DISPLAY* pAttributes = (DEVICE_ATTRIBUTES_DISPLAY*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucEndpoint = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ENDPOINT );
         if ( pAttributes->m_pcText ) {
         	if ( iParamLen > strlen( pAttributes->m_pcText ) ) {
 				vPortFree( pAttributes->m_pcText );
@@ -518,9 +560,9 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
 		memset( pAttributes->m_pcText, 0, iParamLen+1 );
         strncpy( pAttributes->m_pcText, pcParam, iParamLen );
     }
-    else if (ucClass == I2C_DEVICE_CLASS_LIGHT) {
+    else if (ucClass == DEVICE_CLASS_LIGHT) {
         if ( !pProp->m_pvClassAttributes ) {
-            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_LIGHT) );
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_LIGHT) );
             if ( !pProp->m_pvClassAttributes ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
                 ret = -1;
@@ -531,15 +573,15 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         //
 		// Set endpoint, color, brightness, timeout
         //
-        I2C_DEVICE_ATTRIBUTES_LIGHT* pAttributes = (I2C_DEVICE_ATTRIBUTES_LIGHT*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucEndpoint   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ENDPOINT );
-        pAttributes->m_ulColor      = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_COLOR );
-        pAttributes->m_ulBrightness = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_BRIGHTNESS );
-        pAttributes->m_ulTimeout    = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_TIMEOUT );
+        DEVICE_ATTRIBUTES_LIGHT* pAttributes = (DEVICE_ATTRIBUTES_LIGHT*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucEndpoint   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ENDPOINT );
+        pAttributes->m_ulColor      = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_COLOR );
+        pAttributes->m_ulBrightness = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_BRIGHTNESS );
+        pAttributes->m_ulTimeout    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_TIMEOUT );
     }
-    else if (ucClass == I2C_DEVICE_CLASS_POTENTIOMETER) {
+    else if (ucClass == DEVICE_CLASS_POTENTIOMETER) {
         if ( !pProp->m_pvClassAttributes ) {
-            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_POTENTIOMETER) );
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_POTENTIOMETER) );
             if ( !pProp->m_pvClassAttributes ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
                 ret = -1;
@@ -550,14 +592,14 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         //
 		// Set mode, threshold (value, min, max, activate), alert (type, period)
         //
-        I2C_DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = (I2C_DEVICE_ATTRIBUTES_POTENTIOMETER*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_MODE );
-        pAttributes->m_oThreshold.m_ulValue    = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE );
-        pAttributes->m_oThreshold.m_ulMinimum  = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM );
-        pAttributes->m_oThreshold.m_ulMaximum  = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM );
-        pAttributes->m_oThreshold.m_ucActivate = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE );
-        pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ALERT_TYPE );
-        pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ALERT_PERIOD );
+        DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = (DEVICE_ATTRIBUTES_POTENTIOMETER*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_MODE );
+        pAttributes->m_oThreshold.m_ulValue    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_VALUE );
+        pAttributes->m_oThreshold.m_ulMinimum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MINIMUM );
+        pAttributes->m_oThreshold.m_ulMaximum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MAXIMUM );
+        pAttributes->m_oThreshold.m_ucActivate = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_ACTIVATE );
+        pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_TYPE );
+        pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_PERIOD );
         DEBUG_PRINTF( "set_props mode=%d threshold=%d %d %d %d alert=%d %d\r\n",
         	(int)pAttributes->m_ucMode,
 			pAttributes->m_oThreshold.m_ulValue,
@@ -568,9 +610,9 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
 			pAttributes->m_oAlert.m_ulPeriod
 			);
     }
-    else if (ucClass == I2C_DEVICE_CLASS_TEMPERATURE) {
+    else if (ucClass == DEVICE_CLASS_TEMPERATURE) {
         if ( !pProp->m_pvClassAttributes ) {
-            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(I2C_DEVICE_ATTRIBUTES_TEMPERATURE) );
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_TEMPERATURE) );
             if ( !pProp->m_pvClassAttributes ) {
                 //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
                 ret = -1;
@@ -581,31 +623,46 @@ static inline int set_props( I2C_DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uin
         //
 		// Set mode, threshold (value, min, max, activate), alert (type, period)
         //
-        I2C_DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = (I2C_DEVICE_ATTRIBUTES_TEMPERATURE*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_MODE );
-        pAttributes->m_oThreshold.m_ulValue    = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE );
-        pAttributes->m_oThreshold.m_ulMinimum  = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM );
-        pAttributes->m_oThreshold.m_ulMaximum  = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM );
-        pAttributes->m_oThreshold.m_ucActivate = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE );
-        pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ALERT_TYPE );
-        pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ALERT_PERIOD );
+        DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = (DEVICE_ATTRIBUTES_TEMPERATURE*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_MODE );
+        pAttributes->m_oThreshold.m_ulValue    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_VALUE );
+        pAttributes->m_oThreshold.m_ulMinimum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MINIMUM );
+        pAttributes->m_oThreshold.m_ulMaximum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MAXIMUM );
+        pAttributes->m_oThreshold.m_ucActivate = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_ACTIVATE );
+        pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_TYPE );
+        pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_PERIOD );
+    }
+    else if (ucClass == DEVICE_CLASS_ANENOMOMETER) {
+        if ( !pProp->m_pvClassAttributes ) {
+            pProp->m_pvClassAttributes = pvPortMalloc( sizeof(DEVICE_ATTRIBUTES_TEMPERATURE) );
+            if ( !pProp->m_pvClassAttributes ) {
+                //DEBUG_PRINTF( "pvPortMalloc failed! 1\r\n" );
+                ret = -1;
+                goto exit;
+            }
+        }
+
+        //
+		// Set mode, threshold (value, min, max, activate), alert (type, period)
+        //
+        DEVICE_ATTRIBUTES_ANENOMOMETER* pAttributes = (DEVICE_ATTRIBUTES_ANENOMOMETER*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_MODE );
+        pAttributes->m_oThreshold.m_ulValue    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_VALUE );
+        pAttributes->m_oThreshold.m_ulMinimum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MINIMUM );
+        pAttributes->m_oThreshold.m_ulMaximum  = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_MAXIMUM );
+        pAttributes->m_oThreshold.m_ucActivate = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_THRESHOLD_ACTIVATE );
+        pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_TYPE );
+        pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_PERIOD );
     }
 
 exit:
     return ret;
 }
-#endif // ENABLE_I2C
+
+#endif // defined(ENABLE_I2C) || defined(ENABLE_ADC) || defined(ENABLE_ONEWIRE) || defined(ENABLE_TPROBE)
 
 
-static int publish_default( char* topic, int topic_size, char* payload, int payload_size, iot_subscribe_rcv* mqtt_subscribe_recv )
-{
-    int ret;
-    tfp_snprintf( topic, topic_size, "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-    tfp_snprintf( payload, payload_size, PAYLOAD_EMPTY );
-    ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-    DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
-    return ret;
-}
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 // PROCESS MQTT SUBSCRIBED PACKETS
@@ -921,13 +978,13 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     else if ( IS_API(API_ENABLE_I2C_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
+        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ADDRESS );
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
         DEBUG_PRINTF( "I2C %d address=%d ENABLE=%d\r\n", ucNumber, ucAddress, ucEnabled );
 
         if (ucNumber > 0 && ucNumber < I2C_COUNT && ucEnabled < 2) {
             int index = 0xFF;
-            I2C_DEVICE_PROPERTIES* pProp = (I2C_DEVICE_PROPERTIES*)g_pI2CProperties;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pI2CProperties;
             for ( int i=0; i<g_ucI2CPropertiesCount; i++, pProp++ ) {
                 if ( pProp->m_ucSlot == ucNumber && pProp->m_ucAddress == ucAddress) {
                     DEBUG_PRINTF( "found\r\n");
@@ -951,11 +1008,11 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
     else if ( IS_API(API_GET_I2C_DEVICE_PROPERTIES) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
+        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ADDRESS );
         DEBUG_PRINTF( "I2C %d address=%d GET\r\n", ucNumber, ucAddress );
 
         int index = 0xFF;
-        I2C_DEVICE_PROPERTIES* pProp = (I2C_DEVICE_PROPERTIES*)g_pI2CProperties;
+        DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pI2CProperties;
         for ( int i=0; i<g_ucI2CPropertiesCount; i++, pProp++ ) {
             //DEBUG_PRINTF( "class=%d enabled=%d number=%d address=%d  index=%d\r\n", (int)pProp->m_ucClass, (int)pProp->m_ucEnabled, (int)pProp->m_ucSlot, (int)pProp->m_ucAddress, i );
             if ( pProp->m_ucSlot == ucNumber && pProp->m_ucAddress == ucAddress) {
@@ -967,73 +1024,73 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         if ( index != 0xFF ) {
             tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
 
-            if ( pProp->m_ucClass == I2C_DEVICE_CLASS_SPEAKER ) {
-                I2C_DEVICE_ATTRIBUTES_SPEAKER* pAttributes = pProp->m_pvClassAttributes;
+            if ( pProp->m_ucClass == DEVICE_CLASS_SPEAKER ) {
+                DEVICE_ATTRIBUTES_SPEAKER* pAttributes = pProp->m_pvClassAttributes;
                 if (pAttributes->m_ucType == 0) {
-                    I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI* pMidi = (I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI*)pAttributes->m_pvValues;
+                    DEVICE_ATTRIBUTES_SPEAKER_MIDI* pMidi = (DEVICE_ATTRIBUTES_SPEAKER_MIDI*)pAttributes->m_pvValues;
                     tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_SPEAKER,
-                        I2C_DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
-                        I2C_DEVICE_PROPERTIES_TYPE, (int)pAttributes->m_ucType,
-                        I2C_DEVICE_PROPERTIES_DURATION, (int)pMidi->m_ulDuration,
-                        I2C_DEVICE_PROPERTIES_PITCH, (int)pMidi->m_ucPitch,
-                        I2C_DEVICE_PROPERTIES_DELAY, (int)pMidi->m_ulDelay
+                        DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
+                        DEVICE_PROPERTIES_TYPE, (int)pAttributes->m_ucType,
+                        DEVICE_PROPERTIES_DURATION, (int)pMidi->m_ulDuration,
+                        DEVICE_PROPERTIES_PITCH, (int)pMidi->m_ucPitch,
+                        DEVICE_PROPERTIES_DELAY, (int)pMidi->m_ulDelay
                     );
 
                     ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                     DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
                 }
             }
-            else if ( pProp->m_ucClass == I2C_DEVICE_CLASS_DISPLAY ) {
-                I2C_DEVICE_ATTRIBUTES_DISPLAY* pAttributes = pProp->m_pvClassAttributes;
+            else if ( pProp->m_ucClass == DEVICE_CLASS_DISPLAY ) {
+                DEVICE_ATTRIBUTES_DISPLAY* pAttributes = pProp->m_pvClassAttributes;
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_DISPLAY,
-                    I2C_DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
-                    I2C_DEVICE_PROPERTIES_TEXT, pAttributes->m_pcText
+                    DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
+                    DEVICE_PROPERTIES_TEXT, pAttributes->m_pcText
                 );
 
                 ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                 DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
             }
-            else if ( pProp->m_ucClass == I2C_DEVICE_CLASS_LIGHT ) {
-                I2C_DEVICE_ATTRIBUTES_LIGHT* pAttributes = pProp->m_pvClassAttributes;
+            else if ( pProp->m_ucClass == DEVICE_CLASS_LIGHT ) {
+                DEVICE_ATTRIBUTES_LIGHT* pAttributes = pProp->m_pvClassAttributes;
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_LIGHT,
-                    I2C_DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
-                    I2C_DEVICE_PROPERTIES_COLOR, pAttributes->m_ulColor,
-                    I2C_DEVICE_PROPERTIES_BRIGHTNESS, pAttributes->m_ulBrightness,
-                    I2C_DEVICE_PROPERTIES_TIMEOUT, pAttributes->m_ulTimeout
+                    DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
+                    DEVICE_PROPERTIES_COLOR, pAttributes->m_ulColor,
+                    DEVICE_PROPERTIES_BRIGHTNESS, pAttributes->m_ulBrightness,
+                    DEVICE_PROPERTIES_TIMEOUT, pAttributes->m_ulTimeout
                 );
 
                 ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                 DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
             }
-            else if ( pProp->m_ucClass == I2C_DEVICE_CLASS_POTENTIOMETER ) {
-            	I2C_DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = pProp->m_pvClassAttributes;
+            else if ( pProp->m_ucClass == DEVICE_CLASS_POTENTIOMETER ) {
+            	DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = pProp->m_pvClassAttributes;
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER,
-                    I2C_DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
-					I2C_DEVICE_PROPERTIES_THRESHOLD,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
-					I2C_DEVICE_PROPERTIES_ALERT,
-					I2C_DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
-					I2C_DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
+                    DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
+					DEVICE_PROPERTIES_THRESHOLD,
+					DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
+					DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
+					DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
+					DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
+					DEVICE_PROPERTIES_ALERT,
+					DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
+					DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
                 );
 
                 ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
                 DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
             }
-            else if ( pProp->m_ucClass == I2C_DEVICE_CLASS_TEMPERATURE ) {
-            	I2C_DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
+            else if ( pProp->m_ucClass == DEVICE_CLASS_TEMPERATURE ) {
+            	DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
                 tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER,
-                    I2C_DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
-					I2C_DEVICE_PROPERTIES_THRESHOLD,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
-					I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
-					I2C_DEVICE_PROPERTIES_ALERT,
-					I2C_DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
-					I2C_DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
+                    DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
+					DEVICE_PROPERTIES_THRESHOLD,
+					DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
+					DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
+					DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
+					DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
+					DEVICE_PROPERTIES_ALERT,
+					DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
+					DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
                 );
 
                 ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
@@ -1046,30 +1103,30 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
     else if ( IS_API(API_SET_I2C_DEVICE_PROPERTIES) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
-        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_CLASS );
+        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ADDRESS );
+        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
         DEBUG_PRINTF( "I2C %d address=%d class=%d SET %s\r\n", ucNumber, ucAddress, ucClass, mqtt_subscribe_recv->payload );
 
         if ( g_pI2CProperties == NULL ) {
-            g_pI2CProperties = pvPortMalloc( g_ucI2CPropertiesCount * sizeof(I2C_DEVICE_PROPERTIES) );
+            g_pI2CProperties = pvPortMalloc( g_ucI2CPropertiesCount * sizeof(DEVICE_PROPERTIES) );
             if ( !g_pI2CProperties ) {
                 DEBUG_PRINTF( "pvPortMalloc failed!\r\n" );
                 ret = -1;
                 goto exit;
             }
-            memset( g_pI2CProperties, 0, g_ucI2CPropertiesCount * sizeof(I2C_DEVICE_PROPERTIES) );
+            memset( g_pI2CProperties, 0, g_ucI2CPropertiesCount * sizeof(DEVICE_PROPERTIES) );
 
-            I2C_DEVICE_PROPERTIES* pProp = (I2C_DEVICE_PROPERTIES*)g_pI2CProperties;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pI2CProperties;
             ret = set_props( pProp, ucNumber, ucAddress, ucClass, mqtt_subscribe_recv );
             if ( ret < 0 ) {
                 goto exit;
             }
         }
         else {
-            // find the i2c device and set the values
+            // find the I2C device and set the values
             int next = 0xFF;
             int index = 0xFF;
-            I2C_DEVICE_PROPERTIES* pProp = (I2C_DEVICE_PROPERTIES*)g_pI2CProperties;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pI2CProperties;
 
             for ( int i=0; i<g_ucI2CPropertiesCount; i++,pProp++ ) {
                 if ( pProp->m_ucAddress == 0 && next == 0xFF ) {
@@ -1081,14 +1138,14 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 }
             }
             if (index != 0xFF) {
-                ret = set_props( (I2C_DEVICE_PROPERTIES*)(g_pI2CProperties+index*sizeof(I2C_DEVICE_PROPERTIES)),
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pI2CProperties+index*sizeof(DEVICE_PROPERTIES)),
                 	ucNumber, ucAddress, ucClass, mqtt_subscribe_recv );
                 if ( ret < 0 ) {
                     goto exit;
                 }
             }
             else if (next != 0xFF) {
-                ret = set_props( (I2C_DEVICE_PROPERTIES*)(g_pI2CProperties+next*sizeof(I2C_DEVICE_PROPERTIES)),
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pI2CProperties+next*sizeof(DEVICE_PROPERTIES)),
                 	ucNumber, ucAddress, ucClass, mqtt_subscribe_recv );
                 if ( ret < 0 ) {
                     goto exit;
@@ -1102,12 +1159,381 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
 
 #if ENABLE_ADC
+    ///////////////////////////////////////////////////////////////////////////////////
+    // ADC
+    ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_ENABLE_ADC_DEVICE) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
+        DEBUG_PRINTF( "ADC %d ENABLE=%d\r\n", ucNumber, ucEnabled );
+
+        if (ucNumber > 0 && ucNumber < ADC_COUNT && ucEnabled < 2) {
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pADCProperties;
+            for ( int i=0; i<g_ucADCPropertiesCount; i++, pProp++ ) {
+                if ( pProp->m_ucSlot == ucNumber ) {
+                    DEBUG_PRINTF( "found\r\n");
+                    index = i;
+                    break;
+                }
+            }
+            if ( index != 0xFF ) {
+                if ( pProp->m_ucEnabled != ucEnabled ) {
+                    if ( ucEnabled == 0 ) {
+                        // TODO: disable
+                    }
+                    else {
+                        // TODO: enable
+                    }
+                    pProp->m_ucEnabled = ucEnabled;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
+    else if ( IS_API(API_GET_ADC_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "ADC %d GET\r\n", ucNumber );
+
+        int index = 0xFF;
+        DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pADCProperties;
+        for ( int i=0; i<g_ucADCPropertiesCount; i++, pProp++ ) {
+            //DEBUG_PRINTF( "class=%d enabled=%d number=%d address=%d  index=%d\r\n", (int)pProp->m_ucClass, (int)pProp->m_ucEnabled, (int)pProp->m_ucSlot, (int)pProp->m_ucAddress, i );
+            if ( pProp->m_ucSlot == ucNumber ) {
+                index = i;
+                break;
+            }
+        }
+
+        if ( index != 0xFF ) {
+            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+
+            if ( pProp->m_ucClass == DEVICE_CLASS_ANENOMOMETER ) {
+            	DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
+                tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_ADC_DEVICE_PROPERTIES_ANENOMOMETER,
+                    DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
+					DEVICE_PROPERTIES_THRESHOLD,
+					DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
+					DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
+					DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
+					DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
+					DEVICE_PROPERTIES_ALERT,
+					DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
+					DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
+                );
+
+                ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
+            }
+        }
+        else {
+            ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+        }
+    }
+    else if ( IS_API(API_SET_ADC_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
+        DEBUG_PRINTF( "ADC %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
+
+        if ( g_pADCProperties == NULL ) {
+            g_pADCProperties = pvPortMalloc( g_ucADCPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+            if ( !g_pADCProperties ) {
+                DEBUG_PRINTF( "pvPortMalloc failed!\r\n" );
+                ret = -1;
+                goto exit;
+            }
+            memset( g_pADCProperties, 0, g_ucADCPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pADCProperties;
+            ret = set_props( pProp, ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+            if ( ret < 0 ) {
+                goto exit;
+            }
+        }
+        else {
+            // find the ADC device and set the values
+            int next = 0xFF;
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pADCProperties;
+
+            for ( int i=0; i<g_ucADCPropertiesCount; i++,pProp++ ) {
+                if ( pProp->m_ucAddress == 0 && next == 0xFF ) {
+                    next = i;
+                }
+                if ( pProp->m_ucSlot == ucNumber && pProp->m_ucClass == ucClass ) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pADCProperties+index*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+            else if (next != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pADCProperties+next*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
 #endif // ENABLE_ADC
 
 #if ENABLE_ONEWIRE
+    ///////////////////////////////////////////////////////////////////////////////////
+    // 1WIRE
+    ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_ENABLE_1WIRE_DEVICE) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
+        DEBUG_PRINTF( "1WIRE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
+
+        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT && ucEnabled < 2) {
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_p1WIREProperties;
+            for ( int i=0; i<g_uc1WIREPropertiesCount; i++, pProp++ ) {
+                if ( pProp->m_ucSlot == ucNumber) {
+                    DEBUG_PRINTF( "found\r\n");
+                    index = i;
+                    break;
+                }
+            }
+            if ( index != 0xFF ) {
+                if ( pProp->m_ucEnabled != ucEnabled ) {
+                    if ( ucEnabled == 0 ) {
+                        // TODO: disable
+                    }
+                    else {
+                        // TODO: enable
+                    }
+                    pProp->m_ucEnabled = ucEnabled;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
+    else if ( IS_API(API_GET_1WIRE_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "1WIRE %d GET\r\n", ucNumber );
+
+        int index = 0xFF;
+        DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_p1WIREProperties;
+        for ( int i=0; i<g_uc1WIREPropertiesCount; i++, pProp++ ) {
+            //DEBUG_PRINTF( "class=%d enabled=%d number=%d address=%d  index=%d\r\n", (int)pProp->m_ucClass, (int)pProp->m_ucEnabled, (int)pProp->m_ucSlot, (int)pProp->m_ucAddress, i );
+            if ( pProp->m_ucSlot == ucNumber ) {
+                index = i;
+                break;
+            }
+        }
+
+        if ( index != 0xFF ) {
+            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+
+            if ( pProp->m_ucClass == DEVICE_CLASS_ANENOMOMETER ) {
+            	DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
+                tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_1WIRE_DEVICE_PROPERTIES_TEMPERATURE,
+                    DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
+					DEVICE_PROPERTIES_THRESHOLD,
+					DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
+					DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
+					DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
+					DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
+					DEVICE_PROPERTIES_ALERT,
+					DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
+					DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
+                );
+
+                ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
+            }
+        }
+        else {
+            ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+        }
+    }
+    else if ( IS_API(API_SET_1WIRE_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
+        DEBUG_PRINTF( "1WIRE %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
+
+        if ( g_p1WIREProperties == NULL ) {
+            g_p1WIREProperties = pvPortMalloc( g_uc1WIREPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+            if ( !g_p1WIREProperties ) {
+                DEBUG_PRINTF( "pvPortMalloc failed!\r\n" );
+                ret = -1;
+                goto exit;
+            }
+            memset( g_p1WIREProperties, 0, g_uc1WIREPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_p1WIREProperties;
+            ret = set_props( pProp, ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+            if ( ret < 0 ) {
+                goto exit;
+            }
+        }
+        else {
+            // find the 1WIRE device and set the values
+            int next = 0xFF;
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_p1WIREProperties;
+
+            for ( int i=0; i<g_uc1WIREPropertiesCount; i++,pProp++ ) {
+                if ( pProp->m_ucAddress == 0 && next == 0xFF ) {
+                    next = i;
+                }
+                if ( pProp->m_ucSlot == ucNumber && pProp->m_ucClass == ucClass ) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_p1WIREProperties+index*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+            else if (next != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_p1WIREProperties+next*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
 #endif // ENABLE_ONEWIRE
 
 #if ENABLE_TPROBE
+    ///////////////////////////////////////////////////////////////////////////////////
+    // TPROBE
+    ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_ENABLE_TPROBE_DEVICE) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
+        DEBUG_PRINTF( "1WIRE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
+
+        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT && ucEnabled < 2) {
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
+            for ( int i=0; i<g_ucTPROBEPropertiesCount; i++, pProp++ ) {
+                if ( pProp->m_ucSlot == ucNumber) {
+                    DEBUG_PRINTF( "found\r\n");
+                    index = i;
+                    break;
+                }
+            }
+            if ( index != 0xFF ) {
+                if ( pProp->m_ucEnabled != ucEnabled ) {
+                    if ( ucEnabled == 0 ) {
+                        // TODO: disable
+                    }
+                    else {
+                        // TODO: enable
+                    }
+                    pProp->m_ucEnabled = ucEnabled;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
+    else if ( IS_API(API_GET_TPROBE_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "1WIRE %d GET\r\n", ucNumber );
+
+        int index = 0xFF;
+        DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
+        for ( int i=0; i<g_ucTPROBEPropertiesCount; i++, pProp++ ) {
+            //DEBUG_PRINTF( "class=%d enabled=%d number=%d address=%d  index=%d\r\n", (int)pProp->m_ucClass, (int)pProp->m_ucEnabled, (int)pProp->m_ucSlot, (int)pProp->m_ucAddress, i );
+            if ( pProp->m_ucSlot == ucNumber ) {
+                index = i;
+                break;
+            }
+        }
+
+        if ( index != 0xFF ) {
+            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+
+            if ( pProp->m_ucClass == DEVICE_CLASS_TEMPERATURE ) {
+            	DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
+                tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE,
+                    DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
+					DEVICE_PROPERTIES_THRESHOLD,
+					DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
+					DEVICE_PROPERTIES_THRESHOLD_MINIMUM, pAttributes->m_oThreshold.m_ulMinimum,
+					DEVICE_PROPERTIES_THRESHOLD_MAXIMUM, pAttributes->m_oThreshold.m_ulMaximum,
+					DEVICE_PROPERTIES_THRESHOLD_ACTIVATE, (int)pAttributes->m_oThreshold.m_ucActivate,
+					DEVICE_PROPERTIES_ALERT,
+					DEVICE_PROPERTIES_ALERT_TYPE, (int)pAttributes->m_oAlert.m_ucType,
+					DEVICE_PROPERTIES_ALERT_PERIOD, pAttributes->m_oAlert.m_ulPeriod
+                );
+
+                ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
+            }
+        }
+        else {
+            ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+        }
+    }
+    else if ( IS_API(API_SET_TPROBE_DEVICE_PROPERTIES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
+        DEBUG_PRINTF( "1WIRE %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
+
+        if ( g_pTPROBEProperties == NULL ) {
+            g_pTPROBEProperties = pvPortMalloc( g_ucTPROBEPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+            if ( !g_pTPROBEProperties ) {
+                DEBUG_PRINTF( "pvPortMalloc failed!\r\n" );
+                ret = -1;
+                goto exit;
+            }
+            memset( g_pTPROBEProperties, 0, g_ucTPROBEPropertiesCount * sizeof(DEVICE_PROPERTIES) );
+
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
+            ret = set_props( pProp, ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+            if ( ret < 0 ) {
+                goto exit;
+            }
+        }
+        else {
+            // find the TPROBE device and set the values
+            int next = 0xFF;
+            int index = 0xFF;
+            DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
+
+            for ( int i=0; i<g_ucTPROBEPropertiesCount; i++,pProp++ ) {
+                if ( pProp->m_ucAddress == 0 && next == 0xFF ) {
+                    next = i;
+                }
+                if ( pProp->m_ucSlot == ucNumber && pProp->m_ucClass == ucClass ) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pTPROBEProperties+index*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+            else if (next != 0xFF) {
+                ret = set_props( (DEVICE_PROPERTIES*)(g_pTPROBEProperties+next*sizeof(DEVICE_PROPERTIES)),
+                	ucNumber, 0xFF, ucClass, mqtt_subscribe_recv );
+                if ( ret < 0 ) {
+                    goto exit;
+                }
+            }
+        }
+        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
+    }
 #endif // ENABLE_TPROBE
 
 

@@ -12,9 +12,9 @@
 #define ENABLE_GPIO                        0
 
 #define ENABLE_I2C                         1
-#define ENABLE_ADC                         0
-#define ENABLE_ONEWIRE                     0
-#define ENABLE_TPROBE                      0
+#define ENABLE_ADC                         1
+#define ENABLE_ONEWIRE                     1
+#define ENABLE_TPROBE                      1
 
 
 
@@ -139,22 +139,18 @@ typedef enum _ALERT_TYPE {
 
 // i2c
 #if ENABLE_I2C
-#define API_GET_I2CS                       "get_i2cs"
 #define API_GET_I2C_DEVICES                "get_i2c_devs"
-#define API_ADD_I2C_DEVICE                 "add_i2c_dev"
-#define API_REMOVE_I2C_DEVICE              "remove_i2c_dev"
 #define API_ENABLE_I2C_DEVICE              "enable_i2c_dev"
 #define API_GET_I2C_DEVICE_PROPERTIES      "get_i2c_dev_prop"
 #define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
-#define API_ENABLE_I2C                     "enable_i2c"
 #endif // ENABLE_I2C
 
 // adc
 #if ENABLE_ADC
-#define API_GET_I2C_DEVICES                "get_i2c_devs"
-#define API_ENABLE_I2C_DEVICE              "enable_i2c_dev"
-#define API_GET_I2C_DEVICE_PROPERTIES      "get_i2c_dev_prop"
-#define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
+#define API_GET_ADC_DEVICES                "get_adc_devs"
+#define API_ENABLE_ADC_DEVICE              "enable_adc_dev"
+#define API_GET_ADC_DEVICE_PROPERTIES      "get_adc_dev_prop"
+#define API_SET_ADC_DEVICE_PROPERTIES      "set_adc_dev_prop"
 #endif // ENABLE_ADC
 
 // 1wire
@@ -313,111 +309,145 @@ typedef struct _GPIO_PROPERTIES {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-// I2C Properties
+// Device Properties
 ////////////////////////////////////////////////////////////////////////////////////
 
-#define I2C_COUNT                          4
-
-typedef enum _I2C_DEVICE_CLASS {
-    I2C_DEVICE_CLASS_SPEAKER,
-    I2C_DEVICE_CLASS_DISPLAY,
-    I2C_DEVICE_CLASS_LIGHT,
-    I2C_DEVICE_CLASS_POTENTIOMETER,
-    I2C_DEVICE_CLASS_TEMPERATURE,
+typedef enum _DEVICE_CLASS {
+    DEVICE_CLASS_SPEAKER,
+    DEVICE_CLASS_DISPLAY,
+    DEVICE_CLASS_LIGHT,
+    DEVICE_CLASS_POTENTIOMETER,
+    DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_HUMIDITY,
+	DEVICE_CLASS_ANENOMOMETER,
 	// add here
-	I2C_DEVICE_CLASS_COUNT
-} I2C_DEVICE_CLASS;
+	DEVICE_CLASS_COUNT
+} DEVICE_CLASS;
+
 
 
 #pragma pack(1)
 
-typedef struct _I2C_DEVICE_PROPERTIES {
+typedef struct _DEVICE_PROPERTIES {
     uint8_t  m_ucSlot;
     uint8_t  m_ucAddress;
     uint8_t  m_ucEnabled;
     uint8_t  m_ucClass;
     void*    m_pvClassAttributes;
-} I2C_DEVICE_PROPERTIES;
+} DEVICE_PROPERTIES;
 
-
-typedef struct _I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI {
+typedef struct _DEVICE_ATTRIBUTES_SPEAKER_MIDI {
     uint32_t m_ulDuration;
     uint32_t m_ulDelay;
     uint8_t  m_ucPitch;
-} I2C_DEVICE_ATTRIBUTES_SPEAKER_MIDI;
+} DEVICE_ATTRIBUTES_SPEAKER_MIDI;
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD {
+typedef struct _DEVICE_ATTRIBUTES_COMMON_THRESHOLD {
     uint32_t m_ulValue;
     uint32_t m_ulMinimum;
     uint32_t m_ulMaximum;
     uint8_t  m_ucActivate;
-} I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD;
+} DEVICE_ATTRIBUTES_COMMON_THRESHOLD;
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_COMMON_ALERT {
+typedef struct _DEVICE_ATTRIBUTES_COMMON_ALERT {
     uint8_t  m_ucType;
     uint32_t m_ulPeriod;
-} I2C_DEVICE_ATTRIBUTES_COMMON_ALERT;
+} DEVICE_ATTRIBUTES_COMMON_ALERT;
 
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_SPEAKER {
+typedef struct _DEVICE_ATTRIBUTES_SPEAKER {
     uint8_t  m_ucEndpoint;
     uint8_t  m_ucType;
     void*    m_pvValues;
-} I2C_DEVICE_ATTRIBUTES_SPEAKER;
+} DEVICE_ATTRIBUTES_SPEAKER;
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_DISPLAY {
+typedef struct  {
     uint8_t  m_ucEndpoint;
     char*    m_pcText;
-} I2C_DEVICE_ATTRIBUTES_DISPLAY;
+} DEVICE_ATTRIBUTES_DISPLAY;
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_LIGHT {
+typedef struct _DEVICE_ATTRIBUTES_LIGHT {
     uint8_t  m_ucEndpoint;
     uint32_t m_ulColor;
     uint32_t m_ulBrightness;
     uint32_t m_ulTimeout;
     char*    m_pcText;
-} I2C_DEVICE_ATTRIBUTES_LIGHT;
+} DEVICE_ATTRIBUTES_LIGHT;
 
-typedef struct _I2C_DEVICE_ATTRIBUTES_POTENTIOMETER {
+typedef struct _DEVICE_ATTRIBUTES_POTENTIOMETER {
     uint8_t  m_ucMode;
-    I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
-    I2C_DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
-} I2C_DEVICE_ATTRIBUTES_POTENTIOMETER;
+    DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
+    DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+} DEVICE_ATTRIBUTES_POTENTIOMETER;
 
-typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
+typedef struct _DEVICE_ATTRIBUTES_TEMPERATURE {
     uint8_t  m_ucMode;
-    I2C_DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
-    I2C_DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
-} I2C_DEVICE_ATTRIBUTES_TEMPERATURE;
+    DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
+    DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+} DEVICE_ATTRIBUTES_TEMPERATURE;
+
+typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
+    uint8_t  m_ucMode;
+    DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
+    DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+} DEVICE_ATTRIBUTES_ANENOMOMETER;
 
 #pragma pack(reset)
 
 
-#define I2C_DEVICE_PROPERTIES_ADDRESS                       "address"
-#define I2C_DEVICE_PROPERTIES_CLASS                         "class"
+////////////////////////////////////////////////////////////////////////////////////
+// I2C Properties
+////////////////////////////////////////////////////////////////////////////////////
 
-#define I2C_DEVICE_PROPERTIES_ENDPOINT                      "endpoint"
+#define I2C_COUNT                                           4
 
-#define I2C_DEVICE_PROPERTIES_TYPE                          "type"
-#define I2C_DEVICE_PROPERTIES_DURATION                      "duration"
-#define I2C_DEVICE_PROPERTIES_PITCH                         "pitch"
-#define I2C_DEVICE_PROPERTIES_DELAY                         "delay"
+#define DEVICE_PROPERTIES_ADDRESS                           "address"
+#define DEVICE_PROPERTIES_CLASS                             "class"
 
-#define I2C_DEVICE_PROPERTIES_TEXT                          "text"
+#define DEVICE_PROPERTIES_ENDPOINT                          "endpoint"
 
-#define I2C_DEVICE_PROPERTIES_COLOR                         "color"
-#define I2C_DEVICE_PROPERTIES_BRIGHTNESS                    "brightness"
-#define I2C_DEVICE_PROPERTIES_TIMEOUT                       "timeout"
+#define DEVICE_PROPERTIES_TYPE                              "type"
+#define DEVICE_PROPERTIES_DURATION                          "duration"
+#define DEVICE_PROPERTIES_PITCH                             "pitch"
+#define DEVICE_PROPERTIES_DELAY                             "delay"
 
-#define I2C_DEVICE_PROPERTIES_MODE                          "mode"
-#define I2C_DEVICE_PROPERTIES_THRESHOLD                     "threshold"
-#define I2C_DEVICE_PROPERTIES_THRESHOLD_VALUE               "value"
-#define I2C_DEVICE_PROPERTIES_THRESHOLD_MINIMUM             "min"
-#define I2C_DEVICE_PROPERTIES_THRESHOLD_MAXIMUM             "max"
-#define I2C_DEVICE_PROPERTIES_THRESHOLD_ACTIVATE            "activate"
-#define I2C_DEVICE_PROPERTIES_ALERT                         "alert"
-#define I2C_DEVICE_PROPERTIES_ALERT_TYPE                    I2C_DEVICE_PROPERTIES_TYPE
-#define I2C_DEVICE_PROPERTIES_ALERT_PERIOD                  "period"
+#define DEVICE_PROPERTIES_TEXT                              "text"
+
+#define DEVICE_PROPERTIES_COLOR                             "color"
+#define DEVICE_PROPERTIES_BRIGHTNESS                        "brightness"
+#define DEVICE_PROPERTIES_TIMEOUT                           "timeout"
+
+#define DEVICE_PROPERTIES_MODE                              "mode"
+#define DEVICE_PROPERTIES_THRESHOLD                         "threshold"
+#define DEVICE_PROPERTIES_THRESHOLD_VALUE                   "value"
+#define DEVICE_PROPERTIES_THRESHOLD_MINIMUM                 "min"
+#define DEVICE_PROPERTIES_THRESHOLD_MAXIMUM                 "max"
+#define DEVICE_PROPERTIES_THRESHOLD_ACTIVATE                "activate"
+#define DEVICE_PROPERTIES_ALERT                             "alert"
+#define DEVICE_PROPERTIES_ALERT_TYPE                        DEVICE_PROPERTIES_TYPE
+#define DEVICE_PROPERTIES_ALERT_PERIOD                      "period"
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// ADC Properties
+////////////////////////////////////////////////////////////////////////////////////
+
+#define ADC_COUNT                                           2
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// ADC Properties
+////////////////////////////////////////////////////////////////////////////////////
+
+#define ONEWIRE_COUNT                                       1
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// TPROBE Properties
+////////////////////////////////////////////////////////////////////////////////////
+
+#define TPROBE_COUNT                                        1
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -453,17 +483,17 @@ typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
 
 #if ENABLE_ADC
 #define TOPIC_ADC                                            "%s%s/trigger_notification/adc%d/%s"
-#define PAYLOAD_API_GET_ADC_DEVICE_PROPERTIES_TEMPERATURE    PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
+#define PAYLOAD_API_GET_ADC_DEVICE_PROPERTIES_ANENOMOMETER   "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #endif // ENABLE_ADC
 
 #if ENABLE_ONEWIRE
 #define TOPIC_1WIRE                                          "%s%s/trigger_notification/1wire%d/%s"
-#define PAYLOAD_API_GET_1WIRE_DEVICE_PROPERTIES_TEMPERATURE  PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
+#define PAYLOAD_API_GET_1WIRE_DEVICE_PROPERTIES_TEMPERATURE  "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #endif // ENABLE_ONEWIRE
 
 #if ENABLE_TPROBE
 #define TOPIC_TPROBE                                         "%s%s/trigger_notification/tprobe%d/%s"
-#define PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
+#define PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #endif // ENABLE_TPROBE
 
 
