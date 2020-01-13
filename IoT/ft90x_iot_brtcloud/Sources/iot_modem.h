@@ -3,17 +3,19 @@
 
 
 
+#define ENABLE_NOTIFICATIONS               1
+
 #define ENABLE_UART                        0
 #if ENABLE_UART
 #define ENABLE_UART_ATCOMMANDS             0
 #endif // ENABLE_UART
 #define ENABLE_GPIO                        0
-#define ENABLE_I2C                         1
-#define ENABLE_NOTIFICATIONS               1
 
+#define ENABLE_I2C                         1
 #define ENABLE_ADC                         0
 #define ENABLE_ONEWIRE                     0
 #define ENABLE_TPROBE                      0
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +88,10 @@ typedef enum _TASK_NOTIFY_BIT {
     TASK_NOTIFY_BIT_I2C1,
     TASK_NOTIFY_BIT_I2C2,
     TASK_NOTIFY_BIT_I2C3,
+    TASK_NOTIFY_BIT_ADC0,
+    TASK_NOTIFY_BIT_ADC1,
+    TASK_NOTIFY_BIT_1WIRE,
+    TASK_NOTIFY_BIT_TPROBE,
     TASK_NOTIFY_BIT_ACTIVATION,
 } TASK_NOTIFY_BIT;
 
@@ -93,6 +99,9 @@ typedef enum _TASK_NOTIFY_BIT {
 #define TASK_NOTIFY_FROM_UART(y)           ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_UART) )
 #define TASK_NOTIFY_FROM_GPIO(y,z)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_GPIO0+(z)) )
 #define TASK_NOTIFY_FROM_I2C(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_I2C0+(z)) )
+#define TASK_NOTIFY_FROM_ADC(y,z)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ADC0+(z)) )
+#define TASK_NOTIFY_FROM_1WIRE(y)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_1WIRE) )
+#define TASK_NOTIFY_FROM_TPROBE(y)         ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_TPROBE) )
 #define TASK_NOTIFY_ACTIVATION(y)          ( (y) & TASK_NOTIFY_BIT(TASK_NOTIFY_BIT_ACTIVATION) )
 #define TASK_NOTIFY_CLEAR_BITS             0xFFFFFFFF
 
@@ -139,6 +148,32 @@ typedef enum _ALERT_TYPE {
 #define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
 #define API_ENABLE_I2C                     "enable_i2c"
 #endif // ENABLE_I2C
+
+// adc
+#if ENABLE_ADC
+#define API_GET_I2C_DEVICES                "get_i2c_devs"
+#define API_ENABLE_I2C_DEVICE              "enable_i2c_dev"
+#define API_GET_I2C_DEVICE_PROPERTIES      "get_i2c_dev_prop"
+#define API_SET_I2C_DEVICE_PROPERTIES      "set_i2c_dev_prop"
+#endif // ENABLE_ADC
+
+// 1wire
+#if ENABLE_ONEWIRE
+#define API_GET_1WIRE_DEVICES              "get_1wire_devs"
+#define API_ENABLE_1WIRE_DEVICE            "enable_1wire_dev"
+#define API_GET_1WIRE_DEVICE_PROPERTIES    "get_1wire_dev_prop"
+#define API_SET_1WIRE_DEVICE_PROPERTIES    "set_1wire_dev_prop"
+#endif // ENABLE_ONEWIRE
+
+// tprobe
+#if ENABLE_TPROBE
+#define API_GET_TPROBE_DEVICES             "get_tprobe_devs"
+#define API_ENABLE_TPROBE_DEVICE           "enable_tprobe_dev"
+#define API_GET_TPROBE_DEVICE_PROPERTIES   "get_tprobe_dev_prop"
+#define API_SET_TPROBE_DEVICE_PROPERTIES   "set_tprobe_dev_prop"
+#endif // ENABLE_TPROBE
+
+
 
 // notification
 #if ENABLE_NOTIFICATIONS
@@ -418,6 +453,15 @@ typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE   PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER
 #endif // ENABLE_I2C
+
+#if ENABLE_ADC
+#endif // ENABLE_ADC
+
+#if ENABLE_ONEWIRE
+#endif // ENABLE_ONEWIRE
+
+#if ENABLE_TPROBE
+#endif // ENABLE_TPROBE
 
 
 
