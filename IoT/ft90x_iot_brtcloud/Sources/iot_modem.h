@@ -444,9 +444,6 @@ typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
 
 #if ENABLE_I2C
 #define TOPIC_I2C                                           "%s%s/trigger_notification/i2c%d/%s"
-#define PAYLOAD_API_GET_I2CS                                "{\"value\":{\"i2cs\":[{\"%s\":%d},{\"%s\":%d},{\"%s\":%d},{\"%s\":%d}]}}"
-#define PAYLOAD_API_GET_I2C_DEVICES                         "{\"value\":{\"i2cdevices\":[%s]}}"
-#define PAYLOAD_API_GET_I2C_DEVICES_ITEM                    "{\"number\":%d,\"address\":%d,\"enabled\":%d}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
@@ -455,12 +452,18 @@ typedef struct I2C_DEVICE_ATTRIBUTES_TEMPERATURE {
 #endif // ENABLE_I2C
 
 #if ENABLE_ADC
+#define TOPIC_ADC                                            "%s%s/trigger_notification/adc%d/%s"
+#define PAYLOAD_API_GET_ADC_DEVICE_PROPERTIES_TEMPERATURE    PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
 #endif // ENABLE_ADC
 
 #if ENABLE_ONEWIRE
+#define TOPIC_1WIRE                                          "%s%s/trigger_notification/1wire%d/%s"
+#define PAYLOAD_API_GET_1WIRE_DEVICE_PROPERTIES_TEMPERATURE  PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
 #endif // ENABLE_ONEWIRE
 
 #if ENABLE_TPROBE
+#define TOPIC_TPROBE                                         "%s%s/trigger_notification/tprobe%d/%s"
+#define PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE
 #endif // ENABLE_TPROBE
 
 

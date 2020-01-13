@@ -919,68 +919,6 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // I2C
     ///////////////////////////////////////////////////////////////////////////////////
-    else if ( IS_API(API_GET_I2CS) ) {
-        tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-        tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2CS,
-            ENABLED_STRING, g_ucI2cEnabled[0],
-            ENABLED_STRING, g_ucI2cEnabled[1],
-            ENABLED_STRING, g_ucI2cEnabled[2],
-            ENABLED_STRING, g_ucI2cEnabled[3]
-        );
-        ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-        DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
-    }
-/*
-    else if ( IS_API(API_GET_I2C_DEVICES) ) {
-        DEBUG_PRINTF( "API_GET_I2C_DEVICES\r\n" );
-        if ( g_pI2CProperties == NULL ) {
-            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-            tfp_snprintf( payload, sizeof(payload), PAYLOAD_EMPTY );
-            ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-            DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
-            goto exit;
-        }
-        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
-        uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_CLASS );
-        if (ucNumber < I2C_COUNT && ucClass < I2C_DEVICE_CLASS_COUNT) {
-            tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-            tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES,
-                GPIO_PROPERTIES_DIRECTION,
-                g_oGpioProperties[ucNumber].m_ucDirection,
-                GPIO_PROPERTIES_MODE,
-                g_oGpioProperties[ucNumber].m_ucMode,
-                GPIO_PROPERTIES_ALERT,
-                g_oGpioProperties[ucNumber].m_ucAlert,
-                GPIO_PROPERTIES_ALERTPERIOD,
-                g_oGpioProperties[ucNumber].m_ulAlertperiod,
-                GPIO_PROPERTIES_POLARITY,
-                g_oGpioProperties[ucNumber].m_ucPolarity,
-                GPIO_PROPERTIES_WIDTH,
-                g_oGpioProperties[ucNumber].m_ulWidth,
-                GPIO_PROPERTIES_MARK,
-                g_oGpioProperties[ucNumber].m_ulMark,
-                GPIO_PROPERTIES_SPACE,
-                g_oGpioProperties[ucNumber].m_ulSpace,
-                GPIO_PROPERTIES_COUNT,
-                g_oGpioProperties[ucNumber].m_ulCount
-                );
-            ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
-            DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
-        }
-    }
-
-    else if ( IS_API(API_ADD_I2C_DEVICE) ) {
-        DEBUG_PRINTF( "API_ADD_I2C_DEVICE\r\n" );
-        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
-    }
-    else if ( IS_API(API_REMOVE_I2C_DEVICE) ) {
-        DEBUG_PRINTF( "API_REMOVE_I2C_DEVICE\r\n" );
-        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
-    }
-*/
     else if ( IS_API(API_ENABLE_I2C_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, I2C_DEVICE_PROPERTIES_ADDRESS );
@@ -1159,26 +1097,18 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         }
         ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
     }
-    else if ( IS_API(API_ENABLE_I2C) ) {
-        DEBUG_PRINTF( "API_ENABLE_I2C\r\n" );
-        uint8_t ucNumber = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
-        DEBUG_PRINTF( "ucEnabled=%d ucNumber=%d\r\n", ucEnabled, ucNumber );
-
-        if ( ucNumber < I2C_COUNT && ucEnabled < 2 ) {
-            if ( g_ucI2cEnabled[ucNumber] != ucEnabled ) {
-                if ( ucEnabled == 0 ) {
-                    // TODO: disable
-                }
-                else {
-                    // TODO: enable
-                }
-                g_ucI2cEnabled[ucNumber] = ucEnabled;
-            }
-        }
-        ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
-    }
 #endif // ENABLE_I2C
+
+
+
+#if ENABLE_ADC
+#endif // ENABLE_ADC
+
+#if ENABLE_ONEWIRE
+#endif // ENABLE_ONEWIRE
+
+#if ENABLE_TPROBE
+#endif // ENABLE_TPROBE
 
 
 
