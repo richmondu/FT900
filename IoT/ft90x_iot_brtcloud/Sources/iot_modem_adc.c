@@ -33,7 +33,7 @@ void iot_modem_adc_init()
 
 int iot_modem_adc_enable(DEVICE_PROPERTIES* properties)
 {
-	DEBUG_PRINTF( "ADC ENABLE\r\n" );
+    DEBUG_PRINTF( "ADC ENABLE\r\n" );
 
     // MODIFY ME
 

@@ -33,7 +33,7 @@ void iot_modem_1wire_init()
 
 int iot_modem_1wire_enable(DEVICE_PROPERTIES* properties)
 {
-	DEBUG_PRINTF( "1WIRE ENABLE\r\n" );
+    DEBUG_PRINTF( "1WIRE ENABLE\r\n" );
 
     // MODIFY ME
 

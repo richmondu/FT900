@@ -33,7 +33,7 @@ void iot_modem_tprobe_init()
 
 int iot_modem_tprobe_enable(DEVICE_PROPERTIES* properties)
 {
-	DEBUG_PRINTF( "TPROBE ENABLE\r\n" );
+    DEBUG_PRINTF( "TPROBE ENABLE\r\n" );
 
     // MODIFY ME
 

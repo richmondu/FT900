@@ -33,7 +33,7 @@ void iot_modem_i2c_init()
 
 int iot_modem_i2c_enable(DEVICE_PROPERTIES* properties)
 {
-	DEBUG_PRINTF( "I2C ENABLE\r\n" );
+    DEBUG_PRINTF( "I2C ENABLE\r\n" );
 
     // MODIFY ME
 
