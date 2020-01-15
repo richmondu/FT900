@@ -26,6 +26,8 @@
 
 
 
+#if ENABLE_ADC
+
 void iot_modem_adc_init()
 {
     // MODIFY ME
@@ -62,3 +64,5 @@ uint32_t iot_modem_adc_get_sensor_reading(DEVICE_PROPERTIES* properties)
 
     return 1;
 }
+
+#endif // ENABLE_ADC

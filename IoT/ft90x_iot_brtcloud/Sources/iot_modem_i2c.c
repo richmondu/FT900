@@ -26,6 +26,8 @@
 
 
 
+#if ENABLE_I2C
+
 void iot_modem_i2c_init()
 {
     // MODIFY ME
@@ -74,3 +76,5 @@ uint32_t iot_modem_i2c_get_sensor_reading(DEVICE_PROPERTIES* properties)
 
     return 1;
 }
+
+#endif // ENABLE_I2C

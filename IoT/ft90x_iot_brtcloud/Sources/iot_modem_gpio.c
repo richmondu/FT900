@@ -16,6 +16,7 @@
 
 /* IoT Modem */
 #include "iot_modem.h"
+#include "iot_modem__debug.h"
 #include "json.h"
 
 
@@ -26,17 +27,8 @@
 
 
 
-///////////////////////////////////////////////////////////////////////////////////
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) do {CRITICAL_SECTION_BEGIN;tfp_printf(__VA_ARGS__);CRITICAL_SECTION_END;} while (0)
-#else
-#define DEBUG_PRINTF(...)
-#endif
-///////////////////////////////////////////////////////////////////////////////////
-
-
 #if ENABLE_GPIO
+
 extern TaskHandle_t g_iot_app_handle; // used by iot_modem_gpio_process()
 extern iot_handle g_handle;           // used to publish packets
 extern GPIO_PROPERTIES g_oGpioProperties[GPIO_COUNT];
@@ -451,6 +443,5 @@ static void ISR_gpio()
         }
     }
 }
+
 #endif // ENABLE_GPIO
-
-

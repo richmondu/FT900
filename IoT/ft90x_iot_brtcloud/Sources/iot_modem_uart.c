@@ -15,6 +15,7 @@
 
 /* IoT Modem */
 #include "iot_modem.h"
+#include "iot_modem__debug.h"
 #include "json.h"
 
 
@@ -22,17 +23,6 @@
 #include <stdlib.h>
 
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////////
-#define DEBUG
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) do {CRITICAL_SECTION_BEGIN;tfp_printf(__VA_ARGS__);CRITICAL_SECTION_END;} while (0)
-#else
-#define DEBUG_PRINTF(...)
-#endif
-///////////////////////////////////////////////////////////////////////////////////
 
 
 
