@@ -9,7 +9,7 @@
 #if ENABLE_UART
 #define ENABLE_UART_ATCOMMANDS             1
 #endif // ENABLE_UART
-#define ENABLE_GPIO                        0
+#define ENABLE_GPIO                        1
 
 #define ENABLE_I2C                         1
 #define ENABLE_ADC                         1
