@@ -5,9 +5,9 @@
 
 #define ENABLE_NOTIFICATIONS               1
 
-#define ENABLE_UART                        0
+#define ENABLE_UART                        1
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS             0
+#define ENABLE_UART_ATCOMMANDS             1
 #endif // ENABLE_UART
 #define ENABLE_GPIO                        0
 
@@ -525,6 +525,40 @@ void iot_modem_gpio_process(int number, int activate);
 // I2C Functions
 ////////////////////////////////////////////////////////////////////////////////////
 
+void iot_modem_i2c_init();
+int  iot_modem_i2c_enable(DEVICE_PROPERTIES* properties);
+void iot_modem_i2c_set_properties(DEVICE_PROPERTIES* properties);
+uint32_t iot_modem_i2c_get_sensor_reading(DEVICE_PROPERTIES* properties);
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// ADC Functions
+////////////////////////////////////////////////////////////////////////////////////
+
+void iot_modem_adc_init();
+int  iot_modem_adc_enable(DEVICE_PROPERTIES* properties);
+void iot_modem_adc_set_properties(DEVICE_PROPERTIES* properties);
+uint32_t iot_modem_adc_get_sensor_reading(DEVICE_PROPERTIES* properties);
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// 1WIRE Functions
+////////////////////////////////////////////////////////////////////////////////////
+
+void iot_modem_1wire_init();
+int  iot_modem_1wire_enable(DEVICE_PROPERTIES* properties);
+void iot_modem_1wire_set_properties(DEVICE_PROPERTIES* properties);
+uint32_t iot_modem_1wire_get_sensor_reading(DEVICE_PROPERTIES* properties);
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// TPROBE Functions
+////////////////////////////////////////////////////////////////////////////////////
+
+void iot_modem_tprobe_init();
+int  iot_modem_tprobe_enable(DEVICE_PROPERTIES* properties);
+void iot_modem_tprobe_set_properties(DEVICE_PROPERTIES* properties);
+uint32_t iot_modem_tprobe_get_sensor_reading(DEVICE_PROPERTIES* properties);
 
 
 

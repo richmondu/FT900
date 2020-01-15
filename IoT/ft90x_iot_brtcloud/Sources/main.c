@@ -241,6 +241,19 @@ int main( void )
     iot_modem_gpio_init(g_ucGpioVoltage);
     iot_modem_gpio_enable_interrupt();
 #endif // ENABLE_GPIO
+#if ENABLE_I2C
+    iot_modem_i2c_init();
+#endif // ENABLE_I2C
+#if ENABLE_ADC
+    iot_modem_adc_init();
+#endif // ENABLE_ADC
+#if ENABLE_ONEWIRE
+    iot_modem_1wire_init();
+#endif // ENABLE_ONEWIRE
+#if ENABLE_TPROBE
+    iot_modem_tprobe_init();
+#endif // ENABLE_TPROBE
+
     interrupt_enable_globally();
 
     uart_puts( UART0,
@@ -397,13 +410,35 @@ static void iot_app_task( void *pvParameters )
 
 #if ENABLE_I2C
                 /* process I2C */
-                for (i=0; i<4; i++) {
+                for (i=0; i<I2C_COUNT; i++) {
                     if (TASK_NOTIFY_FROM_I2C(ulNotificationValue, i)) {
                         // TODO
                     }
                 }
 #endif // ENABLE_I2C
 
+#if ENABLE_ADC
+                /* process ADC */
+                for (i=0; i<ADC_COUNT; i++) {
+                    if (TASK_NOTIFY_FROM_ADC(ulNotificationValue, i)) {
+                        // TODO
+                    }
+                }
+#endif // ENABLE_ADC
+
+#if ENABLE_ONEWIRE
+                /* process ONEWIRE */
+                if (TASK_NOTIFY_FROM_1WIRE(ulNotificationValue)) {
+                    // TODO
+                }
+#endif // ENABLE_ONEWIRE
+
+#if ENABLE_TPROBE
+                /* process TPROBE */
+                if (TASK_NOTIFY_FROM_TPROBE(ulNotificationValue)) {
+                    // TODO
+                }
+#endif // ENABLE_TPROBE
             }
 
         } while ( net_is_ready() && iot_is_connected( handle ) == 0 && !g_exit );
@@ -994,13 +1029,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             }
             if ( index != 0xFF ) {
                 if ( pProp->m_ucEnabled != ucEnabled ) {
-                    if ( ucEnabled == 0 ) {
-                        // TODO: disable
-                    }
-                    else {
-                        // TODO: enable
-                    }
                     pProp->m_ucEnabled = ucEnabled;
+                	iot_modem_i2c_set_properties(pProp);
                 }
             }
         }
@@ -1121,6 +1151,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             if ( ret < 0 ) {
                 goto exit;
             }
+
+            iot_modem_i2c_set_properties( pProp );
         }
         else {
             // find the I2C device and set the values
@@ -1143,6 +1175,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_i2c_set_properties( (DEVICE_PROPERTIES*)(g_pI2CProperties+index*sizeof(DEVICE_PROPERTIES)) );
             }
             else if (next != 0xFF) {
                 ret = set_props( (DEVICE_PROPERTIES*)(g_pI2CProperties+next*sizeof(DEVICE_PROPERTIES)),
@@ -1150,6 +1184,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_i2c_set_properties( (DEVICE_PROPERTIES*)(g_pI2CProperties+next*sizeof(DEVICE_PROPERTIES)) );
             }
         }
         ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
@@ -1179,13 +1215,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             }
             if ( index != 0xFF ) {
                 if ( pProp->m_ucEnabled != ucEnabled ) {
-                    if ( ucEnabled == 0 ) {
-                        // TODO: disable
-                    }
-                    else {
-                        // TODO: enable
-                    }
                     pProp->m_ucEnabled = ucEnabled;
+                	iot_modem_adc_set_properties(pProp);
                 }
             }
         }
@@ -1249,6 +1280,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             if ( ret < 0 ) {
                 goto exit;
             }
+
+            iot_modem_adc_set_properties( pProp );
         }
         else {
             // find the ADC device and set the values
@@ -1271,6 +1304,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_adc_set_properties( (DEVICE_PROPERTIES*)(g_pADCProperties+index*sizeof(DEVICE_PROPERTIES)) );
             }
             else if (next != 0xFF) {
                 ret = set_props( (DEVICE_PROPERTIES*)(g_pADCProperties+next*sizeof(DEVICE_PROPERTIES)),
@@ -1278,6 +1313,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_adc_set_properties( (DEVICE_PROPERTIES*)(g_pADCProperties+next*sizeof(DEVICE_PROPERTIES)) );
             }
         }
         ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
@@ -1305,13 +1342,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             }
             if ( index != 0xFF ) {
                 if ( pProp->m_ucEnabled != ucEnabled ) {
-                    if ( ucEnabled == 0 ) {
-                        // TODO: disable
-                    }
-                    else {
-                        // TODO: enable
-                    }
                     pProp->m_ucEnabled = ucEnabled;
+                	iot_modem_1wire_set_properties(pProp);
                 }
             }
         }
@@ -1375,6 +1407,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             if ( ret < 0 ) {
                 goto exit;
             }
+
+            iot_modem_1wire_set_properties( pProp );
         }
         else {
             // find the 1WIRE device and set the values
@@ -1397,6 +1431,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_1wire_set_properties( (DEVICE_PROPERTIES*)(g_p1WIREProperties+index*sizeof(DEVICE_PROPERTIES)) );
             }
             else if (next != 0xFF) {
                 ret = set_props( (DEVICE_PROPERTIES*)(g_p1WIREProperties+next*sizeof(DEVICE_PROPERTIES)),
@@ -1404,6 +1440,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_1wire_set_properties( (DEVICE_PROPERTIES*)(g_p1WIREProperties+next*sizeof(DEVICE_PROPERTIES)) );
             }
         }
         ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
@@ -1431,13 +1469,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             }
             if ( index != 0xFF ) {
                 if ( pProp->m_ucEnabled != ucEnabled ) {
-                    if ( ucEnabled == 0 ) {
-                        // TODO: disable
-                    }
-                    else {
-                        // TODO: enable
-                    }
                     pProp->m_ucEnabled = ucEnabled;
+                	iot_modem_tprobe_set_properties(pProp);
                 }
             }
         }
@@ -1501,6 +1534,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             if ( ret < 0 ) {
                 goto exit;
             }
+
+            iot_modem_tprobe_set_properties( pProp );
         }
         else {
             // find the TPROBE device and set the values
@@ -1523,6 +1558,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_tprobe_set_properties( (DEVICE_PROPERTIES*)(g_pTPROBEProperties+index*sizeof(DEVICE_PROPERTIES)) );
             }
             else if (next != 0xFF) {
                 ret = set_props( (DEVICE_PROPERTIES*)(g_pTPROBEProperties+next*sizeof(DEVICE_PROPERTIES)),
@@ -1530,6 +1567,8 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
                 if ( ret < 0 ) {
                     goto exit;
                 }
+
+                iot_modem_tprobe_set_properties( (DEVICE_PROPERTIES*)(g_pTPROBEProperties+next*sizeof(DEVICE_PROPERTIES)) );
             }
         }
         ret = publish_default( topic, sizeof(topic), payload, sizeof(payload), mqtt_subscribe_recv );
