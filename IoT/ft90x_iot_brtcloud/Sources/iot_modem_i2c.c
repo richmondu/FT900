@@ -72,5 +72,5 @@ uint32_t iot_modem_i2c_get_sensor_reading(DEVICE_PROPERTIES* properties)
 {
     // MODIFY ME
 
-	return 1;
+    return 1;
 }

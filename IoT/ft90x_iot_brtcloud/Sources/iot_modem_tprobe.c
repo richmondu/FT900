@@ -60,5 +60,5 @@ uint32_t iot_modem_tprobe_get_sensor_reading(DEVICE_PROPERTIES* properties)
 {
     // MODIFY ME
 
-	return 1;
+    return 1;
 }
