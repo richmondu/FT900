@@ -30,6 +30,8 @@
 
 void iot_modem_1wire_init()
 {
+    DEBUG_PRINTF( "1WIRE INIT\r\n" );
+
     // MODIFY ME
 }
 
@@ -51,6 +53,8 @@ int iot_modem_1wire_enable(DEVICE_PROPERTIES* properties)
 
 void iot_modem_1wire_set_properties(DEVICE_PROPERTIES* properties)
 {
+    DEBUG_PRINTF( "1WIRE SETPROP\r\n" );
+
     // MODIFY ME
 
     if (properties->m_ucClass == DEVICE_CLASS_TEMPERATURE) {

@@ -12,8 +12,8 @@
 #define ENABLE_GPIO                        0
 
 #define ENABLE_I2C                         0
-#define ENABLE_ADC                         0
-#define ENABLE_ONEWIRE                     0
+#define ENABLE_ADC                         1
+#define ENABLE_ONEWIRE                     1
 #define ENABLE_TPROBE                      1
 
 
@@ -56,6 +56,7 @@ typedef enum _DEVICE_STATUS {
 #define ENABLE_STRING                      "enable"
 #define ENABLED_STRING                     "enabled"
 #define STATUS_STRING                      "status"
+#define VOLTAGE_STRING                     "voltage"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +152,8 @@ typedef enum _ALERT_TYPE {
 #define API_ENABLE_ADC_DEVICE              "enable_adc_dev"
 #define API_GET_ADC_DEVICE_PROPERTIES      "get_adc_dev_prop"
 #define API_SET_ADC_DEVICE_PROPERTIES      "set_adc_dev_prop"
+#define API_GET_ADC_VOLTAGE                "get_adc_voltage"
+#define API_SET_ADC_VOLTAGE                "set_adc_voltage"
 #endif // ENABLE_ADC
 
 // 1wire
@@ -279,6 +282,7 @@ typedef enum _GPIO_POLARITY {
 typedef enum _GPIO_VOLTAGE {
     GPIO_VOLTAGE_3_3,
     GPIO_VOLTAGE_5,
+	GPIO_VOLTAGE_COUNT
 } GPIO_VOLTAGE;
 
 #pragma pack(1)
@@ -305,7 +309,6 @@ typedef struct _GPIO_PROPERTIES {
 #define GPIO_PROPERTIES_MARK               "mark"
 #define GPIO_PROPERTIES_SPACE              "space"
 #define GPIO_PROPERTIES_COUNT              "count"
-#define GPIO_PROPERTIES_VOLTAGE            "voltage"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -324,6 +327,27 @@ typedef enum _DEVICE_CLASS {
 	DEVICE_CLASS_COUNT
 } DEVICE_CLASS;
 
+typedef enum _DEVICE_MODE {
+	DEVICE_MODE_SINGLE_THRESHOLD,
+	DEVICE_MODE_DUAL_THRESHOLD,
+	DEVICE_MODE_CONTINUOUS,
+	// add here
+	DEVICE_MODE_COUNT
+} DEVICE_MODE;
+
+typedef enum _DEVICE_ENDPOINT {
+	DEVICE_ENDPOINT_MANUAL,
+	DEVICE_ENDPOINT_HARDWARE,
+	// add here
+	DEVICE_ENDPOINT_HARDWARE_COUNT
+} DEVICE_ENDPOINT;
+
+typedef enum _DEVICE_ACTIVATE {
+	DEVICE_ACTIVATE_WITHINRANGE,
+	DEVICE_ACTIVATE_OUTOFRANGE,
+	// add here
+	DEVICE_ACTIVATE_COUNT
+} DEVICE_ACTIVATE;
 
 
 #pragma pack(1)
@@ -354,16 +378,25 @@ typedef struct _DEVICE_ATTRIBUTES_COMMON_ALERT {
     uint32_t m_ulPeriod;
 } DEVICE_ATTRIBUTES_COMMON_ALERT;
 
+typedef struct _DEVICE_ATTRIBUTES_COMMON_HARDWARE {
+    char*    m_pcDeviceName;
+    char*    m_pcPeripheral;
+    char*    m_pcSensorName;
+    char*    m_pcAttribute;
+} DEVICE_ATTRIBUTES_COMMON_HARDWARE;
+
 
 typedef struct _DEVICE_ATTRIBUTES_SPEAKER {
     uint8_t  m_ucEndpoint;
     uint8_t  m_ucType;
     void*    m_pvValues;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_SPEAKER;
 
 typedef struct  {
     uint8_t  m_ucEndpoint;
     char*    m_pcText;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_DISPLAY;
 
 typedef struct _DEVICE_ATTRIBUTES_LIGHT {
@@ -372,24 +405,28 @@ typedef struct _DEVICE_ATTRIBUTES_LIGHT {
     uint32_t m_ulBrightness;
     uint32_t m_ulTimeout;
     char*    m_pcText;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_LIGHT;
 
 typedef struct _DEVICE_ATTRIBUTES_POTENTIOMETER {
     uint8_t  m_ucMode;
     DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
     DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_POTENTIOMETER;
 
 typedef struct _DEVICE_ATTRIBUTES_TEMPERATURE {
     uint8_t  m_ucMode;
     DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
     DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_TEMPERATURE;
 
 typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
     uint8_t  m_ucMode;
     DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
     DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
 } DEVICE_ATTRIBUTES_ANENOMOMETER;
 
 #pragma pack(reset)
@@ -426,6 +463,11 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define DEVICE_PROPERTIES_ALERT                             "alert"
 #define DEVICE_PROPERTIES_ALERT_TYPE                        DEVICE_PROPERTIES_TYPE
 #define DEVICE_PROPERTIES_ALERT_PERIOD                      "period"
+#define DEVICE_PROPERTIES_HARDWARE                          "hardware"
+#define DEVICE_PROPERTIES_HARDWARE_DEVICENAME               "devicename"
+#define DEVICE_PROPERTIES_HARDWARE_PERIPHERAL               "peripheral"
+#define DEVICE_PROPERTIES_HARDWARE_SENSORNAME               "sensorname"
+#define DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE                "attribute"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -434,6 +476,12 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 
 #define ADC_COUNT                                           2
 
+typedef enum _ADC_VOLTAGE {
+    ADC_VOLTAGE_N5_P5,
+    ADC_VOLTAGE_N10_P10,
+    ADC_VOLTAGE_0_P10,
+    ADC_VOLTAGE_COUNT,
+} ADC_VOLTAGE;
 
 ////////////////////////////////////////////////////////////////////////////////////
 // ADC Properties
@@ -459,6 +507,15 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define PAYLOAD_API_SET_STATUS                              "{\"value\":{\"%s\":%d}}"
 #define PAYLOAD_API_GET_XXX_DEVICES_EMPTY                   "{\"value\":[]}"
 #define PAYLOAD_API_GET_XXX_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d}]}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_EMPTY         "{\"value\":{}}"
+
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_TEMPERATURE   "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_ANEMOMETER    "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
+
 
 #if ENABLE_UART
 #define TOPIC_UART                                          "%s%s/trigger_notification/uart/%s"
@@ -476,28 +533,20 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 
 #if ENABLE_I2C
 #define TOPIC_I2C                                           "%s%s/trigger_notification/i2c%d/%s"
-#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
-#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
-#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
-#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
-#define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE   PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER
 #define PAYLOAD_API_GET_I2C_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d,\"%s\":%d}]}"
 #endif // ENABLE_I2C
 
 #if ENABLE_ADC
 #define TOPIC_ADC                                            "%s%s/trigger_notification/adc%d/%s"
-#define PAYLOAD_API_GET_ADC_DEVICE_PROPERTIES_ANENOMOMETER   "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_ADC_VOLTAGE                         "{\"value\":{\"%s\":%d}}"
 #endif // ENABLE_ADC
 
 #if ENABLE_ONEWIRE
 #define TOPIC_1WIRE                                          "%s%s/trigger_notification/1wire%d/%s"
-#define PAYLOAD_API_GET_1WIRE_DEVICE_PROPERTIES_TEMPERATURE  "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #endif // ENABLE_ONEWIRE
 
 #if ENABLE_TPROBE
 #define TOPIC_TPROBE                                         "%s%s/trigger_notification/tprobe%d/%s"
-#define PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
-#define PAYLOAD_API_GET_TPROBE_DEVICES                       "{\"value\":[{\"%s\":%d,\"%s\":%d}]}"
 #endif // ENABLE_TPROBE
 
 
@@ -539,10 +588,11 @@ uint32_t iot_modem_i2c_get_sensor_reading(DEVICE_PROPERTIES* properties);
 // ADC Functions
 ////////////////////////////////////////////////////////////////////////////////////
 
-void iot_modem_adc_init();
+void iot_modem_adc_init(int voltage);
 int  iot_modem_adc_enable(DEVICE_PROPERTIES* properties);
 void iot_modem_adc_set_properties(DEVICE_PROPERTIES* properties);
 uint32_t iot_modem_adc_get_sensor_reading(DEVICE_PROPERTIES* properties);
+void iot_modem_adc_set_voltage(int voltage);
 
 
 ////////////////////////////////////////////////////////////////////////////////////

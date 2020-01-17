@@ -30,6 +30,8 @@
 
 void iot_modem_tprobe_init()
 {
+    DEBUG_PRINTF( "TPROBE INIT\r\n" );
+
     // MODIFY ME
 }
 
@@ -51,6 +53,8 @@ int iot_modem_tprobe_enable(DEVICE_PROPERTIES* properties)
 
 void iot_modem_tprobe_set_properties(DEVICE_PROPERTIES* properties)
 {
+    DEBUG_PRINTF( "TPROBE SETPROP\r\n" );
+
     // MODIFY ME
 
     if (properties->m_ucClass == DEVICE_CLASS_TEMPERATURE) {
