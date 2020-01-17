@@ -1633,7 +1633,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( IS_API(API_SET_TPROBE_DEVICE_PROPERTIES) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
-        DEBUG_PRINTF( "TPROBE %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
+        DEBUG_PRINTF( "TPROBE %d SET class=%d %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
 
         if ( g_pTPROBEProperties == NULL ) {
             g_pTPROBEProperties = pvPortMalloc( g_ucTPROBEPropertiesCount * sizeof(DEVICE_PROPERTIES) );
