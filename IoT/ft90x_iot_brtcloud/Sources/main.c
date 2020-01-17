@@ -1015,7 +1015,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         DEBUG_PRINTF( "I2C %d GETDEVS\r\n", ucNumber );
 
-        if (ucNumber > 0 && ucNumber < I2C_COUNT) {
+        if (ucNumber < I2C_COUNT) {
 			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pI2CProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
 			if (!pProp) {
 				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
@@ -1034,6 +1034,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 					pProp->m_ucAddress
 					);
 				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
 			}
         }
         else {
@@ -1048,7 +1049,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
         DEBUG_PRINTF( "I2C %d address=%d ENABLE=%d\r\n", ucNumber, ucAddress, ucEnabled );
 
-        if (ucNumber > 0 && ucNumber < I2C_COUNT && ucEnabled < 2) {
+        if (ucNumber < I2C_COUNT && ucEnabled < 2) {
             int index = 0xFF;
             DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pI2CProperties;
             for ( int i=0; i<g_ucI2CPropertiesCount; i++, pProp++ ) {
@@ -1233,7 +1234,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         DEBUG_PRINTF( "ADC %d GETDEVS\r\n", ucNumber );
 
-        if (ucNumber > 0 && ucNumber < ADC_COUNT) {
+        if (ucNumber < ADC_COUNT) {
 			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pADCProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
 			if (!pProp) {
 				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
@@ -1249,6 +1250,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 					pProp->m_ucEnabled
 					);
 				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
 			}
         }
         else {
@@ -1262,7 +1264,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
         DEBUG_PRINTF( "ADC %d ENABLE=%d\r\n", ucNumber, ucEnabled );
 
-        if (ucNumber > 0 && ucNumber < ADC_COUNT && ucEnabled < 2) {
+        if (ucNumber < ADC_COUNT && ucEnabled < 2) {
             int index = 0xFF;
             DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pADCProperties;
             for ( int i=0; i<g_ucADCPropertiesCount; i++, pProp++ ) {
@@ -1388,7 +1390,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         DEBUG_PRINTF( "1WIRE %d GETDEVS\r\n", ucNumber );
 
-        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT) {
+        if (ucNumber < ONEWIRE_COUNT) {
 			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_p1WIREProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
 			if (!pProp) {
 				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
@@ -1404,6 +1406,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 					pProp->m_ucEnabled
 					);
 				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
 			}
         }
         else {
@@ -1417,7 +1420,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
         DEBUG_PRINTF( "1WIRE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
 
-        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT && ucEnabled < 2) {
+        if (ucNumber < ONEWIRE_COUNT && ucEnabled < 2) {
             int index = 0xFF;
             DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_p1WIREProperties;
             for ( int i=0; i<g_uc1WIREPropertiesCount; i++, pProp++ ) {
@@ -1543,7 +1546,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         DEBUG_PRINTF( "TPROBE %d GETDEVS\r\n", ucNumber );
 
-        if (ucNumber > 0 && ucNumber < TPROBE_COUNT) {
+        if (ucNumber < TPROBE_COUNT) {
 			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pTPROBEProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
 			if (!pProp) {
 				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
@@ -1559,6 +1562,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 					pProp->m_ucEnabled
 					);
 				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+                DEBUG_PRINTF( "PUB:  %s %s\r\n\r\n", topic, payload );
 			}
         }
         else {
@@ -1572,7 +1576,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
         DEBUG_PRINTF( "TPROBE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
 
-        if (ucNumber > 0 && ucNumber < TPROBE_COUNT && ucEnabled < 2) {
+        if (ucNumber < TPROBE_COUNT && ucEnabled < 2) {
             int index = 0xFF;
             DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
             for ( int i=0; i<g_ucTPROBEPropertiesCount; i++, pProp++ ) {
