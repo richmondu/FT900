@@ -1011,6 +1011,37 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // I2C
     ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_GET_I2C_DEVICES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "I2C %d GETDEVS\r\n", ucNumber );
+
+        if (ucNumber > 0 && ucNumber < I2C_COUNT) {
+			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pI2CProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
+			if (!pProp) {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+			else {
+				// TODO: there can be more than I2C device per slot
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_I2C_DEVICES,
+					DEVICE_PROPERTIES_CLASS,
+					pProp->m_ucClass,
+					ENABLED_STRING,
+					pProp->m_ucEnabled,
+					DEVICE_PROPERTIES_ADDRESS,
+					pProp->m_ucAddress
+					);
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+        }
+        else {
+			tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+			tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+			ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        }
+    }
     else if ( IS_API(API_ENABLE_I2C_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucAddress = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ADDRESS );
@@ -1198,6 +1229,34 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // ADC
     ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_GET_ADC_DEVICES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "ADC %d GETDEVS\r\n", ucNumber );
+
+        if (ucNumber > 0 && ucNumber < ADC_COUNT) {
+			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pADCProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
+			if (!pProp) {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+			else {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES,
+					DEVICE_PROPERTIES_CLASS,
+					pProp->m_ucClass,
+					ENABLED_STRING,
+					pProp->m_ucEnabled
+					);
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+        }
+        else {
+			tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+			tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+			ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        }
+    }
     else if ( IS_API(API_ENABLE_ADC_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
@@ -1325,6 +1384,34 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // 1WIRE
     ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_GET_1WIRE_DEVICES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "1WIRE %d GETDEVS\r\n", ucNumber );
+
+        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT) {
+			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_p1WIREProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
+			if (!pProp) {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+			else {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES,
+					DEVICE_PROPERTIES_CLASS,
+					pProp->m_ucClass,
+					ENABLED_STRING,
+					pProp->m_ucEnabled
+					);
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+        }
+        else {
+			tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+			tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+			ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        }
+    }
     else if ( IS_API(API_ENABLE_1WIRE_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
@@ -1452,12 +1539,40 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     ///////////////////////////////////////////////////////////////////////////////////
     // TPROBE
     ///////////////////////////////////////////////////////////////////////////////////
+    else if ( IS_API(API_GET_TPROBE_DEVICES) ) {
+        uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
+        DEBUG_PRINTF( "TPROBE %d GETDEVS\r\n", ucNumber );
+
+        if (ucNumber > 0 && ucNumber < TPROBE_COUNT) {
+			DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)(g_pTPROBEProperties+ucNumber*sizeof(DEVICE_PROPERTIES));
+			if (!pProp) {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+			else {
+				tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+				tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES,
+					DEVICE_PROPERTIES_CLASS,
+					pProp->m_ucClass,
+					ENABLED_STRING,
+					pProp->m_ucEnabled
+					);
+				ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+			}
+        }
+        else {
+			tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
+			tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_XXX_DEVICES_EMPTY );
+			ret = iot_publish( g_handle, topic, payload, strlen(payload), 1 );
+        }
+    }
     else if ( IS_API(API_ENABLE_TPROBE_DEVICE) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucEnabled = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, ENABLE_STRING );
-        DEBUG_PRINTF( "1WIRE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
+        DEBUG_PRINTF( "TPROBE %d ENABLE=%d\r\n", ucNumber, ucEnabled );
 
-        if (ucNumber > 0 && ucNumber < ONEWIRE_COUNT && ucEnabled < 2) {
+        if (ucNumber > 0 && ucNumber < TPROBE_COUNT && ucEnabled < 2) {
             int index = 0xFF;
             DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
             for ( int i=0; i<g_ucTPROBEPropertiesCount; i++, pProp++ ) {
@@ -1478,7 +1593,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     }
     else if ( IS_API(API_GET_TPROBE_DEVICE_PROPERTIES) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
-        DEBUG_PRINTF( "1WIRE %d GET\r\n", ucNumber );
+        DEBUG_PRINTF( "TPROBE %d GET\r\n", ucNumber );
 
         int index = 0xFF;
         DEVICE_PROPERTIES* pProp = (DEVICE_PROPERTIES*)g_pTPROBEProperties;
@@ -1518,7 +1633,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
     else if ( IS_API(API_SET_TPROBE_DEVICE_PROPERTIES) ) {
         uint8_t ucNumber  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, NUMBER_STRING ) - 1;
         uint8_t ucClass   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_CLASS );
-        DEBUG_PRINTF( "1WIRE %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
+        DEBUG_PRINTF( "TPROBE %d class=%d SET %s\r\n", ucNumber, ucClass, mqtt_subscribe_recv->payload );
 
         if ( g_pTPROBEProperties == NULL ) {
             g_pTPROBEProperties = pvPortMalloc( g_ucTPROBEPropertiesCount * sizeof(DEVICE_PROPERTIES) );

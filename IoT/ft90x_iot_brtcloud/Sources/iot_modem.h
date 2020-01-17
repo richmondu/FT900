@@ -3,17 +3,17 @@
 
 
 
-#define ENABLE_NOTIFICATIONS               1
+#define ENABLE_NOTIFICATIONS               0
 
-#define ENABLE_UART                        1
+#define ENABLE_UART                        0
 #if ENABLE_UART
 #define ENABLE_UART_ATCOMMANDS             1
 #endif // ENABLE_UART
-#define ENABLE_GPIO                        1
+#define ENABLE_GPIO                        0
 
-#define ENABLE_I2C                         1
-#define ENABLE_ADC                         1
-#define ENABLE_ONEWIRE                     1
+#define ENABLE_I2C                         0
+#define ENABLE_ADC                         0
+#define ENABLE_ONEWIRE                     0
 #define ENABLE_TPROBE                      1
 
 
@@ -457,6 +457,8 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define PAYLOAD_EMPTY                                       "{}"
 #define PAYLOAD_API_GET_STATUS                              "{\"value\":{\"%s\":%d,\"version\":\"%d.%d\"}}"
 #define PAYLOAD_API_SET_STATUS                              "{\"value\":{\"%s\":%d}}"
+#define PAYLOAD_API_GET_XXX_DEVICES_EMPTY                   "{\"value\":[]}"
+#define PAYLOAD_API_GET_XXX_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d}]}"
 
 #if ENABLE_UART
 #define TOPIC_UART                                          "%s%s/trigger_notification/uart/%s"
@@ -479,6 +481,7 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
 #define PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_TEMPERATURE   PAYLOAD_API_GET_I2C_DEVICE_PROPERTIES_POTENTIOMETER
+#define PAYLOAD_API_GET_I2C_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d,\"%s\":%d}]}"
 #endif // ENABLE_I2C
 
 #if ENABLE_ADC
@@ -494,6 +497,7 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #if ENABLE_TPROBE
 #define TOPIC_TPROBE                                         "%s%s/trigger_notification/tprobe%d/%s"
 #define PAYLOAD_API_GET_TPROBE_DEVICE_PROPERTIES_TEMPERATURE "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"hardware\":{\"devicename\":\"\",\"sensorname\":\"\"}}}"
+#define PAYLOAD_API_GET_TPROBE_DEVICES                       "{\"value\":[{\"%s\":%d,\"%s\":%d}]}"
 #endif // ENABLE_TPROBE
 
 
