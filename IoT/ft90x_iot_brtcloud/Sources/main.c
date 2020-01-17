@@ -1876,7 +1876,14 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
 
 
     else {
-        DEBUG_PRINTF( "UNKNOWN\r\n" );
+        DEBUG_PRINTF( "UNKNOWN API. Is peripheral enabled? UART=%d GPIO=%d I2C=%d ADC=%d 1WIRE=%d TPROBE=%d\r\n",
+       		ENABLE_UART,
+       		ENABLE_GPIO,
+       		ENABLE_I2C,
+       		ENABLE_ADC,
+       		ENABLE_ONEWIRE,
+       		ENABLE_TPROBE
+        );
     }
 
 exit:
