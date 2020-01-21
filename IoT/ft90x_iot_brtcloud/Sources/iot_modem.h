@@ -3,11 +3,11 @@
 
 
 
-#define ENABLE_NOTIFICATIONS               0
+#define ENABLE_NOTIFICATIONS               1
 
 #define ENABLE_UART                        0
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS             1
+#define ENABLE_UART_ATCOMMANDS             0
 #endif // ENABLE_UART
 #define ENABLE_GPIO                        0
 
@@ -349,6 +349,15 @@ typedef enum _DEVICE_ACTIVATE {
 	DEVICE_ACTIVATE_COUNT
 } DEVICE_ACTIVATE;
 
+typedef enum _DEVICE_RANGE {
+	DEVICE_RANGE_0_255,
+	DEVICE_RANGE_0_99,
+	DEVICE_RANGE_0_15,
+	DEVICE_RANGE_0_9,
+	// add here
+	DEVICE_RANGE_COUNT
+} DEVICE_RANGE;
+
 
 #pragma pack(1)
 
@@ -409,6 +418,7 @@ typedef struct _DEVICE_ATTRIBUTES_LIGHT {
 } DEVICE_ATTRIBUTES_LIGHT;
 
 typedef struct _DEVICE_ATTRIBUTES_POTENTIOMETER {
+    uint8_t  m_ucRange;
     uint8_t  m_ucMode;
     DEVICE_ATTRIBUTES_COMMON_THRESHOLD m_oThreshold;
     DEVICE_ATTRIBUTES_COMMON_ALERT     m_oAlert;
@@ -454,6 +464,7 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define DEVICE_PROPERTIES_BRIGHTNESS                        "brightness"
 #define DEVICE_PROPERTIES_TIMEOUT                           "timeout"
 
+#define DEVICE_PROPERTIES_RANGE                             "range"
 #define DEVICE_PROPERTIES_MODE                              "mode"
 #define DEVICE_PROPERTIES_THRESHOLD                         "threshold"
 #define DEVICE_PROPERTIES_THRESHOLD_VALUE                   "value"
@@ -509,7 +520,7 @@ typedef enum _ADC_VOLTAGE {
 #define PAYLOAD_API_GET_XXX_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d}]}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_EMPTY         "{\"value\":{}}"
 
-#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_TEMPERATURE   "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_ANEMOMETER    "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"

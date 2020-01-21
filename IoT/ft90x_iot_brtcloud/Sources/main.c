@@ -534,8 +534,9 @@ static inline void get_props( DEVICE_PROPERTIES* pProp, char* payload, int paylo
         );
     }
     else if ( pProp->m_ucClass == DEVICE_CLASS_POTENTIOMETER ) {
-        DEVICE_ATTRIBUTES_TEMPERATURE* pAttributes = pProp->m_pvClassAttributes;
+        DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = pProp->m_pvClassAttributes;
         tfp_snprintf( payload, payload_size, PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_POTENTIOMETER,
+            DEVICE_PROPERTIES_RANGE, (int)pAttributes->m_ucRange,
             DEVICE_PROPERTIES_MODE, (int)pAttributes->m_ucMode,
             DEVICE_PROPERTIES_THRESHOLD,
             DEVICE_PROPERTIES_THRESHOLD_VALUE, pAttributes->m_oThreshold.m_ulValue,
@@ -733,6 +734,7 @@ static inline int set_props( DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uint8_t
         // Set mode, threshold (value, min, max, activate), alert (type, period)
         //
         DEVICE_ATTRIBUTES_POTENTIOMETER* pAttributes = (DEVICE_ATTRIBUTES_POTENTIOMETER*)pProp->m_pvClassAttributes;
+        pAttributes->m_ucRange                 = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_RANGE );
         pAttributes->m_ucMode                  = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_MODE );
         pAttributes->m_oAlert.m_ucType         = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_TYPE );
         pAttributes->m_oAlert.m_ulPeriod       = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ALERT_PERIOD );
@@ -768,7 +770,8 @@ static inline int set_props( DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uint8_t
                 }
             }
         }
-        DEBUG_PRINTF( "set_props mode=%d threshold=%d %d %d %d alert=%d %d hardware %p\r\n",
+        DEBUG_PRINTF( "set_props range=%d mode=%d threshold=%d %d %d %d alert=%d %d hardware %p\r\n",
+            (int)pAttributes->m_ucRange,
             (int)pAttributes->m_ucMode,
             pAttributes->m_oThreshold.m_ulValue,
             pAttributes->m_oThreshold.m_ulMinimum,
