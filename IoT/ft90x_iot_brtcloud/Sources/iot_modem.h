@@ -5,16 +5,16 @@
 
 #define ENABLE_NOTIFICATIONS               1
 
-#define ENABLE_UART                        0
+#define ENABLE_UART                        1
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS             0
+#define ENABLE_UART_ATCOMMANDS             1
 #endif // ENABLE_UART
 #define ENABLE_GPIO                        0
 
 #define ENABLE_I2C                         0
-#define ENABLE_ADC                         1
-#define ENABLE_ONEWIRE                     1
-#define ENABLE_TPROBE                      1
+#define ENABLE_ADC                         0
+#define ENABLE_ONEWIRE                     0
+#define ENABLE_TPROBE                      0
 
 
 
@@ -358,6 +358,14 @@ typedef enum _DEVICE_RANGE {
 	DEVICE_RANGE_COUNT
 } DEVICE_RANGE;
 
+typedef enum _DEVICE_COLOR {
+	DEVICE_COLOR_RED,
+	DEVICE_COLOR_GREEN,
+	DEVICE_COLOR_BLUE,
+	// add here
+	DEVICE_COLOR_COUNT
+} DEVICE_COLOR;
+
 
 #pragma pack(1)
 
@@ -392,7 +400,21 @@ typedef struct _DEVICE_ATTRIBUTES_COMMON_HARDWARE {
     char*    m_pcPeripheral;
     char*    m_pcSensorName;
     char*    m_pcAttribute;
+    uint8_t  m_ucNumber;
+    uint8_t  m_ucAddress;
 } DEVICE_ATTRIBUTES_COMMON_HARDWARE;
+
+typedef struct _DEVICE_ATTRIBUTES_COLOR_ELEMENT {
+    uint8_t  m_ucEndpoint;
+    uint32_t m_ulManual;
+    DEVICE_ATTRIBUTES_COMMON_HARDWARE m_oHardware;
+} DEVICE_ATTRIBUTES_COLOR_ELEMENT;
+
+typedef struct _DEVICE_ATTRIBUTES_COLOR {
+    uint8_t  m_ucUsage;
+    DEVICE_ATTRIBUTES_COLOR_ELEMENT    m_oSingle;
+    DEVICE_ATTRIBUTES_COLOR_ELEMENT    m_oIndividual[DEVICE_COLOR_COUNT];
+} DEVICE_ATTRIBUTES_COLOR;
 
 
 typedef struct _DEVICE_ATTRIBUTES_SPEAKER {
@@ -409,12 +431,8 @@ typedef struct  {
 } DEVICE_ATTRIBUTES_DISPLAY;
 
 typedef struct _DEVICE_ATTRIBUTES_LIGHT {
-    uint8_t  m_ucEndpoint;
-    uint32_t m_ulColor;
-    uint32_t m_ulBrightness;
-    uint32_t m_ulTimeout;
-    char*    m_pcText;
-    DEVICE_ATTRIBUTES_COMMON_HARDWARE  m_oHardware;
+    uint32_t m_ulFadeoutTime;
+    DEVICE_ATTRIBUTES_COLOR            m_oColor;
 } DEVICE_ATTRIBUTES_LIGHT;
 
 typedef struct _DEVICE_ATTRIBUTES_POTENTIOMETER {
@@ -461,6 +479,14 @@ typedef struct _DEVICE_ATTRIBUTES_ANENOMOMETER {
 #define DEVICE_PROPERTIES_TEXT                              "text"
 
 #define DEVICE_PROPERTIES_COLOR                             "color"
+#define DEVICE_PROPERTIES_FADEOUTTIME                       "fadeouttime"
+#define DEVICE_PROPERTIES_USAGE                             "usage"
+#define DEVICE_PROPERTIES_SINGLE                            "single"
+#define DEVICE_PROPERTIES_INDIVIDUAL                        "individual"
+#define DEVICE_PROPERTIES_INDIVIDUAL_RED                    "red"
+#define DEVICE_PROPERTIES_INDIVIDUAL_GREEN                  "green"
+#define DEVICE_PROPERTIES_INDIVIDUAL_BLUE                   "blue"
+#define DEVICE_PROPERTIES_MANUAL                            "manual"
 #define DEVICE_PROPERTIES_BRIGHTNESS                        "brightness"
 #define DEVICE_PROPERTIES_TIMEOUT                           "timeout"
 
@@ -523,9 +549,9 @@ typedef enum _ADC_VOLTAGE {
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_POTENTIOMETER "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_TEMPERATURE   "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
 #define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_ANEMOMETER    "{\"value\":{\"%s\":%d,\"%s\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\"}}}"
-#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
-#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
-#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_SPEAKER       "{\"value\":{\"%s\":%d,\"%s\":%d,\"values\":{\"%s\":%d,\"%s\":%d,\"%s\":%d},\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%d}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_DISPLAY       "{\"value\":{\"%s\":%d,\"%s\":\"%s\",\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%d}}}"
+#define PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_LIGHT         "{\"value\":{\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":%d,\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%d}}}"
 
 
 #if ENABLE_UART

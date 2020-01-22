@@ -599,15 +599,53 @@ static inline void get_props( DEVICE_PROPERTIES* pProp, char* payload, int paylo
     else if ( pProp->m_ucClass == DEVICE_CLASS_LIGHT ) {
         DEVICE_ATTRIBUTES_LIGHT* pAttributes = pProp->m_pvClassAttributes;
         tfp_snprintf( payload, payload_size, PAYLOAD_API_GET_XXX_DEVICE_PROPERTIES_LIGHT,
-            DEVICE_PROPERTIES_ENDPOINT, (int)pAttributes->m_ucEndpoint,
-            DEVICE_PROPERTIES_COLOR, pAttributes->m_ulColor,
-            DEVICE_PROPERTIES_BRIGHTNESS, pAttributes->m_ulBrightness,
-            DEVICE_PROPERTIES_TIMEOUT, pAttributes->m_ulTimeout,
-            DEVICE_PROPERTIES_HARDWARE,
-            DEVICE_PROPERTIES_HARDWARE_DEVICENAME, pAttributes->m_oHardware.m_pcDeviceName ? pAttributes->m_oHardware.m_pcDeviceName : "",
-            DEVICE_PROPERTIES_HARDWARE_PERIPHERAL, pAttributes->m_oHardware.m_pcPeripheral ? pAttributes->m_oHardware.m_pcPeripheral : "",
-            DEVICE_PROPERTIES_HARDWARE_SENSORNAME, pAttributes->m_oHardware.m_pcSensorName ? pAttributes->m_oHardware.m_pcSensorName : "",
-            DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE,  pAttributes->m_oHardware.m_pcAttribute  ? pAttributes->m_oHardware.m_pcAttribute  : ""
+        	DEVICE_PROPERTIES_FADEOUTTIME, (int)pAttributes->m_ulFadeoutTime,
+            DEVICE_PROPERTIES_COLOR,
+			DEVICE_PROPERTIES_USAGE, pAttributes->m_oColor.m_ucUsage,
+			DEVICE_PROPERTIES_SINGLE,
+			DEVICE_PROPERTIES_ENDPOINT, pAttributes->m_oColor.m_oSingle.m_ucEndpoint,
+			DEVICE_PROPERTIES_MANUAL, pAttributes->m_oColor.m_oSingle.m_ulManual,
+			DEVICE_PROPERTIES_HARDWARE,
+			DEVICE_PROPERTIES_HARDWARE_DEVICENAME, pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcDeviceName ? pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcDeviceName : "",
+			DEVICE_PROPERTIES_HARDWARE_PERIPHERAL, pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcPeripheral ? pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcPeripheral : "",
+			DEVICE_PROPERTIES_HARDWARE_SENSORNAME, pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcSensorName ? pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcSensorName : "",
+			DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE, pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcAttribute ? pAttributes->m_oColor.m_oSingle.m_oHardware.m_pcAttribute : "",
+			NUMBER_STRING, pAttributes->m_oColor.m_oSingle.m_oHardware.m_ucNumber,
+			DEVICE_PROPERTIES_ADDRESS, pAttributes->m_oColor.m_oSingle.m_oHardware.m_ucAddress,
+
+			DEVICE_PROPERTIES_INDIVIDUAL,
+			DEVICE_PROPERTIES_INDIVIDUAL_RED,
+			DEVICE_PROPERTIES_ENDPOINT, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_ucEndpoint,
+			DEVICE_PROPERTIES_MANUAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_ulManual,
+			DEVICE_PROPERTIES_HARDWARE,
+			DEVICE_PROPERTIES_HARDWARE_DEVICENAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcDeviceName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcDeviceName : "",
+			DEVICE_PROPERTIES_HARDWARE_PERIPHERAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcPeripheral ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcPeripheral : "",
+			DEVICE_PROPERTIES_HARDWARE_SENSORNAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcSensorName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcSensorName : "",
+			DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcAttribute ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_pcAttribute : "",
+			NUMBER_STRING, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_ucNumber,
+			DEVICE_PROPERTIES_ADDRESS, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_RED].m_oHardware.m_ucAddress,
+
+			DEVICE_PROPERTIES_INDIVIDUAL_GREEN,
+			DEVICE_PROPERTIES_ENDPOINT, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_ucEndpoint,
+			DEVICE_PROPERTIES_MANUAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_ulManual,
+			DEVICE_PROPERTIES_HARDWARE,
+			DEVICE_PROPERTIES_HARDWARE_DEVICENAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcDeviceName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcDeviceName : "",
+			DEVICE_PROPERTIES_HARDWARE_PERIPHERAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcPeripheral ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcPeripheral : "",
+			DEVICE_PROPERTIES_HARDWARE_SENSORNAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcSensorName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcSensorName : "",
+			DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcAttribute ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_pcAttribute : "",
+			NUMBER_STRING, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_ucNumber,
+			DEVICE_PROPERTIES_ADDRESS, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_GREEN].m_oHardware.m_ucAddress,
+
+			DEVICE_PROPERTIES_INDIVIDUAL_BLUE,
+			DEVICE_PROPERTIES_ENDPOINT, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_ucEndpoint,
+			DEVICE_PROPERTIES_MANUAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_ulManual,
+			DEVICE_PROPERTIES_HARDWARE,
+			DEVICE_PROPERTIES_HARDWARE_DEVICENAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcDeviceName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcDeviceName : "",
+			DEVICE_PROPERTIES_HARDWARE_PERIPHERAL, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcPeripheral ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcPeripheral : "",
+			DEVICE_PROPERTIES_HARDWARE_SENSORNAME, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcSensorName ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcSensorName : "",
+			DEVICE_PROPERTIES_HARDWARE_ATTRIBUTE, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcAttribute ? pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_pcAttribute : "",
+			NUMBER_STRING, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_ucNumber,
+			DEVICE_PROPERTIES_ADDRESS, pAttributes->m_oColor.m_oIndividual[DEVICE_COLOR_BLUE].m_oHardware.m_ucAddress
         );
     }
     else {
@@ -714,10 +752,41 @@ static inline int set_props( DEVICE_PROPERTIES* pProp, uint8_t ucNumber, uint8_t
         // Set endpoint, color, brightness, timeout
         //
         DEVICE_ATTRIBUTES_LIGHT* pAttributes = (DEVICE_ATTRIBUTES_LIGHT*)pProp->m_pvClassAttributes;
-        pAttributes->m_ucEndpoint   = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_ENDPOINT );
-        pAttributes->m_ulColor      = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_COLOR );
-        pAttributes->m_ulBrightness = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_BRIGHTNESS );
-        pAttributes->m_ulTimeout    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_TIMEOUT );
+        pAttributes->m_ulFadeoutTime    = json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_FADEOUTTIME );
+        pAttributes->m_oColor.m_ucUsage = (uint8_t)json_parse_int( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_USAGE );
+        if (pAttributes->m_oColor.m_ucUsage == 0) {
+        	char* ptrOffset = json_parse_str( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_SINGLE, NULL );
+
+        	pAttributes->m_oColor.m_oSingle.m_ucEndpoint = (uint8_t)json_parse_int( ptrOffset, DEVICE_PROPERTIES_ENDPOINT );
+        	if (pAttributes->m_oColor.m_oSingle.m_ucEndpoint == DEVICE_ENDPOINT_MANUAL) {
+        		pAttributes->m_oColor.m_oSingle.m_ulManual = (uint32_t)json_parse_int( ptrOffset, DEVICE_PROPERTIES_MANUAL );
+        	}
+        	else {
+        		// TODO
+        	}
+        }
+        else {
+        	for (int i=0; i<DEVICE_COLOR_COUNT; i++) {
+            	char* ptrOffset = NULL;
+            	if (i == 0) {
+            		ptrOffset = json_parse_str( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_INDIVIDUAL_RED, NULL );
+            	}
+            	else if (i == 1) {
+            		ptrOffset = json_parse_str( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_INDIVIDUAL_GREEN, NULL );
+            	}
+            	else if (i == 2) {
+            		ptrOffset = json_parse_str( mqtt_subscribe_recv->payload, DEVICE_PROPERTIES_INDIVIDUAL_BLUE, NULL );
+            	}
+
+        		pAttributes->m_oColor.m_oIndividual[i].m_ucEndpoint = (uint8_t)json_parse_int( ptrOffset, DEVICE_PROPERTIES_ENDPOINT );
+				if (pAttributes->m_oColor.m_oIndividual[i].m_ucEndpoint == DEVICE_ENDPOINT_MANUAL) {
+	        		pAttributes->m_oColor.m_oIndividual[i].m_ulManual = (uint32_t)json_parse_int( ptrOffset, DEVICE_PROPERTIES_MANUAL );
+				}
+				else {
+	        		// TODO
+				}
+        	}
+        }
     }
     else if (ucClass == DEVICE_CLASS_POTENTIOMETER) {
         if ( !pProp->m_pvClassAttributes ) {
