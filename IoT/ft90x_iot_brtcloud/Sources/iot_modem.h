@@ -569,7 +569,7 @@ typedef enum _ADC_VOLTAGE {
 #endif // ENABLE_GPIO
 
 #if ENABLE_I2C
-#define TOPIC_I2C                                           "%s%s/trigger_notification/i2c%d/%s"
+#define TOPIC_I2C                                           "%s%s/trigger_notification/i2c%d/%s/%d" // for i2c, the address must be included
 #define PAYLOAD_API_GET_I2C_DEVICES                         "{\"value\":[{\"%s\":%d,\"%s\":%d,\"%s\":%d}]}"
 #endif // ENABLE_I2C
 
