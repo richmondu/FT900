@@ -1177,7 +1177,7 @@ static void user_subscribe_receive_cb( iot_subscribe_rcv* mqtt_subscribe_recv )
             g_ucGpioStatus[i] = iot_modem_gpio_get_status(&g_oGpioProperties[i], i);
         }
         tfp_snprintf( topic, sizeof(topic), "%s%s", PREPEND_REPLY_TOPIC, mqtt_subscribe_recv->topic );
-        tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIOS, GPIO_PROPERTIES_VOLTAGE, g_ucGpioVoltage,
+        tfp_snprintf( payload, sizeof(payload), PAYLOAD_API_GET_GPIOS, VOLTAGE_STRING, g_ucGpioVoltage,
             ENABLED_STRING, g_ucGpioEnabled[0], GPIO_PROPERTIES_DIRECTION, g_oGpioProperties[0].m_ucDirection, STATUS_STRING, g_ucGpioStatus[0],
             ENABLED_STRING, g_ucGpioEnabled[1], GPIO_PROPERTIES_DIRECTION, g_oGpioProperties[1].m_ucDirection, STATUS_STRING, g_ucGpioStatus[1],
             ENABLED_STRING, g_ucGpioEnabled[2], GPIO_PROPERTIES_DIRECTION, g_oGpioProperties[2].m_ucDirection, STATUS_STRING, g_ucGpioStatus[2],

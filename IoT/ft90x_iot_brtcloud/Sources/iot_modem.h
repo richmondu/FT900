@@ -5,11 +5,11 @@
 
 #define ENABLE_NOTIFICATIONS               1
 
-#define ENABLE_UART                        1
+#define ENABLE_UART                        0
 #if ENABLE_UART
-#define ENABLE_UART_ATCOMMANDS             1
+#define ENABLE_UART_ATCOMMANDS             0
 #endif // ENABLE_UART
-#define ENABLE_GPIO                        0
+#define ENABLE_GPIO                        1
 
 #define ENABLE_I2C                         0
 #define ENABLE_ADC                         0
@@ -303,7 +303,7 @@ typedef struct _GPIO_PROPERTIES {
 #define GPIO_PROPERTIES_DIRECTION          "direction"
 #define GPIO_PROPERTIES_MODE               "mode"
 #define GPIO_PROPERTIES_ALERT              "alert"
-#define GPIO_PROPERTIES_ALERTPERIOD        "period"
+#define GPIO_PROPERTIES_ALERTPERIOD        "alertperiod"
 #define GPIO_PROPERTIES_POLARITY           "polarity"
 #define GPIO_PROPERTIES_WIDTH              "width"
 #define GPIO_PROPERTIES_MARK               "mark"
